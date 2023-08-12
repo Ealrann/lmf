@@ -1,7 +1,7 @@
 package isotropy.lmf.core.lang.impl;
 
-import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.Enum;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureMap;
 
 import java.util.List;
@@ -11,8 +11,8 @@ public final class EnumImpl<T> implements Enum<T>
 {
 	public static final FeatureMap<Function<Enum<?>, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(Enum.Features.name, Named::name),
-					new FeatureMap.FeatureTuple<>(Enum.Features.literals, Enum::literals)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Enum_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Enum_literals, Enum::literals)));
 
 	private final String name;
 	private final List<String> literals;
@@ -41,7 +41,8 @@ public final class EnumImpl<T> implements Enum<T>
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature).apply(this);
+		return (T) GET_MAP.get(feature)
+						  .apply(this);
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public final class EnumImpl<T> implements Enum<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return Enum.GROUP;
+		return LMCorePackage.ENUM_GROUP;
 	}
 
 	@Override

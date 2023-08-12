@@ -3,7 +3,6 @@ package isotropy.lmf.core.lang.builder;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.AliasImpl;
 import isotropy.lmf.core.model.FeatureInserter;
-import isotropy.lmf.core.model.IFeaturedObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +10,11 @@ import java.util.function.Supplier;
 
 public final class AliasBuilder implements Alias.Builder
 {
-	private static final FeatureInserter<AliasBuilder> FEATURE_INSERTER = FeatureInserter.<AliasBuilder>Builder()
+	private static final FeatureInserter<AliasBuilder> FEATURE_INSERTER = FeatureInserter
 
-			.add(Alias.Features.name, AliasBuilder::name)
-			.add(Alias.Features.words, AliasBuilder::addWord)
+			.<AliasBuilder>Builder()
+			.add(LMCoreFeatures.Alias_name, AliasBuilder::name)
+			.add(LMCoreFeatures.Alias_words, AliasBuilder::addWord)
 			.build();
 
 	private String name = null;

@@ -9,20 +9,6 @@ public interface Alias extends Named
 {
 	List<String> words();
 
-	Group<Alias> GROUP = LMCorePackage.ALIAS_GROUP;
-
-	interface Features
-	{
-		Attribute<String, String> name = Named.Features.name;
-		Attribute<String, List<String>> words = new AttributeImpl<>("words",
-																	true,
-																	true,
-																	false,
-																	LMCorePackage.STRING_UNIT);
-
-		List<Feature<?, ?>> All = List.of(name, words);
-	}
-
 	static Alias.Builder builder() {return new AliasBuilder();}
 	interface Builder extends LMObject.Builder<Alias>
 	{

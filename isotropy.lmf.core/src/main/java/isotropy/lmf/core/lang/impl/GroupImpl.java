@@ -1,9 +1,6 @@
 package isotropy.lmf.core.lang.impl;
 
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.Generic;
-import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureGetter;
 
 import java.util.List;
@@ -12,11 +9,11 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 {
 	public static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>()
 
-			.add(Features.Name, Group::name)
-			.add(Features.Concrete, Group::concrete)
-			.add(Features.Includes, Group::includes)
-			.add(Features.Features, Group::features)
-			.add(Features.Generics, Group::generics)
+			.add(LMCoreFeatures.Group_name, Group::name)
+			.add(LMCoreFeatures.Group_concrete, Group::concrete)
+			.add(LMCoreFeatures.Group_includes, Group::includes)
+			.add(LMCoreFeatures.Group_features, Group::features)
+			.add(LMCoreFeatures.Group_generics, Group::generics)
 			.build();
 
 	private final String name;
@@ -85,7 +82,7 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return Group.GROUP;
+		return LMCorePackage.GROUP_GROUP;
 	}
 
 	@Override

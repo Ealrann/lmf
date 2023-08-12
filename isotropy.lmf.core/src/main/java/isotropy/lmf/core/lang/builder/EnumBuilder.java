@@ -1,9 +1,7 @@
 package isotropy.lmf.core.lang.builder;
 
 import isotropy.lmf.core.lang.Enum;
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.EnumImpl;
 import isotropy.lmf.core.model.FeatureInserter;
 
@@ -13,9 +11,12 @@ import java.util.function.Supplier;
 
 public final class EnumBuilder<T> implements Enum.Builder<T>
 {
-	private static final FeatureInserter<EnumBuilder<?>> FEATURE_INSERTER = FeatureInserter.<EnumBuilder<?>>Builder()
+	private static final FeatureInserter<EnumBuilder<?>> FEATURE_INSERTER = FeatureInserter
 
-			.add(Enum.Features.name, EnumBuilder::name).add(Enum.Features.literals, EnumBuilder::addLiteral).build();
+			.<EnumBuilder<?>>Builder()
+			.add(LMCoreFeatures.Enum_name, EnumBuilder::name)
+			.add(LMCoreFeatures.Enum_literals, EnumBuilder::addLiteral)
+			.build();
 
 	private String name = null;
 	private final List<String> literals = new ArrayList<>();

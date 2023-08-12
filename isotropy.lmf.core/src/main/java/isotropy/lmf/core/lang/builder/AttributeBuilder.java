@@ -9,15 +9,18 @@ import java.util.function.Supplier;
 
 public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribute.Builder<UnaryType, EffectiveType>
 {
-	private static final FeatureInserter<AttributeBuilder<?, ?>> FEATURE_INSERTER = FeatureInserter.<AttributeBuilder<?, ?>>Builder()
-			.add(Attribute.Features.name, AttributeBuilder::name)
-			.add(Attribute.Features.immutable, AttributeBuilder::immutable)
-			.add(Attribute.Features.many, AttributeBuilder::many)
-			.add(Attribute.Features.mandatory, AttributeBuilder::mandatory)
-			.build();
+	private static final FeatureInserter<AttributeBuilder<?, ?>> FEATURE_INSERTER
+			= FeatureInserter.<AttributeBuilder<?, ?>>Builder()
+							 .add(LMCoreFeatures.Attribute_name, AttributeBuilder::name)
+							 .add(LMCoreFeatures.Attribute_immutable, AttributeBuilder::immutable)
+							 .add(LMCoreFeatures.Attribute_many, AttributeBuilder::many)
+							 .add(LMCoreFeatures.Attribute_mandatory, AttributeBuilder::mandatory)
+							 .build();
 
-	private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = RelationLazyInserter.<AttributeBuilder<?, ?>>Builder()
-			.add(Attribute.Features.datatype, AttributeBuilder::_datatype).build();
+	private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER
+			= RelationLazyInserter.<AttributeBuilder<?, ?>>Builder()
+								  .add(LMCoreFeatures.Attribute_datatype, AttributeBuilder::_datatype)
+								  .build();
 
 	private String name = null;
 	private boolean many;

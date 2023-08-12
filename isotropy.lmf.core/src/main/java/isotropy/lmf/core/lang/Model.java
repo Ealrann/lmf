@@ -16,32 +16,7 @@ public interface Model extends Named
 
 	IModelPackage lPackage();
 
-	Group<Model> GROUP = LMCorePackage.MODEL_GROUP;
-
-	interface Features
-	{
-		Attribute<String, String> name = Named.Features.name;
-		Relation<Group<?>, List<Group<?>>> groups = new RelationImpl<>("groups",
-																	   true,
-																	   true,
-																	   false,
-																	   Group.GROUP,
-																	   true,
-																	   null);
-		Relation<Enum<?>, List<Enum<?>>> enums = new RelationImpl<>("enums", true, true, false, Enum.GROUP, true, null);
-		Relation<Unit<?>, List<Unit<?>>> units = new RelationImpl<>("units", true, true, false, Unit.GROUP, true, null);
-		Relation<Alias, List<Alias>> aliases = new RelationImpl<>("aliases",
-																  true,
-																  true,
-																  false,
-																  Alias.GROUP,
-																  true,
-																  null);
-
-		List<Feature<?, ?>> All = List.of(name, groups, enums, units, aliases);
-	}
-
-	static Builder builder() { return new ModelBuilder();}
+	static Builder builder() {return new ModelBuilder();}
 	interface Builder extends LMObject.Builder<Model>
 	{
 		Builder name(String name);

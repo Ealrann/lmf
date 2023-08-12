@@ -10,11 +10,11 @@ public final class UnitImpl<T> implements Unit<T>
 {
 	public static final FeatureMap<Function<Unit<?>, Object>> FEATURE_GETTER = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(Features.Name, Named::name),
-					new FeatureMap.FeatureTuple<>(Features.Matcher, Unit::matcher),
-					new FeatureMap.FeatureTuple<>(Features.DefaultValue, Unit::defaultValue),
-					new FeatureMap.FeatureTuple<>(Features.Primitive, Unit::primitive),
-					new FeatureMap.FeatureTuple<>(Features.Extractor, Unit::extractor)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_matcher, Unit::matcher),
+					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_defaultValue, Unit::defaultValue),
+					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_primitive, Unit::primitive),
+					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_extractor, Unit::extractor)));
 
 	private final String name;
 	private final String matcher;
@@ -82,7 +82,7 @@ public final class UnitImpl<T> implements Unit<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return Unit.GROUP;
+		return LMCorePackage.UNIT_GROUP;
 	}
 
 	@Override

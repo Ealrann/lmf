@@ -16,18 +16,18 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	public static final FeatureInserter<RelationBuilder<?, ?>> FEATURE_INSERTER =
 			new FeatureInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(Relation.Features.name, RelationBuilder::name)
-			.add(Relation.Features.immutable, RelationBuilder::immutable)
-			.add(Relation.Features.many, RelationBuilder::many)
-			.add(Relation.Features.mandatory, RelationBuilder::mandatory)
-			.add(Relation.Features.contains, RelationBuilder::contains)
+			.add(LMCoreFeatures.Relation_name, RelationBuilder::name)
+			.add(LMCoreFeatures.Relation_immutable, RelationBuilder::immutable)
+			.add(LMCoreFeatures.Relation_many, RelationBuilder::many)
+			.add(LMCoreFeatures.Relation_mandatory, RelationBuilder::mandatory)
+			.add(LMCoreFeatures.Relation_contains, RelationBuilder::contains)
 			.build();
 
 	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER =
 			new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(Relation.Features.group, RelationBuilder::_group)
-			.add(Relation.Features.parameter, RelationBuilder::parameter)
+			.add(LMCoreFeatures.Relation_group, RelationBuilder::_group)
+			.add(LMCoreFeatures.Relation_parameter, RelationBuilder::parameter)
 			.build();
 
 

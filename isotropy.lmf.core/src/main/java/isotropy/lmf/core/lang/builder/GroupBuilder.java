@@ -8,18 +8,22 @@ import isotropy.lmf.core.model.RelationLazyInserter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 {
-	private static final FeatureInserter<GroupBuilder<?>> FEATURE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>()
+	private static final FeatureInserter<GroupBuilder<?>> FEATURE_INSERTER
+			= new FeatureInserter.Builder<GroupBuilder<?>>()
 
-			.add(Group.Features.Name, GroupBuilder::name).add(Group.Features.Concrete, GroupBuilder::concrete).build();
+			.add(LMCoreFeatures.Group_name, GroupBuilder::name)
+			.add(LMCoreFeatures.Group_concrete, GroupBuilder::concrete)
+			.build();
 
-	private static final RelationLazyInserter<GroupBuilder<?>> BUILDER_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>()
-			.add(Group.Features.Includes, GroupBuilder::addInclude)
-			.add(Group.Features.Features, GroupBuilder::addFeature)
-			.add(Group.Features.Generics, GroupBuilder::addGeneric)
+	private static final RelationLazyInserter<GroupBuilder<?>> BUILDER_INSERTER
+			= new RelationLazyInserter.Builder<GroupBuilder<?>>()
+
+			.add(LMCoreFeatures.Group_includes, GroupBuilder::addInclude)
+			.add(LMCoreFeatures.Group_features, GroupBuilder::addFeature)
+			.add(LMCoreFeatures.Group_generics, GroupBuilder::addGeneric)
 			.build();
 
 	private String name = null;
@@ -32,9 +36,15 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	@Override
 	public Group<T> build()
 	{
-		final var builtIncludes = includes.stream().map(Supplier::get).collect(Collectors.toUnmodifiableList());
-		final var builtFeatures = features.stream().map(Supplier::get).collect(Collectors.toUnmodifiableList());
-		final var builtGenerics = generics.stream().map(Supplier::get).collect(Collectors.toUnmodifiableList());
+		final var builtIncludes = includes.stream()
+										  .map(Supplier::get)
+										  .toList();
+		final var builtFeatures = features.stream()
+										  .map(Supplier::get)
+										  .toList();
+		final var builtGenerics = generics.stream()
+										  .map(Supplier::get)
+										  .toList();
 
 		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
 	}
