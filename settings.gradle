@@ -1,0 +1,4 @@
+rootProject.name = "LMF"
+
+
+include ':isotropy.lmf.core'
