@@ -6,12 +6,11 @@ import isotropy.lmf.core.model.GroupDescriptor;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.IModelPackage;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class LMCorePackage implements IModelPackage
+public final class LMCorePackage implements IModelPackage, LMCoreFeatures.LMCoreTypes
 {
 	public static final LMCorePackage Instance = new LMCorePackage();
 
@@ -97,44 +96,6 @@ public final class LMCorePackage implements IModelPackage
 			new GroupDescriptor<>(UNIT_GROUP, UnitBuilder::new),
 			new GroupDescriptor<>(GENERIC_GROUP, GenericBuilder::new));
 
-	public static final Unit<String> MATCHER_UNIT = new UnitImpl<>("matcher",
-																   "rgx_match:\\b(rgx_match:)*+\\b",
-																   null,
-																   Primitive.String,
-																   null);
-	public static final Unit<String> EXTRACTOR_UNIT = new UnitImpl<>("extractor",
-																	 "rgx_match:\\b(rgx_value:)*+\\b",
-																	 null,
-																	 Primitive.String,
-																	 null);
-	public static final Unit<Boolean> BOOLEAN_UNIT = new UnitImpl<>("boolean",
-																	"\\b(true|false)\\b",
-																	"false",
-																	Primitive.Boolean,
-																	null);
-	public static final Unit<String> INT_UNIT = new UnitImpl<>("int", null, null, Primitive.Int, null);
-	public static final Unit<String> LONG_UNIT = new UnitImpl<>("long", null, null, Primitive.Long, null);
-	public static final Unit<String> FLOAT_UNIT = new UnitImpl<>("float", null, null, Primitive.Float, null);
-	public static final Unit<String> DOUBLE_UNIT = new UnitImpl<>("double", null, null, Primitive.Double, null);
-	public static final Unit<String> STRING_UNIT = new UnitImpl<>("string", null, null, Primitive.String, null);
-
-	public static final List<Unit<?>> units = List.of(MATCHER_UNIT,
-													  EXTRACTOR_UNIT,
-													  BOOLEAN_UNIT,
-													  INT_UNIT,
-													  LONG_UNIT,
-													  FLOAT_UNIT,
-													  DOUBLE_UNIT,
-													  STRING_UNIT);
-
-	public static final Enum<BoundType> BOUND_TYPE_ENUM = new EnumImpl<>("boundType",
-																		 Arrays.stream(BoundType.values())
-																			   .map(java.lang.Enum::name)
-																			   .toList());
-	public static final Enum<Primitive> PRIMITIVE_ENUM = new EnumImpl<>("primitive",
-																		Arrays.stream(Primitive.values())
-																			  .map(java.lang.Enum::name)
-																			  .toList());
 	public static final List<Enum<?>> enums = List.of(BOUND_TYPE_ENUM, PRIMITIVE_ENUM);
 
 	public static final Alias DEFINITION_ALIAS = new AliasImpl("Definition", List.of("Group", "concrete"));

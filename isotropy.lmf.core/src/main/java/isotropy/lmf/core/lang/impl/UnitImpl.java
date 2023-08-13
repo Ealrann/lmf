@@ -10,7 +10,7 @@ public final class UnitImpl<T> implements Unit<T>
 {
 	public static final FeatureMap<Function<Unit<?>, Object>> FEATURE_GETTER = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_name, Named::name),
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_name, Unit::name),
 					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_matcher, Unit::matcher),
 					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_defaultValue, Unit::defaultValue),
 					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Unit_primitive, Unit::primitive),

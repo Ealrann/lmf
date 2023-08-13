@@ -5,10 +5,11 @@ import isotropy.lmf.core.resource.ptree.PTreeReader;
 import isotropy.lmf.core.resource.transform.PTreeToJava;
 
 import java.io.InputStream;
+import java.util.List;
 
 public class ResourceUtil
 {
-	public static final LMObject loadModel(final InputStream inputStream)
+	public static final List<LMObject> loadModel(final InputStream inputStream)
 	{
 		final var ptreeBuilder = new PTreeReader();
 		final var tree = ptreeBuilder.read(inputStream);

@@ -22,9 +22,8 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 	public Optional<AttributeResolution<T>> resolve(final Tree<BuilderNode> tree, final String word)
 	{
 		final var datatype = feature.datatype();
-		if (datatype instanceof isotropy.lmf.core.lang.Enum)
+		if (datatype instanceof final isotropy.lmf.core.lang.Enum<T> _enum)
 		{
-			final var _enum = (isotropy.lmf.core.lang.Enum<T>) datatype;
 			final var lPackage = ((Model) _enum.lContainer()).lPackage();
 			final var value = lPackage.resolveEnum(_enum, word);
 			return value.map(enumVal -> new AttributeResolution<>(feature, enumVal));

@@ -30,11 +30,23 @@ public final class PTreeToJava
 									   .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
 	}
 
-	public LMObject transform(final Tree<List<String>> tree)
+	public List<LMObject> transform(final Tree<List<String>> tree)
 	{
-		final var builderTree = tree.map(this::convert);
-		builderTree.forEach(BuilderTreeResolver::resolve);
-		return builderTree.data().builder.build();
+		final var builderTrees = tree.children()
+									 .stream()
+									 .map(t -> t.map(this::convert))
+									 .toList();
+
+		builderTrees.stream()
+					.flatMap(Tree::stream)
+					.forEach(BuilderTreeResolver::resolve);
+
+		return builderTrees.stream()
+						   .map(Tree::data)
+						   .map(bd -> bd.builder)
+						   .map(IFeaturedObject.Builder::build)
+						   .map(LMObject.class::cast)
+						   .toList();
 	}
 
 	private BuilderNode convert(final Tree<List<String>> node)

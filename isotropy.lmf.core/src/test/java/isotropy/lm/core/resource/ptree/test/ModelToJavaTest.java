@@ -1,6 +1,5 @@
 package isotropy.lm.core.resource.ptree.test;
 
-import isotropy.lmf.core.lang.LMCorePackage;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
 import isotropy.lmf.core.resource.transform.PTreeToJava;
@@ -18,17 +17,15 @@ public class ModelToJavaTest
 	@Test
 	public void testPTreeBuilder_singleElement()
 	{
-		final var core = LMCorePackage.Instance;
-
-
 		final var textModel = "(Model test.model:World)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 
 		final var ptree = treeBuilder.read(inputStream);
 
 		final var ptreeToJava = new PTreeToJava();
-		final var root = ptreeToJava.transform(ptree);
+		final var roots = ptreeToJava.transform(ptree);
 
+		final var root = roots.get(0);
 		assertTrue(root instanceof Model);
 
 		final var model = (Model) root;
