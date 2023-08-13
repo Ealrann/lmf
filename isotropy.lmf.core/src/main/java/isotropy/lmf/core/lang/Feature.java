@@ -10,4 +10,8 @@ public interface Feature<UnaryType, EffectiveType> extends Named
 	boolean many();
 	boolean mandatory();
 	List<Generic> GENERICS = List.of(new GenericImpl("T", null, null));
+
+	Group<Feature<?, ?>> GROUP = LMCoreDefinition.Groups.FEATURE;
+
+	interface Features extends LMCoreDefinition.Features.FEATURE {}
 }
