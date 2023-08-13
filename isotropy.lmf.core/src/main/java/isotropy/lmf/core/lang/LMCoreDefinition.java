@@ -27,13 +27,7 @@ public interface LMCoreDefinition
 		List<Feature<?, ?>> Enum_all = List.of(Enum_name, Enum_literals);
 
 		Attribute<String, String> Generic_name = Named_name;
-		Relation<Type, Type> Generic_type = new RelationImpl<>("type",
-															   true,
-															   false,
-															   true,
-															   Groups.TYPE,
-															   false,
-															   null);
+		Relation<Type, Type> Generic_type = new RelationImpl<>("type", true, false, true, Groups.TYPE, false, null);
 		Attribute<BoundType, BoundType> Generic_boundType = new AttributeImpl<>("boundType",
 																				true,
 																				false,
@@ -104,19 +98,11 @@ public interface LMCoreDefinition
 											   Unit_extractor);
 
 		Attribute<String, String> Alias_name = Named_name;
-		Attribute<String, List<String>> Alias_words = new AttributeImpl<>("words",
-																		  true,
-																		  true,
-																		  false,
-																		  Units.STRING);
+		Attribute<String, List<String>> Alias_words = new AttributeImpl<>("words", true, true, false, Units.STRING);
 
 		List<Feature<?, ?>> Alias_all = List.of(Alias_name, Alias_words);
 		Attribute<String, String> Group_name = Named_name;
-		Attribute<Boolean, Boolean> Group_concrete = new AttributeImpl<>("concrete",
-																		 true,
-																		 false,
-																		 false,
-																		 Units.BOOLEAN);
+		Attribute<Boolean, Boolean> Group_concrete = new AttributeImpl<>("concrete", true, false, false, Units.BOOLEAN);
 		Relation<Group<?>, List<? extends Group<?>>> Group_includes = new RelationImpl<>("includes",
 																						 true,
 																						 true,
@@ -213,18 +199,10 @@ public interface LMCoreDefinition
 	interface Groups
 	{
 		Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), List.of(), List.of());
-		Group<Named> NAMED = new GroupImpl<>("Named",
-											 false,
-											 List.of(LM_OBJECT),
-											 Features.Named_all,
-											 List.of());
+		Group<Named> NAMED = new GroupImpl<>("Named", false, List.of(LM_OBJECT), Features.Named_all, List.of());
 		Group<Type> TYPE = new GroupImpl<>("Type", false, List.of(NAMED), Features.Type_all, List.of());
 		Group<Model> MODEL = new GroupImpl<>("Model", true, List.of(NAMED), Features.Model_all, List.of());
-		Group<Group<?>> GROUP = new GroupImpl<>("Group",
-												true,
-												List.of(TYPE),
-												Features.Group_all,
-												Group.GENERICS);
+		Group<Group<?>> GROUP = new GroupImpl<>("Group", true, List.of(TYPE), Features.Group_all, Group.GENERICS);
 		Group<Feature<?, ?>> FEATURE = new GroupImpl<>("Feature",
 													   false,
 													   List.of(NAMED),
@@ -246,33 +224,21 @@ public interface LMCoreDefinition
 													  Features.Datatype_all,
 													  Datatype.GENERICS);
 		Group<Alias> ALIAS = new GroupImpl<>("Alias", true, List.of(NAMED), Features.Alias_all, List.of());
-		Group<Enum<?>> ENUM = new GroupImpl<>("Enum",
-											  true,
-											  List.of(DATATYPE),
-											  Features.Enum_all,
-											  Enum.GENERICS);
-		Group<Unit<?>> UNIT = new GroupImpl<>("Unit",
-											  true,
-											  List.of(DATATYPE),
-											  Features.Unit_all,
-											  Unit.GENERICS);
-		Group<Generic> GENERIC = new GroupImpl<>("Generic",
-												 true,
-												 List.of(NAMED),
-												 Features.Generic_all,
-												 List.of());
+		Group<Enum<?>> ENUM = new GroupImpl<>("Enum", true, List.of(DATATYPE), Features.Enum_all, Enum.GENERICS);
+		Group<Unit<?>> UNIT = new GroupImpl<>("Unit", true, List.of(DATATYPE), Features.Unit_all, Unit.GENERICS);
+		Group<Generic> GENERIC = new GroupImpl<>("Generic", true, List.of(NAMED), Features.Generic_all, List.of());
 	}
 
 	interface Enums
 	{
 		Enum<BoundType> BOUND_TYPE = new EnumImpl<>("boundType",
 													Arrays.stream(BoundType.values())
-															   .map(java.lang.Enum::name)
-															   .toList());
+														  .map(java.lang.Enum::name)
+														  .toList());
 		Enum<Primitive> PRIMITIVE = new EnumImpl<>("primitive",
 												   Arrays.stream(Primitive.values())
-															  .map(java.lang.Enum::name)
-															  .toList());
+														 .map(java.lang.Enum::name)
+														 .toList());
 	}
 
 	interface Units
