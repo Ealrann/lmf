@@ -1,5 +1,6 @@
 package isotropy.lm.core.resource.ptree.test;
 
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
 import isotropy.lmf.core.resource.transform.PTreeToJava;
@@ -15,13 +16,11 @@ public class ModelToJavaTest
 	private static final PTreeReader treeBuilder = new PTreeReader();
 
 	@Test
-	public void testPTreeBuilder_singleElement()
+	public void singleElement()
 	{
 		final var textModel = "(Model test.model:World)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-
 		final var ptree = treeBuilder.read(inputStream);
-
 		final var ptreeToJava = new PTreeToJava();
 		final var roots = ptreeToJava.transform(ptree);
 
@@ -30,5 +29,38 @@ public class ModelToJavaTest
 
 		final var model = (Model) root;
 		assertEquals("test.model:World", model.name());
+	}
+
+	@Test
+	public void twoClasses()
+	{
+		final var textModel = "(Group Car) (Group Chair)";
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var car = roots.get(0);
+		assertTrue(car instanceof Group);
+		assertEquals("Car", ((Group<?>) car).name());
+
+		final var chair = roots.get(1);
+		assertTrue(chair instanceof Group);
+		assertEquals("Chair", ((Group<?>) chair).name());
+	}
+
+	@Test
+	public void groupWithAttributes()
+	{
+		final var textModel = "(Group Car concrete)";
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var car = roots.get(0);
+		assertTrue(car instanceof Group);
+		assertTrue(((Group<?>) car).concrete());
+		assertEquals("Car", ((Group<?>) car).name());
 	}
 }

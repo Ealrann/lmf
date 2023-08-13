@@ -16,47 +16,82 @@ import java.util.stream.Stream;
 public class TreeToFeatureResolver
 {
 	private final Tree<BuilderNode> tree;
-	private final List<IFeatureResolver<?>> resolvers;
+	private final List<IWordResolver<?>> wordResolvers;
+	private final List<IChildResolver<?>> childResolvers;
 
 	public TreeToFeatureResolver(final Tree<BuilderNode> tree, final List<? extends Feature<?, ?>> features)
 	{
 		this.tree = tree;
 
-		resolvers = features.stream()
-							.map(TreeToFeatureResolver::buildResolver)
-							.collect(Collectors.toUnmodifiableList());
+		final var resolvers = features.stream()
+									  .map(TreeToFeatureResolver::buildResolver)
+									  .toList();
+
+		wordResolvers = resolvers.stream()
+								 .filter(IWordResolver.class::isInstance)
+								 .map(r -> (IWordResolver<?>) r)
+								 .collect(Collectors.toUnmodifiableList());
+
+		childResolvers = resolvers.stream()
+								  .filter(IChildResolver.class::isInstance)
+								  .map(r -> (IChildResolver<?>) r)
+								  .collect(Collectors.<IChildResolver<?>>toUnmodifiableList());
 	}
 
 	public Optional<? extends IFeatureResolution> resolve(final String word)
 	{
-		return wordResolvers().map(r -> r.resolve(tree, word))
-							  .filter(Optional::isPresent)
-							  .map(Optional::get)
-							  .findAny();
+		final var indexEqual = word.indexOf('=');
+
+		if (indexEqual > -1)
+		{
+			final var name = word.substring(0, indexEqual);
+			final var value = word.substring(indexEqual + 1);
+			return resolveWithNameValue(name, value);
+		}
+		else
+		{
+			final var nameOnlyResolution = resolveWithName(word);
+			if (nameOnlyResolution.isPresent())
+			{
+				return nameOnlyResolution;
+			}
+			else
+			{
+				return resolveWithValue(word);
+			}
+		}
 	}
 
 	public Optional<? extends IFeatureResolution> resolve(final BuilderNode child)
 	{
-		return childResolvers().map(r -> r.resolve(child))
-							   .filter(Optional::isPresent)
-							   .map(Optional::get)
-							   .findAny();
+		final var t = childResolvers.stream()
+									.map(r -> r.resolve(child));
+		return findAny(t);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Stream<IWordResolver<?>> wordResolvers()
+	private Optional<? extends IFeatureResolution> resolveWithNameValue(final String name, final String value)
 	{
-		return resolvers.stream()
-						.filter(IWordResolver.class::isInstance)
-						.map(IWordResolver.class::cast);
+		final var resolvedStream = wordResolvers.stream()
+												.filter(r -> r.match(name))
+												.map(r -> r.resolve(tree, value));
+		return findAny(resolvedStream);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Stream<IChildResolver<?>> childResolvers()
+	private Optional<? extends IFeatureResolution> resolveWithValue(final String word)
 	{
-		return resolvers.stream()
-						.filter(IChildResolver.class::isInstance)
-						.map(IChildResolver.class::cast);
+		final var resolvedStream = wordResolvers.stream()
+												.map(r -> r.resolve(tree, word));
+		return findAny(resolvedStream);
+	}
+
+	private Optional<? extends IFeatureResolution> resolveWithName(final String word)
+	{
+		final var nameMatchBooleanResolvers = wordResolvers.stream()
+														   .filter(IWordResolver::isBooleanAttribute)
+														   .filter(r -> r.match(word))
+														   .map(r -> r.resolve(tree, "true"));
+		final var booleanResolution = findAny(nameMatchBooleanResolvers);
+		return booleanResolution;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,6 +105,13 @@ public class TreeToFeatureResolver
 		{
 			return (IFeatureResolver<T>) buildRelationResolver((Relation<?, ?>) feature);
 		}
+	}
+
+	private static Optional<? extends IFeatureResolution> findAny(final Stream<? extends Optional<? extends IFeatureResolution>> t)
+	{
+		return t.filter(Optional::isPresent)
+				.map(Optional::get)
+				.findAny();
 	}
 
 	private static <T extends LMObject> IFeatureResolver<T> buildRelationResolver(Relation<T, ?> relation)

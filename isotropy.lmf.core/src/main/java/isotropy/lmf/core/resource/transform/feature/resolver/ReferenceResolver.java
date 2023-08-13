@@ -18,12 +18,18 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(Tree<BuilderNode> tree, String word)
+	public Optional<IFeatureResolution> resolve(Tree<BuilderNode> tree, String value)
 	{
-		if (word.startsWith("/") || word.startsWith("./") || word.startsWith("../"))
+		if (value.startsWith("/") || value.startsWith("./") || value.startsWith("../"))
 		{
 
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public boolean isBooleanAttribute()
+	{
+		return false;
 	}
 }

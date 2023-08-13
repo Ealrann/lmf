@@ -8,5 +8,7 @@ import java.util.Optional;
 
 public interface IWordResolver<T> extends IFeatureResolver<T>
 {
-	Optional<? extends IFeatureResolution> resolve(Tree<BuilderNode> node, String word);
+	Optional<? extends IFeatureResolution> resolve(Tree<BuilderNode> node, String value);
+
+	boolean isBooleanAttribute();
 }

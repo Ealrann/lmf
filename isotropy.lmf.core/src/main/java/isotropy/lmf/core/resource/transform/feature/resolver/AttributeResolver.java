@@ -1,6 +1,7 @@
 package isotropy.lmf.core.resource.transform.feature.resolver;
 
 import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.model.IFeaturedObject;
@@ -13,29 +14,41 @@ import java.util.regex.Pattern;
 
 public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements IWordResolver<T>
 {
+	private final Pattern pattern;
+
 	public AttributeResolver(final Attribute<T, ?> attribute)
 	{
 		super(attribute);
+		final var datatype = attribute.datatype();
+		if (datatype instanceof Unit<T> unit && unit.extractor() != null)
+		{
+			final var extractor = unit.extractor();
+			pattern = Pattern.compile(extractor);
+		}
+		else
+		{
+			pattern = null;
+		}
 	}
 
 	@Override
-	public Optional<AttributeResolution<T>> resolve(final Tree<BuilderNode> tree, final String word)
+	public Optional<AttributeResolution<T>> resolve(final Tree<BuilderNode> tree, final String value)
 	{
 		final var datatype = feature.datatype();
 		if (datatype instanceof final isotropy.lmf.core.lang.Enum<T> _enum)
 		{
 			final var lPackage = ((Model) _enum.lContainer()).lPackage();
-			final var value = lPackage.resolveEnum(_enum, word);
-			return value.map(enumVal -> new AttributeResolution<>(feature, enumVal));
+			final var resolvedEnum = lPackage.resolveEnum(_enum, value);
+			return resolvedEnum.map(enumVal -> new AttributeResolution<>(feature, enumVal));
 		}
 		else
 		{
 			final var unit = (Unit<T>) datatype;
 			final var matcher = unit.matcher();
-			if (matcher == null || word.matches(matcher))
+			if (matcher == null || value.matches(matcher))
 			{
-				final var value = extract(unit, word);
-				return Optional.of(new AttributeResolution<T>(feature, value));
+				final var extractedValue = extract(unit, value);
+				return Optional.of(new AttributeResolution<T>(feature, extractedValue));
 			}
 		}
 		return Optional.empty();
@@ -48,8 +61,6 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 		final String extraction;
 		if (extractor != null)
 		{
-			// TODO compile in an Adapter ?
-			final var pattern = Pattern.compile(extractor);
 			final var extractMatcher = pattern.matcher(word);
 			extractMatcher.find();
 			extraction = extractMatcher.group();
@@ -59,25 +70,18 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 			extraction = word;
 		}
 
-		switch (unit.primitive())
+		return switch (unit.primitive())
 		{
-			case Boolean:
-				return (T) Boolean.valueOf(extraction);
-			case Int:
-				return (T) Integer.valueOf(extraction);
-			case Long:
-				return (T) Long.valueOf(extraction);
-			case Float:
-				return (T) Float.valueOf(extraction);
-			case Double:
-				return (T) Double.valueOf(extraction);
-			case String:
-				return (T) extraction;
-		}
-		return null;
+			case Boolean -> (T) Boolean.valueOf(extraction);
+			case Int -> (T) Integer.valueOf(extraction);
+			case Long -> (T) Long.valueOf(extraction);
+			case Float -> (T) Float.valueOf(extraction);
+			case Double -> (T) Double.valueOf(extraction);
+			case String -> (T) extraction;
+		};
 	}
 
-	private static final class AttributeResolution<T> implements IFeatureResolution
+	public static final class AttributeResolution<T> implements IFeatureResolution
 	{
 		final Attribute<T, ?> attribute;
 		final T value;
@@ -93,5 +97,11 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 		{
 			builder.push(attribute, value);
 		}
+	}
+
+	@Override
+	public boolean isBooleanAttribute()
+	{
+		return feature.datatype() == LMCoreDefinition.Units.BOOLEAN;
 	}
 }
