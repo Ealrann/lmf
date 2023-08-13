@@ -38,7 +38,7 @@ public interface LMCoreFeatures
 																			false,
 																			LMCorePackage.BOUND_TYPE_ENUM);
 
-	List<Feature<?, ?>> Generic_all = List.of(Generic_name, Generic_type, Generic_type);
+	List<Feature<?, ?>> Generic_all = List.of(Generic_name, Generic_type, Generic_boundType);
 
 	Attribute<String, String> Feature_name = Named_name;
 	Attribute<Boolean, Boolean> Feature_immutable = new AttributeImpl<>("immutable",
