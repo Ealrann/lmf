@@ -14,16 +14,16 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	private static final FeatureInserter<GroupBuilder<?>> FEATURE_INSERTER
 			= new FeatureInserter.Builder<GroupBuilder<?>>()
 
-			.add(LMCoreFeatures.Group_name, GroupBuilder::name)
-			.add(LMCoreFeatures.Group_concrete, GroupBuilder::concrete)
+			.add(LMCoreDefinition.Features.Group_name, GroupBuilder::name)
+			.add(LMCoreDefinition.Features.Group_concrete, GroupBuilder::concrete)
 			.build();
 
 	private static final RelationLazyInserter<GroupBuilder<?>> BUILDER_INSERTER
 			= new RelationLazyInserter.Builder<GroupBuilder<?>>()
 
-			.add(LMCoreFeatures.Group_includes, GroupBuilder::addInclude)
-			.add(LMCoreFeatures.Group_features, GroupBuilder::addFeature)
-			.add(LMCoreFeatures.Group_generics, GroupBuilder::addGeneric)
+			.add(LMCoreDefinition.Features.Group_includes, GroupBuilder::addInclude)
+			.add(LMCoreDefinition.Features.Group_features, GroupBuilder::addFeature)
+			.add(LMCoreDefinition.Features.Group_generics, GroupBuilder::addGeneric)
 			.build();
 
 	private String name = null;

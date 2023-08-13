@@ -10,13 +10,13 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 {
 	public static final FeatureMap<Function<Relation<?, ?>, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_immutable, Relation::immutable),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_many, Relation::many),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_mandatory, Relation::mandatory),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_group, Relation::group),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_contains, Relation::contains),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Relation_parameter, Relation::parameter)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_immutable, Relation::immutable),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_many, Relation::many),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_mandatory, Relation::mandatory),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_group, Relation::group),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_contains, Relation::contains),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Relation_parameter, Relation::parameter)));
 
 	private final String name;
 	private final boolean immutable;
@@ -103,7 +103,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.Groups.RELATION_GROUP;
+		return LMCoreDefinition.Groups.RELATION;
 	}
 
 	@Override

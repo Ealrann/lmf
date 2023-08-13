@@ -12,11 +12,11 @@ public final class ModelImpl implements Model
 {
 	public static final FeatureMap<Function<Model, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Model_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Model_groups, Model::groups),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Model_enums, Model::enums),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Model_units, Model::units),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Model_aliases, Model::aliases)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Model_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Model_groups, Model::groups),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Model_enums, Model::enums),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Model_units, Model::units),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Model_aliases, Model::aliases)));
 
 	private final IModelPackage _package;
 	private final String name;
@@ -88,7 +88,7 @@ public final class ModelImpl implements Model
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.Groups.MODEL_GROUP;
+		return LMCoreDefinition.Groups.MODEL;
 	}
 
 	@Override

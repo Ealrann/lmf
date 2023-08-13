@@ -9,8 +9,8 @@ public final class AliasImpl implements Alias
 {
 	public static final FeatureGetter<Alias> FEATURE_GETTER = new FeatureGetter.Builder<Alias>()
 
-			.add(LMCoreFeatures.Alias_name, Named::name)
-			.add(LMCoreFeatures.Alias_words, Alias::words)
+			.add(LMCoreDefinition.Features.Alias_name, Named::name)
+			.add(LMCoreDefinition.Features.Alias_words, Alias::words)
 			.build();
 
 	private final String name;
@@ -51,7 +51,7 @@ public final class AliasImpl implements Alias
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.Groups.ALIAS_GROUP;
+		return LMCoreDefinition.Groups.ALIAS;
 	}
 
 	@Override

@@ -14,8 +14,8 @@ public final class EnumBuilder<T> implements Enum.Builder<T>
 	private static final FeatureInserter<EnumBuilder<?>> FEATURE_INSERTER = FeatureInserter
 
 			.<EnumBuilder<?>>Builder()
-			.add(LMCoreFeatures.Enum_name, EnumBuilder::name)
-			.add(LMCoreFeatures.Enum_literals, EnumBuilder::addLiteral)
+			.add(LMCoreDefinition.Features.Enum_name, EnumBuilder::name)
+			.add(LMCoreDefinition.Features.Enum_literals, EnumBuilder::addLiteral)
 			.build();
 
 	private String name = null;

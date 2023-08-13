@@ -9,11 +9,11 @@ import java.util.function.Function;
 public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<UnaryType, EffectiveType>
 {
 	public static final FeatureMap<Function<Attribute<?, ?>, Object>> GET_MAP = new FeatureMap<>(
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Attribute_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Attribute_immutable, Attribute::immutable),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Attribute_many, Attribute::many),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Attribute_mandatory, Attribute::mandatory),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Attribute_datatype, Attribute::datatype)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_immutable, Attribute::immutable),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_many, Attribute::many),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_mandatory, Attribute::mandatory),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_datatype, Attribute::datatype)));
 
 	private final String name;
 	private final boolean immutable;
@@ -82,7 +82,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.Groups.ATTRIBUTE_GROUP;
+		return LMCoreDefinition.Groups.ATTRIBUTE;
 	}
 
 	@Override

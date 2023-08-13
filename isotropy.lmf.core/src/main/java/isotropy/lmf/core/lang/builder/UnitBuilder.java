@@ -10,11 +10,11 @@ public final class UnitBuilder<T> implements Unit.Builder<T>
 {
 	public static final FeatureInserter<UnitBuilder<?>> FEATURE_SETTER = new FeatureInserter.Builder<UnitBuilder<?>>()
 
-			.add(LMCoreFeatures.Unit_name, UnitBuilder::name)
-			.add(LMCoreFeatures.Unit_matcher, UnitBuilder::matcher)
-			.add(LMCoreFeatures.Unit_defaultValue, UnitBuilder::defaultValue)
-			.add(LMCoreFeatures.Unit_primitive, UnitBuilder::primitive)
-			.add(LMCoreFeatures.Unit_extractor, UnitBuilder::extractor)
+			.add(LMCoreDefinition.Features.Unit_name, UnitBuilder::name)
+			.add(LMCoreDefinition.Features.Unit_matcher, UnitBuilder::matcher)
+			.add(LMCoreDefinition.Features.Unit_defaultValue, UnitBuilder::defaultValue)
+			.add(LMCoreDefinition.Features.Unit_primitive, UnitBuilder::primitive)
+			.add(LMCoreDefinition.Features.Unit_extractor, UnitBuilder::extractor)
 			.build();
 
 	private String name;

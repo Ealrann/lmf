@@ -3,11 +3,8 @@ package isotropy.lmf.core.lang.builder;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.model.FeatureInserter;
-import isotropy.lmf.core.model.FeatureMap;
-import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.RelationLazyInserter;
 
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Relation.Builder<UnaryType,
@@ -16,18 +13,18 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	public static final FeatureInserter<RelationBuilder<?, ?>> FEATURE_INSERTER =
 			new FeatureInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(LMCoreFeatures.Relation_name, RelationBuilder::name)
-			.add(LMCoreFeatures.Relation_immutable, RelationBuilder::immutable)
-			.add(LMCoreFeatures.Relation_many, RelationBuilder::many)
-			.add(LMCoreFeatures.Relation_mandatory, RelationBuilder::mandatory)
-			.add(LMCoreFeatures.Relation_contains, RelationBuilder::contains)
+			.add(LMCoreDefinition.Features.Relation_name, RelationBuilder::name)
+			.add(LMCoreDefinition.Features.Relation_immutable, RelationBuilder::immutable)
+			.add(LMCoreDefinition.Features.Relation_many, RelationBuilder::many)
+			.add(LMCoreDefinition.Features.Relation_mandatory, RelationBuilder::mandatory)
+			.add(LMCoreDefinition.Features.Relation_contains, RelationBuilder::contains)
 			.build();
 
 	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER =
 			new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(LMCoreFeatures.Relation_group, RelationBuilder::_group)
-			.add(LMCoreFeatures.Relation_parameter, RelationBuilder::parameter)
+			.add(LMCoreDefinition.Features.Relation_group, RelationBuilder::_group)
+			.add(LMCoreDefinition.Features.Relation_parameter, RelationBuilder::parameter)
 			.build();
 
 

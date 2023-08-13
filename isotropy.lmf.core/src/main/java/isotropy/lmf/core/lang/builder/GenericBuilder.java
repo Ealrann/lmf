@@ -11,13 +11,13 @@ public class GenericBuilder implements Generic.Builder
 {
 	private static final FeatureInserter<GenericBuilder> FEATURE_INSERTER = FeatureInserter.<GenericBuilder>Builder()
 
-			.add(LMCoreFeatures.Generic_name, GenericBuilder::name)
-			.add(LMCoreFeatures.Generic_boundType, GenericBuilder::boundType)
+			.add(LMCoreDefinition.Features.Generic_name, GenericBuilder::name)
+			.add(LMCoreDefinition.Features.Generic_boundType, GenericBuilder::boundType)
 			.build();
 
 	private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = RelationLazyInserter.<GenericBuilder>Builder()
 
-			.add(LMCoreFeatures.Generic_type, GenericBuilder::type).build();
+																									  .add(LMCoreDefinition.Features.Generic_type, GenericBuilder::type).build();
 
 	private String name;
 	private BoundType boundType;

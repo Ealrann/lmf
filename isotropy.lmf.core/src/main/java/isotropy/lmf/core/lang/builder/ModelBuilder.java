@@ -16,14 +16,14 @@ public final class ModelBuilder implements Model.Builder
 {
 	private static final FeatureInserter<ModelBuilder> FEATURE_INSERTER = new FeatureInserter.Builder<ModelBuilder>()
 
-			.add(LMCoreFeatures.Model_name, ModelBuilder::name).build();
+			.add(LMCoreDefinition.Features.Model_name, ModelBuilder::name).build();
 
 	private static final RelationLazyInserter<ModelBuilder> BUILDER_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>()
 
-			.add(LMCoreFeatures.Model_groups, ModelBuilder::addGroup)
-			.add(LMCoreFeatures.Model_enums, ModelBuilder::addEnum)
-			.add(LMCoreFeatures.Model_units, ModelBuilder::addUnit)
-			.add(LMCoreFeatures.Model_aliases, ModelBuilder::addAlias)
+			.add(LMCoreDefinition.Features.Model_groups, ModelBuilder::addGroup)
+			.add(LMCoreDefinition.Features.Model_enums, ModelBuilder::addEnum)
+			.add(LMCoreDefinition.Features.Model_units, ModelBuilder::addUnit)
+			.add(LMCoreDefinition.Features.Model_aliases, ModelBuilder::addAlias)
 			.build();
 
 	private String name;

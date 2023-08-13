@@ -10,9 +10,9 @@ public final class GenericImpl implements Generic
 {
 	public static final FeatureMap<Function<Generic, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Generic_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Generic_boundType, Generic::boundType),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Generic_type, Generic::type)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Generic_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Generic_boundType, Generic::boundType),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Generic_type, Generic::type)));
 
 	private final String name;
 	private final BoundType boundType;
@@ -62,7 +62,7 @@ public final class GenericImpl implements Generic
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.Groups.GENERIC_GROUP;
+		return LMCoreDefinition.Groups.GENERIC;
 	}
 
 	@Override

@@ -11,8 +11,8 @@ public final class EnumImpl<T> implements Enum<T>
 {
 	public static final FeatureMap<Function<Enum<?>, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreFeatures.Enum_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreFeatures.Enum_literals, Enum::literals)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Enum_name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Enum_literals, Enum::literals)));
 
 	private final String name;
 	private final List<String> literals;
@@ -54,7 +54,7 @@ public final class EnumImpl<T> implements Enum<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.Groups.ENUM_GROUP;
+		return LMCoreDefinition.Groups.ENUM;
 	}
 
 	@Override
