@@ -82,7 +82,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.ATTRIBUTE_GROUP;
+		return LMCorePackage.Groups.ATTRIBUTE_GROUP;
 	}
 
 	@Override

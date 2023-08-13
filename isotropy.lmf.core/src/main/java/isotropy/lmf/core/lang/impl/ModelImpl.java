@@ -88,7 +88,7 @@ public final class ModelImpl implements Model
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.MODEL_GROUP;
+		return LMCorePackage.Groups.MODEL_GROUP;
 	}
 
 	@Override

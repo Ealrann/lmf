@@ -82,7 +82,7 @@ public final class UnitImpl<T> implements Unit<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.UNIT_GROUP;
+		return LMCorePackage.Groups.UNIT_GROUP;
 	}
 
 	@Override

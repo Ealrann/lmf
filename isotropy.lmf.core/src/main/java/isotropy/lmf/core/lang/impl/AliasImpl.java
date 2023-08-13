@@ -51,7 +51,7 @@ public final class AliasImpl implements Alias
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.ALIAS_GROUP;
+		return LMCorePackage.Groups.ALIAS_GROUP;
 	}
 
 	@Override

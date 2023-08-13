@@ -13,7 +13,7 @@ public interface Group<T extends LMObject> extends Type
 	List<? extends Feature<?, ?>> features();
 	List<Generic> generics();
 
-	List<Generic> GENERICS = List.of(new GenericImpl("T", BoundType.Extends, LMCorePackage.LMOBJECT_GROUP));
+	List<Generic> GENERICS = List.of(new GenericImpl("T", BoundType.Extends, LMCorePackage.Groups.LMOBJECT_GROUP));
 
 	static <T extends LMObject> Builder<T> builder() {return new GroupBuilder<>();}
 	interface Builder<T extends LMObject> extends LMObject.Builder<Group<T>>

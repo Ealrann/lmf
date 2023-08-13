@@ -62,7 +62,7 @@ public final class GenericImpl implements Generic
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.GENERIC_GROUP;
+		return LMCorePackage.Groups.GENERIC_GROUP;
 	}
 
 	@Override

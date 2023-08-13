@@ -54,7 +54,7 @@ public final class EnumImpl<T> implements Enum<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.ENUM_GROUP;
+		return LMCorePackage.Groups.ENUM_GROUP;
 	}
 
 	@Override

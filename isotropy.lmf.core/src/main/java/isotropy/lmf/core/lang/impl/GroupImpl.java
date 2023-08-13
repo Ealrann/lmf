@@ -82,7 +82,7 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.GROUP_GROUP;
+		return LMCorePackage.Groups.GROUP_GROUP;
 	}
 
 	@Override

@@ -103,7 +103,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	@Override
 	public Group<?> lmGroup()
 	{
-		return LMCorePackage.RELATION_GROUP;
+		return LMCorePackage.Groups.RELATION_GROUP;
 	}
 
 	@Override
