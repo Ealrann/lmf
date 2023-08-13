@@ -52,6 +52,7 @@ public final class LMCorePackage implements IModelPackage
 													  LMCoreDefinition.Units.STRING);
 	public static final List<Enum<?>> enums = List.of(LMCoreDefinition.Enums.BOUND_TYPE,
 													  LMCoreDefinition.Enums.PRIMITIVE);
+
 	public static final Model MODEL = new ModelImpl(Instance,
 													"lmcore",
 													groups.stream()

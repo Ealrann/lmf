@@ -1,18 +1,12 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.FeatureGetter;
 
 import java.util.List;
+import java.util.function.Function;
 
 public final class AliasImpl implements Alias
 {
-	public static final FeatureGetter<Alias> FEATURE_GETTER = new FeatureGetter.Builder<Alias>()
-
-			.add(LMCoreDefinition.Features.Alias_name, Named::name)
-			.add(LMCoreDefinition.Features.Alias_words, Alias::words)
-			.build();
-
 	private final String name;
 	private final List<String> words;
 
@@ -39,7 +33,24 @@ public final class AliasImpl implements Alias
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return FEATURE_GETTER.get(this, feature);
+		return featureGetter(feature).apply(this);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Function<Alias, T> featureGetter(Feature<?, T> f)
+	{
+		if (f == LMCoreDefinition.Features.ALIAS.name)
+		{
+			return (Function<Alias, T>) (Function<Alias, ?>) Alias::name;
+		}
+		else if (f == LMCoreDefinition.Features.ALIAS.words)
+		{
+			return (Function<Alias, T>) (Function<Alias, ?>) Alias::words;
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Override

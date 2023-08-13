@@ -9,11 +9,11 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 {
 	public static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>()
 
-			.add(LMCoreDefinition.Features.Group_name, Group::name)
-			.add(LMCoreDefinition.Features.Group_concrete, Group::concrete)
-			.add(LMCoreDefinition.Features.Group_includes, Group::includes)
-			.add(LMCoreDefinition.Features.Group_features, Group::features)
-			.add(LMCoreDefinition.Features.Group_generics, Group::generics)
+			.add(LMCoreDefinition.Features.GROUP.name, Group::name)
+			.add(LMCoreDefinition.Features.GROUP.concrete, Group::concrete)
+			.add(LMCoreDefinition.Features.GROUP.includes, Group::includes)
+			.add(LMCoreDefinition.Features.GROUP.features, Group::features)
+			.add(LMCoreDefinition.Features.GROUP.generics, Group::generics)
 			.build();
 
 	private final String name;

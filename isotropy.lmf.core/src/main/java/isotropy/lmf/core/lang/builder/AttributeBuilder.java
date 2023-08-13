@@ -11,15 +11,15 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribu
 {
 	private static final FeatureInserter<AttributeBuilder<?, ?>> FEATURE_INSERTER
 			= FeatureInserter.<AttributeBuilder<?, ?>>Builder()
-							 .add(LMCoreDefinition.Features.Attribute_name, AttributeBuilder::name)
-							 .add(LMCoreDefinition.Features.Attribute_immutable, AttributeBuilder::immutable)
-							 .add(LMCoreDefinition.Features.Attribute_many, AttributeBuilder::many)
-							 .add(LMCoreDefinition.Features.Attribute_mandatory, AttributeBuilder::mandatory)
+							 .add(LMCoreDefinition.Features.ATTRIBUTE.name, AttributeBuilder::name)
+							 .add(LMCoreDefinition.Features.ATTRIBUTE.immutable, AttributeBuilder::immutable)
+							 .add(LMCoreDefinition.Features.ATTRIBUTE.many, AttributeBuilder::many)
+							 .add(LMCoreDefinition.Features.ATTRIBUTE.mandatory, AttributeBuilder::mandatory)
 							 .build();
 
 	private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER
 			= RelationLazyInserter.<AttributeBuilder<?, ?>>Builder()
-								  .add(LMCoreDefinition.Features.Attribute_datatype, AttributeBuilder::_datatype)
+								  .add(LMCoreDefinition.Features.ATTRIBUTE.datatype, AttributeBuilder::_datatype)
 								  .build();
 
 	private String name = null;

@@ -9,15 +9,18 @@ import java.util.function.Supplier;
 
 public class GenericBuilder implements Generic.Builder
 {
-	private static final FeatureInserter<GenericBuilder> FEATURE_INSERTER = FeatureInserter.<GenericBuilder>Builder()
+	private static final FeatureInserter<GenericBuilder> FEATURE_INSERTER = FeatureInserter
 
-			.add(LMCoreDefinition.Features.Generic_name, GenericBuilder::name)
-			.add(LMCoreDefinition.Features.Generic_boundType, GenericBuilder::boundType)
+			.<GenericBuilder>Builder()
+			.add(LMCoreDefinition.Features.GENERIC.name, GenericBuilder::name)
+			.add(LMCoreDefinition.Features.GENERIC.boundType, GenericBuilder::boundType)
 			.build();
 
-	private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = RelationLazyInserter.<GenericBuilder>Builder()
+	private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = RelationLazyInserter
 
-																									  .add(LMCoreDefinition.Features.Generic_type, GenericBuilder::type).build();
+			.<GenericBuilder>Builder()
+			.add(LMCoreDefinition.Features.GENERIC.type, GenericBuilder::type)
+			.build();
 
 	private String name;
 	private BoundType boundType;

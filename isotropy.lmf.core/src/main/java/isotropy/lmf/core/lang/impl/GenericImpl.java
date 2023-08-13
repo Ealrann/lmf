@@ -10,9 +10,9 @@ public final class GenericImpl implements Generic
 {
 	public static final FeatureMap<Function<Generic, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Generic_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Generic_boundType, Generic::boundType),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Generic_type, Generic::type)));
+			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.boundType, Generic::boundType),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.type, Generic::type)));
 
 	private final String name;
 	private final BoundType boundType;

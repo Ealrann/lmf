@@ -13,12 +13,12 @@ public final class AliasBuilder implements Alias.Builder
 	private static final FeatureInserter<AliasBuilder> FEATURE_INSERTER = FeatureInserter
 
 			.<AliasBuilder>Builder()
-			.add(LMCoreDefinition.Features.Alias_name, AliasBuilder::name)
-			.add(LMCoreDefinition.Features.Alias_words, AliasBuilder::addWord)
+			.add(LMCoreDefinition.Features.ALIAS.name, AliasBuilder::name)
+			.add(LMCoreDefinition.Features.ALIAS.words, AliasBuilder::addWord)
 			.build();
 
 	private String name = null;
-	private List<String> words = new ArrayList<>();
+	private final List<String> words = new ArrayList<>();
 
 	@Override
 	public AliasImpl build()

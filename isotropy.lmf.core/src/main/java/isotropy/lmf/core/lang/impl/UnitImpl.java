@@ -1,21 +1,11 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.FeatureMap;
 
-import java.util.List;
 import java.util.function.Function;
 
 public final class UnitImpl<T> implements Unit<T>
 {
-	public static final FeatureMap<Function<Unit<?>, Object>> FEATURE_GETTER = new FeatureMap<>(
-
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Unit_name, Unit::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Unit_matcher, Unit::matcher),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Unit_defaultValue, Unit::defaultValue),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Unit_primitive, Unit::primitive),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Unit_extractor, Unit::extractor)));
-
 	private final String name;
 	private final String matcher;
 	private final String defaultValue;
@@ -70,7 +60,36 @@ public final class UnitImpl<T> implements Unit<T>
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) FEATURE_GETTER.get(feature).apply(this);
+		return featureGetter(feature).apply(this);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Function<Unit<?>, T> featureGetter(Feature<?, T> f)
+	{
+		if (f == LMCoreDefinition.Features.UNIT.name)
+		{
+			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::name;
+		}
+		else if (f == LMCoreDefinition.Features.UNIT.matcher)
+		{
+			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::matcher;
+		}
+		else if (f == LMCoreDefinition.Features.UNIT.defaultValue)
+		{
+			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::defaultValue;
+		}
+		else if (f == LMCoreDefinition.Features.UNIT.primitive)
+		{
+			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::primitive;
+		}
+		else if (f == LMCoreDefinition.Features.UNIT.extractor)
+		{
+			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::extractor;
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Override

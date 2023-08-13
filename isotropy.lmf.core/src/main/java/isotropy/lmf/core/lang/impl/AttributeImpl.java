@@ -1,20 +1,11 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.FeatureMap;
 
-import java.util.List;
 import java.util.function.Function;
 
 public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<UnaryType, EffectiveType>
 {
-	public static final FeatureMap<Function<Attribute<?, ?>, Object>> GET_MAP = new FeatureMap<>(
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_immutable, Attribute::immutable),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_many, Attribute::many),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_mandatory, Attribute::mandatory),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Attribute_datatype, Attribute::datatype)));
-
 	private final String name;
 	private final boolean immutable;
 	private final boolean many;
@@ -66,11 +57,39 @@ public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<
 		return datatype;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature).apply(this);
+		return featureGetter(feature).apply(this);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Function<Attribute<?, ?>, T> featureGetter(Feature<?, T> f)
+	{
+		if (f == LMCoreDefinition.Features.ATTRIBUTE.name)
+		{
+			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::name;
+		}
+		else if (f == LMCoreDefinition.Features.ATTRIBUTE.immutable)
+		{
+			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::immutable;
+		}
+		else if (f == LMCoreDefinition.Features.ATTRIBUTE.many)
+		{
+			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::many;
+		}
+		else if (f == LMCoreDefinition.Features.ATTRIBUTE.mandatory)
+		{
+			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::mandatory;
+		}
+		else if (f == LMCoreDefinition.Features.ATTRIBUTE.datatype)
+		{
+			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::datatype;
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Override

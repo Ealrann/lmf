@@ -2,18 +2,12 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.FeatureMap;
 
 import java.util.List;
 import java.util.function.Function;
 
 public final class EnumImpl<T> implements Enum<T>
 {
-	public static final FeatureMap<Function<Enum<?>, Object>> GET_MAP = new FeatureMap<>(
-
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Enum_name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.Enum_literals, Enum::literals)));
-
 	private final String name;
 	private final List<String> literals;
 
@@ -37,12 +31,27 @@ public final class EnumImpl<T> implements Enum<T>
 		return literals;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature)
-						  .apply(this);
+		return featureGetter(feature).apply(this);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Function<Enum<?>, T> featureGetter(Feature<?, T> f)
+	{
+		if (f == LMCoreDefinition.Features.ENUM.name)
+		{
+			return (Function<Enum<?>, T>) (Function<Enum<?>, ?>) Enum::name;
+		}
+		else if (f == LMCoreDefinition.Features.ENUM.literals)
+		{
+			return (Function<Enum<?>, T>) (Function<Enum<?>, ?>) Enum::literals;
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Override
