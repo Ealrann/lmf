@@ -1,5 +1,6 @@
-package isotropy.lm.core.resource.ptree.test;
+package isotropy.lm.core.resource.ptree.test.model2java;
 
+import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
@@ -11,7 +12,7 @@ import java.io.ByteArrayInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ModelToJavaTest
+public class BasicTest
 {
 	private static final PTreeReader treeBuilder = new PTreeReader();
 
@@ -62,5 +63,23 @@ public class ModelToJavaTest
 		assertTrue(car instanceof Group);
 		assertTrue(((Group<?>) car).concrete());
 		assertEquals("Car", ((Group<?>) car).name());
+	}
+
+	@Test
+	public void twoEmptyEnums()
+	{
+		final var textModel = "(Enum EColor) (Enum ESize)";
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var color = roots.get(0);
+		assertTrue(color instanceof Enum<?>);
+		assertEquals("EColor", ((Enum<?>) color).name());
+
+		final var size = roots.get(1);
+		assertTrue(size instanceof Enum<?>);
+		assertEquals("ESize", ((Enum<?>) size).name());
 	}
 }
