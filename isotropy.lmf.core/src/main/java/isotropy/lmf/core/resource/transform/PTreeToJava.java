@@ -30,11 +30,11 @@ public final class PTreeToJava
 									   .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
 	}
 
-	public List<LMObject> transform(final Tree<List<String>> tree)
+	public List<? extends LMObject> transform(final Tree<List<String>> tree)
 	{
 		final var builderTrees = tree.children()
 									 .stream()
-									 .map(t -> t.map(this::convert))
+									 .map(t -> t.<BuilderNode<?>>map(this::convert))
 									 .toList();
 
 		builderTrees.stream()
@@ -43,19 +43,21 @@ public final class PTreeToJava
 
 		return builderTrees.stream()
 						   .map(Tree::data)
-						   .map(bd -> bd.builder)
-						   .map(IFeaturedObject.Builder::build)
-						   .map(LMObject.class::cast)
+						   .map(BuilderNode::build)
 						   .toList();
 	}
 
-	private BuilderNode convert(final List<String> words)
+	private BuilderNode<?> convert(final List<String> words)
 	{
 		final var namedNode = extractWords(words);
-		final var modelGroup = groups.get(namedNode.name);
+		final var name = namedNode.name;
+		final var equalIdex = name.indexOf('=');
+		final var containmentName = equalIdex == -1 ? null : name.substring(0, equalIdex);
+		final var groupName = equalIdex == -1 ? name : name.substring(equalIdex);
+		final var modelGroup = groups.get(groupName);
 		final var group = modelGroup.group;
 		final var builder = modelGroup.builder();
-		return new BuilderNode(namedNode.words, builder, group);
+		return new BuilderNode<>(containmentName, namedNode.words, builder, group);
 	}
 
 	private NamedNode extractWords(final List<String> words)

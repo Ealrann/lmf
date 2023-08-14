@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ResourceUtil
 {
-	public static final List<LMObject> loadModel(final InputStream inputStream)
+	public static final List<? extends LMObject> loadModel(final InputStream inputStream)
 	{
 		final var ptreeBuilder = new PTreeReader();
 		final var tree = ptreeBuilder.read(inputStream);

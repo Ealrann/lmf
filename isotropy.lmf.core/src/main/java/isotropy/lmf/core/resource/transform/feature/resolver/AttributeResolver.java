@@ -34,7 +34,7 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(final Tree<BuilderNode> tree, final String value)
+	public Optional<IFeatureResolution> resolve(final Tree<BuilderNode<?>> tree, final String value)
 	{
 		final var datatype = feature.datatype();
 		if (datatype instanceof final isotropy.lmf.core.lang.Enum<T> _enum)

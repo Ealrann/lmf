@@ -18,7 +18,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(Tree<BuilderNode> tree, String value)
+	public Optional<IFeatureResolution> resolve(Tree<BuilderNode<?>> tree, String value)
 	{
 		if (value.startsWith("/") || value.startsWith("./") || value.startsWith("../"))
 		{

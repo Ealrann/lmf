@@ -2,7 +2,6 @@ package isotropy.lmf.core.resource.transform.feature;
 
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.resource.transform.feature.resolver.*;
 import isotropy.lmf.core.resource.transform.util.BuilderNode;
@@ -15,11 +14,11 @@ import java.util.stream.Stream;
 
 public class TreeToFeatureResolver
 {
-	private final Tree<BuilderNode> tree;
+	private final Tree<BuilderNode<?>> tree;
 	private final List<IWordResolver<?>> wordResolvers;
 	private final List<IChildResolver<?>> childResolvers;
 
-	public TreeToFeatureResolver(final Tree<BuilderNode> tree, final List<? extends Feature<?, ?>> features)
+	public TreeToFeatureResolver(final Tree<BuilderNode<?>> tree, final List<? extends Feature<?, ?>> features)
 	{
 		this.tree = tree;
 
@@ -62,11 +61,12 @@ public class TreeToFeatureResolver
 		}
 	}
 
-	public Optional<? extends IFeatureResolution> resolve(final BuilderNode child)
+	public Stream<? extends IFeatureResolution> resolve(final Tree<BuilderNode<?>> node)
 	{
-		final var t = childResolvers.stream()
-									.map(r -> r.resolve(child));
-		return findAny(t);
+		return childResolvers.stream()
+							 .map(r -> r.resolve(node))
+							 .filter(Optional::isPresent)
+							 .map(Optional::get);
 	}
 
 	private Optional<? extends IFeatureResolution> resolveWithNameValue(final String name, final String value)
@@ -94,19 +94,6 @@ public class TreeToFeatureResolver
 		return booleanResolution;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> IFeatureResolver<T> buildResolver(Feature<T, ?> feature)
-	{
-		if (feature instanceof Attribute)
-		{
-			return new AttributeResolver<>((Attribute<T, ?>) feature);
-		}
-		else
-		{
-			return (IFeatureResolver<T>) buildRelationResolver((Relation<?, ?>) feature);
-		}
-	}
-
 	private static Optional<? extends IFeatureResolution> findAny(final Stream<? extends Optional<? extends IFeatureResolution>> t)
 	{
 		return t.filter(Optional::isPresent)
@@ -114,7 +101,19 @@ public class TreeToFeatureResolver
 				.findAny();
 	}
 
-	private static <T extends LMObject> IFeatureResolver<T> buildRelationResolver(Relation<T, ?> relation)
+	private static IFeatureResolver<?> buildResolver(Feature<?, ?> feature)
+	{
+		if (feature instanceof Attribute)
+		{
+			return new AttributeResolver<>((Attribute<?, ?>) feature);
+		}
+		else
+		{
+			return buildRelationResolver((Relation<?, ?>) feature);
+		}
+	}
+
+	private static IFeatureResolver<?> buildRelationResolver(Relation<?, ?> relation)
 	{
 		if (relation.contains())
 		{
