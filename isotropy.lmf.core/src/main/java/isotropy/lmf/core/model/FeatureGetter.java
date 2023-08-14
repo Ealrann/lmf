@@ -16,7 +16,7 @@ public final class FeatureGetter<T>
 	@SuppressWarnings("unchecked")
 	public <F> F get(final T object, final Feature<?, F> feature)
 	{
-		return (F) featureMap.getTuple(feature).value.apply(object);
+		return (F) featureMap.getTuple(feature).value().apply(object);
 	}
 
 	public static final class Builder<T>

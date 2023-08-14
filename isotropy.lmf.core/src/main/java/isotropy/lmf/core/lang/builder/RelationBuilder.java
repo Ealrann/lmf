@@ -40,7 +40,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	@Override
 	public Relation<UnaryType, EffectiveType> build()
 	{
-		return new RelationImpl<>(name, many, immutable, mandatory, group.get(), contains, parameter.get());
+		return new RelationImpl<>(name, many, immutable, mandatory, group, contains, parameter.get());
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	}
 
 	@Override
-	public <Type> void push(final Feature<Type, ?> feature, final Type value)
+	public <AttributeType> void push(final Attribute<AttributeType, ?> feature, final AttributeType value)
 	{
 		FEATURE_INSERTER.push(this, feature, value);
 	}

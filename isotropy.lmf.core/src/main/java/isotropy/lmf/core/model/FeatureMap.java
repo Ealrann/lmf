@@ -33,17 +33,8 @@ public final class FeatureMap<T>
 		throw new IllegalArgumentException("Feature " + feature.name() + " doesn't belong to this FeatureMap");
 	}
 
-	public static final class FeatureTuple<T, F>
-	{
-		public final Feature<?, F> feature;
-		public final T value;
-
-		public FeatureTuple(Feature<?, F> feature, T value)
-		{
-			this.feature = feature;
-			this.value = value;
-		}
-	}
+	public record FeatureTuple<T, F>(Feature<?, F> feature, T value)
+	{}
 
 	public static final class Builder<T>
 	{

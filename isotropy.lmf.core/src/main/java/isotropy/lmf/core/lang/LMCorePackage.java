@@ -85,7 +85,7 @@ public final class LMCorePackage implements IModelPackage
 	public <T extends LMObject> IFeaturedObject.Builder<T> builder(final Group<T> group)
 	{
 		return (IFeaturedObject.Builder<T>) groups.stream()
-												  .filter(groupDescriptor -> groupDescriptor.group == group)
+												  .filter(groupDescriptor -> groupDescriptor.group() == group)
 												  .findAny()
 												  .orElseThrow()
 												  .builder()

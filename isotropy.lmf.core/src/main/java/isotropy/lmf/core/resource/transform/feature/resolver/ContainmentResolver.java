@@ -65,7 +65,7 @@ public final class ContainmentResolver<T extends LMObject> extends AbstractResol
 		{
 			for (final var b : builders)
 			{
-				builder.push(relation, b.build());
+				builder.push(relation, b::build);
 			}
 		}
 	}

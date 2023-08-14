@@ -65,7 +65,7 @@ public final class UnitBuilder<T> implements Unit.Builder<T>
 	}
 
 	@Override
-	public <Type> void push(final Feature<Type, ?> feature, final Type value)
+	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
 		FEATURE_SETTER.push(this, feature, value);
 	}

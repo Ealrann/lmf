@@ -19,8 +19,9 @@ public final class FeatureBuilderInserter<T>
 													   final Relation<RelationType, ?> feature,
 													   final IFeaturedObject.Builder<RelationType> builder)
 	{
-		((BiConsumer<T, IFeaturedObject.Builder<RelationType>>) featureMap.getTuple(feature).value).accept(owner,
-																										   builder);
+		final var value = (BiConsumer<T, IFeaturedObject.Builder<RelationType>>) featureMap.getTuple(feature)
+																						   .value();
+		value.accept(owner, builder);
 	}
 
 	public static <T extends LMObject> Builder<T> Builder()
@@ -30,7 +31,8 @@ public final class FeatureBuilderInserter<T>
 
 	public static final class Builder<T>
 	{
-		private final FeatureMap.Builder<BiConsumer<T, ? extends IFeaturedObject.Builder<?>>> builder = new FeatureMap.Builder<>();
+		private final FeatureMap.Builder<BiConsumer<T, ? extends IFeaturedObject.Builder<?>>> builder
+				= new FeatureMap.Builder<>();
 
 		public FeatureBuilderInserter<T> build()
 		{

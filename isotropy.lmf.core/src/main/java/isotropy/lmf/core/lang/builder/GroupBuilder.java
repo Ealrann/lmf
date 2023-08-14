@@ -85,7 +85,7 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	}
 
 	@Override
-	public <Type> void push(final Feature<Type, ?> feature, final Type value)
+	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
 		FEATURE_INSERTER.push(this, feature, value);
 	}

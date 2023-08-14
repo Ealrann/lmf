@@ -42,7 +42,7 @@ public final class EnumBuilder<T> implements Enum.Builder<T>
 	}
 
 	@Override
-	public <Type> void push(final Feature<Type, ?> feature, final Type value)
+	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
 		FEATURE_INSERTER.push(this, feature, value);
 	}

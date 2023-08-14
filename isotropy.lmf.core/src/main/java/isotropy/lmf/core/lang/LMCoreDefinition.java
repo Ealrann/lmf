@@ -31,7 +31,7 @@ public interface LMCoreDefinition
 		interface GENERIC
 		{
 			Attribute<String, String> name = NAMED.name;
-			Relation<Type, Type> type = new RelationImpl<>("type", true, false, true, Groups.TYPE, false, null);
+			Relation<Type, Type> type = new RelationImpl<>("type", true, false, true, () -> Groups.TYPE, false, null);
 			Attribute<BoundType, BoundType> boundType = new AttributeImpl<>("boundType",
 																			true,
 																			false,
@@ -59,7 +59,7 @@ public interface LMCoreDefinition
 																			 true,
 																			 false,
 																			 true,
-																			 Groups.DATATYPE,
+																			 () -> Groups.DATATYPE,
 																			 false,
 																			 null);
 			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, datatype);
@@ -105,21 +105,21 @@ public interface LMCoreDefinition
 																					   true,
 																					   true,
 																					   false,
-																					   Groups.GROUP,
+																					   () -> Groups.GROUP,
 																					   false,
 																					   null);
 			Relation<Feature<?, ?>, List<? extends Feature<?, ?>>> features = new RelationImpl<>("features",
 																								 true,
 																								 true,
 																								 false,
-																								 Groups.FEATURE,
+																								 () -> Groups.FEATURE,
 																								 true,
 																								 null);
 			Relation<Generic, List<Generic>> generics = new RelationImpl<>("generics",
 																		   true,
 																		   true,
 																		   false,
-																		   Groups.GENERIC,
+																		   () -> Groups.GENERIC,
 																		   true,
 																		   null);
 			List<Feature<?, ?>> all = List.of(name, concrete, includes, features, generics);
@@ -135,7 +135,7 @@ public interface LMCoreDefinition
 																	true,
 																	false,
 																	true,
-																	Groups.GROUP,
+																	() -> Groups.GROUP,
 																	false,
 																	null);
 			Attribute<Boolean, Boolean> contains = new AttributeImpl<>("contains", true, false, false, Units.BOOLEAN);
@@ -143,7 +143,7 @@ public interface LMCoreDefinition
 																	  true,
 																	  false,
 																	  false,
-																	  Groups.GENERIC,
+																	  () -> Groups.GENERIC,
 																	  false,
 																	  null);
 			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, group, contains, parameter);
@@ -156,28 +156,28 @@ public interface LMCoreDefinition
 																		   true,
 																		   true,
 																		   false,
-																		   Groups.GROUP,
+																		   () -> Groups.GROUP,
 																		   true,
 																		   null);
 			Relation<Enum<?>, List<Enum<?>>> enums = new RelationImpl<>("enums",
 																		true,
 																		true,
 																		false,
-																		Groups.ENUM,
+																		() -> Groups.ENUM,
 																		true,
 																		null);
 			Relation<Unit<?>, List<Unit<?>>> units = new RelationImpl<>("units",
 																		true,
 																		true,
 																		false,
-																		Groups.UNIT,
+																		() -> Groups.UNIT,
 																		true,
 																		null);
 			Relation<Alias, List<Alias>> aliases = new RelationImpl<>("aliases",
 																	  true,
 																	  true,
 																	  false,
-																	  Groups.ALIAS,
+																	  () -> Groups.ALIAS,
 																	  true,
 																	  null);
 			List<Feature<?, ?>> all = List.of(name, groups, enums, units, aliases);

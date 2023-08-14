@@ -27,7 +27,7 @@ public final class AliasBuilder implements Alias.Builder
 	}
 
 	@Override
-	public <Type> void push(final Feature<Type, ?> feature, final Type value)
+	public <AttributeType> void push(final Attribute<AttributeType, ?> feature, final AttributeType value)
 	{
 		FEATURE_INSERTER.push(this, feature, value);
 	}

@@ -16,7 +16,7 @@ public final class FeatureSetter<T>
 	@SuppressWarnings("unchecked")
 	public <F> void set(final T object, final Feature<?, F> feature, final F value)
 	{
-		((BiConsumer<T, F>) featureMap.getTuple(feature).value).accept(object, value);
+		((BiConsumer<T, F>) featureMap.getTuple(feature).value()).accept(object, value);
 	}
 
 	public static <T> Builder<T> Builder()

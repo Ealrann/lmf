@@ -5,6 +5,7 @@ import isotropy.lmf.core.model.FeatureMap;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> implements Relation<UnaryType, EffectiveType>
 {
@@ -22,7 +23,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	private final boolean immutable;
 	private final boolean many;
 	private final boolean mandatory;
-	private final Group<UnaryType> group;
+	private final Supplier<Group<UnaryType>> group;
 	private final boolean contains;
 	private final Generic parameter;
 
@@ -32,7 +33,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 						final boolean immutable,
 						final boolean many,
 						final boolean mandatory,
-						final Group<UnaryType> group,
+						final Supplier<Group<UnaryType>> group,
 						final boolean contains,
 						final Generic parameter)
 	{
@@ -72,7 +73,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	@Override
 	public Group<UnaryType> group()
 	{
-		return group;
+		return group.get();
 	}
 
 	@Override

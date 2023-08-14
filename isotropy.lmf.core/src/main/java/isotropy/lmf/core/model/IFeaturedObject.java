@@ -1,9 +1,6 @@
 package isotropy.lmf.core.model;
 
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.resource.util.ModelUtil;
 
 import java.util.function.Supplier;
@@ -27,7 +24,7 @@ public interface IFeaturedObject
 	{
 		T build();
 
-		<Type> void push(Feature<Type, ?> feature, Type value);
+		<AttributeType> void push(Attribute<AttributeType, ?> feature, AttributeType value);
 		<RelationType extends LMObject> void push(Relation<RelationType, ?> relation, Supplier<RelationType> supplier);
 	}
 }

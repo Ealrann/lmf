@@ -18,6 +18,7 @@
 
 	(Group Feature includes=//groups.1 (Generic T)
 		(-att immutable //units.2)
+		(-att lazy //units.2)
 		(-att many      //units.2)
 		(-att mandatory //units.2))
 
