@@ -27,7 +27,6 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 			.add(LMCoreDefinition.Features.RELATION.parameter, RelationBuilder::parameter)
 			.build();
 
-
 	private String name = null;
 	private boolean many;
 	private boolean immutable;

@@ -1,30 +1,30 @@
 package isotropy.lmf.core.resource.transform.util;
 
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
 import isotropy.lmf.core.resource.transform.feature.TreeToFeatureResolver;
 import isotropy.lmf.core.resource.util.Tree;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class BuilderTreeResolver
 {
-	private final TreeToFeatureResolver treeToFeatureResolver;
+	private final TreeToFeatureResolver resolver;
+	private final Group<?> group;
 
-	public static void resolve(final Tree<BuilderNode<?>> tree)
+	public BuilderTreeResolver(final Group<?> group)
+	{
+		this.group = group;
+		final var features = group.features();
+		resolver = new TreeToFeatureResolver(features);
+	}
+
+	public void resolve(final Tree<BuilderNode<?>> tree)
 	{
 		final var builderNode = tree.data();
-		final var features = builderNode.group.features();
-
-		//todo bake one per group and put in a map before starts
-		final var featureResolver = new TreeToFeatureResolver(tree, features);
-		final var resolver = new BuilderTreeResolver(featureResolver);
-
-		final var words = builderNode.words;
-
-		final var wordResolution = resolver.resolveWords(words);
-		final var childrenResolution = resolver.resolveChildren(tree);
+		final var wordResolution = resolveWords(tree);
+		final var childrenResolution = resolveChildren(tree);
 
 		final var featureResolutions = Stream.concat(wordResolution, childrenResolution)
 											 .toList();
@@ -32,21 +32,23 @@ public final class BuilderTreeResolver
 		builderNode.setFeatureResolutions(featureResolutions);
 	}
 
-	private BuilderTreeResolver(final TreeToFeatureResolver treeToFeatureResolver)
+	private Stream<? extends IFeatureResolution> resolveWords(final Tree<BuilderNode<?>> node)
 	{
-		this.treeToFeatureResolver = treeToFeatureResolver;
-	}
-
-	private Stream<? extends IFeatureResolution> resolveWords(final List<String> words)
-	{
+		final var builderNode = node.data();
+		final var words = builderNode.words;
 		return words.stream()
-					.map(treeToFeatureResolver::resolve)
+					.map(word -> resolver.resolve(node, word))
 					.filter(Optional::isPresent)
 					.map(Optional::get);
 	}
 
 	private Stream<? extends IFeatureResolution> resolveChildren(final Tree<BuilderNode<?>> node)
 	{
-		return treeToFeatureResolver.resolve(node);
+		return resolver.resolve(node);
+	}
+
+	public Group<?> group()
+	{
+		return group;
 	}
 }

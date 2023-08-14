@@ -18,6 +18,8 @@ public final class PTreeToJava
 	private final Map<String, Alias> aliases;
 	private final Map<String, ModelGroup> groups;
 
+	private final Map<Group<?>, BuilderTreeResolver> resolvers;
+
 	public PTreeToJava()
 	{
 		aliases = ModelRegistry.Instance.models()
@@ -28,6 +30,12 @@ public final class PTreeToJava
 		groups = ModelRegistry.Instance.models()
 									   .flatMap(PTreeToJava::modelGroups)
 									   .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
+
+		resolvers = groups.values()
+						  .stream()
+						  .map(ModelGroup::group)
+						  .map(BuilderTreeResolver::new)
+						  .collect(Collectors.toUnmodifiableMap(BuilderTreeResolver::group, Function.identity()));
 	}
 
 	public List<? extends LMObject> transform(final Tree<List<String>> tree)
@@ -39,12 +47,18 @@ public final class PTreeToJava
 
 		builderTrees.stream()
 					.flatMap(Tree::stream)
-					.forEach(BuilderTreeResolver::resolve);
+					.forEach(this::resolve);
 
 		return builderTrees.stream()
 						   .map(Tree::data)
 						   .map(BuilderNode::build)
 						   .toList();
+	}
+
+	private void resolve(Tree<BuilderNode<?>> tree)
+	{
+		final var resolver = resolvers.get(tree.data().group);
+		resolver.resolve(tree);
 	}
 
 	private BuilderNode<?> convert(final List<String> words)
