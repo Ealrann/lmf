@@ -54,7 +54,7 @@ public final class LMCorePackage implements IModelPackage
 													  LMCoreDefinition.Enums.PRIMITIVE);
 
 	public static final Model MODEL = new ModelImpl(Instance,
-													"lmcore",
+													"LMCore",
 													groups.stream()
 														  .map(GroupDescriptor::group)
 														  .collect(Collectors.toUnmodifiableList()),
