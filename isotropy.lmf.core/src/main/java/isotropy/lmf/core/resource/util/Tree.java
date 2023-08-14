@@ -33,15 +33,15 @@ public final class Tree<T>
 		return children;
 	}
 
-	public <Target> Tree<Target> map(final Function<Tree<T>, Target> mapper)
+	public <Target> Tree<Target> map(final Function<T, Target> mapper)
 	{
 		return map(null, mapper);
 	}
 
-	private <Target> Tree<Target> map(final Tree<Target> mappedParent, final Function<Tree<T>, Target> mapper)
+	private <Target> Tree<Target> map(final Tree<Target> mappedParent, final Function<T, Target> mapper)
 	{
 		return new Tree<>(mappedParent,
-						  mapper.apply(this),
+						  mapper.apply(data),
 						  treeParent -> children.stream()
 												.map(c -> c.map(treeParent, mapper))
 												.toList());

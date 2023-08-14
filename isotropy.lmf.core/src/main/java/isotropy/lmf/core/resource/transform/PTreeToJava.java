@@ -49,18 +49,17 @@ public final class PTreeToJava
 						   .toList();
 	}
 
-	private BuilderNode convert(final Tree<List<String>> node)
+	private BuilderNode convert(final List<String> words)
 	{
-		final var namedNode = extractWords(node);
+		final var namedNode = extractWords(words);
 		final var modelGroup = groups.get(namedNode.name);
 		final var group = modelGroup.group;
 		final var builder = modelGroup.builder();
 		return new BuilderNode(namedNode.words, builder, group);
 	}
 
-	private NamedNode extractWords(final Tree<List<String>> tree)
+	private NamedNode extractWords(final List<String> words)
 	{
-		final var words = tree.data();
 		if (words.get(0)
 				 .equals(Alias.class.getSimpleName()))
 		{
