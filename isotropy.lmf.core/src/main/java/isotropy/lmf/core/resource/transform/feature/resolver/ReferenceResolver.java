@@ -6,7 +6,7 @@ import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.ModelRegistry;
 import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
-import isotropy.lmf.core.resource.transform.util.BuilderNode;
+import isotropy.lmf.core.resource.transform.node.BuilderNode;
 import isotropy.lmf.core.resource.util.Tree;
 
 import java.util.List;
@@ -30,13 +30,30 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 		else if (value.startsWith("/"))
 		{
-
-			return Optional.empty();
+			return resolveLocalDependency(tree, value);
 		}
 		else
 		{
 			return Optional.empty();
 		}
+	}
+
+	private Optional<IFeatureResolution> resolveLocalDependency(final Tree<BuilderNode<?>> tree, final String uri)
+	{
+		final var path = uri.substring(1);
+		final var steps = path.split("/");
+
+		Tree<BuilderNode<?>> current = tree.root();
+		for (final var step : steps)
+		{
+			final var pointIndex = step.indexOf('.');
+			final var featureName = pointIndex == -1 ? step : step.substring(0, pointIndex);
+			final Integer index = pointIndex == -1 ? null : Integer.valueOf(step.substring(pointIndex + 1));
+
+			//current.data().featureResolutions
+		}
+
+		return Optional.empty();
 	}
 
 	@SuppressWarnings("unchecked")

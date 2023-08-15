@@ -4,7 +4,7 @@ import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.IModelPackage;
 import isotropy.lmf.core.model.ModelRegistry;
-import isotropy.lmf.core.resource.transform.util.BuilderNode;
+import isotropy.lmf.core.resource.transform.node.BuilderNode;
 import isotropy.lmf.core.resource.transform.util.BuilderTreeResolver;
 import isotropy.lmf.core.resource.util.Tree;
 

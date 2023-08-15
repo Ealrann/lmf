@@ -1,4 +1,4 @@
-package isotropy.lmf.core.resource.transform.util;
+package isotropy.lmf.core.resource.transform.node;
 
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMObject;
@@ -6,41 +6,43 @@ import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public final class BuilderNode<T extends LMObject>
 {
-	public final String name;
+	public final String containmentName;
 	public final List<String> words;
 	public final IFeaturedObject.Builder<T> builder;
 	public final Group<?> group;
 
-	public List<IFeatureResolution> featureResolutions;
+	private Stream<? extends IFeatureResolution> wordsResolutions;
+	public List<? extends IFeatureResolution> childrenResolutions;
 	public T buildObject = null;
 
-	public BuilderNode(final String name,
+	public BuilderNode(final String containmentName,
 					   final List<String> words,
 					   final IFeaturedObject.Builder<T> builder,
 					   final Group<?> group)
 	{
-		this.name = name;
+		this.containmentName = containmentName;
 		this.words = words;
 		this.builder = builder;
 		this.group = group;
 	}
 
-	public void setFeatureResolutions(List<? extends IFeatureResolution> featureResolutions)
+	public void setResolutions(Stream<? extends IFeatureResolution> wordsResolutions,
+							   Stream<? extends IFeatureResolution> childrenResolutions)
 	{
-		this.featureResolutions = List.copyOf(featureResolutions);
+		this.wordsResolutions = wordsResolutions;
+		this.childrenResolutions = childrenResolutions.toList();
 	}
 
 	public T build()
 	{
 		if (buildObject == null)
 		{
-			for (final var reolution : featureResolutions)
-			{
-				reolution.pushValue(builder);
-			}
+			childrenResolutions.forEach(r -> r.pushValue(builder));
+			wordsResolutions.forEach(r -> r.pushValue(builder));
 			buildObject = builder.build();
 		}
 		return buildObject;

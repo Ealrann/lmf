@@ -3,6 +3,7 @@ package isotropy.lmf.core.resource.transform.util;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
 import isotropy.lmf.core.resource.transform.feature.TreeToFeatureResolver;
+import isotropy.lmf.core.resource.transform.node.BuilderNode;
 import isotropy.lmf.core.resource.util.Tree;
 
 import java.util.Optional;
@@ -23,13 +24,10 @@ public final class BuilderTreeResolver
 	public void resolve(final Tree<BuilderNode<?>> tree)
 	{
 		final var builderNode = tree.data();
-		final var wordResolution = resolveWords(tree);
 		final var childrenResolution = resolveChildren(tree);
+		final var wordResolution = resolveWords(tree);
 
-		final var featureResolutions = Stream.concat(wordResolution, childrenResolution)
-											 .toList();
-
-		builderNode.setFeatureResolutions(featureResolutions);
+		builderNode.setResolutions(wordResolution, childrenResolution);
 	}
 
 	private Stream<? extends IFeatureResolution> resolveWords(final Tree<BuilderNode<?>> node)

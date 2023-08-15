@@ -33,6 +33,11 @@ public final class Tree<T>
 		return children;
 	}
 
+	public Tree<T> root()
+	{
+		return parent == null ? this : parent.root();
+	}
+
 	public <Target> Tree<Target> map(final Function<T, Target> mapper)
 	{
 		return map(null, mapper);

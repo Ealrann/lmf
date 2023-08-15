@@ -4,7 +4,7 @@ import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.resource.transform.feature.resolver.*;
-import isotropy.lmf.core.resource.transform.util.BuilderNode;
+import isotropy.lmf.core.resource.transform.node.BuilderNode;
 import isotropy.lmf.core.resource.util.Tree;
 
 import java.util.List;

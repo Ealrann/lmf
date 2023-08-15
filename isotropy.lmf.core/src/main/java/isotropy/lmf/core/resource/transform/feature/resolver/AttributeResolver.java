@@ -6,7 +6,7 @@ import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
-import isotropy.lmf.core.resource.transform.util.BuilderNode;
+import isotropy.lmf.core.resource.transform.node.BuilderNode;
 import isotropy.lmf.core.resource.util.Tree;
 
 import java.util.List;

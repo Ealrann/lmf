@@ -4,7 +4,7 @@ import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
-import isotropy.lmf.core.resource.transform.util.BuilderNode;
+import isotropy.lmf.core.resource.transform.node.BuilderNode;
 import isotropy.lmf.core.resource.util.Tree;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public final class ContainmentResolver<T extends LMObject> extends AbstractResol
 										.stream()
 										.map(Tree::data)
 										.filter(n -> feature.name()
-															.equals(n.name))
+															.equals(n.containmentName))
 										.map(n -> (BuilderNode<T>) n)
 										.toList();
 
