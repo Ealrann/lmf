@@ -37,7 +37,7 @@ public class GenericTest
 	@Test
 	public void genericWithLocalGroup()
 	{
-		/*final var textModel = "(Model Test " +
+		final var textModel = "(Model Test " +
 							  "  (Group name=GenericGroup" +
 							  "    (Generic name=T boundType=Super type=/groups.1))" +
 							  "  (Group name=ICategory))";
@@ -56,6 +56,6 @@ public class GenericTest
 
 		assertEquals("T", generic.name());
 		assertEquals(BoundType.Super, generic.boundType());
-		assertEquals(generic.type(), group1);*/
+		assertEquals(generic.type(), group1);
 	}
 }
