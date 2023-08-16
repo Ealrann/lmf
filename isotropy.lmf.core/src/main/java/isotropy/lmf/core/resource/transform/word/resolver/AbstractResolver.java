@@ -1,8 +1,8 @@
-package isotropy.lmf.core.resource.transform.feature.resolver;
+package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.Feature;
 
-public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IFeatureResolver<T>
+public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IWordResolver<T>
 {
 	protected final F feature;
 

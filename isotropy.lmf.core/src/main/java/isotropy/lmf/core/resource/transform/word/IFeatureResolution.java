@@ -1,4 +1,4 @@
-package isotropy.lmf.core.resource.transform.feature;
+package isotropy.lmf.core.resource.transform.word;
 
 import isotropy.lmf.core.model.IFeaturedObject;
 

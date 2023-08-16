@@ -1,13 +1,12 @@
-package isotropy.lmf.core.resource.transform.feature.resolver;
+package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
-import isotropy.lmf.core.resource.transform.node.BuilderNode;
-import isotropy.lmf.core.resource.util.Tree;
+import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
+import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,7 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(final Tree<BuilderNode<?>> tree, final String value)
+	public Optional<IFeatureResolution> resolve(final TreeBuilderNode<?> node, final String value)
 	{
 		final var datatype = feature.datatype();
 		if (datatype instanceof final isotropy.lmf.core.lang.Enum<T> _enum)

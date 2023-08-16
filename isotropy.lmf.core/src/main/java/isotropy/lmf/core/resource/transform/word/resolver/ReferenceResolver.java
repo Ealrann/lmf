@@ -1,13 +1,12 @@
-package isotropy.lmf.core.resource.transform.feature.resolver;
+package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.ModelRegistry;
-import isotropy.lmf.core.resource.transform.feature.IFeatureResolution;
-import isotropy.lmf.core.resource.transform.node.BuilderNode;
-import isotropy.lmf.core.resource.util.Tree;
+import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
+import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +21,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(Tree<BuilderNode<?>> tree, String value)
+	public Optional<IFeatureResolution> resolve(TreeBuilderNode<?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -30,7 +29,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 		else if (value.startsWith("/"))
 		{
-			return resolveLocalDependency(tree, value);
+			return resolveLocalDependency(node, value);
 		}
 		else
 		{
@@ -38,12 +37,12 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	private Optional<IFeatureResolution> resolveLocalDependency(final Tree<BuilderNode<?>> tree, final String uri)
+	private Optional<IFeatureResolution> resolveLocalDependency(final TreeBuilderNode<?> node, final String uri)
 	{
 		final var path = uri.substring(1);
 		final var steps = path.split("/");
 
-		Tree<BuilderNode<?>> current = tree.root();
+		TreeBuilderNode<?> current = node.root();
 		for (final var step : steps)
 		{
 			final var pointIndex = step.indexOf('.');
