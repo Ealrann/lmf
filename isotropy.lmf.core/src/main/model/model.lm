@@ -31,8 +31,10 @@
 		(-refers parameter /groups.12))
 
 	(Group name=DataType /groups.2 (Generic T))
-	(Definition name=Alias includes=/groups.1 (-att words /units.7 [0..*]))
-	(Definition name=Enum  includes=/groups.8<T> (Generic T) (-att literals /units.7 [0..*]))
+	(Definition name=Alias includes=/groups.1
+		(-att words /units.7 [0..*]))
+	(Definition name=Enum  includes=/groups.8<T> (Generic T)
+		(-att literals /units.7 [0..*]))
 	(Definition name=Unit  includes=/groups.8<T> (Generic T)
 		(-att matcher      /matcher)
 		(-att defaultValue /units.7)
@@ -43,16 +45,16 @@
 		(-refers type      /groups.2)
 		(-att    boundType /enums.0))
 
-	(Unit name=matcher   matcher="rgx_match:\b(rgx_match:)*+\b")
-	(Unit name=extractor matcher="rgx_match:\b(rgx_value:)*+\b")
+	(Unit name=matcher   matcher="^rgx_match:\\b([^\\]+)\\b")
+	(Unit name=extractor matcher="^rgx_match:\\b([^\\]+)\\b")
 	(Enum name=BoundType extends,super)
 
 	(Enum name=Primitive boolean,int,long,float,double,string)
-	(Unit name=boolean "rgx_match:\b(true|false)\b" false /enums.1:boolean )
-	(Unit name=int     "rgx_match:\b[0-9]+\b"       0     /enums.1:int     )
-	(Unit name=long    "rgx_match:\b[0-9]+[Ll]\b"   0L    /enums.1:long    rgx_value:[0-9]+)
-	(Unit name=float   "rgx_match:\b[0-9.]+[Ff]\b"  0f    /enums.1:float   rgx_value:[0-9.]+)
-	(Unit name=double  "rgx_match:\b[0-9.]+\b"      0.    /enums.1:double  rgx_value:[0-9.]+)
+	(Unit name=boolean matcher="rgx_match:\b(true|false)\b" defaultValue=false primitive=boolean )
+	(Unit name=int     matcher="rgx_match:\b[0-9]+\b"       defaultValue=0     primitive=int     )
+	(Unit name=long    matcher="rgx_match:\b[0-9]+[Ll]\b"   defaultValue=0L    primitive=long    extractor=rgx_value:[0-9]+)
+	(Unit name=float   matcher="rgx_match:\b[0-9.]+[Ff]\b"  defaultValue=0f    primitive=float   extractor=rgx_value:[0-9.]+)
+	(Unit name=double  matcher="rgx_match:\b[0-9.]+\b"      defaultValue=0.    primitive=double  extractor=rgx_value:[0-9.]+)
 	(Unit name=string)
 
 	(Alias name=Definition Group,concrete)

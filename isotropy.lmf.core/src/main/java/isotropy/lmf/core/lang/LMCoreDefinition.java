@@ -220,20 +220,20 @@ public interface LMCoreDefinition
 	interface Units
 	{
 		Unit<String> MATCHER = new UnitImpl<>("matcher",
-											  "rgx_match:\\b(rgx_match:)*+\\b",
+											  "rgx_match:<(.+?)>",
 											  null,
 											  Primitive.String,
 											  null);
 		Unit<String> EXTRACTOR = new UnitImpl<>("extractor",
-												"rgx_match:\\b(rgx_value:)*+\\b",
+												"rgx_match:<(.+?)>",
 												null,
 												Primitive.String,
 												null);
-		Unit<Boolean> BOOLEAN = new UnitImpl<>("boolean", "\\b(true|false)\\b", "false", Primitive.Boolean, null);
-		Unit<String> INT = new UnitImpl<>("int", null, null, Primitive.Int, null);
-		Unit<String> LONG = new UnitImpl<>("long", null, null, Primitive.Long, null);
-		Unit<String> FLOAT = new UnitImpl<>("float", null, null, Primitive.Float, null);
-		Unit<String> DOUBLE = new UnitImpl<>("double", null, null, Primitive.Double, null);
+		Unit<Boolean> BOOLEAN = new UnitImpl<>("boolean", "rgx_match:<(true|false)>", "false", Primitive.Boolean, null);
+		Unit<String> INT = new UnitImpl<>("int", "rgx_match:<[0-9]+>", null, Primitive.Int, null);
+		Unit<String> LONG = new UnitImpl<>("long", "rgx_match:<[0-9]+[Ll]>", null, Primitive.Long, null);
+		Unit<String> FLOAT = new UnitImpl<>("float", "rgx_match:<[0-9.]+[Ff]>", null, Primitive.Float, null);
+		Unit<String> DOUBLE = new UnitImpl<>("double", "rgx_match:<[0-9.]+>", null, Primitive.Double, null);
 		Unit<String> STRING = new UnitImpl<>("string", null, null, Primitive.String, null);
 	}
 

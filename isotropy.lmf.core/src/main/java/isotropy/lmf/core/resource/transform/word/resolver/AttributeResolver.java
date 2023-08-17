@@ -1,35 +1,42 @@
 package isotropy.lmf.core.resource.transform.word.resolver;
 
-import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.lang.LMCoreDefinition;
-import isotropy.lmf.core.lang.Model;
-import isotropy.lmf.core.lang.Unit;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements IWordResolver<T>
 {
-	private final Pattern pattern;
+	private static final Pattern ROOT_MATCHER = Pattern.compile(LMCoreDefinition.Units.MATCHER.matcher());
+	private final Pattern matcherPattern;
+	private final Pattern extractorPattern;
 
 	public AttributeResolver(final Attribute<T, ?> attribute)
 	{
 		super(attribute);
 		final var datatype = attribute.datatype();
-		if (datatype instanceof Unit<T> unit && unit.extractor() != null)
+		matcherPattern = compilePattern(datatype, Unit::matcher);
+		extractorPattern = compilePattern(datatype, Unit::extractor);
+	}
+
+	private Pattern compilePattern(final Datatype<T> datatype, Function<Unit<?>, String> expressionGetter)
+	{
+		if (datatype instanceof Unit<T> unit && expressionGetter.apply(unit) != null)
 		{
-			final var extractor = unit.extractor();
-			pattern = Pattern.compile(extractor);
+			final var matcher = expressionGetter.apply(unit);
+			final var extractMatcher = ROOT_MATCHER.matcher(matcher);
+			//noinspection ResultOfMethodCallIgnored
+			extractMatcher.find();
+			final var applicableMatcher = extractMatcher.group(1);
+			return Pattern.compile(applicableMatcher);
 		}
-		else
-		{
-			pattern = null;
-		}
+		return null;
 	}
 
 	@Override
@@ -50,7 +57,7 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 
 	private Optional<IFeatureResolution> resolveUnit(final String value, final Unit<T> unit)
 	{
-		final var matcher = unit.matcher();
+		final var matcher = unit.matcher() != null ? LMCoreDefinition.Units.MATCHER.matcher() : null;
 		if (feature.many())
 		{
 			final var split = value.split(",");
@@ -61,10 +68,11 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 		}
 		else
 		{
-			if (matcher == null || value.matches(matcher))
+			final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
+			if (pmatcher == null || pmatcher.matches())
 			{
 				final var extractedValue = extractValue(unit, value);
-				return Optional.of(new AttributeResolution<T>(feature, extractedValue));
+				return Optional.of(new AttributeResolution<>(feature, extractedValue));
 			}
 		}
 		return Optional.empty();
@@ -92,8 +100,17 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 	private static <T> Optional<T> extractEnumLiteral(final String value, final isotropy.lmf.core.lang.Enum<T> _enum)
 	{
 		final var lPackage = ((Model) _enum.lContainer()).lPackage();
-		final var resolvedEnum = lPackage.resolveEnum(_enum, value);
+		final var resolvedEnum = lPackage.resolveEnum(_enum, capitalizeFirstLetter(value));
 		return resolvedEnum;
+	}
+
+	public static String capitalizeFirstLetter(String str)
+	{
+		if (str == null || str.isEmpty())
+		{
+			return str;
+		}
+		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -103,10 +120,10 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 		final String extraction;
 		if (extractor != null)
 		{
-			final var extractMatcher = pattern.matcher(word);
+			final var extractMatcher = extractorPattern.matcher(word);
 			//noinspection ResultOfMethodCallIgnored
 			extractMatcher.find();
-			extraction = extractMatcher.group();
+			extraction = extractMatcher.group(1);
 		}
 		else
 		{

@@ -110,4 +110,17 @@ public class PTreeReaderTest
 		assertEquals("-string", name.data().get(0));
 		assertEquals("name", name.data().get(1));
 	}
+
+	@Test
+	public void testPTreeBuilder_matcherEqual()
+	{
+		final var model = "(model matcher=\"\\b(true|false)\\b\")";
+		final var inputStream = new ByteArrayInputStream(model.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+
+		final var root = ptree.children().get(0);
+		assertEquals(2, root.data().size());
+		assertEquals("model", root.data().get(0));
+		assertEquals("matcher=\\b(true|false)\\b", root.data().get(1));
+	}
 }
