@@ -57,7 +57,6 @@ public final class AttributeResolver<T> extends AbstractResolver<T, Attribute<T,
 
 	private Optional<IFeatureResolution> resolveUnit(final String value, final Unit<T> unit)
 	{
-		final var matcher = unit.matcher() != null ? LMCoreDefinition.Units.MATCHER.matcher() : null;
 		if (feature.many())
 		{
 			final var split = value.split(",");
