@@ -1,12 +1,12 @@
 package isotropy.lmf.core.resource.transform.word.resolver;
 
-import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.ModelRegistry;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
+import isotropy.lmf.core.util.ModelUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,9 +59,10 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			current = children.get(index);
 		}
 
-		if (isSubGroup(feature.group(),
-					   current.modelGroup()
-							  .group()))
+		if (ModelUtils.isSubGroup(feature.groupReference()
+										 .group(),
+								  current.modelGroup()
+										 .group()))
 		{
 			return Optional.of(new DynamicReferenceResolution<>(feature, (TreeBuilderNode<T>) current));
 		}
@@ -111,7 +112,8 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 		}
 
-		if (isSubGroup(feature.group(), current.lmGroup()))
+		if (ModelUtils.isSubGroup(feature.groupReference()
+										 .group(), current.lmGroup()))
 		{
 			return Optional.of(new StaticReferenceResolution<>(feature, (T) current));
 		}
@@ -124,26 +126,6 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	@Override
 	public boolean isBooleanAttribute()
 	{
-		return false;
-	}
-
-	private static boolean isSubGroup(final Group<?> parent, final Group<?> check)
-	{
-		if (check == parent)
-		{
-			return true;
-		}
-		else if (check.includes()
-					  .isEmpty() == false)
-		{
-			for (final var include : check.includes())
-			{
-				if (isSubGroup(parent, include))
-				{
-					return true;
-				}
-			}
-		}
 		return false;
 	}
 

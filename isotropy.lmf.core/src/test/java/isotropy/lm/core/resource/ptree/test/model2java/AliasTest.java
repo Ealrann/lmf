@@ -46,8 +46,8 @@ public class AliasTest
 							  "    (Definition name=Oui)" +
 							  "    (Alias name=[1..*]     mandatory,many)" +
 							  "    (Definition name=Atts" +
-							  "        (-att [1..*] name=count dataType=#LMCore/units.3)" +
-							  "        (+att [1..*] name=exists dataType=#LMCore/units.2)" +
+							  "        (-att [1..*] name=count datatype=#LMCore/units.3)" +
+							  "        (+att [1..*] name=exists datatype=#LMCore/units.2)" +
 							  "    )" +
 							  ") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -74,7 +74,7 @@ public class AliasTest
 
 		final var group1 = model.groups()
 								.get(1);
-		assertEquals("Oui", group1.name());
+		assertEquals("Atts", group1.name());
 		assertTrue(group1.concrete());
 		assertEquals(2,
 					 group1.features()
@@ -88,10 +88,11 @@ public class AliasTest
 		assertTrue(att0.immutable());
 
 		final var att1 = (Attribute<?, ?>) group1.features()
-												 .get(0);
-		assertEquals("count", att1.name());
+												 .get(1);
+		assertEquals("exists", att1.name());
 		assertEquals(Primitive.Boolean, ((Unit<?>) att1.datatype()).primitive());
-		assertTrue(att1.many());
+		assertTrue(att1.mandatory());
 		assertFalse(att1.immutable());
+		assertTrue(att1.many());
 	}
 }

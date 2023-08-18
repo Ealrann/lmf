@@ -24,6 +24,7 @@ public final class LMCorePackage implements IModelPackage
 			new GroupDescriptor<>(LMCoreDefinition.Groups.FEATURE, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ATTRIBUTE, AttributeBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.RELATION, RelationBuilder::new),
+			new GroupDescriptor<>(LMCoreDefinition.Groups.GROUP_REFERENCE, GroupReferenceBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.DATATYPE, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ALIAS, AliasBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ENUM, EnumBuilder::new),

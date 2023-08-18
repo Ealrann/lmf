@@ -31,7 +31,12 @@ public interface LMCoreDefinition
 		interface GENERIC
 		{
 			Attribute<String, String> name = NAMED.name;
-			Relation<Type, Type> type = new RelationImpl<>("type", true, false, true, () -> Groups.TYPE, false, null);
+			Relation<Type, Type> type = new RelationImpl<>("type",
+														   true,
+														   false,
+														   true,
+														   new GroupReferenceImpl<>(() -> Groups.TYPE, null, null),
+														   false);
 			Attribute<BoundType, BoundType> boundType = new AttributeImpl<>("boundType",
 																			true,
 																			false,
@@ -59,9 +64,10 @@ public interface LMCoreDefinition
 																			 true,
 																			 false,
 																			 true,
-																			 () -> Groups.DATATYPE,
-																			 false,
-																			 null);
+																			 new GroupReferenceImpl<>(() -> Groups.DATATYPE,
+																									  null,
+																									  null),
+																			 false);
 			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, datatype);
 		}
 
@@ -101,28 +107,70 @@ public interface LMCoreDefinition
 		{
 			Attribute<String, String> name = NAMED.name;
 			Attribute<Boolean, Boolean> concrete = new AttributeImpl<>("concrete", true, false, false, Units.BOOLEAN);
-			Relation<Group<?>, List<? extends Group<?>>> includes = new RelationImpl<>("includes",
-																					   true,
-																					   true,
-																					   false,
-																					   () -> Groups.GROUP,
-																					   false,
-																					   null);
+			Relation<GroupReference<?>, List<? extends GroupReference<?>>> includes = new RelationImpl<>("includes",
+																										 true,
+																										 true,
+																										 false,
+																										 new GroupReferenceImpl<>(
+																												 () -> Groups.GROUP_REFERENCE,
+																												 null,
+																												 null),
+																										 true);
 			Relation<Feature<?, ?>, List<? extends Feature<?, ?>>> features = new RelationImpl<>("features",
 																								 true,
 																								 true,
 																								 false,
-																								 () -> Groups.FEATURE,
-																								 true,
-																								 null);
+																								 new GroupReferenceImpl<>(
+																										 () -> Groups.FEATURE,
+																										 null,
+																										 null),
+																								 true);
 			Relation<Generic, List<Generic>> generics = new RelationImpl<>("generics",
 																		   true,
 																		   true,
 																		   false,
-																		   () -> Groups.GENERIC,
-																		   true,
-																		   null);
-			List<Feature<?, ?>> all = List.of(name, concrete, includes, features, generics);
+																		   new GroupReferenceImpl<>(() -> Groups.GENERIC,
+																									null,
+																									null),
+																		   true);
+			Relation<Generic, List<Generic>> parameters = new RelationImpl<>("parameters",
+																			 true,
+																			 true,
+																			 false,
+																			 new GroupReferenceImpl<>(() -> Groups.GENERIC,
+																									  null,
+																									  null),
+																			 false);
+			List<Feature<?, ?>> all = List.of(name, concrete, includes, features, generics, parameters);
+		}
+
+		interface GROUP_REFERENCE
+		{
+			Relation<Group<?>, Group<?>> group = new RelationImpl<>("group",
+																	true,
+																	false,
+																	true,
+																	new GroupReferenceImpl<>(() -> Groups.GROUP,
+																							 null,
+																							 null),
+																	false);
+			Relation<Generic, List<Generic>> genericParameter = new RelationImpl<>("genericParameter",
+																				   true,
+																				   false,
+																				   false,
+																				   new GroupReferenceImpl<>(() -> Groups.GENERIC,
+																											null,
+																											null),
+																				   false);
+			Relation<Group<?>, Group<?>> directParameter = new RelationImpl<>("directParameter",
+																			  true,
+																			  false,
+																			  false,
+																			  new GroupReferenceImpl<>(() -> Groups.GROUP,
+																									   null,
+																									   null),
+																			  false);
+			List<Feature<?, ?>> all = List.of(group, genericParameter, directParameter);
 		}
 
 		interface RELATION
@@ -131,22 +179,19 @@ public interface LMCoreDefinition
 			Attribute<Boolean, Boolean> immutable = FEATURE.immutable;
 			Attribute<Boolean, Boolean> many = FEATURE.many;
 			Attribute<Boolean, Boolean> mandatory = FEATURE.mandatory;
-			Relation<Group<?>, Group<?>> group = new RelationImpl<>("group",
-																	true,
-																	false,
-																	true,
-																	() -> Groups.GROUP,
-																	false,
-																	null);
+			Relation<GroupReference<?>, GroupReference<?>> groupReference = new RelationImpl<>("groupReference",
+																							   true,
+																							   false,
+																							   true,
+																							   new GroupReferenceImpl<>(
+																									   () -> Groups.GROUP_REFERENCE,
+																									   () -> Groups.RELATION.generics()
+																															.get(0),
+																									   null),
+																							   true);
 			Attribute<Boolean, Boolean> contains = new AttributeImpl<>("contains", true, false, false, Units.BOOLEAN);
-			Relation<Generic, Generic> parameter = new RelationImpl<>("parameter",
-																	  true,
-																	  false,
-																	  false,
-																	  () -> Groups.GENERIC,
-																	  false,
-																	  null);
-			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, group, contains, parameter);
+
+			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, groupReference, contains);
 		}
 
 		interface MODEL
@@ -156,79 +201,129 @@ public interface LMCoreDefinition
 																		   true,
 																		   true,
 																		   false,
-																		   () -> Groups.GROUP,
-																		   true,
-																		   null);
+																		   new GroupReferenceImpl<>(() -> Groups.GROUP,
+																									null,
+																									null),
+																		   true);
 			Relation<Enum<?>, List<Enum<?>>> enums = new RelationImpl<>("enums",
 																		true,
 																		true,
 																		false,
-																		() -> Groups.ENUM,
-																		true,
-																		null);
+																		new GroupReferenceImpl<>(() -> Groups.ENUM,
+																								 null,
+																								 null),
+																		true);
 			Relation<Unit<?>, List<Unit<?>>> units = new RelationImpl<>("units",
 																		true,
 																		true,
 																		false,
-																		() -> Groups.UNIT,
-																		true,
-																		null);
+																		new GroupReferenceImpl<>(() -> Groups.UNIT,
+																								 null,
+																								 null),
+																		true);
 			Relation<Alias, List<Alias>> aliases = new RelationImpl<>("aliases",
 																	  true,
 																	  true,
 																	  false,
-																	  () -> Groups.ALIAS,
-																	  true,
-																	  null);
+																	  new GroupReferenceImpl<>(() -> Groups.ALIAS,
+																							   null,
+																							   null),
+																	  true);
 			List<Feature<?, ?>> all = List.of(name, groups, enums, units, aliases);
 		}
 	}
 
 	interface Groups
 	{
-		Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), List.of(), List.of());
-		Group<Named> NAMED = new GroupImpl<>("Named", false, List.of(LM_OBJECT), Features.NAMED.all, List.of());
-		Group<Type> TYPE = new GroupImpl<>("Type", false, List.of(NAMED), Features.TYPE.all, List.of());
-		Group<Model> MODEL = new GroupImpl<>("Model", true, List.of(NAMED), Features.MODEL.all, List.of());
-		Group<Group<?>> GROUP = new GroupImpl<>("Group", true, List.of(TYPE), Features.GROUP.all, Group.GENERICS);
+		Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), List.of(), List.of(), List.of());
+		Group<Named> NAMED = new GroupImpl<>("Named",
+											 false,
+											 List.of(new GroupReferenceImpl<>(() -> LM_OBJECT, null, null)),
+											 Features.NAMED.all,
+											 List.of(),
+											 List.of());
+		Group<Type> TYPE = new GroupImpl<>("Type",
+										   false,
+										   List.of(new GroupReferenceImpl<>(() -> NAMED, null, null)),
+										   Features.TYPE.all,
+										   List.of(),
+										   List.of());
+		Group<Model> MODEL = new GroupImpl<>("Model",
+											 true,
+											 List.of(new GroupReferenceImpl<>(() -> NAMED, null, null)),
+											 Features.MODEL.all,
+											 List.of(),
+											 List.of());
+		Group<Group<?>> GROUP = new GroupImpl<>("Group",
+												true,
+												List.of(new GroupReferenceImpl<>(() -> TYPE, null, null)),
+												Features.GROUP.all,
+												Group.GENERICS,
+												Group.GENERICS);
 		Group<Feature<?, ?>> FEATURE = new GroupImpl<>("Feature",
 													   false,
-													   List.of(NAMED),
+													   List.of(new GroupReferenceImpl<>(() -> NAMED, null, null)),
 													   Features.FEATURE.all,
+													   Feature.GENERICS,
 													   Feature.GENERICS);
 		Group<Attribute<?, ?>> ATTRIBUTE = new GroupImpl<>("Attribute",
 														   true,
-														   List.of(FEATURE),
+														   List.of(new GroupReferenceImpl<>(() -> FEATURE, null, null)),
 														   Features.ATTRIBUTE.all,
-														   Attribute.GENERICS);
+														   Generics.Attribute,
+														   Generics.Attribute);
 		Group<Relation<?, ?>> RELATION = new GroupImpl<>("Relation",
 														 true,
-														 List.of(FEATURE),
+														 List.of(new GroupReferenceImpl<>(() -> FEATURE,
+																						  () -> Generics.Relation.get(0),
+																						  null)),
 														 Features.RELATION.all,
-														 Relation.GENERICS);
+														 Generics.Relation,
+														 Generics.Relation);
+		Group<GroupReference<?>> GROUP_REFERENCE = new GroupImpl<>("GroupReference",
+																   true,
+																   List.of(new GroupReferenceImpl<>(() -> NAMED,
+																									null,
+																									null)),
+																   Features.GROUP_REFERENCE.all,
+																   GroupReference.GENERICS,
+																   GroupReference.GENERICS);
 		Group<Datatype<?>> DATATYPE = new GroupImpl<>("Datatype",
 													  false,
-													  List.of(TYPE),
+													  List.of(new GroupReferenceImpl<>(() -> TYPE, null, null)),
 													  Features.DATA_TYPE.all,
-													  Datatype.GENERICS);
-		Group<Alias> ALIAS = new GroupImpl<>("Alias", true, List.of(NAMED), Features.ALIAS.all, List.of());
-		Group<Enum<?>> ENUM = new GroupImpl<>("Enum", true, List.of(DATATYPE), Features.ENUM.all, Enum.GENERICS);
-		Group<Unit<?>> UNIT = new GroupImpl<>("Unit", true, List.of(DATATYPE), Features.UNIT.all, Unit.GENERICS);
-		Group<Generic> GENERIC = new GroupImpl<>("Generic", true, List.of(NAMED), Features.GENERIC.all, List.of());
+													  Generics.DataType,
+													  Generics.DataType);
+		Group<Alias> ALIAS = new GroupImpl<>("Alias",
+											 true,
+											 List.of(new GroupReferenceImpl<>(() -> NAMED, null, null)),
+											 Features.ALIAS.all,
+											 List.of(),
+											 List.of());
+		Group<Enum<?>> ENUM = new GroupImpl<>("Enum",
+											  true,
+											  List.of(new GroupReferenceImpl<>(() -> DATATYPE, null, null)),
+											  Features.ENUM.all,
+											  Generics.Enum,
+											  Generics.Enum);
+		Group<Unit<?>> UNIT = new GroupImpl<>("Unit",
+											  true,
+											  List.of(new GroupReferenceImpl<>(() -> DATATYPE, null, null)),
+											  Features.UNIT.all,
+											  Generics.Unit,
+											  Generics.Unit);
+		Group<Generic> GENERIC = new GroupImpl<>("Generic",
+												 true,
+												 List.of(new GroupReferenceImpl<>(() -> NAMED, null, null)),
+												 Features.GENERIC.all,
+												 List.of(),
+												 List.of());
 	}
 
 	interface Units
 	{
-		Unit<String> MATCHER = new UnitImpl<>("matcher",
-											  "rgx_match:<(.+?)>",
-											  null,
-											  Primitive.String,
-											  null);
-		Unit<String> EXTRACTOR = new UnitImpl<>("extractor",
-												"rgx_match:<(.+?)>",
-												null,
-												Primitive.String,
-												null);
+		Unit<String> MATCHER = new UnitImpl<>("matcher", "rgx_match:<(.+?)>", null, Primitive.String, null);
+		Unit<String> EXTRACTOR = new UnitImpl<>("extractor", "rgx_match:<(.+?)>", null, Primitive.String, null);
 		Unit<Boolean> BOOLEAN = new UnitImpl<>("boolean", "rgx_match:<(true|false)>", "false", Primitive.Boolean, null);
 		Unit<String> INT = new UnitImpl<>("int", "rgx_match:<[0-9]+>", null, Primitive.Int, null);
 		Unit<String> LONG = new UnitImpl<>("long", "rgx_match:<[0-9]+[Ll]>", null, Primitive.Long, null);
@@ -262,5 +357,16 @@ public interface LMCoreDefinition
 		Alias LB_1_DOT_DOT_1_RB = new AliasImpl("[1..1]", List.of("mandatory", "many=false"));
 		Alias LB_0_DOT_DOT_STAR_RB = new AliasImpl("[0..*]", List.of("mandatory=false", "many"));
 		Alias LB_1_DOT_DOT_STAR_RB = new AliasImpl("[1..*]", List.of("mandatory", "many"));
+	}
+
+	interface Generics
+	{
+		List<Generic> Attribute = List.of(new GenericImpl("UnaryType", null, null),
+										  new GenericImpl("EffectiveType", null, null));
+		List<Generic> DataType = List.of(new GenericImpl("T", null, null));
+		List<Generic> Enum = List.of(new GenericImpl("T", null, null));
+		List<Generic> Relation = List.of(new GenericImpl("UnaryType", BoundType.Extends, Groups.LM_OBJECT),
+										 new GenericImpl("EffectiveType", null, null));
+		List<Generic> Unit = List.of(new GenericImpl("T", null, null));
 	}
 }

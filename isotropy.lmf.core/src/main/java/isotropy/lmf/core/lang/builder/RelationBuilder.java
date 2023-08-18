@@ -23,8 +23,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER =
 			new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(LMCoreDefinition.Features.RELATION.group, RelationBuilder::_group)
-			.add(LMCoreDefinition.Features.RELATION.parameter, RelationBuilder::parameter)
+			.add(LMCoreDefinition.Features.RELATION.groupReference, RelationBuilder::_groupReference)
 			.build();
 
 	private String name = null;
@@ -33,13 +32,12 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	private boolean mandatory;
 	private boolean contains;
 
-	private Supplier<Group<UnaryType>> group = null;
-	private Supplier<Generic> parameter;
+	private Supplier<GroupReference<UnaryType>> groupReference = () -> null;
 
 	@Override
 	public Relation<UnaryType, EffectiveType> build()
 	{
-		return new RelationImpl<>(name, many, immutable, mandatory, group, contains, parameter.get());
+		return new RelationImpl<>(name, many, immutable, mandatory, groupReference.get(), contains);
 	}
 
 	@Override
@@ -71,16 +69,16 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	}
 
 	@Override
-	public RelationBuilder<UnaryType, EffectiveType> group(Supplier<Group<UnaryType>> group)
+	public RelationBuilder<UnaryType, EffectiveType> groupReference(Supplier<GroupReference<UnaryType>> groupReference)
 	{
-		this.group = group;
+		this.groupReference = groupReference;
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public RelationBuilder<UnaryType, EffectiveType> _group(Supplier<? extends Group<?>> group)
+	public RelationBuilder<UnaryType, EffectiveType> _groupReference(Supplier<? extends GroupReference<?>> groupReference)
 	{
-		this.group = (Supplier<Group<UnaryType>>) group;
+		this.groupReference = (Supplier<GroupReference<UnaryType>>) groupReference;
 		return this;
 	}
 
@@ -88,13 +86,6 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	public RelationBuilder<UnaryType, EffectiveType> contains(final boolean contains)
 	{
 		this.contains = contains;
-		return this;
-	}
-
-	@Override
-	public RelationBuilder<UnaryType, EffectiveType> parameter(final Supplier<Generic> parameter)
-	{
-		this.parameter = parameter;
 		return this;
 	}
 

@@ -26,12 +26,12 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribu
 	private boolean many;
 	private boolean immutable;
 	private boolean mandatory;
-	private Supplier<? extends Datatype<UnaryType>> suppliedDatatype;
+	private Supplier<? extends Datatype<UnaryType>> suppliedDatatype = () -> null;
 
 	@Override
 	public Attribute<UnaryType, EffectiveType> build()
 	{
-		return new AttributeImpl<>(name, many, immutable, mandatory, suppliedDatatype.get());
+		return new AttributeImpl<>(name, immutable, many, mandatory, suppliedDatatype.get());
 	}
 
 	@Override

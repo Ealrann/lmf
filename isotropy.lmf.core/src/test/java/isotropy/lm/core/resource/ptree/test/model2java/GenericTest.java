@@ -50,12 +50,94 @@ public class GenericTest
 
 		final var model = (Model) roots.get(0);
 
-		final var group0 = model.groups().get(0);
-		final var group1 = model.groups().get(1);
-		final var generic = group0.generics().get(0);
+		final var group0 = model.groups()
+								.get(0);
+		final var group1 = model.groups()
+								.get(1);
+		final var generic = group0.generics()
+								  .get(0);
 
 		assertEquals("T", generic.name());
 		assertEquals(BoundType.Super, generic.boundType());
 		assertEquals(generic.type(), group1);
 	}
+
+	@Test
+	public void genericHalfUsage()
+	{
+		final var textModel = """
+				(Model Test
+				    (Group name=Container parameters=/groups.0/generics.0
+				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
+				    )
+				    (Definition name=Car)
+				    (Group name=CarContainer (includes group=/groups.0 directParameter=/groups.1))
+				)
+				""";
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var root = roots.get(0);
+		assertTrue(root instanceof Model);
+		final var model = (Model) root;
+
+		final var container = model.groups().get(0);
+		final var car = model.groups().get(1);
+		final var carContainer = model.groups().get(2);
+		final var genericOfContainer = container.generics().get(0);
+
+		assertEquals("Container", container.name());
+		assertEquals(1, container.generics().size());
+		assertEquals(1, container.parameters().size());
+		assertEquals(0, container.features().size());
+		assertEquals("Car", car.name());
+		assertEquals("CarContainer", carContainer.name());
+
+
+		assertEquals(genericOfContainer, container.parameters().get(0));
+		assertEquals(car, carContainer.includes().get(0).directParameter());
+	}
+
+/*	@Test
+	public void genericFullUsage()
+	{
+		final var textModel = """
+				(Model Test
+				    (Group name=Container parameters=/groups.0/generics.0
+				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
+				        (-contains cargo [1..1] (groupReference group=/groups.2 genericParameter=/groups.0/generics.0))
+				    )
+				    (Definition name=Car)
+				    (Group name=CarContainer (includes group=/groups.0 directParameter=/groups.1))
+				)
+				""";
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var root = roots.get(0);
+		assertTrue(root instanceof Model);
+		final var model = (Model) root;
+
+		final var container = model.groups().get(0);
+		final var car = model.groups().get(1);
+		final var carContainer = model.groups().get(2);
+		final var genericOfContainer = container.generics().get(0);
+		final var cargoRelation = (Relation<?,?>) container.features().get(0);
+
+		assertEquals("Container", container.name());
+		assertEquals(1, container.generics().size());
+		assertEquals(1, container.parameters().size());
+		assertEquals(1, container.features().size());
+		assertEquals("Car", car.name());
+		assertEquals("CarContainer", carContainer.name());
+
+
+		assertEquals(genericOfContainer, container.parameters().get(0));
+		assertEquals(genericOfContainer, cargoRelation.groupReference().genericParameter());
+		assertEquals(car, carContainer.includes().get(0).directParameter());
+	}*/
 }

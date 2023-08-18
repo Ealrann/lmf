@@ -1,9 +1,6 @@
 package isotropy.lmf.core.lang;
 
 import isotropy.lmf.core.lang.builder.ModelBuilder;
-import isotropy.lmf.core.lang.impl.GenericImpl;
-
-import java.util.List;
 
 public interface Unit<T> extends Datatype<T>
 {
@@ -11,8 +8,6 @@ public interface Unit<T> extends Datatype<T>
 	String defaultValue();
 	Primitive primitive();
 	String extractor();
-
-	List<Generic> GENERICS = List.of(new GenericImpl("T", null, null));
 
 	static Model.Builder builder() {return new ModelBuilder();}
 	interface Builder<T> extends LMObject.Builder<Unit<T>>

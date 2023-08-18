@@ -5,9 +5,11 @@ import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.resource.transform.word.TreeToFeatureResolver;
 import isotropy.lmf.core.resource.util.Tree;
+import isotropy.lmf.core.util.ModelUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class TreeBuilderNodeBuilder
 {
@@ -41,6 +43,7 @@ public class TreeBuilderNodeBuilder
 			final var parentNamedNode = namedNodeBuilder.build(parent.data());
 			final var parentModelGroup = findModelGroup(parentNamedNode);
 			final var parentGroup = parentModelGroup.group();
+
 			return buildNodeInfoWithParent(namedNode, parentGroup, modelGroup);
 		}
 		else
@@ -49,25 +52,48 @@ public class TreeBuilderNodeBuilder
 		}
 	}
 
+	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(NamedNode namedNode,
+																			Group<?> parentGroup,
+																			ModelGroup<T> modelGroup)
+	{
+		final var effectiveGroup = modelGroup != null
+								   ? modelGroup
+								   : this.<T>findModelGroupFromParent(namedNode, parentGroup);
+		final var name = namedNode.name();
+		final var equalIndex = name.indexOf('=');
+		final var containmentName = equalIndex == -1 ? null : name.substring(0, equalIndex);
+		final var resolvedRelation = resolveContainmentRelation(containmentName, parentGroup, effectiveGroup.group());
+		return new BuilderNodeInfo<>(resolvedRelation, namedNode.words(), effectiveGroup);
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T extends LMObject> ModelGroup<T> findModelGroup(final NamedNode namedNode)
 	{
 		final var name = namedNode.name();
 		final var equalIndex = name.indexOf('=');
-		final var groupName = equalIndex == -1 ? name : name.substring(equalIndex);
+		final var groupName = equalIndex == -1 ? name : name.substring(equalIndex + 1);
 		final var modelGroup = groups.get(groupName);
 		return (ModelGroup<T>) modelGroup;
 	}
 
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(NamedNode namedNode,
-																			Group<?> parentGroup,
-																			ModelGroup<T> modelGroup)
+	@SuppressWarnings("unchecked")
+	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final NamedNode namedNode,
+																		final Group<?> parentGroup)
 	{
-		final var name = namedNode.name();
-		final var equalIndex = name.indexOf('=');
-		final var containmentName = equalIndex == -1 ? null : name.substring(0, equalIndex);
-		final var resolvedRelation = resolveContainmentRelation(containmentName, parentGroup, modelGroup.group());
-		return new BuilderNodeInfo<>(resolvedRelation, namedNode.words(), modelGroup);
+		final var groupFromParent = parentGroup.features()
+											   .stream()
+											   .filter(Relation.class::isInstance)
+											   .map(Relation.class::cast)
+											   .filter(r -> r.name()
+															 .equals(namedNode.name()))
+											   .map(r -> r.groupReference()
+														  .group())
+											   .findAny()
+											   .orElseThrow(() -> new NoSuchElementException("Cannot resolve " +
+																							 "containance of " +
+																							 namedNode.name()));
+
+		return (ModelGroup<T>) groups.get(groupFromParent.name());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -89,9 +115,14 @@ public class TreeBuilderNodeBuilder
 		{
 			return (Relation<T, ?>) resolvers.get(parentGroup)
 											 .streamContainmentRelations()
-											 .filter(r -> childGroup == r.group())
+											 .filter(r -> ModelUtils.isSubGroup(r.groupReference()
+																				 .group(), childGroup))
 											 .findAny()
-											 .orElseThrow();
+											 .orElseThrow(() -> new NoSuchElementException("Cannot find containment " +
+																						   "relation from parent " +
+																						   parentGroup.name() +
+																						   " to child " +
+																						   childGroup.name()));
 		}
 	}
 }

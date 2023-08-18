@@ -5,7 +5,6 @@ import isotropy.lmf.core.model.FeatureMap;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> implements Relation<UnaryType, EffectiveType>
 {
@@ -15,17 +14,15 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.immutable, Relation::immutable),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.many, Relation::many),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.mandatory, Relation::mandatory),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.group, Relation::group),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.contains, Relation::contains),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.parameter, Relation::parameter)));
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.groupReference, Relation::groupReference),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.contains, Relation::contains)));
 
 	private final String name;
 	private final boolean immutable;
 	private final boolean many;
 	private final boolean mandatory;
-	private final Supplier<Group<UnaryType>> group;
+	private final GroupReference<UnaryType> groupReference;
 	private final boolean contains;
-	private final Generic parameter;
 
 	private LMObject container;
 
@@ -33,17 +30,15 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 						final boolean immutable,
 						final boolean many,
 						final boolean mandatory,
-						final Supplier<Group<UnaryType>> group,
-						final boolean contains,
-						final Generic parameter)
+						final GroupReference<UnaryType> groupReference,
+						final boolean contains)
 	{
 		this.name = name;
 		this.immutable = immutable;
 		this.many = many;
 		this.mandatory = mandatory;
-		this.group = group;
+		this.groupReference = groupReference;
 		this.contains = contains;
-		this.parameter = parameter;
 	}
 
 	@Override
@@ -71,9 +66,9 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	}
 
 	@Override
-	public Group<UnaryType> group()
+	public GroupReference<UnaryType> groupReference()
 	{
-		return group.get();
+		return groupReference;
 	}
 
 	@Override
@@ -82,17 +77,12 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 		return contains;
 	}
 
-	@Override
-	public Generic parameter()
-	{
-		return parameter;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature).apply(this);
+		return (T) GET_MAP.get(feature)
+						  .apply(this);
 	}
 
 	@Override

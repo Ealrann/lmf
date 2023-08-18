@@ -11,12 +11,13 @@
 		(-contains aliases /groups.9  [0..*]))
 
 	(Definition name=Group includes=/groups.2 (Generic T extends /groups.0)
-		(-att      concrete /units.2)
-		(-refers   includes /groups.4  [0..*])
-		(-contains features /groups.5  [0..*])
-		(-contains generics /groups.12 [0..*]))
+		(-att      concrete       /units.2)
+		(-contains includes       /groups.13  [0..*])
+		(-contains features       /groups.5   [0..*])
+		(-contains generics       /groups.12  [0..*])
+		(-refers   parameters     /groups.12) [0..*]))
 
-	(Group name=Feature includes=/groups.1 (Generic T)
+	(Group name=Feature includes=/groups.1 (Generic UnaryType) (Generic EffectiveType)
 		(-att immutable /units.2)
 		(-att many      /units.2)
 		(-att mandatory /units.2))
@@ -24,11 +25,10 @@
 	(Definition name=Attribute /groups.5<EffectiveType> (Generic UnaryType) (Generic EffectiveType)
 		(-refers dataType /groups.8<UnaryType> [1..1]))
 
-	(Definition name=Relation   /groups.5<EffectiveType> (Generic name=UnaryType boundType=Extends type=/groups.0) (Generic EffectiveType)
-		(-refers group     /groups.4<UnaryType> [1..1])
-		(-att lazy /units.2)
-		(-att    contains  /units.2)
-		(-refers parameter /groups.12))
+	(Definition name=Relation includes=/groups.5<UnaryType, EffectiveType> (Generic name=UnaryType boundType=Extends type=/groups.0) (Generic EffectiveType)
+		(-contains reference        groupReference=/groups.13 [1..1])
+		(-att      lazy             dataType=/units.2)
+		(-att      contains         dataType=/units.2))
 
 	(Group name=DataType /groups.2 (Generic T))
 	(Definition name=Alias includes=/groups.1
@@ -44,6 +44,11 @@
 	(Definition name=Generic Named
 		(-refers type      /groups.2)
 		(-att    boundType /enums.0))
+
+	(Definition name=GroupReference includes=/groups.1
+    	(-refers group             /groups.2)
+    	(-refers genericParameter  /groups.12)
+    	(-refers directParameter   /groups.4))
 
 	(Unit name=matcher   matcher="^rgx_match:\\b([^\\]+)\\b")
 	(Unit name=extractor matcher="^rgx_match:\\b([^\\]+)\\b")

@@ -14,27 +14,31 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 			.add(LMCoreDefinition.Features.GROUP.includes, Group::includes)
 			.add(LMCoreDefinition.Features.GROUP.features, Group::features)
 			.add(LMCoreDefinition.Features.GROUP.generics, Group::generics)
+			.add(LMCoreDefinition.Features.GROUP.parameters, Group::parameters)
 			.build();
 
 	private final String name;
 	private final boolean concrete;
-	private final List<? extends Group<?>> includes;
+	private final List<? extends GroupReference<?>> includes;
 	private final List<? extends Feature<?, ?>> features;
 	private final List<Generic> generics;
+	private final List<Generic> parameters;
 
 	private LMObject container;
 
 	public GroupImpl(final String name,
 					 final boolean concrete,
-					 final List<? extends Group<?>> includes,
+					 final List<? extends GroupReference<?>> includes,
 					 final List<? extends Feature<?, ?>> features,
-					 final List<Generic> generics)
+					 final List<Generic> generics,
+					 final List<Generic> parameters)
 	{
 		this.name = name;
 		this.concrete = concrete;
 		this.includes = includes;
 		this.features = features;
 		this.generics = generics;
+		this.parameters = parameters;
 	}
 
 	@Override
@@ -50,7 +54,7 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	}
 
 	@Override
-	public List<? extends Group<?>> includes()
+	public List<? extends GroupReference<?>> includes()
 	{
 		return includes;
 	}
@@ -65,6 +69,12 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	public List<Generic> generics()
 	{
 		return generics;
+	}
+
+	@Override
+	public List<Generic> parameters()
+	{
+		return parameters;
 	}
 
 	@Override

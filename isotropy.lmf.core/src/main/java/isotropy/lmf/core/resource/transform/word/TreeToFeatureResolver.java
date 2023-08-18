@@ -1,13 +1,12 @@
 package isotropy.lmf.core.resource.transform.word;
 
-import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.Enum;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
-import isotropy.lmf.core.resource.transform.word.resolver.AttributeResolver;
+import isotropy.lmf.core.resource.transform.word.resolver.EnumResolver;
 import isotropy.lmf.core.resource.transform.word.resolver.IWordResolver;
 import isotropy.lmf.core.resource.transform.word.resolver.ReferenceResolver;
+import isotropy.lmf.core.resource.transform.word.resolver.UnitResolver;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,15 +54,24 @@ public class TreeToFeatureResolver
 		final var builderNode = node.data();
 		final var words = builderNode.words();
 		return words.stream()
-					.map(word -> resolve(node, word))
+					.map(word -> resolveOrSerr(node, word))
 					.filter(Optional::isPresent)
 					.map(Optional::get);
+	}
+
+	private Optional<? extends IFeatureResolution> resolveOrSerr(final TreeBuilderNode<?> node, final String word)
+	{
+		final var res = resolve(node, word);
+		if (res.isEmpty())
+		{
+			System.err.println("Cannot resolve word: " + word);
+		}
+		return res;
 	}
 
 	private Optional<? extends IFeatureResolution> resolve(final TreeBuilderNode<?> node, final String word)
 	{
 		final var indexEqual = word.indexOf('=');
-
 		if (indexEqual > -1)
 		{
 			final var name = word.substring(0, indexEqual);
@@ -120,9 +128,16 @@ public class TreeToFeatureResolver
 
 	private static Optional<IWordResolver<?>> buildResolver(Feature<?, ?> feature)
 	{
-		if (feature instanceof Attribute)
+		if (feature instanceof Attribute<?, ?> attribute)
 		{
-			return Optional.of(new AttributeResolver<>((Attribute<?, ?>) feature));
+			if (attribute.datatype() instanceof Enum<?>)
+			{
+				return Optional.of(new EnumResolver<>((Attribute<?, ?>) feature));
+			}
+			else
+			{
+				return Optional.of(new UnitResolver<>((Attribute<?, ?>) feature));
+			}
 		}
 		else
 		{

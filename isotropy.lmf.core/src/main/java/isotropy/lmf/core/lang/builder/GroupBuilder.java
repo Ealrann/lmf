@@ -24,14 +24,16 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 			.add(LMCoreDefinition.Features.GROUP.includes, GroupBuilder::addInclude)
 			.add(LMCoreDefinition.Features.GROUP.features, GroupBuilder::addFeature)
 			.add(LMCoreDefinition.Features.GROUP.generics, GroupBuilder::addGeneric)
+			.add(LMCoreDefinition.Features.GROUP.parameters, GroupBuilder::addParameter)
 			.build();
 
 	private String name = null;
 	private boolean concrete;
 
-	private final List<Supplier<Group<?>>> includes = new ArrayList<>();
+	private final List<Supplier<GroupReference<?>>> includes = new ArrayList<>();
 	private final List<Supplier<Feature<?, ?>>> features = new ArrayList<>();
 	private final List<Supplier<Generic>> generics = new ArrayList<>();
+	private final List<Supplier<Generic>> parameters = new ArrayList<>();
 
 	@Override
 	public Group<T> build()
@@ -45,8 +47,11 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 		final var builtGenerics = generics.stream()
 										  .map(Supplier::get)
 										  .toList();
+		final var builtParameters = parameters.stream()
+										  .map(Supplier::get)
+										  .toList();
 
-		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
+		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics, builtParameters);
 	}
 
 	@Override
@@ -64,7 +69,7 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	}
 
 	@Override
-	public GroupBuilder<T> addInclude(Supplier<Group<?>> include)
+	public GroupBuilder<T> addInclude(Supplier<GroupReference<?>> include)
 	{
 		includes.add(include);
 		return this;
@@ -81,6 +86,13 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	public GroupBuilder<T> addGeneric(Supplier<Generic> generic)
 	{
 		generics.add(generic);
+		return this;
+	}
+
+	@Override
+	public GroupBuilder<T> addParameter(Supplier<Generic> parameter)
+	{
+		parameters.add(parameter);
 		return this;
 	}
 

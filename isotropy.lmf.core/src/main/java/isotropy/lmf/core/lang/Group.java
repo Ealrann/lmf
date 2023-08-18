@@ -9,9 +9,10 @@ import java.util.function.Supplier;
 public interface Group<T extends LMObject> extends Type
 {
 	boolean concrete();
-	List<? extends Group<?>> includes();
+	List<? extends GroupReference<?>> includes();
 	List<? extends Feature<?, ?>> features();
 	List<Generic> generics();
+	List<Generic> parameters();
 
 	List<Generic> GENERICS = List.of(new GenericImpl("T", BoundType.Extends, LMCoreDefinition.Groups.LM_OBJECT));
 
@@ -21,8 +22,9 @@ public interface Group<T extends LMObject> extends Type
 		Builder<T> name(String name);
 		Builder<T> concrete(boolean concrete);
 
-		Builder<T> addInclude(Supplier<Group<?>> include);
+		Builder<T> addInclude(Supplier<GroupReference<?>> include);
 		Builder<T> addFeature(Supplier<Feature<?, ?>> feature);
 		Builder<T> addGeneric(Supplier<Generic> generic);
+		Builder<T> addParameter(Supplier<Generic> parameter);
 	}
 }
