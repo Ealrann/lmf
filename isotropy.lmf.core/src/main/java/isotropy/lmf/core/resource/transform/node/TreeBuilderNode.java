@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<BuilderNodeInfo<T>, TreeBuilderNode<T>>
 {
 	private final IFeaturedObject.Builder<T> builder;
-	private Stream<? extends IFeatureResolution> wordsResolutions;
+	private List<? extends IFeatureResolution> wordsResolutions;
 
 	public T builtObject = null;
 
@@ -46,7 +46,7 @@ public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<Buil
 		return data().modelGroup();
 	}
 
-	public void setResolutions(Stream<? extends IFeatureResolution> wordsResolutions)
+	public void setResolutions(List<? extends IFeatureResolution> wordsResolutions)
 	{
 		this.wordsResolutions = wordsResolutions;
 	}
