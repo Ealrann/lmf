@@ -2,19 +2,14 @@ package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Enum;
-import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
 import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public final class EnumResolver<T> extends AttributeResolver<T>
 {
-	private static final Pattern ROOT_MATCHER = Pattern.compile(LMCoreDefinition.Units.MATCHER.matcher());
-
 	private final Enum<T> enumeration;
 
 	public EnumResolver(final Attribute<T, ?> attribute)
@@ -24,23 +19,10 @@ public final class EnumResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(final TreeBuilderNode<?> node, final String value)
+	protected Optional<IFeatureResolution> internalResolve(final TreeBuilderNode<?> node, final String value)
 	{
-		if (feature.many())
-		{
-			final var split = value.split(",");
-			final var res = Stream.of(split)
-								  .map(v -> extractEnumLiteral(v, enumeration))
-								  .filter(Optional::isPresent)
-								  .map(Optional::get)
-								  .toList();
-			return Optional.of(new AttributeListResolution<>(feature, res));
-		}
-		else
-		{
-			final var resolvedEnum = extractEnumLiteral(value, enumeration);
-			return resolvedEnum.map(enumVal -> new AttributeResolution<>(feature, enumVal));
-		}
+		final var resolvedEnum = extractEnumLiteral(value, enumeration);
+		return resolvedEnum.map(enumVal -> new AttributeResolution<>(feature, enumVal));
 	}
 
 	private static <T> Optional<T> extractEnumLiteral(final String value, final isotropy.lmf.core.lang.Enum<T> _enum)

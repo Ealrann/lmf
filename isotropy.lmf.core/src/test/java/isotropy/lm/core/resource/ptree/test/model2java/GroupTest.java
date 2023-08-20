@@ -20,9 +20,9 @@ public class GroupTest
 	public void simpleGroup()
 	{
 		final var textModel = """
-					(Group name=Container)
-					(Definition name=Car)
-					""";
+				(Group name=Container)
+				(Definition name=Car)
+				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PTreeToJava();
@@ -60,13 +60,66 @@ public class GroupTest
 		assertTrue(root instanceof Model);
 		final var model = (Model) root;
 
-		final var container = model.groups().get(0);
-		final var car = model.groups().get(1);
-		final var carContainer = model.groups().get(2);
-		final var genericOfContainer = container.generics().get(0);
-		final var cargoRelation = (Relation<?,?>) container.features().get(0);
+		final var container = model.groups()
+								   .get(0);
+		final var car = model.groups()
+							 .get(1);
+		final var carContainer = model.groups()
+									  .get(2);
+		final var genericOfContainer = container.generics()
+												.get(0);
+		final var cargoRelation = (Relation<?, ?>) container.features()
+															.get(0);
 
-		assertEquals(container, carContainer.includes().get(0).group());
-		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
+		assertEquals(container,
+					 carContainer.includes()
+								 .get(0)
+								 .group());
+		assertEquals(car,
+					 carContainer.includes()
+								 .get(0)
+								 .parameters()
+								 .get(0));
+	}
+
+	@Test
+	public void multipleRef()
+	{
+		final var textModel = """
+				(Model LMCore
+					(Group Feature
+					    (Generic UnaryType)
+					    (Generic EffectiveType))
+					(Group Attribute (includes /groups.0 parameters=/groups.1/generics.0,/groups.1/generics.1)
+						(Generic UnaryType) (Generic EffectiveType))
+				)
+				""";
+
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var root = roots.get(0);
+		assertTrue(root instanceof Model);
+		final var model = (Model) root;
+
+		final var featureGroup = model.groups()
+									  .get(0);
+		final var attGroup = model.groups()
+								  .get(1);
+		final var attGeneric0 = attGroup.generics()
+										.get(0);
+		final var attGeneric1 = attGroup.generics()
+										.get(1);
+
+		final var include = attGroup.includes()
+									.get(0);
+		final var parameters = include.parameters();
+
+		assertEquals(include.group(), featureGroup);
+		assertEquals(parameters.get(0), attGeneric0);
+		assertEquals(parameters.get(0), attGeneric0);
+		assertEquals(parameters.get(1), attGeneric1);
 	}
 }

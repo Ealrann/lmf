@@ -38,6 +38,7 @@ public final class PTreeReader
 
 	private void parseFile(final InputStream inputStream)
 	{
+		assert inputStream != null;
 		try (final var inputStreamReader = new InputStreamReader(inputStream))
 		{
 			try (final var reader = new BufferedReader(inputStreamReader))

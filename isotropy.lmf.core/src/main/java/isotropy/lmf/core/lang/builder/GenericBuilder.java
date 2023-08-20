@@ -24,7 +24,7 @@ public class GenericBuilder<T> implements Generic.Builder<T>
 
 	private String name;
 	private BoundType boundType;
-	private Supplier<Type<T>> type;
+	private Supplier<Type<T>> type = () -> null;
 
 	@Override
 	public Generic<T> build()

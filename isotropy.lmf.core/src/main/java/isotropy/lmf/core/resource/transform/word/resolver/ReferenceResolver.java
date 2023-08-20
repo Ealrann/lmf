@@ -9,6 +9,7 @@ import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 import isotropy.lmf.core.util.ModelUtils;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public final class ReferenceResolver<T extends LMObject> extends AbstractResolver<T, Relation<T, ?>> implements
@@ -21,7 +22,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(TreeBuilderNode<?> node, String value)
+	protected Optional<IFeatureResolution> internalResolve(TreeBuilderNode<?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -56,6 +57,12 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 													  .name()
 													  .equals(featureName))
 										.toList();
+
+			if(children.size() < index +1)
+			{
+				throw new NoSuchElementException("Cannot resolve path " + uri);
+			}
+
 			current = children.get(index);
 		}
 
@@ -121,12 +128,6 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		{
 			return Optional.empty();
 		}
-	}
-
-	@Override
-	public boolean isBooleanAttribute()
-	{
-		return false;
 	}
 
 	public static final class StaticReferenceResolution<T extends LMObject> implements IFeatureResolution

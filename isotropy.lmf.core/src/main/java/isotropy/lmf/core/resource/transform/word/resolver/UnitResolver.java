@@ -3,15 +3,12 @@ package isotropy.lmf.core.resource.transform.word.resolver;
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.Unit;
-import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public final class UnitResolver<T> extends AttributeResolver<T>
 {
@@ -43,26 +40,18 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	public Optional<IFeatureResolution> resolve(final TreeBuilderNode<?> node, final String value)
+	protected Optional<IFeatureResolution> internalResolve(final TreeBuilderNode<?> node, final String value)
 	{
-		if (feature.many())
+		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
+		if (pmatcher == null || pmatcher.matches())
 		{
-			final var split = value.split(",");
-			final var res = Stream.of(split)
-								  .map(v -> extractValue(unit, v))
-								  .toList();
-			return Optional.of(new AttributeListResolution<>(feature, res));
+			final var extractedValue = extractValue(unit, value);
+			return Optional.of(new AttributeResolution<>(feature, extractedValue));
 		}
 		else
 		{
-			final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
-			if (pmatcher == null || pmatcher.matches())
-			{
-				final var extractedValue = extractValue(unit, value);
-				return Optional.of(new AttributeResolution<>(feature, extractedValue));
-			}
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,44 +80,5 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 			case Double -> (T) Double.valueOf(extraction);
 			case String -> (T) extraction;
 		};
-	}
-
-	public static final class AttributeResolution<T> implements IFeatureResolution
-	{
-		final Attribute<T, ?> attribute;
-		final T value;
-
-		private AttributeResolution(final Attribute<T, ?> attribute, final T value)
-		{
-			this.attribute = attribute;
-			this.value = value;
-		}
-
-		@Override
-		public void pushValue(final IFeaturedObject.Builder<?> builder)
-		{
-			builder.push(attribute, value);
-		}
-	}
-
-	public static final class AttributeListResolution<T> implements IFeatureResolution
-	{
-		final Attribute<T, ?> attribute;
-		final List<T> values;
-
-		private AttributeListResolution(final Attribute<T, ?> attribute, final List<T> values)
-		{
-			this.attribute = attribute;
-			this.values = values;
-		}
-
-		@Override
-		public void pushValue(final IFeaturedObject.Builder<?> builder)
-		{
-			for (final var value : values)
-			{
-				builder.push(attribute, value);
-			}
-		}
 	}
 }

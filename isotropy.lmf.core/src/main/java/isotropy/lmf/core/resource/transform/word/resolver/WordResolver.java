@@ -3,10 +3,7 @@ package isotropy.lmf.core.resource.transform.word.resolver;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 public class WordResolver
@@ -74,9 +71,9 @@ public class WordResolver
 			for (final var nameValueWord : nameValueWords)
 			{
 				final var resolved = findMandatory(r -> r.match(nameValueWord.name)
-														? r.resolveOrThrow(node,
-																		   nameValueWord.value)
-														: Optional.empty());
+														? Optional.of(r.resolveOrThrow(node,
+																					   nameValueWord.value))
+														: Optional.empty(), nameValueWord.toString());
 				resolutions.add(resolved);
 			}
 
@@ -90,21 +87,22 @@ public class WordResolver
 			for (final var word : simpleWords)
 			{
 				final var resolved = findOptional(r -> r.match(word)
-													   ? r.resolveOrThrow(node, "true")
+													   ? Optional.of(r.resolveOrThrow(node, "true"))
 													   : Optional.empty());
 				resolved.ifPresentOrElse(resolutions::add, () -> notFound.add(word));
 			}
 			for (final var word : notFound)
 			{
-				resolutions.add(findMandatory(r -> r.resolve(node, word)));
+				resolutions.add(findMandatory(r -> r.resolve(node, word), word));
 			}
 
 			return resolutions;
 		}
 
-		private IFeatureResolution findMandatory(final Function<IWordResolver<?>, Optional<? extends IFeatureResolution>> resolver)
+		private IFeatureResolution findMandatory(final Function<IWordResolver<?>, Optional<? extends IFeatureResolution>> resolver,
+												 String message)
 		{
-			return findOptional(resolver).orElseThrow();
+			return findOptional(resolver).orElseThrow(() -> new NoSuchElementException(message));
 		}
 
 		private Optional<IFeatureResolution> findOptional(final Function<IWordResolver<?>, Optional<? extends IFeatureResolution>> resolver)

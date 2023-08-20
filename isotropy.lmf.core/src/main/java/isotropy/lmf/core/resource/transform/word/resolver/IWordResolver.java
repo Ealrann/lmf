@@ -7,26 +7,13 @@ import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public interface IWordResolver<T>
 {
 	boolean match(String featureName);
-	default Optional<? extends IFeatureResolution> resolveOrThrow(TreeBuilderNode<?> node, String value)
-	{
-		final var res = resolve(node, value);
-		if(res.isEmpty())
-		{
-			throw new NoSuchElementException();
-		}
-		return res;
-	}
-
+	IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, String value);
 	Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, String value);
-
-	boolean isBooleanAttribute();
-
 
 	static Optional<IWordResolver<?>> buildResolver(Feature<?, ?> feature)
 	{

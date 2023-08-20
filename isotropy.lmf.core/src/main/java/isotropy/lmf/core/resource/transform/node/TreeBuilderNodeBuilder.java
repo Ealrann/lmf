@@ -36,12 +36,12 @@ public class TreeBuilderNodeBuilder
 	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<List<String>> node)
 	{
 		final var namedNode = namedNodeBuilder.build(node.data());
-		final var modelGroup = this.<T>findModelGroup(namedNode);
+		final var modelGroup = this.<T>findModelGroup(namedNode, false);
 		final var parent = node.parent();
 		if (parent != null && parent.parent() != null)
 		{
 			final var parentNamedNode = namedNodeBuilder.build(parent.data());
-			final var parentModelGroup = findModelGroup(parentNamedNode);
+			final var parentModelGroup = findModelGroup(parentNamedNode, true);
 			final var parentGroup = parentModelGroup.group();
 
 			return buildNodeInfoWithParent(namedNode, parentGroup, modelGroup);
@@ -63,16 +63,33 @@ public class TreeBuilderNodeBuilder
 		final var equalIndex = name.indexOf('=');
 		final var containmentName = equalIndex == -1 ? null : name.substring(0, equalIndex);
 		final var resolvedRelation = resolveContainmentRelation(containmentName, parentGroup, effectiveGroup.group());
+
+		if (resolvedRelation == null)
+		{
+			throw new NoSuchElementException("Cannot find containment " +
+											 "relation from parent " +
+											 parentGroup.name() +
+											 " (" +
+											 name +
+											 ") to child " +
+											 effectiveGroup.group()
+														   .name());
+		}
+
 		return new BuilderNodeInfo<>(resolvedRelation, namedNode.words(), effectiveGroup);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroup(final NamedNode namedNode)
+	private <T extends LMObject> ModelGroup<T> findModelGroup(final NamedNode namedNode, boolean mandatory)
 	{
 		final var name = namedNode.name();
 		final var equalIndex = name.indexOf('=');
 		final var groupName = equalIndex == -1 ? name : name.substring(equalIndex + 1);
 		final var modelGroup = groups.get(groupName);
+		if (mandatory && modelGroup == null)
+		{
+			throw new NoSuchElementException("Cannot find Group: " + groupName);
+		}
 		return (ModelGroup<T>) modelGroup;
 	}
 
@@ -118,11 +135,7 @@ public class TreeBuilderNodeBuilder
 											 .filter(r -> ModelUtils.isSubGroup(r.reference()
 																				 .group(), childGroup))
 											 .findAny()
-											 .orElseThrow(() -> new NoSuchElementException("Cannot find containment " +
-																						   "relation from parent " +
-																						   parentGroup.name() +
-																						   " to child " +
-																						   childGroup.name()));
+											 .orElse(null);
 		}
 	}
 }
