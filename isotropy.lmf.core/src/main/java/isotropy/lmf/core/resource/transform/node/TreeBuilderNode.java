@@ -7,7 +7,6 @@ import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 import isotropy.lmf.core.resource.util.AbstractTree;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<BuilderNodeInfo<T>, TreeBuilderNode<T>>
 {

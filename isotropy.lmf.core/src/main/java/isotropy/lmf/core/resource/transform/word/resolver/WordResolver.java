@@ -7,151 +7,124 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class WordResolver
 {
 	private final List<IWordResolver<?>> availableResolvers;
 
-	public WordResolver(final List<IWordResolver<?>> wordResolvers)
+	public WordResolver(final List<? extends IWordResolver<?>> wordResolvers)
 	{
 		this.availableResolvers = List.copyOf(wordResolvers);
 	}
 
-	public List<IFeatureResolution> resolve(final TreeBuilderNode<?> node, final List<String> words)
+	public List<IFeatureResolution> resolve(final TreeBuilderNode<?> node)
 	{
-		final var runner = new WordResolverRunner(availableResolvers, node, words);
-		return runner.resolve();
+		final var runner = new WordResolverRunner(availableResolvers, node);
+		final var wordResolutions = resolveWords(node.words());
+		final List<IFeatureResolution> resolutions = new ArrayList<>();
+
+		resolutions.addAll(runner.filterNameValueResolvers(wordResolutions.nameValueWords));
+		resolutions.addAll(runner.filterSimpleResolvers(wordResolutions.simpleWords));
+
+		return resolutions;
+	}
+
+	private static WordResolverRunner.WordsResolution resolveWords(List<String> words)
+	{
+		final List<String> simpleWords = new ArrayList<>();
+		final List<WordResolverRunner.NameValueWord> nameValueWords = new ArrayList<>();
+		for (final var word : words)
+		{
+			toNameValue(word).ifPresentOrElse(nameValueWords::add, () -> simpleWords.add(word));
+		}
+		return new WordResolverRunner.WordsResolution(simpleWords, nameValueWords);
+	}
+
+	private static Optional<WordResolverRunner.NameValueWord> toNameValue(final String word)
+	{
+		final var indexEqual = word.indexOf('=');
+		if (indexEqual > -1)
+		{
+			final var name = word.substring(0, indexEqual);
+			final var value = word.substring(indexEqual + 1);
+			return Optional.of(new WordResolverRunner.NameValueWord(name, value));
+		}
+		else
+		{
+			return Optional.empty();
+		}
 	}
 
 	private static class WordResolverRunner
 	{
 		private final LinkedList<IWordResolver<?>> availableResolvers;
 		private final TreeBuilderNode<?> node;
-		private final WordsResolution wordResolutions;
 
-		WordResolverRunner(final List<IWordResolver<?>> wordResolvers,
-						   final TreeBuilderNode<?> node,
-						   final List<String> words)
+		WordResolverRunner(final List<IWordResolver<?>> wordResolvers, final TreeBuilderNode<?> node)
 		{
 
 			this.availableResolvers = new LinkedList<>(wordResolvers);
-			this.wordResolutions = resolveWords(words);
 			this.node = node;
 		}
 
-		public List<IFeatureResolution> resolve()
-		{
-			final List<IFeatureResolution> resolutions = new ArrayList<>();
-
-			resolutions.addAll(filterNameValueResolvers(wordResolutions.nameValueWords, node));
-			resolutions.addAll(filterSimpleResolvers(wordResolutions.simpleWords, node));
-
-			return resolutions;
-		}
-
-		private List<IFeatureResolution> filterNameValueResolvers(final List<NameValueWord> nameValueWords,
-																  final TreeBuilderNode<?> node)
+		public List<IFeatureResolution> filterNameValueResolvers(final List<NameValueWord> nameValueWords)
 		{
 			final List<IFeatureResolution> resolutions = new ArrayList<>();
 			for (final var nameValueWord : nameValueWords)
 			{
-				final var it = availableResolvers.iterator();
-				while (it.hasNext())
-				{
-					final var currentResolver = it.next();
-					if (currentResolver.match(nameValueWord.name))
-					{
-						final var resolution = currentResolver.resolve(node, nameValueWord.value)
-															  .orElseThrow();
-						resolutions.add(resolution);
-						it.remove();
-					}
-				}
+				final var resolved = findMandatory(r -> r.match(nameValueWord.name)
+														? r.resolveOrThrow(node,
+																		   nameValueWord.value)
+														: Optional.empty());
+				resolutions.add(resolved);
 			}
 
 			return resolutions;
 		}
 
-		private List<IFeatureResolution> filterSimpleResolvers(final List<String> simpleWords,
-															   final TreeBuilderNode<?> node)
+		public List<IFeatureResolution> filterSimpleResolvers(final List<String> simpleWords)
 		{
 			final List<IFeatureResolution> resolutions = new ArrayList<>();
 			final List<String> notFound = new ArrayList<>();
-
 			for (final var word : simpleWords)
 			{
-				boolean found = false;
-				final var it = availableResolvers.iterator();
-				while (it.hasNext())
-				{
-					final var currentResolver = it.next();
-					if (currentResolver.match(word))
-					{
-						final var resolution = currentResolver.resolve(node, "true")
-															  .orElseThrow();
-						resolutions.add(resolution);
-						it.remove();
-						found = true;
-					}
-				}
-				if (!found)
-				{
-					notFound.add(word);
-				}
+				final var resolved = findOptional(r -> r.match(word)
+													   ? r.resolveOrThrow(node, "true")
+													   : Optional.empty());
+				resolved.ifPresentOrElse(resolutions::add, () -> notFound.add(word));
 			}
 			for (final var word : notFound)
 			{
-				boolean found = false;
-				final var it = availableResolvers.iterator();
-				while (it.hasNext())
-				{
-					final var currentResolver = it.next();
-					final var resolution = currentResolver.resolve(node, word);
-					if (resolution.isPresent())
-					{
-						resolutions.add(resolution.get());
-						it.remove();
-						found = true;
-					}
-				}
-				if (!found)
-				{
-					notFound.add(word);
-				}
+				resolutions.add(findMandatory(r -> r.resolve(node, word)));
 			}
 
 			return resolutions;
 		}
 
-		private static Optional<NameValueWord> toNameValue(final String word)
+		private IFeatureResolution findMandatory(final Function<IWordResolver<?>, Optional<? extends IFeatureResolution>> resolver)
 		{
-			final var indexEqual = word.indexOf('=');
-			if (indexEqual > -1)
-			{
-				final var name = word.substring(0, indexEqual);
-				final var value = word.substring(indexEqual + 1);
-				return Optional.of(new NameValueWord(name, value));
-			}
-			else
-			{
-				return Optional.empty();
-			}
+			return findOptional(resolver).orElseThrow();
 		}
 
-		private static WordsResolution resolveWords(List<String> words)
+		private Optional<IFeatureResolution> findOptional(final Function<IWordResolver<?>, Optional<? extends IFeatureResolution>> resolver)
 		{
-			final List<String> simpleWords = new ArrayList<>();
-			final List<NameValueWord> nameValueWords = new ArrayList<>();
-			for (final var word : words)
+			final var it = availableResolvers.iterator();
+			while (it.hasNext())
 			{
-				toNameValue(word).ifPresentOrElse(nameValueWords::add, () -> simpleWords.add(word));
+				final var currentResolver = it.next();
+				final var resolution = resolver.apply(currentResolver);
+				if (resolution.isPresent())
+				{
+					it.remove();
+					return Optional.of(resolution.get());
+				}
 			}
-			return new WordsResolution(simpleWords, nameValueWords);
+			return Optional.empty();
 		}
 
 		record NameValueWord(String name, String value) {}
 
 		record WordsResolution(List<String> simpleWords, List<NameValueWord> nameValueWords) {}
 	}
-
 }
