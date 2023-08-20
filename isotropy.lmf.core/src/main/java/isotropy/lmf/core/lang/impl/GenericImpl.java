@@ -6,9 +6,9 @@ import isotropy.lmf.core.model.FeatureMap;
 import java.util.List;
 import java.util.function.Function;
 
-public final class GenericImpl implements Generic
+public final class GenericImpl<T> implements Generic<T>
 {
-	public static final FeatureMap<Function<Generic, Object>> GET_MAP = new FeatureMap<>(
+	public static final FeatureMap<Function<Generic<?>, Object>> GET_MAP = new FeatureMap<>(
 
 			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.name, Named::name),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.boundType, Generic::boundType),
@@ -16,11 +16,11 @@ public final class GenericImpl implements Generic
 
 	private final String name;
 	private final BoundType boundType;
-	private final Type type;
+	private final Type<T> type;
 
 	private LMObject container;
 
-	public GenericImpl(final String name, final BoundType boundType, final Type type)
+	public GenericImpl(final String name, final BoundType boundType, final Type<T> type)
 	{
 		this.name = name;
 		this.boundType = boundType;
@@ -40,7 +40,7 @@ public final class GenericImpl implements Generic
 	}
 
 	@Override
-	public Type type()
+	public Type<T> type()
 	{
 		return type;
 	}

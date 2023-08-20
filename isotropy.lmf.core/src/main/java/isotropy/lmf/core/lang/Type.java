@@ -1,4 +1,4 @@
 package isotropy.lmf.core.lang;
 
-public interface Type extends Named
+public interface Type<T> extends Named
 {}

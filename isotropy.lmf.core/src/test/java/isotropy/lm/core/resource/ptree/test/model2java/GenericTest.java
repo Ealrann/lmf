@@ -26,7 +26,7 @@ public class GenericTest
 		final var root = roots.get(0);
 		assertTrue(root instanceof Generic);
 
-		final var generic = (Generic) root;
+		final var generic = (Generic<?>) root;
 		assertEquals("UnaryType", generic.name());
 		assertEquals(BoundType.Extends, generic.boundType());
 		assertEquals(generic.type(),
@@ -71,7 +71,7 @@ public class GenericTest
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				    )
 				    (Definition name=Car)
-				    (Group name=CarContainer (includes group=/groups.0 directParameter=/groups.1))
+				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
 				)
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -97,20 +97,20 @@ public class GenericTest
 
 
 		assertEquals(genericOfContainer, container.parameters().get(0));
-		assertEquals(car, carContainer.includes().get(0).directParameter());
+		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
 	}
 
-/*	@Test
+	@Test
 	public void genericFullUsage()
 	{
 		final var textModel = """
 				(Model Test
 				    (Group name=Container parameters=/groups.0/generics.0
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
-				        (-contains cargo [1..1] (groupReference group=/groups.2 genericParameter=/groups.0/generics.0))
+				        (-contains cargo [1..1] (reference group=/groups.2 parameters=/groups.0/generics.0))
 				    )
 				    (Definition name=Car)
-				    (Group name=CarContainer (includes group=/groups.0 directParameter=/groups.1))
+				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
 				)
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -135,9 +135,11 @@ public class GenericTest
 		assertEquals("Car", car.name());
 		assertEquals("CarContainer", carContainer.name());
 
-
 		assertEquals(genericOfContainer, container.parameters().get(0));
-		assertEquals(genericOfContainer, cargoRelation.groupReference().genericParameter());
-		assertEquals(car, carContainer.includes().get(0).directParameter());
-	}*/
+		assertEquals(genericOfContainer, cargoRelation.reference().parameters().get(0));
+		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
+
+
+
+	}
 }

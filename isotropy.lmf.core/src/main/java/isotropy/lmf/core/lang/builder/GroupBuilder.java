@@ -30,10 +30,10 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	private String name = null;
 	private boolean concrete;
 
-	private final List<Supplier<GroupReference<?>>> includes = new ArrayList<>();
+	private final List<Supplier<Reference<?>>> includes = new ArrayList<>();
 	private final List<Supplier<Feature<?, ?>>> features = new ArrayList<>();
-	private final List<Supplier<Generic>> generics = new ArrayList<>();
-	private final List<Supplier<Generic>> parameters = new ArrayList<>();
+	private final List<Supplier<Generic<?>>> generics = new ArrayList<>();
+	private final List<Supplier<Generic<?>>> parameters = new ArrayList<>();
 
 	@Override
 	public Group<T> build()
@@ -69,7 +69,7 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	}
 
 	@Override
-	public GroupBuilder<T> addInclude(Supplier<GroupReference<?>> include)
+	public GroupBuilder<T> addInclude(Supplier<Reference<?>> include)
 	{
 		includes.add(include);
 		return this;
@@ -83,14 +83,14 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	}
 
 	@Override
-	public GroupBuilder<T> addGeneric(Supplier<Generic> generic)
+	public GroupBuilder<T> addGeneric(Supplier<Generic<?>> generic)
 	{
 		generics.add(generic);
 		return this;
 	}
 
 	@Override
-	public GroupBuilder<T> addParameter(Supplier<Generic> parameter)
+	public GroupBuilder<T> addParameter(Supplier<Generic<?>> parameter)
 	{
 		parameters.add(parameter);
 		return this;

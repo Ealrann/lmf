@@ -1,16 +1,16 @@
 (Model LMCore
 
 	(Group name=LMObject)
-	(Group name=Named includes=/groups.0 (-att name /units.7 mandatory))
+	(Group name=Named includes=/groups.0 (-att name=name /units.7 mandatory))
 	(Group name=Type  includes=/groups.1)
 
-	(Definition name=Model /groups.1
-		(-contains groups  /groups.4  [0..*])
-		(-contains enums   /groups.10 [0..*])
-		(-contains units   /groups.11 [0..*])
-		(-contains aliases /groups.9  [0..*]))
+	(Definition name=Model (includes group=/groups.1)
+		(-contains groups  (dref group=/groups.4  [0..*]))
+		(-contains enums   (dref group=/groups.10 [0..*]))
+		(-contains units   (dref group=/groups.11 [0..*]))
+		(-contains aliases (dref group=/groups.9  [0..*])))
 
-	(Definition name=Group includes=/groups.2 (Generic T extends /groups.0)
+	(Definition name=Group (includes group=/groups.2)(includes group=/groups.16) (Generic T extends /groups.0)
 		(-att      concrete       /units.2)
 		(-contains includes       /groups.13  [0..*])
 		(-contains features       /groups.5   [0..*])
@@ -18,15 +18,15 @@
 		(-refers   parameters     /groups.12) [0..*]))
 
 	(Group name=Feature includes=/groups.1 (Generic UnaryType) (Generic EffectiveType)
-		(-att immutable /units.2)
-		(-att many      /units.2)
-		(-att mandatory /units.2))
+		(-att immutable datatype=/units.2)
+		(-att many      datatype=/units.2)
+		(-att mandatory datatype=/units.2))
 
 	(Definition name=Attribute /groups.5<EffectiveType> (Generic UnaryType) (Generic EffectiveType)
 		(-refers dataType /groups.8<UnaryType> [1..1]))
 
 	(Definition name=Relation includes=/groups.5<UnaryType, EffectiveType> (Generic name=UnaryType boundType=Extends type=/groups.0) (Generic EffectiveType)
-		(-contains reference        groupReference=/groups.13 [1..1])
+		(-contains reference        (dref group=/groups.13) [1..1])
 		(-att      lazy             dataType=/units.2)
 		(-att      contains         dataType=/units.2))
 
@@ -34,21 +34,24 @@
 	(Definition name=Alias includes=/groups.1
 		(-att words /units.7 [0..*]))
 	(Definition name=Enum  includes=/groups.8<T> (Generic T)
-		(-att literals /units.7 [0..*]))
+		(-att name=literals /units.7 [0..*]))
 	(Definition name=Unit  includes=/groups.8<T> (Generic T)
-		(-att matcher      /matcher)
-		(-att defaultValue /units.7)
-		(-att primitive    /enums.1 [1..1])
-		(-att extractor    /extractor))
+		(-att name=matcher      /matcher)
+		(-att name=defaultValue /units.7)
+		(-att name=primitive    /enums.1 [1..1])
+		(-att name=extractor    /extractor))
 
-	(Definition name=Generic Named
-		(-refers type      /groups.2)
-		(-att    boundType /enums.0))
+	(Definition name=Generic (includes group=/groups.1)(includes group=/groups.14)(parameters generic=/groups.12/generics.0)
+	    (Generic name=T boundType=extends type=/groups.0)
+		(-refers name=type      (dref group=/groups.2)
+		(-att    name=boundType datatype=/enums.0))
 
-	(Definition name=GroupReference includes=/groups.1
-    	(-refers group             /groups.2)
-    	(-refers genericParameter  /groups.12)
-    	(-refers directParameter   /groups.4))
+	(Definition name=Reference (includes group=/groups.0 (parameters generic=/groups.13/generics.0))
+	    (Generic name=T)
+    	(-refers   [1..1] name=group      (dref group=/groups.14 (parameters generic=/groups.14/generics.0)))
+    	(-contains [0..*] name=parameters (dref group=/groups.16)))
+
+    (Group name=Concept)
 
 	(Unit name=matcher   matcher="^rgx_match:\\b([^\\]+)\\b")
 	(Unit name=extractor matcher="^rgx_match:\\b([^\\]+)\\b")
@@ -73,4 +76,6 @@
 	(Alias name=[1..1]     mandatory,many=false)
 	(Alias name=[0..*]     mandatory=false,many)
 	(Alias name=[1..*]     mandatory,many)
+	(Alias name=dref       reference=DirectReference)
+	(Alias name=gref       reference=GenericReference)
 )

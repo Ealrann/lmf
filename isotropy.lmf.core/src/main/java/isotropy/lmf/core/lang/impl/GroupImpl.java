@@ -19,19 +19,19 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 
 	private final String name;
 	private final boolean concrete;
-	private final List<? extends GroupReference<?>> includes;
+	private final List<? extends Reference<?>> includes;
 	private final List<? extends Feature<?, ?>> features;
-	private final List<Generic> generics;
-	private final List<Generic> parameters;
+	private final List<? extends Generic<?>> generics;
+	private final List<? extends Generic<?>> parameters;
 
 	private LMObject container;
 
 	public GroupImpl(final String name,
 					 final boolean concrete,
-					 final List<? extends GroupReference<?>> includes,
+					 final List<? extends Reference<?>> includes,
 					 final List<? extends Feature<?, ?>> features,
-					 final List<Generic> generics,
-					 final List<Generic> parameters)
+					 final List<? extends Generic<?>> generics,
+					 final List<? extends Generic<?>> parameters)
 	{
 		this.name = name;
 		this.concrete = concrete;
@@ -54,7 +54,7 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	}
 
 	@Override
-	public List<? extends GroupReference<?>> includes()
+	public List<? extends Reference<?>> includes()
 	{
 		return includes;
 	}
@@ -66,13 +66,13 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	}
 
 	@Override
-	public List<Generic> generics()
+	public List<? extends Generic<?>> generics()
 	{
 		return generics;
 	}
 
 	@Override
-	public List<Generic> parameters()
+	public List<? extends Generic<?>> parameters()
 	{
 		return parameters;
 	}

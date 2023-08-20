@@ -7,47 +7,54 @@ import isotropy.lmf.core.model.RelationLazyInserter;
 
 import java.util.function.Supplier;
 
-public class GenericBuilder implements Generic.Builder
+public class GenericBuilder<T> implements Generic.Builder<T>
 {
-	private static final FeatureInserter<GenericBuilder> FEATURE_INSERTER = FeatureInserter
+	private static final FeatureInserter<GenericBuilder<?>> FEATURE_INSERTER = FeatureInserter
 
-			.<GenericBuilder>Builder()
+			.<GenericBuilder<?>>Builder()
 			.add(LMCoreDefinition.Features.GENERIC.name, GenericBuilder::name)
 			.add(LMCoreDefinition.Features.GENERIC.boundType, GenericBuilder::boundType)
 			.build();
 
-	private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = RelationLazyInserter
+	private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = RelationLazyInserter
 
-			.<GenericBuilder>Builder()
-			.add(LMCoreDefinition.Features.GENERIC.type, GenericBuilder::type)
+			.<GenericBuilder<?>>Builder()
+			.add(LMCoreDefinition.Features.GENERIC.type, GenericBuilder::_type)
 			.build();
 
 	private String name;
 	private BoundType boundType;
-	private Supplier<Type> type;
+	private Supplier<Type<T>> type;
 
 	@Override
-	public Generic build()
+	public Generic<T> build()
 	{
-		return new GenericImpl(name, boundType, type.get());
+		return new GenericImpl<>(name, boundType, type.get());
 	}
 
 	@Override
-	public GenericBuilder type(Supplier<Type> type)
+	public GenericBuilder<T> type(Supplier<Type<T>> type)
 	{
 		this.type = type;
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public GenericBuilder<T> _type(Supplier<? extends Type<?>> type)
+	{
+		this.type = (Supplier<Type<T>>) type;
+		return this;
+	}
+
 	@Override
-	public GenericBuilder name(final String name)
+	public GenericBuilder<T> name(final String name)
 	{
 		this.name = name;
 		return this;
 	}
 
 	@Override
-	public GenericBuilder boundType(final BoundType boundType)
+	public GenericBuilder<T> boundType(final BoundType boundType)
 	{
 		this.boundType = boundType;
 		return this;

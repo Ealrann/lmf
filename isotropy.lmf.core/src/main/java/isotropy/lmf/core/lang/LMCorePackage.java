@@ -19,12 +19,13 @@ public final class LMCorePackage implements IModelPackage
 			new GroupDescriptor<>(LMCoreDefinition.Groups.LM_OBJECT, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.NAMED, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.TYPE, null),
+			new GroupDescriptor<>(LMCoreDefinition.Groups.CONCEPT, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.MODEL, ModelBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.GROUP, GroupBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.FEATURE, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ATTRIBUTE, AttributeBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.RELATION, RelationBuilder::new),
-			new GroupDescriptor<>(LMCoreDefinition.Groups.GROUP_REFERENCE, GroupReferenceBuilder::new),
+			new GroupDescriptor<>(LMCoreDefinition.Groups.REFERENCE, ReferenceBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.DATATYPE, null),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ALIAS, AliasBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ENUM, EnumBuilder::new),
@@ -41,7 +42,9 @@ public final class LMCorePackage implements IModelPackage
 													  LMCoreDefinition.Aliases.LB_0_DOT_DOT_1_RB,
 													  LMCoreDefinition.Aliases.LB_1_DOT_DOT_1_RB,
 													  LMCoreDefinition.Aliases.LB_0_DOT_DOT_STAR_RB,
-													  LMCoreDefinition.Aliases.LB_1_DOT_DOT_STAR_RB);
+													  LMCoreDefinition.Aliases.LB_1_DOT_DOT_STAR_RB,
+													  LMCoreDefinition.Aliases.DREF,
+													  LMCoreDefinition.Aliases.GREF);
 
 	public static final List<Unit<?>> units = List.of(LMCoreDefinition.Units.MATCHER,
 													  LMCoreDefinition.Units.EXTRACTOR,

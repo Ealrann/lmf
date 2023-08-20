@@ -23,7 +23,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER =
 			new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(LMCoreDefinition.Features.RELATION.groupReference, RelationBuilder::_groupReference)
+			.add(LMCoreDefinition.Features.RELATION.reference, RelationBuilder::_reference)
 			.build();
 
 	private String name = null;
@@ -32,12 +32,12 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	private boolean mandatory;
 	private boolean contains;
 
-	private Supplier<GroupReference<UnaryType>> groupReference = () -> null;
+	private Supplier<Reference<UnaryType>> reference = () -> null;
 
 	@Override
 	public Relation<UnaryType, EffectiveType> build()
 	{
-		return new RelationImpl<>(name, many, immutable, mandatory, groupReference.get(), contains);
+		return new RelationImpl<>(name, many, immutable, mandatory, reference.get(), contains);
 	}
 
 	@Override
@@ -69,16 +69,16 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	}
 
 	@Override
-	public RelationBuilder<UnaryType, EffectiveType> groupReference(Supplier<GroupReference<UnaryType>> groupReference)
+	public RelationBuilder<UnaryType, EffectiveType> reference(Supplier<Reference<UnaryType>> reference)
 	{
-		this.groupReference = groupReference;
+		this.reference = reference;
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public RelationBuilder<UnaryType, EffectiveType> _groupReference(Supplier<? extends GroupReference<?>> groupReference)
+	public RelationBuilder<UnaryType, EffectiveType> _reference(Supplier<? extends Reference<?>> reference)
 	{
-		this.groupReference = (Supplier<GroupReference<UnaryType>>) groupReference;
+		this.reference = (Supplier<Reference<UnaryType>>) reference;
 		return this;
 	}
 

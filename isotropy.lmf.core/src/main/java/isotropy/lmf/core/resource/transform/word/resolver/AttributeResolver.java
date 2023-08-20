@@ -1,15 +1,11 @@
 package isotropy.lmf.core.resource.transform.word.resolver;
 
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements IWordResolver<T>
 {

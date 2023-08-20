@@ -59,7 +59,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			current = children.get(index);
 		}
 
-		if (ModelUtils.isSubGroup(feature.groupReference()
+		if (ModelUtils.isSubGroup(feature.reference()
 										 .group(),
 								  current.modelGroup()
 										 .group()))
@@ -112,7 +112,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 		}
 
-		if (ModelUtils.isSubGroup(feature.groupReference()
+		if (ModelUtils.isSubGroup(feature.reference()
 										 .group(), current.lmGroup()))
 		{
 			return Optional.of(new StaticReferenceResolution<>(feature, (T) current));

@@ -14,14 +14,14 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.immutable, Relation::immutable),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.many, Relation::many),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.mandatory, Relation::mandatory),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.groupReference, Relation::groupReference),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.reference, Relation::reference),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.contains, Relation::contains)));
 
 	private final String name;
 	private final boolean immutable;
 	private final boolean many;
 	private final boolean mandatory;
-	private final GroupReference<UnaryType> groupReference;
+	private final Reference<UnaryType> reference;
 	private final boolean contains;
 
 	private LMObject container;
@@ -30,14 +30,14 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 						final boolean immutable,
 						final boolean many,
 						final boolean mandatory,
-						final GroupReference<UnaryType> groupReference,
+						final Reference<UnaryType> reference,
 						final boolean contains)
 	{
 		this.name = name;
 		this.immutable = immutable;
 		this.many = many;
 		this.mandatory = mandatory;
-		this.groupReference = groupReference;
+		this.reference = reference;
 		this.contains = contains;
 	}
 
@@ -66,9 +66,9 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	}
 
 	@Override
-	public GroupReference<UnaryType> groupReference()
+	public Reference<UnaryType> reference()
 	{
-		return groupReference;
+		return reference;
 	}
 
 	@Override

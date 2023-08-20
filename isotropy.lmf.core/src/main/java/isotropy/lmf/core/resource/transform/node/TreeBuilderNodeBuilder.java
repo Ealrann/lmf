@@ -86,7 +86,7 @@ public class TreeBuilderNodeBuilder
 											   .map(Relation.class::cast)
 											   .filter(r -> r.name()
 															 .equals(namedNode.name()))
-											   .map(r -> r.groupReference()
+											   .map(r -> r.reference()
 														  .group())
 											   .findAny()
 											   .orElseThrow(() -> new NoSuchElementException("Cannot resolve " +
@@ -115,7 +115,7 @@ public class TreeBuilderNodeBuilder
 		{
 			return (Relation<T, ?>) resolvers.get(parentGroup)
 											 .streamContainmentRelations()
-											 .filter(r -> ModelUtils.isSubGroup(r.groupReference()
+											 .filter(r -> ModelUtils.isSubGroup(r.reference()
 																				 .group(), childGroup))
 											 .findAny()
 											 .orElseThrow(() -> new NoSuchElementException("Cannot find containment " +

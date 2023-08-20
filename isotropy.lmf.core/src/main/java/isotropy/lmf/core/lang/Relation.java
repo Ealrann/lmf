@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 public interface Relation<UnaryType extends LMObject, EffectiveType> extends Feature<UnaryType, EffectiveType>
 {
-	GroupReference<UnaryType> groupReference();
+	Reference<UnaryType> reference();
 	boolean contains();
 
 	static <UnaryType extends LMObject, EffectiveType> Builder<UnaryType, EffectiveType> builder() {return new RelationBuilder<UnaryType, EffectiveType>();}
@@ -17,7 +17,6 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
 		Builder<UnaryType, EffectiveType> many(boolean many);
 		Builder<UnaryType, EffectiveType> mandatory(boolean mandatory);
 		Builder<UnaryType, EffectiveType> contains(boolean contains);
-
-		Builder<UnaryType, EffectiveType> groupReference(Supplier<GroupReference<UnaryType>> groupReference);
+		Builder<UnaryType, EffectiveType> reference(Supplier<Reference<UnaryType>> groupReference);
 	}
 }
