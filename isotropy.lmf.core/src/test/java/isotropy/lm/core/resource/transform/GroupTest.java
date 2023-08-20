@@ -1,4 +1,4 @@
-package isotropy.lm.core.resource.ptree.test.model2java;
+package isotropy.lm.core.resource.transform;
 
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;

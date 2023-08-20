@@ -1,4 +1,4 @@
-package isotropy.lm.core.resource.ptree.test;
+package isotropy.lm.core.resource.ptree;
 
 import isotropy.lmf.core.resource.ptree.PTreeReader;
 import org.junit.jupiter.api.Test;
