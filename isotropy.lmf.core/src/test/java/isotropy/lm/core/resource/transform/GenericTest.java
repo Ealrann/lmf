@@ -67,7 +67,7 @@ public class GenericTest
 	{
 		final var textModel = """
 				(Model Test
-				    (Group name=Container parameters=/groups.0/generics.0
+				    (Group name=Container parameters=./generics.0
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				    )
 				    (Definition name=Car)

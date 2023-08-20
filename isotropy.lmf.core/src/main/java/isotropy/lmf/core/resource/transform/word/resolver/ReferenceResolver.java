@@ -28,7 +28,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		{
 			return resolveExternalDependency(value);
 		}
-		else if (value.startsWith("/"))
+		else if (value.startsWith("/") || value.startsWith("."))
 		{
 			return resolveLocalDependency(node, value);
 		}
@@ -41,29 +41,41 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	@SuppressWarnings("unchecked")
 	private Optional<IFeatureResolution> resolveLocalDependency(final TreeBuilderNode<?> node, final String uri)
 	{
-		final var path = uri.substring(1);
-		final var steps = path.split("/");
+		TreeBuilderNode<?> current = node;
+		if (uri.startsWith("/"))
+		{
+			current = current.root();
+		}
 
-		TreeBuilderNode<?> current = node.root();
+		final var steps = uri.split("/");
 		for (final var step : steps)
 		{
-			final var pointIndex = step.indexOf('.');
-			final var featureName = pointIndex == -1 ? step : step.substring(0, pointIndex);
-			final int index = pointIndex == -1 ? 0 : Integer.parseInt(step.substring(pointIndex + 1));
-
-			final var children = current.children()
-										.stream()
-										.filter(c -> c.containingRelation()
-													  .name()
-													  .equals(featureName))
-										.toList();
-
-			if(children.size() < index +1)
+			if (step.isEmpty() || step.equals("."))
 			{
-				throw new NoSuchElementException("Cannot resolve path " + uri);
+				continue;
 			}
+			if (step.equals(".."))
+			{
+				current = current.parent();
+			}
+			else
+			{
+				final var pointIndex = step.indexOf('.');
+				final var featureName = pointIndex == -1 ? step : step.substring(0, pointIndex);
+				final int index = pointIndex == -1 ? 0 : Integer.parseInt(step.substring(pointIndex + 1));
 
-			current = children.get(index);
+				final var children = current.children()
+											.stream()
+											.filter(c -> c.containingRelation()
+														  .name()
+														  .equals(featureName))
+											.toList();
+				if (children.size() < index + 1)
+				{
+					throw new NoSuchElementException("Cannot resolve path " + uri);
+				}
+				current = children.get(index);
+			}
 		}
 
 		if (ModelUtils.isSubGroup(feature.reference()
@@ -90,7 +102,6 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		final var model = ModelRegistry.Instance.get(modelName)
 												.model();
 
-		//TODO this code should be done only once, earlier (word pre-resolution)
 		LMObject current = model;
 		final var steps = path.split("/");
 		for (final var step : steps)
