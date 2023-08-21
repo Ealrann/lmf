@@ -12,11 +12,11 @@ public class ResourceUtil
 	public static final List<? extends LMObject> loadModel(final InputStream inputStream)
 	{
 		final var ptreeBuilder = new PTreeReader();
-		final var tree = ptreeBuilder.read(inputStream);
+		final var ptree = ptreeBuilder.read(inputStream);
 
 		final var modelBuilder = new PTreeToJava();
-		final var root = modelBuilder.transform(tree);
+		final var roots = modelBuilder.transform(ptree);
 
-		return root;
+		return roots;
 	}
 }
