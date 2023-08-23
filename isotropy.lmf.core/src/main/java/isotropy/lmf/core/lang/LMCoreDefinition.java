@@ -158,6 +158,11 @@ public interface LMCoreDefinition
 		interface MODEL
 		{
 			Attribute<String, String> name = NAMED.name;
+			Attribute<String, String> domain = new AttributeImpl<>("domain",
+																   true,
+																   false,
+																   true,
+																   Units.STRING);
 			Relation<Group<?>, List<Group<?>>> groups = new RelationImpl<>("groups",
 																		   true,
 																		   true,
@@ -185,7 +190,7 @@ public interface LMCoreDefinition
 																	  false,
 																	  new ReferenceImpl<>(() -> Groups.ALIAS, List.of()),
 																	  true);
-			List<Feature<?, ?>> all = List.of(name, groups, enums, units, aliases);
+			List<Feature<?, ?>> all = List.of(name, domain, groups, enums, units, aliases);
 		}
 
 		interface REFERENCE

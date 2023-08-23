@@ -1,4 +1,4 @@
-package isotropy.lm.core.resource.transform;
+package isotropy.lmf.core.resource.transform;
 
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Primitive;

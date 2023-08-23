@@ -16,7 +16,8 @@ public final class ModelBuilder implements Model.Builder
 {
 	private static final FeatureInserter<ModelBuilder> FEATURE_INSERTER = new FeatureInserter.Builder<ModelBuilder>()
 
-			.add(LMCoreDefinition.Features.MODEL.name, ModelBuilder::name).build();
+			.add(LMCoreDefinition.Features.MODEL.name, ModelBuilder::name)
+			.add(LMCoreDefinition.Features.MODEL.domain, ModelBuilder::domain).build();
 
 	private static final RelationLazyInserter<ModelBuilder> BUILDER_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>()
 
@@ -27,6 +28,7 @@ public final class ModelBuilder implements Model.Builder
 			.build();
 
 	private String name;
+	private String domain;
 	private IModelPackage modelPackage;
 
 	private final List<Supplier<? extends Group<?>>> groups = new ArrayList<>();
@@ -42,13 +44,20 @@ public final class ModelBuilder implements Model.Builder
 		final var builtUnits = BuildUtils.collectSuppliers(units);
 		final var builtAliases = BuildUtils.collectSuppliers(aliases);
 
-		return new ModelImpl(modelPackage, name, builtGroups, builtEnums, builtUnits, builtAliases);
+		return new ModelImpl(modelPackage, name, domain, builtGroups, builtEnums, builtUnits, builtAliases);
 	}
 
 	@Override
 	public ModelBuilder name(final String name)
 	{
 		this.name = name;
+		return this;
+	}
+
+	@Override
+	public ModelBuilder domain(final String name)
+	{
+		this.domain = domain;
 		return this;
 	}
 

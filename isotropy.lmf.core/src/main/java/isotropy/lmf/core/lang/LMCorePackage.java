@@ -59,6 +59,7 @@ public final class LMCorePackage implements IModelPackage
 
 	public static final Model MODEL = new ModelImpl(Instance,
 													"LMCore",
+													"isotrpoy.lmf.core.lang",
 													groups.stream()
 														  .map(GroupDescriptor::group)
 														  .collect(Collectors.toUnmodifiableList()),

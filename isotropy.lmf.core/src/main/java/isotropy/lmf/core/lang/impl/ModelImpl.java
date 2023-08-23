@@ -13,6 +13,7 @@ public final class ModelImpl implements Model
 	public static final FeatureMap<Function<Model, Object>> GET_MAP = new FeatureMap<>(
 
 			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.name, Named::name),
+					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.domain, Model::domain),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.groups, Model::groups),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.enums, Model::enums),
 					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.units, Model::units),
@@ -20,6 +21,7 @@ public final class ModelImpl implements Model
 
 	private final IModelPackage _package;
 	private final String name;
+	private final String domain;
 	private final List<Group<?>> groups;
 	private final List<Enum<?>> enums;
 	private final List<Unit<?>> units;
@@ -29,6 +31,7 @@ public final class ModelImpl implements Model
 
 	public ModelImpl(final IModelPackage _package,
 					 final String name,
+					 final String domain,
 					 final List<Group<?>> groups,
 					 final List<Enum<?>> enums,
 					 final List<Unit<?>> units,
@@ -36,6 +39,7 @@ public final class ModelImpl implements Model
 	{
 		this._package = _package;
 		this.name = name;
+		this.domain = domain;
 		this.groups = groups;
 		this.enums = enums;
 		this.units = units;
@@ -46,6 +50,12 @@ public final class ModelImpl implements Model
 	public String name()
 	{
 		return name;
+	}
+
+	@Override
+	public String domain()
+	{
+		return domain;
 	}
 
 	@Override

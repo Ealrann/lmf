@@ -1,7 +1,6 @@
 package isotropy.lmf.core.lang;
 
 import isotropy.lmf.core.lang.builder.ModelBuilder;
-import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.model.IModelPackage;
 
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.function.Supplier;
 
 public interface Model extends Named
 {
+	String domain();
 	List<Group<?>> groups();
 	List<Enum<?>> enums();
 	List<Unit<?>> units();
@@ -20,6 +20,7 @@ public interface Model extends Named
 	interface Builder extends LMObject.Builder<Model>
 	{
 		Builder name(String name);
+		Builder domain(String domain);
 		Builder lPackage(IModelPackage modelPackage);
 
 		Builder addGroup(Supplier<? extends Group<?>> group);

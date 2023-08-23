@@ -1,4 +1,4 @@
-(Model LMCore
+(Model domain=isotropy.lmf.core.lang name=LMCore
 
 	(Group LMObject)
 	(Group Named (includes /groups.0) (-att name=name /units.7 mandatory))
@@ -21,9 +21,9 @@
 		(-refers   parameters     (reference /groups.12)  [0..*]))
 
 	(Group Feature (includes /groups.1) (Generic UnaryType) (Generic EffectiveType)
-		(-att immutable datatype=/units.2)
-		(-att many      datatype=/units.2)
-		(-att mandatory datatype=/units.2))
+		(-att name=immutable datatype=/units.2)
+		(-att name=many      datatype=/units.2)
+		(-att name=mandatory datatype=/units.2))
 
 	(Definition Attribute parameters=./generics.0,./generics.1
 		(includes /groups.5 parameters=../generics.0,../generics.1)

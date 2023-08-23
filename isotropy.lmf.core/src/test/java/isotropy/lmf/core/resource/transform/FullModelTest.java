@@ -1,8 +1,7 @@
-package isotropy.lm.core.resource.transform;
+package isotropy.lmf.core.resource.transform;
 
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
-import isotropy.lmf.core.resource.transform.PTreeToJava;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -26,15 +25,24 @@ public class FullModelTest
 		assertTrue(root instanceof Model);
 
 		final var model = (Model) root;
+		assertEquals(model.domain(), "isotrpoy.lmf.core.lang");
 
-		assertEquals(15, model.groups().size());
-		assertEquals(11, model.aliases().size());
-		assertEquals(8, model.units().size());
-		assertEquals(2, model.enums().size());
+		assertEquals(15,
+					 model.groups()
+						  .size());
+		assertEquals(11,
+					 model.aliases()
+						  .size());
+		assertEquals(8,
+					 model.units()
+						  .size());
+		assertEquals(2,
+					 model.enums()
+						  .size());
 	}
 
 	private static final String fullModelText = """
-			(Model LMCore
+			(Model name=LMCore domain=isotrpoy.lmf.core.lang
 			   
 				(Group LMObject)
 				(Group Named (includes /groups.0) (-att name=name /units.7 mandatory))
@@ -65,7 +73,7 @@ public class FullModelTest
 					(includes /groups.5 parameters=../generics.0,../generics.1)
 					(Generic UnaryType) (Generic EffectiveType)
 					(-refers datatype (reference /groups.8 parameters=/groups.6/generics.0) [1..1]))
-			
+						
 				(Definition Relation parameters=./generics.0,./generics.1
 					(includes /groups.5 parameters=../generics.0,../generics.1)
 					(Generic UnaryType boundType=Extends type=/groups.0) (Generic EffectiveType)
