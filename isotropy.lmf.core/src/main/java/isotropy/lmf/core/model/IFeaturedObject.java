@@ -3,14 +3,15 @@ package isotropy.lmf.core.model;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.resource.util.ModelUtil;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface IFeaturedObject
 {
 	Group<?> lmGroup();
-	LMObject lContainer();
-	void lContainer(LMObject container);
+	LMObject lmContainer();
+	Relation<?, ?> lmContainingFeature();
 
 	<T> T get(Feature<?, T> feature);
 	<T> void set(Feature<?, T> feature, T value);
@@ -19,6 +20,9 @@ public interface IFeaturedObject
 	{
 		return ModelUtil.streamTree((LMObject) this);
 	}
+
+	void listenStruture(Consumer<Notification> listener);
+	void sulkStructure(Consumer<Notification> listener);
 
 	interface Builder<T extends LMObject>
 	{

@@ -1,7 +1,5 @@
 package isotropy.lmf.core.model;
 
-import isotropy.lmf.core.lang.Feature;
-
 import java.util.function.BiConsumer;
 
 public final class FeatureSetter<T>
@@ -14,9 +12,10 @@ public final class FeatureSetter<T>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <F> void set(final T object, final Feature<?, F> feature, final F value)
+	public <F> void set(final T object, final RawFeature<?, F> feature, final F value)
 	{
-		((BiConsumer<T, F>) featureMap.getTuple(feature).value()).accept(object, value);
+		((BiConsumer<T, F>) featureMap.getTuple(feature)
+									  .value()).accept(object, value);
 	}
 
 	public static <T> Builder<T> Builder()
@@ -33,7 +32,7 @@ public final class FeatureSetter<T>
 			return new FeatureSetter<>(builder.build());
 		}
 
-		public <F> Builder<T> add(final Feature<?, F> feature, final BiConsumer<T, F> function)
+		public <F> Builder<T> add(final RawFeature<?, F> feature, final BiConsumer<T, F> function)
 		{
 			builder.add(feature, function);
 			return this;

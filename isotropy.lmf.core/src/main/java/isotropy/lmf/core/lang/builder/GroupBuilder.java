@@ -11,20 +11,18 @@ import java.util.function.Supplier;
 
 public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 {
-	private static final FeatureInserter<GroupBuilder<?>> FEATURE_INSERTER
-			= new FeatureInserter.Builder<GroupBuilder<?>>()
+	private static final FeatureInserter<GroupBuilder<?>> FEATURE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>()
 
-			.add(LMCoreDefinition.Features.GROUP.name, GroupBuilder::name)
-			.add(LMCoreDefinition.Features.GROUP.concrete, GroupBuilder::concrete)
+			.add(Group.Features.name, GroupBuilder::name)
+			.add(Group.Features.concrete, GroupBuilder::concrete)
 			.build();
 
-	private static final RelationLazyInserter<GroupBuilder<?>> BUILDER_INSERTER
-			= new RelationLazyInserter.Builder<GroupBuilder<?>>()
+	private static final RelationLazyInserter<GroupBuilder<?>> BUILDER_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>()
 
-			.add(LMCoreDefinition.Features.GROUP.includes, GroupBuilder::addInclude)
-			.add(LMCoreDefinition.Features.GROUP.features, GroupBuilder::addFeature)
-			.add(LMCoreDefinition.Features.GROUP.generics, GroupBuilder::addGeneric)
-			.add(LMCoreDefinition.Features.GROUP.parameters, GroupBuilder::addParameter)
+			.add(Group.Features.includes, GroupBuilder::addInclude)
+			.add(Group.Features.features, GroupBuilder::addFeature)
+			.add(Group.Features.generics, GroupBuilder::addGeneric)
+			.add(Group.Features.parameters, GroupBuilder::addParameter)
 			.build();
 
 	private String name = null;
@@ -48,8 +46,8 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 										  .map(Supplier::get)
 										  .toList();
 		final var builtParameters = parameters.stream()
-										  .map(Supplier::get)
-										  .toList();
+											  .map(Supplier::get)
+											  .toList();
 
 		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics, builtParameters);
 	}
@@ -99,13 +97,13 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	@Override
 	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override
 	public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
 													 final Supplier<RelationType> supplier)
 	{
-		BUILDER_INSERTER.push(this, relation, supplier);
+		BUILDER_INSERTER.push(this, relation.rawFeature(), supplier);
 	}
 }

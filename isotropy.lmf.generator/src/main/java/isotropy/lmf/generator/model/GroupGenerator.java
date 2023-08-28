@@ -2,11 +2,9 @@ package isotropy.lmf.generator.model;
 
 import com.squareup.javapoet.*;
 import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.LMCorePackage;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.core.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -46,7 +44,7 @@ public class GroupGenerator
 
 		if (refInclude != null)
 		{
-			final var model = (Model) refInclude.lContainer();
+			final var model = (Model) refInclude.lmContainer();
 
 			groupInterfaceBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(model.domain(), ""),
 																			  ClassName.get("", "T")));

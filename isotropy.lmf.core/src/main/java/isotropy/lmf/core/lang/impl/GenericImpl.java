@@ -1,30 +1,29 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.FeatureMap;
+import isotropy.lmf.core.model.FeatureGetter;
+import isotropy.lmf.core.model.FeaturedObject;
 
-import java.util.List;
-import java.util.function.Function;
-
-public final class GenericImpl<T> implements Generic<T>
+public final class GenericImpl<T> extends FeaturedObject implements Generic<T>
 {
-	public static final FeatureMap<Function<Generic<?>, Object>> GET_MAP = new FeatureMap<>(
+	public static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>()
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.boundType, Generic::boundType),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.GENERIC.type, Generic::type)));
+			.add(Features.name, Named::name)
+			.add(Features.boundType, Generic::boundType)
+			.add(Features.type, Generic::type)
+			.build();
 
 	private final String name;
 	private final BoundType boundType;
 	private final Type<T> type;
-
-	private LMObject container;
 
 	public GenericImpl(final String name, final BoundType boundType, final Type<T> type)
 	{
 		this.name = name;
 		this.boundType = boundType;
 		this.type = type;
+
+		ContainmentUtils.setContainer(this, type, Features.type);
 	}
 
 	@Override
@@ -45,12 +44,10 @@ public final class GenericImpl<T> implements Generic<T>
 		return type;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature)
-						  .apply(this);
+		return GET_MAP.get(this, feature.rawFeature());
 	}
 
 	@Override
@@ -63,17 +60,5 @@ public final class GenericImpl<T> implements Generic<T>
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.GENERIC;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

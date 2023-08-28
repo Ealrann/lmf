@@ -1,7 +1,5 @@
 package isotropy.lmf.core.model;
 
-import isotropy.lmf.core.lang.Feature;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,13 +12,13 @@ public final class FeatureMap<T>
 		this.features = List.copyOf(features);
 	}
 
-	public T get(final Feature<?, ?> feature)
+	public T get(final RawFeature<?, ?> feature)
 	{
 		return getTuple(feature).value;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <F> FeatureTuple<T, F> getTuple(final Feature<?, F> feature)
+	public <F> FeatureTuple<T, F> getTuple(final RawFeature<?, F> feature)
 	{
 		for (int i = 0; i < features.size(); i++)
 		{
@@ -30,10 +28,10 @@ public final class FeatureMap<T>
 				return (FeatureTuple<T, F>) entry;
 			}
 		}
-		throw new IllegalArgumentException("Feature " + feature.name() + " doesn't belong to this FeatureMap");
+		throw new IllegalArgumentException("This Feature doesn't belong to this FeatureMap");
 	}
 
-	public record FeatureTuple<T, F>(Feature<?, F> feature, T value)
+	public record FeatureTuple<T, F>(RawFeature<?, F> feature, T value)
 	{}
 
 	public static final class Builder<T>
@@ -45,7 +43,7 @@ public final class FeatureMap<T>
 			return new FeatureMap<>(List.copyOf(features));
 		}
 
-		public Builder<T> add(final Feature<?, ?> feature, final T value)
+		public Builder<T> add(final RawFeature<?, ?> feature, final T value)
 		{
 			features.add(new FeatureTuple<>(feature, value));
 			return this;

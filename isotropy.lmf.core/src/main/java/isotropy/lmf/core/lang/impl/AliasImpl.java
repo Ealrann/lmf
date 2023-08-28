@@ -1,16 +1,15 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.model.FeaturedObject;
 
 import java.util.List;
 import java.util.function.Function;
 
-public final class AliasImpl implements Alias
+public final class AliasImpl extends FeaturedObject implements Alias
 {
 	private final String name;
 	private final List<String> words;
-
-	private LMObject container;
 
 	public AliasImpl(final String name, final List<String> words)
 	{
@@ -63,17 +62,5 @@ public final class AliasImpl implements Alias
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.ALIAS;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

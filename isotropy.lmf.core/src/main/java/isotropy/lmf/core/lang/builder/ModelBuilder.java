@@ -16,15 +16,16 @@ public final class ModelBuilder implements Model.Builder
 {
 	private static final FeatureInserter<ModelBuilder> FEATURE_INSERTER = new FeatureInserter.Builder<ModelBuilder>()
 
-			.add(LMCoreDefinition.Features.MODEL.name, ModelBuilder::name)
-			.add(LMCoreDefinition.Features.MODEL.domain, ModelBuilder::domain).build();
+			.add(Model.Features.name, ModelBuilder::name)
+			.add(Model.Features.domain, ModelBuilder::domain)
+			.build();
 
 	private static final RelationLazyInserter<ModelBuilder> BUILDER_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>()
 
-			.add(LMCoreDefinition.Features.MODEL.groups, ModelBuilder::addGroup)
-			.add(LMCoreDefinition.Features.MODEL.enums, ModelBuilder::addEnum)
-			.add(LMCoreDefinition.Features.MODEL.units, ModelBuilder::addUnit)
-			.add(LMCoreDefinition.Features.MODEL.aliases, ModelBuilder::addAlias)
+			.add(Model.Features.groups, ModelBuilder::addGroup)
+			.add(Model.Features.enums, ModelBuilder::addEnum)
+			.add(Model.Features.units, ModelBuilder::addUnit)
+			.add(Model.Features.aliases, ModelBuilder::addAlias)
 			.build();
 
 	private String name;
@@ -55,7 +56,7 @@ public final class ModelBuilder implements Model.Builder
 	}
 
 	@Override
-	public ModelBuilder domain(final String name)
+	public ModelBuilder domain(final String domain)
 	{
 		this.domain = domain;
 		return this;
@@ -99,13 +100,13 @@ public final class ModelBuilder implements Model.Builder
 	@Override
 	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override
 	public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
 													 final Supplier<RelationType> supplier)
 	{
-		BUILDER_INSERTER.push(this, relation, supplier);
+		BUILDER_INSERTER.push(this, relation.rawFeature(), supplier);
 	}
 }

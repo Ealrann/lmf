@@ -67,16 +67,6 @@ public final class LMCorePackage implements IModelPackage
 													units,
 													aliases);
 
-	static
-	{
-		groups.stream()
-			  .map(GroupDescriptor::group)
-			  .forEach(u -> u.lContainer(MODEL));
-		enums.forEach(u -> u.lContainer(MODEL));
-		units.forEach(u -> u.lContainer(MODEL));
-		aliases.forEach(u -> u.lContainer(MODEL));
-	}
-
 	private LMCorePackage() {}
 
 	@Override

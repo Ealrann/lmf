@@ -1,6 +1,9 @@
 package isotropy.lmf.core.lang.builder;
 
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Alias;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.impl.AliasImpl;
 import isotropy.lmf.core.model.FeatureInserter;
 
@@ -13,8 +16,8 @@ public final class AliasBuilder implements Alias.Builder
 	private static final FeatureInserter<AliasBuilder> FEATURE_INSERTER = FeatureInserter
 
 			.<AliasBuilder>Builder()
-			.add(LMCoreDefinition.Features.ALIAS.name, AliasBuilder::name)
-			.add(LMCoreDefinition.Features.ALIAS.words, AliasBuilder::addWord)
+			.add(Alias.Features.name, AliasBuilder::name)
+			.add(Alias.Features.words, AliasBuilder::addWord)
 			.build();
 
 	private String name = null;
@@ -29,7 +32,7 @@ public final class AliasBuilder implements Alias.Builder
 	@Override
 	public <AttributeType> void push(final Attribute<AttributeType, ?> feature, final AttributeType value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override

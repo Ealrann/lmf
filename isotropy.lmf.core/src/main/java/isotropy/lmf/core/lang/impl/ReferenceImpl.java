@@ -2,23 +2,21 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureMap;
+import isotropy.lmf.core.model.FeaturedObject;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class ReferenceImpl<UnaryType extends LMObject> implements Reference<UnaryType>
+public final class ReferenceImpl<UnaryType extends LMObject> extends FeaturedObject implements Reference<UnaryType>
 {
 	public static final FeatureMap<Function<Reference<?>, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.REFERENCE.group, Reference::group),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.REFERENCE.parameters,
-												  Reference::parameters)));
+			List.of(new FeatureMap.FeatureTuple<>(Features.group, Reference::group),
+					new FeatureMap.FeatureTuple<>(Features.parameters, Reference::parameters)));
 
 	private final Supplier<Concept<UnaryType>> group;
 	private final List<Supplier<? extends Concept<?>>> parameters;
-
-	private LMObject container;
 
 	public ReferenceImpl(final Supplier<Concept<UnaryType>> group,
 						 final List<Supplier<? extends Concept<?>>> parameters)
@@ -45,7 +43,7 @@ public final class ReferenceImpl<UnaryType extends LMObject> implements Referenc
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature)
+		return (T) GET_MAP.get(feature.rawFeature())
 						  .apply(this);
 	}
 
@@ -59,17 +57,5 @@ public final class ReferenceImpl<UnaryType extends LMObject> implements Referenc
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.RELATION;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

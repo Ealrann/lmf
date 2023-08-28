@@ -27,7 +27,7 @@ public final class EnumResolver<T> extends AttributeResolver<T>
 
 	private static <T> Optional<T> extractEnumLiteral(final String value, final isotropy.lmf.core.lang.Enum<T> _enum)
 	{
-		final var lPackage = ((Model) _enum.lContainer()).lPackage();
+		final var lPackage = ((Model) _enum.lmContainer()).lPackage();
 		final var resolvedEnum = lPackage.resolveEnum(_enum, capitalizeFirstLetter(value));
 		return resolvedEnum;
 	}

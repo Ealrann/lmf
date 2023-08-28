@@ -1,7 +1,6 @@
 package isotropy.lmf.core.model;
 
 import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.lang.Relation;
 
 import java.util.function.BiConsumer;
 
@@ -16,7 +15,7 @@ public final class FeatureBuilderInserter<T>
 
 	@SuppressWarnings("unchecked")
 	public <RelationType extends LMObject> void accept(final T owner,
-													   final Relation<RelationType, ?> feature,
+													   final RawFeature<RelationType, ?> feature,
 													   final IFeaturedObject.Builder<RelationType> builder)
 	{
 		final var value = (BiConsumer<T, IFeaturedObject.Builder<RelationType>>) featureMap.getTuple(feature)
@@ -31,15 +30,14 @@ public final class FeatureBuilderInserter<T>
 
 	public static final class Builder<T>
 	{
-		private final FeatureMap.Builder<BiConsumer<T, ? extends IFeaturedObject.Builder<?>>> builder
-				= new FeatureMap.Builder<>();
+		private final FeatureMap.Builder<BiConsumer<T, ? extends IFeaturedObject.Builder<?>>> builder = new FeatureMap.Builder<>();
 
 		public FeatureBuilderInserter<T> build()
 		{
 			return new FeatureBuilderInserter<>(builder.build());
 		}
 
-		public <F extends LMObject> Builder<T> add(final Relation<F, ?> feature,
+		public <F extends LMObject> Builder<T> add(final RawFeature<F, ?> feature,
 												   final BiConsumer<T, IFeaturedObject.Builder<F>> function)
 		{
 			builder.add(feature, function);

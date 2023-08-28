@@ -12,14 +12,14 @@ public class GenericBuilder<T> implements Generic.Builder<T>
 	private static final FeatureInserter<GenericBuilder<?>> FEATURE_INSERTER = FeatureInserter
 
 			.<GenericBuilder<?>>Builder()
-			.add(LMCoreDefinition.Features.GENERIC.name, GenericBuilder::name)
-			.add(LMCoreDefinition.Features.GENERIC.boundType, GenericBuilder::boundType)
+			.add(Generic.Features.name, GenericBuilder::name)
+			.add(Generic.Features.boundType, GenericBuilder::boundType)
 			.build();
 
 	private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = RelationLazyInserter
 
 			.<GenericBuilder<?>>Builder()
-			.add(LMCoreDefinition.Features.GENERIC.type, GenericBuilder::_type)
+			.add(Generic.Features.type, GenericBuilder::_type)
 			.build();
 
 	private String name;
@@ -63,13 +63,13 @@ public class GenericBuilder<T> implements Generic.Builder<T>
 	@Override
 	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override
 	public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
 													 final Supplier<RelationType> supplier)
 	{
-		RELATION_INSERTER.push(this, relation, supplier);
+		RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
 	}
 }

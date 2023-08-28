@@ -25,6 +25,7 @@ public class FullModelTest
 		assertTrue(root instanceof Model);
 
 		final var model = (Model) root;
+		assertEquals(model.name(), "LMCore");
 		assertEquals(model.domain(), "isotrpoy.lmf.core.lang");
 
 		assertEquals(15,

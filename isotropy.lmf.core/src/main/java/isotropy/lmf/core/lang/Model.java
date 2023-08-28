@@ -2,6 +2,7 @@ package isotropy.lmf.core.lang;
 
 import isotropy.lmf.core.lang.builder.ModelBuilder;
 import isotropy.lmf.core.model.IModelPackage;
+import isotropy.lmf.core.model.RawFeature;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -15,6 +16,26 @@ public interface Model extends Named
 	List<Alias> aliases();
 
 	IModelPackage lPackage();
+
+	interface Features
+	{
+		RawFeature<String, String> name = Named.Features.name;
+		RawFeature<String, String> domain = new RawFeature<>(false,
+															 false,
+															 () -> LMCoreDefinition.Features.MODEL.domain);
+		RawFeature<Group<?>, List<Group<?>>> groups = new RawFeature<>(true,
+																	   true,
+																	   () -> LMCoreDefinition.Features.MODEL.groups);
+		RawFeature<Enum<?>, List<Enum<?>>> enums = new RawFeature<>(true,
+																	true,
+																	() -> LMCoreDefinition.Features.MODEL.enums);
+		RawFeature<Unit<?>, List<Unit<?>>> units = new RawFeature<>(true,
+																	true,
+																	() -> LMCoreDefinition.Features.MODEL.units);
+		RawFeature<Alias, List<Alias>> aliases = new RawFeature<>(true,
+																  true,
+																  () -> LMCoreDefinition.Features.MODEL.aliases);
+	}
 
 	static Builder builder() {return new ModelBuilder();}
 	interface Builder extends LMObject.Builder<Model>

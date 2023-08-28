@@ -2,19 +2,20 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureGetter;
+import isotropy.lmf.core.model.FeaturedObject;
 
 import java.util.List;
 
-public final class GroupImpl<T extends LMObject> implements Group<T>
+public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T>
 {
 	public static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>()
 
-			.add(LMCoreDefinition.Features.GROUP.name, Group::name)
-			.add(LMCoreDefinition.Features.GROUP.concrete, Group::concrete)
-			.add(LMCoreDefinition.Features.GROUP.includes, Group::includes)
-			.add(LMCoreDefinition.Features.GROUP.features, Group::features)
-			.add(LMCoreDefinition.Features.GROUP.generics, Group::generics)
-			.add(LMCoreDefinition.Features.GROUP.parameters, Group::parameters)
+			.add(Features.name, Group::name)
+			.add(Features.concrete, Group::concrete)
+			.add(Features.includes, Group::includes)
+			.add(Features.features, Group::features)
+			.add(Features.generics, Group::generics)
+			.add(Features.parameters, Group::parameters)
 			.build();
 
 	private final String name;
@@ -23,8 +24,6 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	private final List<? extends Feature<?, ?>> features;
 	private final List<? extends Generic<?>> generics;
 	private final List<? extends Generic<?>> parameters;
-
-	private LMObject container;
 
 	public GroupImpl(final String name,
 					 final boolean concrete,
@@ -39,6 +38,11 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 		this.features = features;
 		this.generics = generics;
 		this.parameters = parameters;
+
+		ContainmentUtils.setContainer(this, includes, Features.includes);
+		ContainmentUtils.setContainer(this, features, Features.features);
+		ContainmentUtils.setContainer(this, generics, Features.generics);
+		ContainmentUtils.setContainer(this, parameters, Features.parameters);
 	}
 
 	@Override
@@ -80,7 +84,7 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return GET_MAP.get(this, feature);
+		return GET_MAP.get(this, feature.rawFeature());
 	}
 
 	@Override
@@ -93,17 +97,5 @@ public final class GroupImpl<T extends LMObject> implements Group<T>
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.GROUP;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

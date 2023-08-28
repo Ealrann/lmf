@@ -1,18 +1,17 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.model.FeaturedObject;
 
 import java.util.function.Function;
 
-public final class UnitImpl<T> implements Unit<T>
+public final class UnitImpl<T> extends FeaturedObject implements Unit<T>
 {
 	private final String name;
 	private final String matcher;
 	private final String defaultValue;
 	private final Primitive primitive;
 	private final String extractor;
-
-	private LMObject container;
 
 	public UnitImpl(final String name,
 					final String matcher,
@@ -102,17 +101,5 @@ public final class UnitImpl<T> implements Unit<T>
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.UNIT;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

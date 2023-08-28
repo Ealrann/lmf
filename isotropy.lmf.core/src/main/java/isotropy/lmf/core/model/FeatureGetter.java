@@ -1,7 +1,5 @@
 package isotropy.lmf.core.model;
 
-import isotropy.lmf.core.lang.Feature;
-
 import java.util.function.Function;
 
 public final class FeatureGetter<T>
@@ -14,9 +12,11 @@ public final class FeatureGetter<T>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <F> F get(final T object, final Feature<?, F> feature)
+	public <F> F get(final T object, final RawFeature<?, F> feature)
 	{
-		return (F) featureMap.getTuple(feature).value().apply(object);
+		return (F) featureMap.getTuple(feature)
+							 .value()
+							 .apply(object);
 	}
 
 	public static final class Builder<T>
@@ -28,7 +28,7 @@ public final class FeatureGetter<T>
 			return new FeatureGetter<>(builder.build());
 		}
 
-		public <F> Builder<T> add(final Feature<?, F> feature, final Function<T, ? extends F> function)
+		public <F> Builder<T> add(final RawFeature<?, F> feature, final Function<T, ? extends F> function)
 		{
 			builder.add(feature, function);
 			return this;

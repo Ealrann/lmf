@@ -1,30 +1,35 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.model.FeaturedObject;
+import isotropy.lmf.core.model.RawFeature;
 
 import java.util.function.Function;
 
-public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<UnaryType, EffectiveType>
+public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType>
 {
 	private final String name;
 	private final boolean immutable;
 	private final boolean many;
 	private final boolean mandatory;
 	private final Datatype<UnaryType> datatype;
-
-	private LMObject container;
+	private final RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	public AttributeImpl(final String name,
 						 final boolean immutable,
 						 final boolean many,
 						 final boolean mandatory,
-						 final Datatype<UnaryType> datatype)
+						 final Datatype<UnaryType> datatype,
+						 final RawFeature<UnaryType, EffectiveType> rawFeature)
 	{
 		this.name = name;
 		this.immutable = immutable;
 		this.many = many;
 		this.mandatory = mandatory;
 		this.datatype = datatype;
+		this.rawFeature = rawFeature;
+
+		ContainmentUtils.setContainer(this, datatype, Features.datatype);
 	}
 
 	@Override
@@ -55,6 +60,12 @@ public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<
 	public Datatype<UnaryType> datatype()
 	{
 		return datatype;
+	}
+
+	@Override
+	public RawFeature<UnaryType, EffectiveType> rawFeature()
+	{
+		return rawFeature;
 	}
 
 	@Override
@@ -102,17 +113,5 @@ public final class AttributeImpl<UnaryType, EffectiveType> implements Attribute<
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.ATTRIBUTE;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

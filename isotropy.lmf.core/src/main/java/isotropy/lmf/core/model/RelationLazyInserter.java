@@ -1,7 +1,6 @@
 package isotropy.lmf.core.model;
 
 import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.lang.Relation;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -16,9 +15,10 @@ public final class RelationLazyInserter<T>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <F extends LMObject> void push(final T object, final Relation<F, ?> relation, final Supplier<F> value)
+	public <F extends LMObject> void push(final T object, final RawFeature<F, ?> relation, final Supplier<F> value)
 	{
-		((BiConsumer<T, Supplier<F>>) featureMap.getTuple(relation).value()).accept(object, value);
+		((BiConsumer<T, Supplier<F>>) featureMap.getTuple(relation)
+												.value()).accept(object, value);
 	}
 
 	public static <T> Builder<T> Builder()
@@ -35,7 +35,7 @@ public final class RelationLazyInserter<T>
 			return new RelationLazyInserter<>(builder.build());
 		}
 
-		public <F extends LMObject> Builder<T> add(final Relation<F, ?> relation,
+		public <F extends LMObject> Builder<T> add(final RawFeature<F, ?> relation,
 												   final BiConsumer<T, Supplier<F>> function)
 		{
 			builder.add(relation, function);

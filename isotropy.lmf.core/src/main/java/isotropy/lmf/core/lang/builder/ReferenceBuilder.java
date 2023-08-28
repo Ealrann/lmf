@@ -19,8 +19,8 @@ public final class ReferenceBuilder<UnaryType extends LMObject> implements Refer
 	private static final RelationLazyInserter<ReferenceBuilder<?>> RELATION_INSERTER = RelationLazyInserter
 
 			.<ReferenceBuilder<?>>Builder()
-			.add(LMCoreDefinition.Features.REFERENCE.group, ReferenceBuilder::_group)
-			.add(LMCoreDefinition.Features.REFERENCE.parameters, ReferenceBuilder::addParameter)
+			.add(Reference.Features.group, ReferenceBuilder::_group)
+			.add(Reference.Features.parameters, ReferenceBuilder::addParameter)
 			.build();
 
 	private Supplier<Concept<UnaryType>> group = null;
@@ -56,13 +56,13 @@ public final class ReferenceBuilder<UnaryType extends LMObject> implements Refer
 	@Override
 	public <AttributeType> void push(final Attribute<AttributeType, ?> feature, final AttributeType value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override
 	public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
 													 final Supplier<RelationType> supplier)
 	{
-		RELATION_INSERTER.push(this, relation, supplier);
+		RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
 	}
 }

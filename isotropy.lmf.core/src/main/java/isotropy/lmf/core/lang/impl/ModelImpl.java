@@ -3,21 +3,22 @@ package isotropy.lmf.core.lang.impl;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureMap;
+import isotropy.lmf.core.model.FeaturedObject;
 import isotropy.lmf.core.model.IModelPackage;
 
 import java.util.List;
 import java.util.function.Function;
 
-public final class ModelImpl implements Model
+public final class ModelImpl extends FeaturedObject implements Model
 {
 	public static final FeatureMap<Function<Model, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.domain, Model::domain),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.groups, Model::groups),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.enums, Model::enums),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.units, Model::units),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.MODEL.aliases, Model::aliases)));
+			List.of(new FeatureMap.FeatureTuple<>(Features.name, Named::name),
+					new FeatureMap.FeatureTuple<>(Features.domain, Model::domain),
+					new FeatureMap.FeatureTuple<>(Features.groups, Model::groups),
+					new FeatureMap.FeatureTuple<>(Features.enums, Model::enums),
+					new FeatureMap.FeatureTuple<>(Features.units, Model::units),
+					new FeatureMap.FeatureTuple<>(Features.aliases, Model::aliases)));
 
 	private final IModelPackage _package;
 	private final String name;
@@ -26,8 +27,6 @@ public final class ModelImpl implements Model
 	private final List<Enum<?>> enums;
 	private final List<Unit<?>> units;
 	private final List<Alias> aliases;
-
-	private LMObject container;
 
 	public ModelImpl(final IModelPackage _package,
 					 final String name,
@@ -44,6 +43,11 @@ public final class ModelImpl implements Model
 		this.enums = enums;
 		this.units = units;
 		this.aliases = aliases;
+
+		ContainmentUtils.setContainer(this, groups, Features.groups);
+		ContainmentUtils.setContainer(this, enums, Features.enums);
+		ContainmentUtils.setContainer(this, units, Features.units);
+		ContainmentUtils.setContainer(this, aliases, Features.aliases);
 	}
 
 	@Override
@@ -86,7 +90,7 @@ public final class ModelImpl implements Model
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature).apply(this);
+		return (T) GET_MAP.get(feature.rawFeature()).apply(this);
 	}
 
 	@Override
@@ -99,18 +103,6 @@ public final class ModelImpl implements Model
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.MODEL;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 
 	@Override

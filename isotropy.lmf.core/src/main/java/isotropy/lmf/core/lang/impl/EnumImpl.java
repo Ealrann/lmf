@@ -2,16 +2,15 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.model.FeaturedObject;
 
 import java.util.List;
 import java.util.function.Function;
 
-public final class EnumImpl<T> implements Enum<T>
+public final class EnumImpl<T> extends FeaturedObject implements Enum<T>
 {
 	private final String name;
 	private final List<String> literals;
-
-	private LMObject container;
 
 	public EnumImpl(final String name, final List<String> literals)
 	{
@@ -64,17 +63,5 @@ public final class EnumImpl<T> implements Enum<T>
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.ENUM;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

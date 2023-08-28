@@ -14,8 +14,8 @@ public final class EnumBuilder<T> implements Enum.Builder<T>
 	private static final FeatureInserter<EnumBuilder<?>> FEATURE_INSERTER = FeatureInserter
 
 			.<EnumBuilder<?>>Builder()
-			.add(LMCoreDefinition.Features.ENUM.name, EnumBuilder::name)
-			.add(LMCoreDefinition.Features.ENUM.literals, EnumBuilder::addLiteral)
+			.add(Enum.Features.name, EnumBuilder::name)
+			.add(Enum.Features.literals, EnumBuilder::addLiteral)
 			.build();
 
 	private String name = null;
@@ -44,7 +44,7 @@ public final class EnumBuilder<T> implements Enum.Builder<T>
 	@Override
 	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override

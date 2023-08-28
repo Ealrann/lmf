@@ -2,20 +2,22 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureMap;
+import isotropy.lmf.core.model.FeaturedObject;
+import isotropy.lmf.core.model.RawFeature;
 
 import java.util.List;
 import java.util.function.Function;
 
-public final class RelationImpl<UnaryType extends LMObject, EffectiveType> implements Relation<UnaryType, EffectiveType>
+public final class RelationImpl<UnaryType extends LMObject, EffectiveType> extends FeaturedObject implements Relation<UnaryType, EffectiveType>
 {
 	public static final FeatureMap<Function<Relation<?, ?>, Object>> GET_MAP = new FeatureMap<>(
 
-			List.of(new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.name, Named::name),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.immutable, Relation::immutable),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.many, Relation::many),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.mandatory, Relation::mandatory),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.reference, Relation::reference),
-					new FeatureMap.FeatureTuple<>(LMCoreDefinition.Features.RELATION.contains, Relation::contains)));
+			List.of(new FeatureMap.FeatureTuple<>(Features.name, Named::name),
+					new FeatureMap.FeatureTuple<>(Features.immutable, Relation::immutable),
+					new FeatureMap.FeatureTuple<>(Features.many, Relation::many),
+					new FeatureMap.FeatureTuple<>(Features.mandatory, Relation::mandatory),
+					new FeatureMap.FeatureTuple<>(Features.reference, Relation::reference),
+					new FeatureMap.FeatureTuple<>(Features.contains, Relation::contains)));
 
 	private final String name;
 	private final boolean immutable;
@@ -23,15 +25,15 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	private final boolean mandatory;
 	private final Reference<UnaryType> reference;
 	private final boolean contains;
-
-	private LMObject container;
+	private final RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	public RelationImpl(final String name,
 						final boolean immutable,
 						final boolean many,
 						final boolean mandatory,
 						final Reference<UnaryType> reference,
-						final boolean contains)
+						final boolean contains,
+						final RawFeature<UnaryType, EffectiveType> rawFeature)
 	{
 		this.name = name;
 		this.immutable = immutable;
@@ -39,6 +41,9 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 		this.mandatory = mandatory;
 		this.reference = reference;
 		this.contains = contains;
+		this.rawFeature = rawFeature;
+
+		ContainmentUtils.setContainer(this, reference, Features.reference);
 	}
 
 	@Override
@@ -77,11 +82,17 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 		return contains;
 	}
 
+	@Override
+	public RawFeature<UnaryType, EffectiveType> rawFeature()
+	{
+		return rawFeature;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature)
+		return (T) GET_MAP.get(feature.rawFeature())
 						  .apply(this);
 	}
 
@@ -95,17 +106,5 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> imple
 	public Group<?> lmGroup()
 	{
 		return LMCoreDefinition.Groups.RELATION;
-	}
-
-	@Override
-	public LMObject lContainer()
-	{
-		return container;
-	}
-
-	@Override
-	public void lContainer(final LMObject container)
-	{
-		this.container = container;
 	}
 }

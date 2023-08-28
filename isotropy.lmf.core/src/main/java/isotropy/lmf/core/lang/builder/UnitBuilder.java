@@ -10,11 +10,11 @@ public final class UnitBuilder<T> implements Unit.Builder<T>
 {
 	public static final FeatureInserter<UnitBuilder<?>> FEATURE_SETTER = new FeatureInserter.Builder<UnitBuilder<?>>()
 
-			.add(LMCoreDefinition.Features.UNIT.name, UnitBuilder::name)
-			.add(LMCoreDefinition.Features.UNIT.matcher, UnitBuilder::matcher)
-			.add(LMCoreDefinition.Features.UNIT.defaultValue, UnitBuilder::defaultValue)
-			.add(LMCoreDefinition.Features.UNIT.primitive, UnitBuilder::primitive)
-			.add(LMCoreDefinition.Features.UNIT.extractor, UnitBuilder::extractor)
+			.add(Unit.Features.name, UnitBuilder::name)
+			.add(Unit.Features.matcher, UnitBuilder::matcher)
+			.add(Unit.Features.defaultValue, UnitBuilder::defaultValue)
+			.add(Unit.Features.primitive, UnitBuilder::primitive)
+			.add(Unit.Features.extractor, UnitBuilder::extractor)
 			.build();
 
 	private String name;
@@ -67,7 +67,7 @@ public final class UnitBuilder<T> implements Unit.Builder<T>
 	@Override
 	public <Type> void push(final Attribute<Type, ?> feature, final Type value)
 	{
-		FEATURE_SETTER.push(this, feature, value);
+		FEATURE_SETTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override

@@ -1,29 +1,30 @@
 package isotropy.lmf.core.lang.builder;
 
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.lang.Reference;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.model.FeatureInserter;
+import isotropy.lmf.core.model.RawFeature;
 import isotropy.lmf.core.model.RelationLazyInserter;
 
 import java.util.function.Supplier;
 
-public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Relation.Builder<UnaryType,
-		EffectiveType>
+public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Relation.Builder<UnaryType, EffectiveType>
 {
-	public static final FeatureInserter<RelationBuilder<?, ?>> FEATURE_INSERTER =
-			new FeatureInserter.Builder<RelationBuilder<?, ?>>()
+	public static final FeatureInserter<RelationBuilder<?, ?>> FEATURE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(LMCoreDefinition.Features.RELATION.name, RelationBuilder::name)
-			.add(LMCoreDefinition.Features.RELATION.immutable, RelationBuilder::immutable)
-			.add(LMCoreDefinition.Features.RELATION.many, RelationBuilder::many)
-			.add(LMCoreDefinition.Features.RELATION.mandatory, RelationBuilder::mandatory)
-			.add(LMCoreDefinition.Features.RELATION.contains, RelationBuilder::contains)
+			.add(Relation.Features.name, RelationBuilder::name)
+			.add(Relation.Features.immutable, RelationBuilder::immutable)
+			.add(Relation.Features.many, RelationBuilder::many)
+			.add(Relation.Features.mandatory, RelationBuilder::mandatory)
+			.add(Relation.Features.contains, RelationBuilder::contains)
 			.build();
 
-	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER =
-			new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
+	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
 
-			.add(LMCoreDefinition.Features.RELATION.reference, RelationBuilder::_reference)
+			.add(Relation.Features.reference, RelationBuilder::_reference)
 			.build();
 
 	private String name = null;
@@ -31,13 +32,14 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	private boolean immutable;
 	private boolean mandatory;
 	private boolean contains;
+	private RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	private Supplier<Reference<UnaryType>> reference = () -> null;
 
 	@Override
 	public Relation<UnaryType, EffectiveType> build()
 	{
-		return new RelationImpl<>(name, many, immutable, mandatory, reference.get(), contains);
+		return new RelationImpl<>(name, many, immutable, mandatory, reference.get(), contains, rawFeature);
 	}
 
 	@Override
@@ -83,6 +85,13 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	}
 
 	@Override
+	public RelationBuilder<UnaryType, EffectiveType> rawFeature(RawFeature<UnaryType, EffectiveType> rawFeature)
+	{
+		this.rawFeature = rawFeature;
+		return this;
+	}
+
+	@Override
 	public RelationBuilder<UnaryType, EffectiveType> contains(final boolean contains)
 	{
 		this.contains = contains;
@@ -92,13 +101,13 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	@Override
 	public <AttributeType> void push(final Attribute<AttributeType, ?> feature, final AttributeType value)
 	{
-		FEATURE_INSERTER.push(this, feature, value);
+		FEATURE_INSERTER.push(this, feature.rawFeature(), value);
 	}
 
 	@Override
 	public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
 													 final Supplier<RelationType> supplier)
 	{
-		BUILDER_INSERTER.push(this, relation, supplier);
+		BUILDER_INSERTER.push(this, relation.rawFeature(), supplier);
 	}
 }
