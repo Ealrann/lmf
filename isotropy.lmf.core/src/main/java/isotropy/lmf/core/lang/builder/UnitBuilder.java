@@ -20,7 +20,7 @@ public final class UnitBuilder<T> implements Unit.Builder<T>
 	private String name;
 	private String matcher;
 	private String defaultValue;
-	private Primitive primitive;
+	private Primitive primitive = Primitive.String;
 	private String extractor;
 
 	@Override

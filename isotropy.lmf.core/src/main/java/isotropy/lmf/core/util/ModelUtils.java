@@ -1,8 +1,13 @@
 package isotropy.lmf.core.util;
 
 import isotropy.lmf.core.lang.Concept;
+import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Generic;
 import isotropy.lmf.core.lang.Group;
+
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class ModelUtils
 {
@@ -41,5 +46,37 @@ public class ModelUtils
 			}
 		}
 		return false;
+	}
+
+	public static Stream<Feature<?, ?>> streamAllFeatures(Group<?> group)
+	{
+		return streamHierarchy(group).map(Group::features)
+									 .flatMap(Collection::stream);
+	}
+
+	public static Stream<Group<?>> streamHierarchy(Group<?> group)
+	{
+		final var groupSet = new LinkedHashSet<Group<?>>();
+		addHierarchy(group, groupSet);
+		groupSet.add(group);
+
+		final var deque = new LinkedList<>(groupSet);
+		final var reverseStream = StreamSupport.stream(Spliterators.spliterator(deque.descendingIterator(),
+																				deque.size(),
+																				Spliterator.SIZED |
+																				Spliterator.ORDERED |
+																				Spliterator.IMMUTABLE |
+																				Spliterator.DISTINCT), false);
+
+		return reverseStream;
+	}
+
+	private static void addHierarchy(Group<?> group, LinkedHashSet<Group<?>> res)
+	{
+		res.add(group);
+		for (final var include : group.includes())
+		{
+			addHierarchy((Group<?>) include.group(), res);
+		}
 	}
 }

@@ -102,4 +102,42 @@ public final class LMCorePackage implements IModelPackage
 
 		return Optional.empty();
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> Optional<Class<T>> resolveClass(final Enum<T> _enum)
+	{
+		if (_enum == LMCoreDefinition.Enums.BOUND_TYPE)
+		{
+			return Optional.of((Class<T>) BoundType.class);
+		}
+		else if (_enum == LMCoreDefinition.Enums.PRIMITIVE)
+		{
+			return Optional.of((Class<T>) Primitive.class);
+		}
+
+		return Optional.empty();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends LMObject> Optional<Class<T>> resolveClass(final Group<T> group)
+	{
+		if (group == LMCoreDefinition.Groups.LM_OBJECT) return Optional.of((Class<T>) LMObject.class);
+		else if (group == LMCoreDefinition.Groups.NAMED) return Optional.of((Class<T>) Named.class);
+		else if (group == LMCoreDefinition.Groups.TYPE) return Optional.of((Class<T>) Type.class);
+		else if (group == LMCoreDefinition.Groups.CONCEPT) return Optional.of((Class<T>) Concept.class);
+		else if (group == LMCoreDefinition.Groups.MODEL) return Optional.of((Class<T>) Model.class);
+		else if (group == LMCoreDefinition.Groups.GROUP) return Optional.of((Class<T>) Group.class);
+		else if (group == LMCoreDefinition.Groups.FEATURE) return Optional.of((Class<T>) Feature.class);
+		else if (group == LMCoreDefinition.Groups.ATTRIBUTE) return Optional.of((Class<T>) Attribute.class);
+		else if (group == LMCoreDefinition.Groups.RELATION) return Optional.of((Class<T>) Relation.class);
+		else if (group == LMCoreDefinition.Groups.DATATYPE) return Optional.of((Class<T>) Datatype.class);
+		else if (group == LMCoreDefinition.Groups.ENUM) return Optional.of((Class<T>) Enum.class);
+		else if (group == LMCoreDefinition.Groups.UNIT) return Optional.of((Class<T>) Unit.class);
+		else if (group == LMCoreDefinition.Groups.GENERIC) return Optional.of((Class<T>) Generic.class);
+		else if (group == LMCoreDefinition.Groups.REFERENCE) return Optional.of((Class<T>) Reference.class);
+
+		return Optional.empty();
+	}
 }

@@ -1,10 +1,11 @@
 package isotropy.lmf.generator.model;
 
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Model;
-import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.util.GenUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -13,83 +14,56 @@ import java.io.IOException;
 public class GroupGenerator
 {
 	private final Group<?> group;
+	private final String packageName;
 
 	public GroupGenerator(Group<?> group)
 	{
 		this.group = group;
+		final var model = (Model) group.lmContainer();
+		packageName = model.domain();
 	}
 
 	public void generate(final File target)
 	{
-		generateInterface(target);
-	}
-
-	private void generateInterface(final File target)
-	{
-		final var groupName = group.name();
-		final var packageName = "isotropy.lmf.lang";
 		final var isFinal = group.concrete();
-
 		final var includes = group.includes();
 		final var refInclude = includes.isEmpty() ? null : includes.get(0);
+		final var types = Types.build(refInclude, group);
 
-		final var groupInterfaceBuilder = TypeSpec.interfaceBuilder(groupName)
-												  .addModifiers(Modifier.PUBLIC)
-												  .addSuperinterface(ParameterizedTypeName.get(ClassName.get(
-														  IFeaturedObject.class), ClassName.get("", groupName)));
-		final var builderTypeBuilder = TypeSpec.interfaceBuilder("Builder")
-											   .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-											   .addSuperinterface(ParameterizedTypeName.get(ClassName.get(
-													   IFeaturedObject.Builder.class), ClassName.get("", groupName)));
+		final var interfaceBuilder = TypeSpec.interfaceBuilder(types.className())
+											 .addSuperinterface(types.superType())
+											 .addTypeVariables(types.typedParameters())
+											 .addModifiers(Modifier.PUBLIC);
 
-		if (refInclude != null)
+		if (isFinal)
 		{
-			final var model = (Model) refInclude.lmContainer();
+			final var builderTypes = types.builder();
+			final var builderTypeBuilder = TypeSpec.interfaceBuilder(builderTypes.className())
+												   .addSuperinterface(builderTypes.superType())
+												   .addTypeVariables(builderTypes.typedParameters())
+												   .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
-			groupInterfaceBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(model.domain(), ""),
-																			  ClassName.get("", "T")));
-			builderTypeBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(IFeaturedObject.Builder.class),
-																		   ClassName.get("", "T")));
-		}
-		else if (groupName.equals("LMObject"))
-		{
-			groupInterfaceBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(IFeaturedObject.class),
-																			  ClassName.get("", "T")));
-			builderTypeBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(IFeaturedObject.Builder.class),
-																		   ClassName.get("", "T")));
-		}
-		else
-		{
-			groupInterfaceBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(LMObject.class),
-																			  ClassName.get("", "T")));
-			builderTypeBuilder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(LMObject.Builder.class),
-																		   ClassName.get("", "T")));
+			final var typedBuilder = GenUtils.parameterize(builderTypes.className(), builderTypes.rawParameters());
+			final var methodBuilder = new MethodUtil.BuilderMethodBuilder(typedBuilder);
+
+			ModelUtils.streamAllFeatures(group)
+					  .map(methodBuilder::build)
+					  .forEach(builderTypeBuilder::addMethod);
+
+			interfaceBuilder.addType(builderTypeBuilder.build());
 		}
 
-		for (final var feature : group.features())
-		{
-			final var builderFeatureMethod = MethodSpec.methodBuilder(feature.name())
-													   .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-													   .returns(void.class)
-													   .build();
+		final var methodBuilder = new MethodUtil.MethodBuilder();
 
-			final var featureMethod = MethodSpec.methodBuilder(feature.name())
-												.addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-												.returns(void.class)
-												.build();
-
-			builderTypeBuilder.addMethod(builderFeatureMethod);
-			groupInterfaceBuilder.addMethod(featureMethod);
-		}
-
-		final var builderType = builderTypeBuilder.build();
-		final var groupClass = groupInterfaceBuilder.addType(builderType)
-													.build();
-		final var javaFile = JavaFile.builder(packageName, groupClass)
-									 .build();
+		group.features()
+			 .stream()
+			 .map(methodBuilder::build)
+			 .forEach(interfaceBuilder::addMethod);
 
 		try
 		{
+			final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build())
+										 .build();
 			javaFile.writeTo(target);
 		}
 		catch (IOException e)

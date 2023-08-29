@@ -21,13 +21,16 @@ public class ModelGenerator
 
 	public void generateJava(File target)
 	{
-
 		for(final var group : model.groups())
 		{
 			final var groupGenerator = new GroupGenerator(group);
 			groupGenerator.generate(target);
 		}
-
+		for(final var enumeration : model.enums())
+		{
+			final var enumGenerator = new EnumGenerator(enumeration);
+			enumGenerator.generate(target);
+		}
 
 		final var modelName = model.name();
 		final var className = modelName + "Package";

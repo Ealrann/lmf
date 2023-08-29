@@ -1,8 +1,8 @@
-(Model domain=isotropy.lmf.core.lang name=LMCore
+(Model domain=isotropy.lmf.core.langg name=LMCore
 
 	(Group LMObject)
 	(Group Named (includes /groups.0) (-att name=name /units.7 mandatory))
-	(Group Type  (includes /groups.1))
+	(Group Type  (includes /groups.1) (generics name=T))
 
 	(Definition Model (includes group=/groups.1)
 		(-contains groups  (reference group=/groups.4)  [0..*])
@@ -50,15 +50,15 @@
 
 	(Definition Generic (includes group=/groups.1)(includes /groups.14 parameters=../generics.0) parameters=./generics.0
 	    (Generic T boundType=extends type=/groups.0)
-		(-refers type      (reference group=/groups.2))
+		(-refers type      (reference group=/groups.2 parameters=../../generics.0))
 		(-att    boundType datatype=/enums.0))
 
-	(Definition Reference (includes group=/groups.0 parameters=../generics.0)
-	    (Generic T)
+	(Definition Reference (includes group=/groups.0)
+	    (Generic name=T boundType=Extends type=/groups.0)
     	(-refers   group      [1..1] (reference /groups.14 parameters=../../generics.0))
     	(-contains parameters [0..*] (reference /groups.14)))
 
-    (Group Concept)
+    (Group Concept (Generic name=T))
 
 	(Unit name=matcher   matcher="rgx_match:<(.+?)>")
     (Unit name=extractor matcher="rgx_match:<(.+?)>")

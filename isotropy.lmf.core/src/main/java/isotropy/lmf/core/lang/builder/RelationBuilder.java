@@ -39,7 +39,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	@Override
 	public Relation<UnaryType, EffectiveType> build()
 	{
-		return new RelationImpl<>(name, many, immutable, mandatory, reference.get(), contains, rawFeature);
+		return new RelationImpl<>(name, immutable, many, mandatory, reference.get(), contains, rawFeature);
 	}
 
 	@Override

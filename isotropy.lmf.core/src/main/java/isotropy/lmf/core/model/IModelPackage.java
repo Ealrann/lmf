@@ -13,4 +13,6 @@ public interface IModelPackage
 	<T extends LMObject> IFeaturedObject.Builder<T> builder(Group<T> group);
 
 	<T> Optional<T> resolveEnum(Enum<T> anEnum, String word);
+	<T> Optional<Class<T>> resolveClass(final Enum<T> _enum);
+	<T extends LMObject> Optional<Class<T>> resolveClass(final Group<T> group);
 }

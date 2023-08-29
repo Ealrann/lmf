@@ -11,10 +11,9 @@ test {
 	useJUnitPlatform()
 }
 
-
 sourceSets {
 	main {
-		java.srcDirs += ['src/main/model',
-						 'src/main/generated']
+		java.srcDirs += ['src/main/model'
+						 ,'src/main/generated']
 	}
 }

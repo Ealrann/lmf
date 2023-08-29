@@ -29,7 +29,7 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribu
 			.build();
 
 	private String name = null;
-	private boolean many;
+	private boolean many = false;
 	private boolean immutable;
 	private boolean mandatory;
 	private Supplier<? extends Datatype<UnaryType>> suppliedDatatype = () -> null;
