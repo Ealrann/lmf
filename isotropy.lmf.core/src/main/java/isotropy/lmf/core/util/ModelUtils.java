@@ -1,9 +1,6 @@
 package isotropy.lmf.core.util;
 
-import isotropy.lmf.core.lang.Concept;
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.Generic;
-import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.lang.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -11,6 +8,18 @@ import java.util.stream.StreamSupport;
 
 public class ModelUtils
 {
+	public static LMObject root(LMObject child)
+	{
+		if(child.lmContainer() != null)
+		{
+			return root(child.lmContainer());
+		}
+		else
+		{
+			return child;
+		}
+	}
+
 	public static boolean isSubGroup(final Concept<?> parent, final Group<?> check)
 	{
 

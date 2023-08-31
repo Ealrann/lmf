@@ -33,7 +33,7 @@
 	(Definition Relation parameters=./generics.0,./generics.1
 		(includes /groups.5 parameters=../generics.0,../generics.1)
 		(Generic UnaryType boundType=Extends type=/groups.0) (Generic EffectiveType)
-		(-contains reference        (reference group=/groups.13) [1..1])
+		(-contains reference        (reference group=/groups.13 parameters=../../generics.0) [1..1])
 		(-att      lazy             datatype=/units.2)
 		(-att      contains         datatype=/units.2))
 

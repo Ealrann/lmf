@@ -1,12 +1,12 @@
 package isotropy.lmf.generator.model;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.generator.util.GenUtils;
+import isotropy.lmf.generator.util.TypeParameter;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -53,7 +53,7 @@ public record Types(Group<?> group,
 		return new Types(group, className, superClass.parametrized(), rawParameters, typedParameters);
 	}
 
-	private static ParameteredType resolveInclude(final Reference<?> refInclude, final Group<?> group)
+	private static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)
 	{
 		if (refInclude != null)
 		{
@@ -61,26 +61,18 @@ public record Types(Group<?> group,
 			final var refIncludeGroup = refInclude.group();
 			final var model = (Model) refIncludeGroup.lmContainer();
 			final var className = ClassName.get(model.domain(), refIncludeGroup.name());
-			return new ParameteredType(className, params);
+			return TypeParameter.of(className, params);
 		}
 		else if (group.name()
 					  .equals("LMObject"))
 		{
 			final var res = ClassName.get(IFeaturedObject.class);
-			return new ParameteredType(res, new ClassName[0]);
+			return TypeParameter.of(res, new ClassName[0]);
 		}
 		else
 		{
 			final var res = ClassName.get(LMObject.class);
-			return new ParameteredType(res, new ClassName[0]);
-		}
-	}
-
-	private record ParameteredType(ClassName raw, ClassName[] params)
-	{
-		TypeName parametrized()
-		{
-			return params.length == 0 ? raw : ParameterizedTypeName.get(raw, params);
+			return TypeParameter.of(res, new ClassName[0]);
 		}
 	}
 
