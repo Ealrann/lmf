@@ -13,7 +13,6 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T>
 	List<? extends Reference<?>> includes();
 	List<? extends Feature<?, ?>> features();
 	List<? extends Generic<?>> generics();
-	List<? extends Generic<?>> parameters();
 
 	List<Generic<?>> GENERICS = List.of(new GenericImpl<>("T", BoundType.Extends, LMCoreDefinition.Groups.LM_OBJECT));
 
@@ -32,9 +31,6 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T>
 		RawFeature<Generic<?>, List<? extends Generic<?>>> generics = new RawFeature<>(true,
 																					   true,
 																					   () -> LMCoreDefinition.Features.GROUP.generics);
-		RawFeature<Generic<?>, List<? extends Generic<?>>> parameters = new RawFeature<>(true,
-																						 true,
-																						 () -> LMCoreDefinition.Features.GROUP.parameters);
 	}
 	static <T extends LMObject> Builder<T> builder() {return new GroupBuilder<>();}
 	interface Builder<T extends LMObject> extends LMObject.Builder<Group<T>>
@@ -45,6 +41,5 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T>
 		Builder<T> addInclude(Supplier<Reference<?>> include);
 		Builder<T> addFeature(Supplier<Feature<?, ?>> feature);
 		Builder<T> addGeneric(Supplier<Generic<?>> generic);
-		Builder<T> addParameter(Supplier<Generic<?>> parameter);
 	}
 }

@@ -4,7 +4,6 @@ import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Primitive;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
-import isotropy.lmf.core.resource.transform.PTreeToJava;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -91,7 +90,7 @@ public class UnitTest
 		final var unitMatcher = model.units()
 									 .get(0);
 		assertEquals("matcher", unitMatcher.name());
-		assertNull(unitMatcher.primitive());
+		assertEquals(Primitive.String, unitMatcher.primitive());
 		assertNull(unitMatcher.defaultValue());
 		assertEquals("rgx_match:<(.+?)>", unitMatcher.matcher());
 		assertNull(unitMatcher.extractor());
@@ -99,7 +98,7 @@ public class UnitTest
 		final var unitExtractor = model.units()
 									   .get(1);
 		assertEquals("extractor", unitExtractor.name());
-		assertNull(unitExtractor.primitive());
+		assertEquals(Primitive.String, unitExtractor.primitive());
 		assertNull(unitExtractor.defaultValue());
 		assertEquals("rgx_match:<(.+?)>", unitExtractor.matcher());
 		assertNull(unitExtractor.extractor());
@@ -147,7 +146,7 @@ public class UnitTest
 		final var stringUnit = model.units()
 									.get(7);
 		assertEquals("string", stringUnit.name());
-		assertNull(stringUnit.primitive());
+		assertEquals(Primitive.String, stringUnit.primitive());
 		assertNull(stringUnit.defaultValue());
 		assertNull(stringUnit.matcher());
 		assertNull(stringUnit.extractor());

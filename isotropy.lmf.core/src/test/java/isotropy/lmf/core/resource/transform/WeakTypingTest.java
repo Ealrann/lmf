@@ -1,8 +1,10 @@
 package isotropy.lmf.core.resource.transform;
 
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.Model;
+import isotropy.lmf.core.lang.Primitive;
+import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
-import isotropy.lmf.core.resource.transform.PTreeToJava;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -34,7 +36,6 @@ public class WeakTypingTest
 		final var root = roots.get(0);
 		assertTrue(root instanceof Model);
 		final var model = (Model) root;
-
 
 		final var alias = model.aliases()
 							   .get(0);
@@ -78,7 +79,7 @@ public class WeakTypingTest
 	{
 		final var textModel = """
 				(Model Test
-				    (Group Container /groups.0/generics.0
+				    (Group Container
 				        (Generic T Extends #LMCore/groups.0)
 				        (-contains cargo [1..1] (reference /groups.2 /groups.0/generics.0))
 				    )
@@ -95,12 +96,20 @@ public class WeakTypingTest
 		assertTrue(root instanceof Model);
 		final var model = (Model) root;
 
-		final var container = model.groups().get(0);
-		final var car = model.groups().get(1);
-		final var carContainer = model.groups().get(2);
+		final var groups = model.groups();
+		final var container = groups.get(0);
+		final var car = groups.get(1);
+		final var carContainer = groups.get(2);
 
-		assertEquals(container, carContainer.includes().get(0).group());
-		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
+		assertEquals(container,
+					 carContainer.includes()
+								 .get(0)
+								 .group());
+		assertEquals(car,
+					 carContainer.includes()
+								 .get(0)
+								 .parameters()
+								 .get(0));
 	}
 
 	@Test

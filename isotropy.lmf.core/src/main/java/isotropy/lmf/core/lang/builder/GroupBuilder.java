@@ -22,7 +22,6 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 			.add(Group.Features.includes, GroupBuilder::addInclude)
 			.add(Group.Features.features, GroupBuilder::addFeature)
 			.add(Group.Features.generics, GroupBuilder::addGeneric)
-			.add(Group.Features.parameters, GroupBuilder::addParameter)
 			.build();
 
 	private String name = null;
@@ -31,7 +30,6 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	private final List<Supplier<Reference<?>>> includes = new ArrayList<>();
 	private final List<Supplier<Feature<?, ?>>> features = new ArrayList<>();
 	private final List<Supplier<Generic<?>>> generics = new ArrayList<>();
-	private final List<Supplier<Generic<?>>> parameters = new ArrayList<>();
 
 	@Override
 	public Group<T> build()
@@ -45,11 +43,8 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 		final var builtGenerics = generics.stream()
 										  .map(Supplier::get)
 										  .toList();
-		final var builtParameters = parameters.stream()
-											  .map(Supplier::get)
-											  .toList();
 
-		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics, builtParameters);
+		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
 	}
 
 	@Override
@@ -84,13 +79,6 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	public GroupBuilder<T> addGeneric(Supplier<Generic<?>> generic)
 	{
 		generics.add(generic);
-		return this;
-	}
-
-	@Override
-	public GroupBuilder<T> addParameter(Supplier<Generic<?>> parameter)
-	{
-		parameters.add(parameter);
 		return this;
 	}
 

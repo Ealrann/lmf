@@ -26,6 +26,7 @@ public final class ModelBuilder implements Model.Builder
 			.add(Model.Features.enums, ModelBuilder::addEnum)
 			.add(Model.Features.units, ModelBuilder::addUnit)
 			.add(Model.Features.aliases, ModelBuilder::addAlias)
+			.add(Model.Features.javaWrappers, ModelBuilder::addJavaWrapper)
 			.build();
 
 	private String name;
@@ -36,6 +37,7 @@ public final class ModelBuilder implements Model.Builder
 	private final List<Supplier<? extends Enum<?>>> enums = new ArrayList<>();
 	private final List<Supplier<? extends Unit<?>>> units = new ArrayList<>();
 	private final List<Supplier<Alias>> aliases = new ArrayList<>();
+	private final List<Supplier<JavaWrapper<?>>> javaWrappers = new ArrayList<>();
 
 	@Override
 	public Model build()
@@ -44,8 +46,16 @@ public final class ModelBuilder implements Model.Builder
 		final var builtEnums = BuildUtils.collectSuppliers(enums);
 		final var builtUnits = BuildUtils.collectSuppliers(units);
 		final var builtAliases = BuildUtils.collectSuppliers(aliases);
+		final var builtJavaWrappers = BuildUtils.collectSuppliers(javaWrappers);
 
-		return new ModelImpl(modelPackage, name, domain, builtGroups, builtEnums, builtUnits, builtAliases);
+		return new ModelImpl(modelPackage,
+							 name,
+							 domain,
+							 builtGroups,
+							 builtEnums,
+							 builtUnits,
+							 builtAliases,
+							 builtJavaWrappers);
 	}
 
 	@Override
@@ -94,6 +104,13 @@ public final class ModelBuilder implements Model.Builder
 	public ModelBuilder addAlias(final Supplier<Alias> alias)
 	{
 		aliases.add(alias);
+		return this;
+	}
+
+	@Override
+	public ModelBuilder addJavaWrapper(final Supplier<JavaWrapper<?>> javaWrapper)
+	{
+		javaWrappers.add(javaWrapper);
 		return this;
 	}
 

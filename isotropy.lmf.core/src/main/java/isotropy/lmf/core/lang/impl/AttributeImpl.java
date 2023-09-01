@@ -4,6 +4,7 @@ import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeaturedObject;
 import isotropy.lmf.core.model.RawFeature;
 
+import java.util.List;
 import java.util.function.Function;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType>
@@ -13,6 +14,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 	private final boolean many;
 	private final boolean mandatory;
 	private final Datatype<UnaryType> datatype;
+	private final List<? extends Generic<?>> parameters;
 	private final RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	public AttributeImpl(final String name,
@@ -20,6 +22,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 						 final boolean many,
 						 final boolean mandatory,
 						 final Datatype<UnaryType> datatype,
+						 final List<? extends Generic<?>> parameters,
 						 final RawFeature<UnaryType, EffectiveType> rawFeature)
 	{
 		this.name = name;
@@ -27,9 +30,11 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 		this.many = many;
 		this.mandatory = mandatory;
 		this.datatype = datatype;
+		this.parameters = parameters;
 		this.rawFeature = rawFeature;
 
 		ContainmentUtils.setContainer(this, datatype, Features.datatype);
+		ContainmentUtils.setContainer(this, parameters, Features.parameters);
 	}
 
 	@Override
@@ -60,6 +65,12 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 	public Datatype<UnaryType> datatype()
 	{
 		return datatype;
+	}
+
+	@Override
+	public List<? extends Generic<?>> parameters()
+	{
+		return parameters;
 	}
 
 	@Override
@@ -96,6 +107,10 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 		else if (f == LMCoreDefinition.Features.ATTRIBUTE.datatype)
 		{
 			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::datatype;
+		}
+		else if (f == LMCoreDefinition.Features.ATTRIBUTE.parameters)
+		{
+			return (Function<Attribute<?, ?>, T>) (Function<Attribute<?, ?>, ?>) Attribute::parameters;
 		}
 		else
 		{

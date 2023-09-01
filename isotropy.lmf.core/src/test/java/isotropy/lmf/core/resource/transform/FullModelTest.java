@@ -55,7 +55,7 @@ public class FullModelTest
 					(-contains units   (reference group=/groups.11) [0..*])
 					(-contains aliases (reference group=/groups.9)  [0..*]))
 			   
-				(Definition Group parameters=./generics.0
+				(Definition Group
 					(includes group=/groups.2 parameters=../generics.0)
 					(includes group=/groups.14 parameters=../generics.0)
 					(Generic T extends /groups.0)
@@ -70,12 +70,12 @@ public class FullModelTest
 					(-att many      datatype=/units.2)
 					(-att mandatory datatype=/units.2))
 			   
-				(Definition Attribute parameters=./generics.0,./generics.1
+				(Definition Attribute
 					(includes /groups.5 parameters=../generics.0,../generics.1)
 					(Generic UnaryType) (Generic EffectiveType)
 					(-refers datatype (reference /groups.8 parameters=/groups.6/generics.0) [1..1]))
 						
-				(Definition Relation parameters=./generics.0,./generics.1
+				(Definition Relation
 					(includes /groups.5 parameters=../generics.0,../generics.1)
 					(Generic UnaryType boundType=Extends type=/groups.0) (Generic EffectiveType)
 					(-contains reference        (reference group=/groups.13) [1..1])
@@ -93,7 +93,7 @@ public class FullModelTest
 					(-att primitive    /enums.1   [1..1])
 					(-att extractor    /units.1   [0..1]))
 			   
-				(Definition Generic (includes group=/groups.1)(includes /groups.14 parameters=../generics.0) parameters=./generics.0
+				(Definition Generic (includes group=/groups.1)(includes /groups.14 parameters=../generics.0)
 				    (Generic T boundType=extends type=/groups.0)
 					(-refers type      (reference group=/groups.2))
 					(-att    boundType datatype=/enums.0))

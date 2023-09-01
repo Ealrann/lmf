@@ -3,11 +3,13 @@ package isotropy.lmf.core.lang;
 import isotropy.lmf.core.lang.builder.AttributeBuilder;
 import isotropy.lmf.core.model.RawFeature;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, EffectiveType>
 {
 	Datatype<UnaryType> datatype();
+	List<? extends Generic<?>> parameters();
 
 	interface Features
 	{
@@ -18,6 +20,9 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
 		RawFeature<Datatype<?>, Datatype<?>> datatype = new RawFeature<>(false,
 																		 true,
 																		 () -> LMCoreDefinition.Features.ATTRIBUTE.datatype);
+		RawFeature<Generic<?>, List<? extends Generic<?>>> parameters = new RawFeature<>(true,
+																						 true,
+																						 () -> LMCoreDefinition.Features.ATTRIBUTE.parameters);
 	}
 
 	static <UnaryType, EffectiveType> Attribute.Builder<UnaryType, EffectiveType> builder() {return new AttributeBuilder<>();}
@@ -30,5 +35,6 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
 		Builder<UnaryType, EffectiveType> rawFeature(RawFeature<UnaryType, EffectiveType> rawFeature);
 
 		Builder<UnaryType, EffectiveType> datatype(Supplier<Datatype<UnaryType>> suppliedDatatype);
+		Builder<UnaryType, EffectiveType> addParameter(Supplier<Generic<?>> parameter);
 	}
 }

@@ -67,7 +67,7 @@ public class GenericTest
 	{
 		final var textModel = """
 				(Model Test
-				    (Group name=Container parameters=./generics.0
+				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				    )
 				    (Definition name=Car)
@@ -90,13 +90,11 @@ public class GenericTest
 
 		assertEquals("Container", container.name());
 		assertEquals(1, container.generics().size());
-		assertEquals(1, container.parameters().size());
 		assertEquals(0, container.features().size());
 		assertEquals("Car", car.name());
 		assertEquals("CarContainer", carContainer.name());
 
 
-		assertEquals(genericOfContainer, container.parameters().get(0));
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
 	}
 
@@ -105,7 +103,7 @@ public class GenericTest
 	{
 		final var textModel = """
 				(Model Test
-				    (Group name=Container parameters=/groups.0/generics.0
+				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				        (-contains cargo [1..1] (reference group=/groups.2 parameters=/groups.0/generics.0))
 				    )
@@ -130,12 +128,10 @@ public class GenericTest
 
 		assertEquals("Container", container.name());
 		assertEquals(1, container.generics().size());
-		assertEquals(1, container.parameters().size());
 		assertEquals(1, container.features().size());
 		assertEquals("Car", car.name());
 		assertEquals("CarContainer", carContainer.name());
 
-		assertEquals(genericOfContainer, container.parameters().get(0));
 		assertEquals(genericOfContainer, cargoRelation.reference().parameters().get(0));
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
 

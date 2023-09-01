@@ -18,7 +18,8 @@ public final class ModelImpl extends FeaturedObject implements Model
 					new FeatureMap.FeatureTuple<>(Features.groups, Model::groups),
 					new FeatureMap.FeatureTuple<>(Features.enums, Model::enums),
 					new FeatureMap.FeatureTuple<>(Features.units, Model::units),
-					new FeatureMap.FeatureTuple<>(Features.aliases, Model::aliases)));
+					new FeatureMap.FeatureTuple<>(Features.aliases, Model::aliases),
+					new FeatureMap.FeatureTuple<>(Features.javaWrappers, Model::javaWrappers)));
 
 	private final IModelPackage _package;
 	private final String name;
@@ -27,6 +28,7 @@ public final class ModelImpl extends FeaturedObject implements Model
 	private final List<Enum<?>> enums;
 	private final List<Unit<?>> units;
 	private final List<Alias> aliases;
+	private final List<JavaWrapper<?>> javaWrappers;
 
 	public ModelImpl(final IModelPackage _package,
 					 final String name,
@@ -34,7 +36,8 @@ public final class ModelImpl extends FeaturedObject implements Model
 					 final List<Group<?>> groups,
 					 final List<Enum<?>> enums,
 					 final List<Unit<?>> units,
-					 final List<Alias> aliases)
+					 final List<Alias> aliases,
+					 final List<JavaWrapper<?>> javaWrappers)
 	{
 		this._package = _package;
 		this.name = name;
@@ -43,11 +46,13 @@ public final class ModelImpl extends FeaturedObject implements Model
 		this.enums = enums;
 		this.units = units;
 		this.aliases = aliases;
+		this.javaWrappers = javaWrappers;
 
 		ContainmentUtils.setContainer(this, groups, Features.groups);
 		ContainmentUtils.setContainer(this, enums, Features.enums);
 		ContainmentUtils.setContainer(this, units, Features.units);
 		ContainmentUtils.setContainer(this, aliases, Features.aliases);
+		ContainmentUtils.setContainer(this, javaWrappers, Features.javaWrappers);
 	}
 
 	@Override
@@ -86,11 +91,18 @@ public final class ModelImpl extends FeaturedObject implements Model
 		return aliases;
 	}
 
+	@Override
+	public List<JavaWrapper<?>> javaWrappers()
+	{
+		return javaWrappers;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return (T) GET_MAP.get(feature.rawFeature()).apply(this);
+		return (T) GET_MAP.get(feature.rawFeature())
+						  .apply(this);
 	}
 
 	@Override

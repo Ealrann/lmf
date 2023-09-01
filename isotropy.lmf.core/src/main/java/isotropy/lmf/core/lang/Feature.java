@@ -24,6 +24,9 @@ public interface Feature<UnaryType, EffectiveType> extends Named
 		RawFeature<Boolean, Boolean> mandatory = new RawFeature<>(false,
 																  false,
 																  () -> LMCoreDefinition.Features.FEATURE.mandatory);
+		RawFeature<RawFeature<?, ?>, RawFeature<?, ?>> rawFeature = new RawFeature<>(false,
+																		 false,
+																		 () -> LMCoreDefinition.Features.FEATURE.rawFeature);
 	}
 
 	List<Generic<?>> GENERICS = List.of(new GenericImpl<>("UnaryType", null, null),

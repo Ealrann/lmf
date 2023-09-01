@@ -30,6 +30,7 @@ public final class LMCorePackage implements IModelPackage
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ALIAS, AliasBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.ENUM, EnumBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.UNIT, UnitBuilder::new),
+			new GroupDescriptor<>(LMCoreDefinition.Groups.JAVA_WRAPPER, JavaWrapperBuilder::new),
 			new GroupDescriptor<>(LMCoreDefinition.Groups.GENERIC, GenericBuilder::new));
 
 	public static final List<Alias> aliases = List.of(LMCoreDefinition.Aliases.DEFINITION,
@@ -57,6 +58,8 @@ public final class LMCorePackage implements IModelPackage
 	public static final List<Enum<?>> enums = List.of(LMCoreDefinition.Enums.BOUND_TYPE,
 													  LMCoreDefinition.Enums.PRIMITIVE);
 
+	public static final List<JavaWrapper<?>> javaWrappers = List.of(LMCoreDefinition.JavaWrappers.RawFeature);
+
 	public static final Model MODEL = new ModelImpl(Instance,
 													"LMCore",
 													"isotrpoy.lmf.core.lang",
@@ -65,7 +68,8 @@ public final class LMCorePackage implements IModelPackage
 														  .collect(Collectors.toUnmodifiableList()),
 													enums,
 													units,
-													aliases);
+													aliases,
+													javaWrappers);
 
 	private LMCorePackage() {}
 

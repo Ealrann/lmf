@@ -14,6 +14,7 @@ public interface Model extends Named
 	List<Enum<?>> enums();
 	List<Unit<?>> units();
 	List<Alias> aliases();
+	List<JavaWrapper<?>> javaWrappers();
 
 	IModelPackage lPackage();
 
@@ -35,6 +36,9 @@ public interface Model extends Named
 		RawFeature<Alias, List<Alias>> aliases = new RawFeature<>(true,
 																  true,
 																  () -> LMCoreDefinition.Features.MODEL.aliases);
+		RawFeature<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RawFeature<>(true,
+																						 true,
+																						 () -> LMCoreDefinition.Features.MODEL.javaWrappers);
 	}
 
 	static Builder builder() {return new ModelBuilder();}
@@ -48,5 +52,6 @@ public interface Model extends Named
 		Builder addEnum(Supplier<? extends Enum<?>> _enum);
 		Builder addUnit(Supplier<? extends Unit<?>> unit);
 		Builder addAlias(Supplier<Alias> alias);
+		Builder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper);
 	}
 }

@@ -1,6 +1,8 @@
 package isotropy.lmf.core.lang;
 
 import isotropy.lmf.core.lang.impl.*;
+import isotropy.lmf.core.model.IModelPackage;
+import isotropy.lmf.core.model.RawFeature;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +18,7 @@ public interface LMCoreDefinition
 																 false,
 																 true,
 																 Units.STRING,
+																 List.of(),
 																 Named.Features.name);
 			List<Feature<?, ?>> all = List.of(name);
 		}
@@ -34,6 +37,7 @@ public interface LMCoreDefinition
 																		   true,
 																		   false,
 																		   Units.STRING,
+																		   List.of(),
 																		   Enum.Features.literals);
 			List<Feature<?, ?>> all = List.of(name, literals);
 		}
@@ -53,6 +57,7 @@ public interface LMCoreDefinition
 																			false,
 																			false,
 																			Enums.BOUND_TYPE,
+																			List.of(),
 																			Generic.Features.boundType);
 			List<Feature<?, ?>> all = List.of(name, type, boundType);
 		}
@@ -65,20 +70,30 @@ public interface LMCoreDefinition
 																		false,
 																		false,
 																		Units.BOOLEAN,
-																		Attribute.Features.immutable);
+																		List.of(),
+																		Feature.Features.immutable);
 			Attribute<Boolean, Boolean> many = new AttributeImpl<>("many",
 																   true,
 																   false,
 																   false,
 																   Units.BOOLEAN,
-																   Attribute.Features.many);
+																   List.of(),
+																   Feature.Features.many);
 			Attribute<Boolean, Boolean> mandatory = new AttributeImpl<>("mandatory",
 																		true,
 																		false,
 																		false,
 																		Units.BOOLEAN,
-																		Attribute.Features.mandatory);
-			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory);
+																		List.of(),
+																		Feature.Features.mandatory);
+			Attribute<RawFeature<?, ?>, RawFeature<?, ?>> rawFeature = new AttributeImpl<>("rawFeature",
+																						   true,
+																						   false,
+																						   false,
+																						   JavaWrappers.RawFeature,
+																						   List.of(),
+																						   Feature.Features.rawFeature);
+			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, rawFeature);
 		}
 
 		interface ATTRIBUTE
@@ -95,7 +110,15 @@ public interface LMCoreDefinition
 																								 List.of()),
 																			 false,
 																			 Attribute.Features.datatype);
-			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, datatype);
+			Relation<Generic<?>, List<? extends Generic<?>>> parameters = new RelationImpl<>("parameters",
+																							 true,
+																							 true,
+																							 false,
+																							 new ReferenceImpl<>(() -> Groups.GENERIC,
+																												 List.of()),
+																							 false,
+																							 Attribute.Features.parameters);
+			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, datatype, parameters);
 		}
 
 		interface DATA_TYPE
@@ -112,24 +135,28 @@ public interface LMCoreDefinition
 																	false,
 																	false,
 																	Units.MATCHER,
+																	List.of(),
 																	Unit.Features.matcher);
 			Attribute<String, String> defaultValue = new AttributeImpl<>("defaultValue",
 																		 true,
 																		 false,
 																		 false,
 																		 Units.STRING,
+																		 List.of(),
 																		 Unit.Features.defaultValue);
 			Attribute<Primitive, Primitive> primitive = new AttributeImpl<>("primitive",
 																			true,
 																			false,
 																			true,
 																			Enums.PRIMITIVE,
+																			List.of(),
 																			Unit.Features.primitive);
 			Attribute<String, String> extractor = new AttributeImpl<>("extractor",
 																	  true,
 																	  false,
 																	  false,
 																	  Units.EXTRACTOR,
+																	  List.of(),
 																	  Unit.Features.extractor);
 			List<Feature<?, ?>> all = List.of(name, matcher, defaultValue, primitive, extractor);
 		}
@@ -142,6 +169,7 @@ public interface LMCoreDefinition
 																		true,
 																		false,
 																		Units.STRING,
+																		List.of(),
 																		Alias.Features.words);
 
 			List<Feature<?, ?>> all = List.of(name, words);
@@ -155,6 +183,7 @@ public interface LMCoreDefinition
 																	   false,
 																	   false,
 																	   Units.BOOLEAN,
+																	   List.of(),
 																	   Group.Features.concrete);
 			Relation<Reference<?>, List<? extends Reference<?>>> includes = new RelationImpl<>("includes",
 																							   true,
@@ -180,15 +209,7 @@ public interface LMCoreDefinition
 																											   List.of()),
 																						   true,
 																						   Group.Features.generics);
-			Relation<Generic<?>, List<? extends Generic<?>>> parameters = new RelationImpl<>("parameters",
-																							 true,
-																							 true,
-																							 false,
-																							 new ReferenceImpl<>(() -> Groups.GENERIC,
-																												 List.of()),
-																							 false,
-																							 Group.Features.parameters);
-			List<Feature<?, ?>> all = List.of(name, concrete, includes, features, generics, parameters);
+			List<Feature<?, ?>> all = List.of(name, concrete, includes, features, generics);
 		}
 
 		interface RELATION
@@ -211,6 +232,7 @@ public interface LMCoreDefinition
 																	   false,
 																	   false,
 																	   Units.BOOLEAN,
+																	   List.of(),
 																	   Relation.Features.contains);
 
 			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, reference, contains);
@@ -224,6 +246,7 @@ public interface LMCoreDefinition
 																   false,
 																   true,
 																   Units.STRING,
+																   List.of(),
 																   Model.Features.domain);
 			Relation<Group<?>, List<Group<?>>> groups = new RelationImpl<>("groups",
 																		   true,
@@ -257,7 +280,15 @@ public interface LMCoreDefinition
 																						  List.of()),
 																	  true,
 																	  Model.Features.aliases);
-			List<Feature<?, ?>> all = List.of(name, domain, groups, enums, units, aliases);
+			Relation<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RelationImpl<>("javaWrappers",
+																							 true,
+																							 true,
+																							 false,
+																							 new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER,
+																												 List.of()),
+																							 true,
+																							 Model.Features.javaWrappers);
+			List<Feature<?, ?>> all = List.of(name, domain, groups, enums, units, aliases, javaWrappers);
 		}
 
 		interface REFERENCE
@@ -280,54 +311,60 @@ public interface LMCoreDefinition
 																				   Reference.Features.parameters);
 			List<Feature<?, ?>> all = List.of(group, parameters);
 		}
+
+		interface JAVA_WRAPPER
+		{
+			Attribute<String, String> name = NAMED.name;
+			Attribute<String, String> domain = new AttributeImpl<>("domain",
+																   true,
+																   false,
+																   true,
+																   Units.STRING,
+																   List.of(),
+																   JavaWrapper.Features.domain);
+			List<Feature<?, ?>> all = List.of(name, domain);
+		}
 	}
 
 	interface Groups
 	{
-		Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), List.of(), List.of(), List.of());
+		Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), List.of(), List.of());
 		Group<Named> NAMED = new GroupImpl<>("Named",
 											 false,
 											 List.of(new ReferenceImpl<>(() -> LM_OBJECT, List.of())),
 											 Features.NAMED.all,
-											 List.of(),
 											 List.of());
 		Group<Type<?>> TYPE = new GroupImpl<>("Type",
 											  false,
 											  List.of(new ReferenceImpl<>(() -> NAMED, List.of())),
 											  Features.TYPE.all,
-											  List.of(),
 											  List.of());
 
 		Group<Concept<?>> CONCEPT = new GroupImpl<>("Concept",
 													false,
 													List.of(new ReferenceImpl<>(() -> NAMED, List.of())),
 													Features.TYPE.all,
-													List.of(),
 													List.of());
 		Group<Model> MODEL = new GroupImpl<>("Model",
 											 true,
 											 List.of(new ReferenceImpl<>(() -> NAMED, List.of())),
 											 Features.MODEL.all,
-											 List.of(),
 											 List.of());
 		Group<Group<?>> GROUP = new GroupImpl<>("Group",
 												true,
 												List.of(new ReferenceImpl<>(() -> TYPE, List.of()),
 														new ReferenceImpl<>(() -> CONCEPT, List.of())),
 												Features.GROUP.all,
-												Group.GENERICS,
 												Group.GENERICS);
 		Group<Feature<?, ?>> FEATURE = new GroupImpl<>("Feature",
 													   false,
 													   List.of(new ReferenceImpl<>(() -> NAMED, List.of())),
 													   Features.FEATURE.all,
-													   Feature.GENERICS,
 													   Feature.GENERICS);
 		Group<Attribute<?, ?>> ATTRIBUTE = new GroupImpl<>("Attribute",
 														   true,
 														   List.of(new ReferenceImpl<>(() -> FEATURE, List.of())),
 														   Features.ATTRIBUTE.all,
-														   Generics.Attribute,
 														   Generics.Attribute);
 		Group<Relation<?, ?>> RELATION = new GroupImpl<>("Relation",
 														 true,
@@ -337,44 +374,42 @@ public interface LMCoreDefinition
 																							 () -> Generics.Relation.get(
 																									 1)))),
 														 Features.RELATION.all,
-														 Generics.Relation,
 														 Generics.Relation);
 		Group<Datatype<?>> DATATYPE = new GroupImpl<>("Datatype",
 													  false,
 													  List.of(new ReferenceImpl<>(() -> TYPE, List.of())),
 													  Features.DATA_TYPE.all,
-													  Generics.DataType,
 													  Generics.DataType);
 		Group<Alias> ALIAS = new GroupImpl<>("Alias",
 											 true,
 											 List.of(new ReferenceImpl<>(() -> NAMED, List.of())),
 											 Features.ALIAS.all,
-											 List.of(),
 											 List.of());
 		Group<Enum<?>> ENUM = new GroupImpl<>("Enum",
 											  true,
 											  List.of(new ReferenceImpl<>(() -> DATATYPE, List.of())),
 											  Features.ENUM.all,
-											  Generics.Enum,
 											  Generics.Enum);
 		Group<Unit<?>> UNIT = new GroupImpl<>("Unit",
 											  true,
 											  List.of(new ReferenceImpl<>(() -> DATATYPE, List.of())),
 											  Features.UNIT.all,
-											  Generics.Unit,
 											  Generics.Unit);
 		Group<Generic<?>> GENERIC = new GroupImpl<>("Generic",
 													true,
 													List.of(new ReferenceImpl<>(() -> CONCEPT, List.of())),
 													Features.GENERIC.all,
-													List.of(),
 													List.of());
+		Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupImpl<>("JavaWrapper",
+															 true,
+															 List.of(new ReferenceImpl<>(() -> DATATYPE, List.of())),
+															 Features.JAVA_WRAPPER.all,
+															 List.of());
 
 		Group<Reference<?>> REFERENCE = new GroupImpl<>("Reference",
 														true,
 														List.of(new ReferenceImpl<>(() -> LM_OBJECT, List.of())),
 														Features.REFERENCE.all,
-														Generics.Reference,
 														Generics.Reference);
 	}
 
@@ -431,5 +466,11 @@ public interface LMCoreDefinition
 		List<Generic<?>> Reference = List.of(new GenericImpl<>("T",
 															   BoundType.Extends,
 															   LMCoreDefinition.Groups.LM_OBJECT));
+	}
+
+	interface JavaWrappers
+	{
+		JavaWrapper<RawFeature<?, ?>> RawFeature = new JavaWrapperImpl<>("RawFeature", "isotropy.lmf.core.model");
+		JavaWrapper<IModelPackage> IModelPackage = new JavaWrapperImpl<>("IModelPackage", "isotropy.lmf.core.model");
 	}
 }

@@ -43,7 +43,7 @@ public class GroupTest
 	{
 		final var textModel = """
 				(Model Test
-				    (Group name=Container parameters=/groups.0/generics.0
+				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				        (-contains cargo [1..1] (reference group=/groups.2 parameters=/groups.0/generics.0))
 				    )

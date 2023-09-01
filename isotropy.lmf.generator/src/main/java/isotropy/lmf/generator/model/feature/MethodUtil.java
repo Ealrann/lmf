@@ -42,12 +42,26 @@ public interface MethodUtil
 				final var typeName = TypeName.get(primitiveType);
 				return TypeParameter.of(typeName);
 			}
-			else
+			else if (datatype instanceof Enum<?> enumeration)
 			{
-				final var enumeration = (Enum<?>) datatype;
 				final var model = (Model) enumeration.lmContainer();
 				final var className = ClassName.get(model.domain(), enumeration.name());
 				return TypeParameter.of(className);
+			}
+			else
+			{
+				final var javaWrapper = (JavaWrapper) datatype;
+				final var parameters = attribute.parameters();
+				final var className = ClassName.get(javaWrapper.domain(), javaWrapper.name());
+				if (!parameters.isEmpty())
+				{
+					final var params = GenUtils.toParameters(parameters);
+					return TypeParameter.of(className, params);
+				}
+				else
+				{
+					return TypeParameter.of(className);
+				}
 			}
 		}
 		else

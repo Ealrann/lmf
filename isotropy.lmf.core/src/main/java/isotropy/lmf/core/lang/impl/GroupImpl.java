@@ -15,7 +15,6 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 			.add(Features.includes, Group::includes)
 			.add(Features.features, Group::features)
 			.add(Features.generics, Group::generics)
-			.add(Features.parameters, Group::parameters)
 			.build();
 
 	private final String name;
@@ -23,26 +22,22 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 	private final List<? extends Reference<?>> includes;
 	private final List<? extends Feature<?, ?>> features;
 	private final List<? extends Generic<?>> generics;
-	private final List<? extends Generic<?>> parameters;
 
 	public GroupImpl(final String name,
 					 final boolean concrete,
 					 final List<? extends Reference<?>> includes,
 					 final List<? extends Feature<?, ?>> features,
-					 final List<? extends Generic<?>> generics,
-					 final List<? extends Generic<?>> parameters)
+					 final List<? extends Generic<?>> generics)
 	{
 		this.name = name;
 		this.concrete = concrete;
 		this.includes = includes;
 		this.features = features;
 		this.generics = generics;
-		this.parameters = parameters;
 
 		ContainmentUtils.setContainer(this, includes, Features.includes);
 		ContainmentUtils.setContainer(this, features, Features.features);
 		ContainmentUtils.setContainer(this, generics, Features.generics);
-		ContainmentUtils.setContainer(this, parameters, Features.parameters);
 	}
 
 	@Override
@@ -73,12 +68,6 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 	public List<? extends Generic<?>> generics()
 	{
 		return generics;
-	}
-
-	@Override
-	public List<? extends Generic<?>> parameters()
-	{
-		return parameters;
 	}
 
 	@Override

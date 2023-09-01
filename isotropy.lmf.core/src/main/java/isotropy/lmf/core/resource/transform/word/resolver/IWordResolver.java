@@ -1,9 +1,7 @@
 package isotropy.lmf.core.resource.transform.word.resolver;
 
-import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Enum;
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
@@ -15,6 +13,7 @@ public interface IWordResolver<T>
 	IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, String value);
 	Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, String value);
 
+	@SuppressWarnings("unchecked")
 	static Optional<IWordResolver<?>> buildResolver(Feature<?, ?> feature)
 	{
 		if (feature instanceof Attribute<?, ?> attribute)
@@ -23,9 +22,13 @@ public interface IWordResolver<T>
 			{
 				return Optional.of(new EnumResolver<>((Attribute<?, ?>) feature));
 			}
-			else
+			else if (attribute.datatype() instanceof Unit<?>)
 			{
 				return Optional.of(new UnitResolver<>((Attribute<?, ?>) feature));
+			}
+			else
+			{
+				return Optional.of(new JavaWrapperResolver((Attribute<Object, ?>) feature));
 			}
 		}
 		else

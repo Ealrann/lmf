@@ -77,11 +77,18 @@ public class GroupGenerator
 		}
 	}
 
-	private static Stream<MethodSpec> buildFeatureMethods(final List<FeatureResolution> featureResolutions)
+	private Stream<MethodSpec> buildFeatureMethods(final List<FeatureResolution> featureResolutions)
 	{
 		final var methodBuilder = new MethodBuilder();
 		return featureResolutions.stream()
+								 .filter(this::matchGroup)
 								 .map(methodBuilder::build);
+	}
+
+	private boolean matchGroup(final FeatureResolution f)
+	{
+		return f.feature()
+				.lmContainer() == group;
 	}
 
 	private static TypeSpec buildBuilderInterface(final Types builderTypes,

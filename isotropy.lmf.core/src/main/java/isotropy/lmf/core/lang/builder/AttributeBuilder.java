@@ -1,14 +1,13 @@
 package isotropy.lmf.core.lang.builder;
 
-import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.lang.Datatype;
-import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.AttributeImpl;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.RawFeature;
 import isotropy.lmf.core.model.RelationLazyInserter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribute.Builder<UnaryType, EffectiveType>
@@ -26,6 +25,7 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribu
 
 			.<AttributeBuilder<?, ?>>Builder()
 			.add(Attribute.Features.datatype, AttributeBuilder::_datatype)
+			.add(Attribute.Features.parameters, AttributeBuilder::addParameter)
 			.build();
 
 	private String name = null;
@@ -33,12 +33,23 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribu
 	private boolean immutable;
 	private boolean mandatory;
 	private Supplier<? extends Datatype<UnaryType>> suppliedDatatype = () -> null;
+	private final List<Supplier<Generic<?>>> parameters = new ArrayList<>();
 	private RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	@Override
 	public Attribute<UnaryType, EffectiveType> build()
 	{
-		return new AttributeImpl<>(name, immutable, many, mandatory, suppliedDatatype.get(), rawFeature);
+		final var builtParameters = parameters.stream()
+											  .map(Supplier::get)
+											  .toList();
+
+		return new AttributeImpl<>(name,
+								   immutable,
+								   many,
+								   mandatory,
+								   suppliedDatatype.get(),
+								   builtParameters,
+								   rawFeature);
 	}
 
 	@Override
@@ -87,6 +98,13 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Attribu
 	private AttributeBuilder<UnaryType, EffectiveType> _datatype(Supplier<? extends Datatype<?>> suppliedDatatype)
 	{
 		this.suppliedDatatype = (Supplier<? extends Datatype<UnaryType>>) suppliedDatatype;
+		return this;
+	}
+
+	@Override
+	public AttributeBuilder<UnaryType, EffectiveType> addParameter(Supplier<Generic<?>> parameter)
+	{
+		parameters.add(parameter);
 		return this;
 	}
 
