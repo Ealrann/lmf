@@ -1,21 +1,19 @@
-package isotropy.lmf.generator.model;
+package isotropy.lmf.generator.util;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.TypeParameter;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 public record Types(Group<?> group,
-					ClassName className,
-					TypeName superType,
-					List<TypeVariableName> rawParameters,
-					List<TypeVariableName> typedParameters)
+					ClassName interfaceName,
+					TypeName superInterface,
+					List<TypeVariableName> finalParameters,
+					List<TypeVariableName> detailedParameters)
 {
 	private static final boolean INCLUDE_SELF_TYPE = false;
 
@@ -23,17 +21,17 @@ public record Types(Group<?> group,
 	{
 		final var builderName = ClassName.get("", "Builder");
 		final var rawSuperBuilder = ClassName.get(IFeaturedObject.Builder.class);
-		final var rawParametrizedClass = GenUtils.parameterize(className, rawParameters);
+		final var rawParametrizedClass = GenUtils.parameterize(interfaceName, finalParameters);
 		final var superBuilder = GenUtils.parameterize(rawSuperBuilder, List.of(rawParametrizedClass));
 
-		return new Types(group, builderName, superBuilder, rawParameters, typedParameters);
+		return new Types(group, builderName, superBuilder, finalParameters, detailedParameters);
 	}
 
 	public static Types build(final Reference<?> refInclude, final Group<?> group)
 	{
-		final var superClass = resolveInclude(refInclude, group);
+		final var superInterface = resolveInclude(refInclude, group);
 		final var model = (Model) group.lmContainer();
-		final var className = ClassName.get(model.domain(), group.name());
+		final var interfaceName = ClassName.get(model.domain(), group.name());
 
 		final var genericParameters = group.generics()
 										   .stream()
@@ -50,7 +48,7 @@ public record Types(Group<?> group,
 		final var typedParameters = INCLUDE_SELF_TYPE ? Stream.concat(typedStream, Stream.of(varNameSelf))
 															  .toList() : typedStream.toList();
 
-		return new Types(group, className, superClass.parametrized(), rawParameters, typedParameters);
+		return new Types(group, interfaceName, superInterface.parametrized(), rawParameters, typedParameters);
 	}
 
 	private static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)

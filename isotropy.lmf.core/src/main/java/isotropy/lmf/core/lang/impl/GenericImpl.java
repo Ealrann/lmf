@@ -23,7 +23,7 @@ public final class GenericImpl<T> extends FeaturedObject implements Generic<T>
 		this.boundType = boundType;
 		this.type = type;
 
-		ContainmentUtils.setContainer(this, type, Features.type);
+		setContainer(type, Features.type);
 	}
 
 	@Override

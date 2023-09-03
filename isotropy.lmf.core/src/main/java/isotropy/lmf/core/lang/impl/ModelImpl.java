@@ -48,11 +48,11 @@ public final class ModelImpl extends FeaturedObject implements Model
 		this.aliases = aliases;
 		this.javaWrappers = javaWrappers;
 
-		ContainmentUtils.setContainer(this, groups, Features.groups);
-		ContainmentUtils.setContainer(this, enums, Features.enums);
-		ContainmentUtils.setContainer(this, units, Features.units);
-		ContainmentUtils.setContainer(this, aliases, Features.aliases);
-		ContainmentUtils.setContainer(this, javaWrappers, Features.javaWrappers);
+		setContainer(groups, Features.groups);
+		setContainer(enums, Features.enums);
+		setContainer(units, Features.units);
+		setContainer(aliases, Features.aliases);
+		setContainer(javaWrappers, Features.javaWrappers);
 	}
 
 	@Override

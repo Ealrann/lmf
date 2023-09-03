@@ -33,8 +33,8 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 		this.parameters = parameters;
 		this.rawFeature = rawFeature;
 
-		ContainmentUtils.setContainer(this, datatype, Features.datatype);
-		ContainmentUtils.setContainer(this, parameters, Features.parameters);
+		setContainer(datatype, Features.datatype);
+		setContainer(parameters, Features.parameters);
 	}
 
 	@Override

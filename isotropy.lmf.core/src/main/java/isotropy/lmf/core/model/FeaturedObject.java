@@ -39,6 +39,22 @@ public abstract class FeaturedObject implements IFeaturedObject
 		}
 	}
 
+	protected final void setContainer(final LMObject child, final RawFeature<?, ?> feature)
+	{
+		if (child != null)
+		{
+			ContainmentUtils.setContainer((LMObject) this, child, feature);
+		}
+	}
+
+	protected final void setContainer(final List<? extends LMObject> children, final RawFeature<?, ?> feature)
+	{
+		if (!children.isEmpty())
+		{
+			ContainmentUtils.setContainer((LMObject) this, children, feature);
+		}
+	}
+
 	@Override
 	public final void listenStruture(final Consumer<Notification> listener)
 	{
@@ -53,61 +69,31 @@ public abstract class FeaturedObject implements IFeaturedObject
 
 	protected static final class ContainmentUtils
 	{
-		public static void setContainer(LMObject parent, List<? extends LMObject> children, RawFeature<?, ?> feature)
+		public static void setContainer(LMObject newContainer, LMObject child, RawFeature<?, ?> feature)
 		{
-			changeContainer(null, parent, children, null, feature);
+			setContainerInternal(newContainer, child, feature);
 		}
 
-		public static void setContainer(LMObject parent, LMObject child, RawFeature<?, ?> feature)
-		{
-			changeContainer(null, parent, child, null, feature);
-		}
-
-		public static void changeContainer(LMObject oldContainer,
-										   LMObject newContainer,
-										   List<? extends LMObject> children,
-										   RawFeature<?, ?> oldFeature,
-										   RawFeature<?, ?> newFeature)
+		public static void setContainer(LMObject newContainer,
+										List<? extends LMObject> children,
+										RawFeature<?, ?> newFeature)
 		{
 			for (final var child : children)
 			{
-				((FeaturedObject) child).containingFeature = newFeature;
-				((FeaturedObject) child).container = newContainer;
-			}
-			if (oldContainer != null)
-			{
-				final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
-																					 oldFeature,
-																					 children);
-				((FeaturedObject) oldContainer).lNotify(oldParentNotification);
-			}
-			for (final var child : children)
-			{
-				final var childNotification = new ContainerChange(child,
-																  oldFeature,
-																  newFeature,
-																  newContainer,
-																  oldContainer);
-				((FeaturedObject) child).lNotify(childNotification);
-			}
-			if (newContainer != null)
-			{
-				final var newParentNotification = RelationNotificationBuilder.insert(newContainer, newFeature, children);
-				((FeaturedObject) newContainer).lNotify(newParentNotification);
+				setContainerInternal(newContainer, child, newFeature);
 			}
 		}
 
-		public static void changeContainer(LMObject oldContainer,
-										   LMObject newContainer,
-										   LMObject child,
-										   RawFeature<?, ?> oldFeature,
-										   RawFeature<?, ?> newFeature)
+		private static void setContainerInternal(final LMObject newContainer,
+												 final LMObject child,
+												 final RawFeature<?, ?> newFeature)
 		{
-			if (child != null)
-			{
-				((FeaturedObject) child).containingFeature = newFeature;
-				((FeaturedObject) child).container = newContainer;
-			}
+			final var featuredChild = (FeaturedObject) child;
+			final var oldContainer = featuredChild.container;
+			final var oldFeature = featuredChild.containingFeature;
+
+			featuredChild.containingFeature = newFeature;
+			featuredChild.container = newContainer;
 
 			if (oldContainer != null)
 			{
@@ -115,20 +101,12 @@ public abstract class FeaturedObject implements IFeaturedObject
 				((FeaturedObject) oldContainer).lNotify(oldParentNotification);
 			}
 
-			if (child != null)
-			{
-				final var childNotification = new ContainerChange(child,
-																  oldFeature,
-																  newFeature,
-																  newContainer,
-																  oldContainer);
-				((FeaturedObject) child).lNotify(childNotification);
-			}
-			if (newContainer != null)
-			{
-				final var newParentNotification = RelationNotificationBuilder.insert(newContainer, newFeature, child);
-				((FeaturedObject) newContainer).lNotify(newParentNotification);
-			}
+			final var childNotification = new ContainerChange(child,
+															  oldFeature,
+															  newFeature,
+															  newContainer,
+															  oldContainer);
+			featuredChild.lNotify(childNotification);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package isotropy.lmf.generator.model.feature;
+package isotropy.lmf.generator.group.feature;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -9,8 +9,10 @@ import isotropy.lmf.generator.util.TypeParameter;
 
 import java.util.List;
 
-public interface MethodUtil
+public final class MethodUtil
 {
+	private static final String PREFIX = "add";
+
 	static TypeParameter effectiveType(final Feature<?, ?> feature, TypeParameter singleType)
 	{
 		if (feature.many())
@@ -50,7 +52,7 @@ public interface MethodUtil
 			}
 			else
 			{
-				final var javaWrapper = (JavaWrapper) datatype;
+				final var javaWrapper = (JavaWrapper<?>) datatype;
 				final var parameters = attribute.parameters();
 				final var className = ClassName.get(javaWrapper.domain(), javaWrapper.name());
 				if (!parameters.isEmpty())
@@ -104,5 +106,11 @@ public interface MethodUtil
 		{
 			return TypeParameter.of(className);
 		}
+	}
+
+	public static String builderMethodName(final FeatureResolution f)
+	{
+		return f.feature()
+				.many() ? "add" + GenUtils.capitalizeFirstLetter(f.name()) : f.name();
 	}
 }

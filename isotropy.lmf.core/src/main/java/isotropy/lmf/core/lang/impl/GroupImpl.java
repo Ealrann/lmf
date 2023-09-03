@@ -35,9 +35,9 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 		this.features = features;
 		this.generics = generics;
 
-		ContainmentUtils.setContainer(this, includes, Features.includes);
-		ContainmentUtils.setContainer(this, features, Features.features);
-		ContainmentUtils.setContainer(this, generics, Features.generics);
+		setContainer(includes, Features.includes);
+		setContainer(features, Features.features);
+		setContainer(generics, Features.generics);
 	}
 
 	@Override

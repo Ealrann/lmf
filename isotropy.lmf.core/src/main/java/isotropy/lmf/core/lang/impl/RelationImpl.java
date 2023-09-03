@@ -43,7 +43,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 		this.contains = contains;
 		this.rawFeature = rawFeature;
 
-		ContainmentUtils.setContainer(this, reference, Features.reference);
+		setContainer(reference, Features.reference);
 	}
 
 	@Override

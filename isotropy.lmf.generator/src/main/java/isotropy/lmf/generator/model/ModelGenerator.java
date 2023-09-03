@@ -5,6 +5,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Model;
+import isotropy.lmf.generator.group.GroupGenerationContext;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -19,14 +20,17 @@ public class ModelGenerator
 		this.model = model;
 	}
 
-	public void generateJava(File target)
+	public void generateJava(final File target)
 	{
-		for(final var group : model.groups())
-		{
-			final var groupGenerator = new GroupGenerator(group);
-			groupGenerator.generate(target);
-		}
-		for(final var enumeration : model.enums())
+		final var groupContextBuilder = new GroupGenerationContext.Builder(target);
+
+		model.groups()
+			 .stream()
+			 .map(groupContextBuilder::build)
+			 .map(GroupGenerator::new)
+			 .forEach(GroupGenerator::generate);
+
+		for (final var enumeration : model.enums())
 		{
 			final var enumGenerator = new EnumGenerator(enumeration);
 			enumGenerator.generate(target);
@@ -36,32 +40,32 @@ public class ModelGenerator
 		final var className = modelName + "Package";
 		final var packageName = model.domain();
 
-		TypeSpec iface = TypeSpec.interfaceBuilder("HelloWorld")
-								 //.addModifiers(Modifier.PUBLIC)
-								 .addField(FieldSpec.builder(String.class, "ONLY_THING_THAT_IS_CONSTANT")
-													.addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-													.initializer("$S", "change")
-													.build())
-								 .addMethod(MethodSpec.methodBuilder("beep")
-													  .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-													  .build())
-								 .build();
+		final var iface = TypeSpec.interfaceBuilder("HelloWorld")
+								  //.addModifiers(Modifier.PUBLIC)
+								  .addField(FieldSpec.builder(String.class, "ONLY_THING_THAT_IS_CONSTANT")
+													 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+													 .initializer("$S", "change")
+													 .build())
+								  .addMethod(MethodSpec.methodBuilder("beep")
+													   .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+													   .build())
+								  .build();
 
-		MethodSpec main = MethodSpec.methodBuilder("main")
-									.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-									.returns(void.class)
-									.addParameter(String[].class, "args")
-									.addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
-									.build();
+		final var main = MethodSpec.methodBuilder("main")
+								   .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+								   .returns(void.class)
+								   .addParameter(String[].class, "args")
+								   .addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
+								   .build();
 
-		TypeSpec helloWorld = TypeSpec.classBuilder(className)
-									  .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-									  .addMethod(main)
-									  .addType(iface)
-									  .build();
+		final var helloWorld = TypeSpec.classBuilder(className)
+									   .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+									   .addMethod(main)
+									   .addType(iface)
+									   .build();
 
-		JavaFile javaFile = JavaFile.builder(packageName, helloWorld)
-									.build();
+		final var javaFile = JavaFile.builder(packageName, helloWorld)
+									 .build();
 
 		try
 		{
