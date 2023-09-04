@@ -1,4 +1,4 @@
-package isotropy.lmf.generator.group.feature;
+package isotropy.lmf.generator.code.feature;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -9,19 +9,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class MethodBuilder implements CodeBuilder<MethodSpec>
+public final class FeatureMethodBuilder implements FeatureBuilder<MethodSpec>
 {
 	private final Modifier[] modifiers;
 	private final Function<FeatureResolution, String> nameResolver;
 	private final Function<FeatureResolution, TypeName> returnResolver;
 	private final Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver;
 	private final Optional<Function<FeatureResolution, List<String>>> statementResolver;
+	private final boolean overide;
 
-	public MethodBuilder(Modifier[] modifiers,
-						 Function<FeatureResolution, String> nameResolver,
-						 Function<FeatureResolution, TypeName> returnResolver,
-						 Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver,
-						 Optional<Function<FeatureResolution, List<String>>> statementResolver)
+	public FeatureMethodBuilder(final Modifier[] modifiers,
+								final Function<FeatureResolution, String> nameResolver,
+								final Function<FeatureResolution, TypeName> returnResolver,
+								final Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver,
+								final Optional<Function<FeatureResolution, List<String>>> statementResolver,
+								final boolean overide)
 	{
 		assert modifiers != null;
 
@@ -30,13 +32,14 @@ public final class MethodBuilder implements CodeBuilder<MethodSpec>
 		this.returnResolver = returnResolver;
 		this.parameterResolver = parameterResolver;
 		this.statementResolver = statementResolver;
+		this.overide = overide;
 	}
 
-	public MethodBuilder(Modifier[] modifiers,
-						 Function<FeatureResolution, String> nameResolver,
-						 Function<FeatureResolution, TypeName> returnResolver)
+	public FeatureMethodBuilder(final Modifier[] modifiers,
+								final Function<FeatureResolution, String> nameResolver,
+								final Function<FeatureResolution, TypeName> returnResolver)
 	{
-		this(modifiers, nameResolver, returnResolver, Optional.empty(), Optional.empty());
+		this(modifiers, nameResolver, returnResolver, Optional.empty(), Optional.empty(), false);
 	}
 
 	@Override
@@ -50,6 +53,8 @@ public final class MethodBuilder implements CodeBuilder<MethodSpec>
 
 		statementResolver.ifPresent(r -> r.apply(resolution)
 										  .forEach(spec::addStatement));
+
+		if (overide) spec.addAnnotation(Override.class);
 
 		return spec.build();
 	}

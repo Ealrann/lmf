@@ -4,7 +4,7 @@ import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.util.Types;
-import isotropy.lmf.generator.group.feature.FeatureResolution;
+import isotropy.lmf.generator.code.feature.FeatureResolution;
 
 import java.io.File;
 import java.util.List;

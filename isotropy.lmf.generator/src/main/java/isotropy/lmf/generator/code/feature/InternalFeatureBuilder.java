@@ -1,4 +1,4 @@
-package isotropy.lmf.generator.group.feature;
+package isotropy.lmf.generator.code.feature;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;

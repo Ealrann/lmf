@@ -1,23 +1,22 @@
 package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.FeatureMap;
+import isotropy.lmf.core.model.FeatureGetter;
+import isotropy.lmf.core.model.FeatureSetter;
 import isotropy.lmf.core.model.FeaturedObject;
 import isotropy.lmf.core.model.RawFeature;
 
-import java.util.List;
-import java.util.function.Function;
-
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> extends FeaturedObject implements Relation<UnaryType, EffectiveType>
 {
-	public static final FeatureMap<Function<Relation<?, ?>, Object>> GET_MAP = new FeatureMap<>(
+	public static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>()
 
-			List.of(new FeatureMap.FeatureTuple<>(Features.name, Named::name),
-					new FeatureMap.FeatureTuple<>(Features.immutable, Relation::immutable),
-					new FeatureMap.FeatureTuple<>(Features.many, Relation::many),
-					new FeatureMap.FeatureTuple<>(Features.mandatory, Relation::mandatory),
-					new FeatureMap.FeatureTuple<>(Features.reference, Relation::reference),
-					new FeatureMap.FeatureTuple<>(Features.contains, Relation::contains)));
+			.add(Features.name, Relation::name)
+			.add(Features.immutable, Relation::immutable)
+			.add(Features.many, Relation::many)
+			.add(Features.mandatory, Relation::mandatory)
+			.add(Features.reference, Relation::reference)
+			.add(Features.contains, Relation::contains)
+			.build();
 
 	private final String name;
 	private final boolean immutable;
@@ -88,18 +87,16 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 		return rawFeature;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T get(final Feature<?, T> feature)
+	protected FeatureGetter<?> getterMap()
 	{
-		return (T) GET_MAP.get(feature.rawFeature())
-						  .apply(this);
+		return GET_MAP;
 	}
 
 	@Override
-	public <T> void set(final Feature<?, T> feature, final T value)
+	protected FeatureSetter<?> setterMap()
 	{
-		throw new IllegalAccessError("Group " + Generic.class.getSimpleName() + " is immutable.");
+		return null;
 	}
 
 	@Override

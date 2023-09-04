@@ -2,6 +2,7 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.FeatureGetter;
+import isotropy.lmf.core.model.FeatureSetter;
 import isotropy.lmf.core.model.FeaturedObject;
 
 import java.util.List;
@@ -71,19 +72,19 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 	}
 
 	@Override
-	public <T> T get(final Feature<?, T> feature)
+	protected FeatureGetter<?> getterMap()
 	{
-		return GET_MAP.get(this, feature.rawFeature());
+		return GET_MAP;
 	}
 
 	@Override
-	public <T> void set(final Feature<?, T> feature, final T value)
+	protected FeatureSetter<?> setterMap()
 	{
-		throw new IllegalAccessError("Group " + Generic.class.getSimpleName() + " is immutable.");
+		return null;
 	}
 
 	@Override
-	public Group<?> lmGroup()
+	public Group<Group<?>> lmGroup()
 	{
 		return LMCoreDefinition.Groups.GROUP;
 	}

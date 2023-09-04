@@ -4,7 +4,9 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
+import isotropy.lmf.generator.code.type.TypeFeatures;
 import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -25,20 +27,24 @@ public final class ImplementationGenerator
 		final var packageName = context.packageName() + ".impl";
 		final var featureResolutions = context.featureResolutions();
 		final var types = context.types();
+		final var typedInterface = TypeParameter.of(types.interfaceName(), types.finalParameters());
 
 		final var className = ClassName.get(packageName, group.name() + "Impl");
 
 		final var classBuilder = TypeSpec.classBuilder(className)
-										 .addSuperinterface(types.interfaceName())
+										 .addSuperinterface(typedInterface.parametrized())
 										 .superclass(FEATURE_OBJECT_TYPE)
 										 .addTypeVariables(types.detailedParameters())
 										 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 		final var constructor = MethodSpec.constructorBuilder()
 										  .addModifiers(Modifier.PUBLIC);
 
-		final var installers = ImplementationFeatureUtil.buildInstallers(classBuilder, constructor);
+		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder, constructor);
+		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(classBuilder);
+		final var typeFeatures = new TypeFeatures(group, typedInterface, featureResolutions);
 
-		featureResolutions.forEach(installers::install);
+		featureResolutions.forEach(featureInstallers::install);
+		typeInstallers.install(typeFeatures);
 
 		classBuilder.addMethod(constructor.build());
 

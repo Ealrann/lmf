@@ -10,7 +10,7 @@ public interface Reference<T extends LMObject> extends LMObject
 {
 	Concept<T> group();
 
-	List<? extends Concept<?>> parameters();
+	List<Concept<?>> parameters();
 
 	interface Features
 	{

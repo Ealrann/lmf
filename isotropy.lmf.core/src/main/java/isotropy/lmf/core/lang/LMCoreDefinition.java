@@ -326,6 +326,20 @@ public interface LMCoreDefinition
 		}
 	}
 
+	interface Generics
+	{
+		List<Generic<?>> Attribute = List.of(new GenericImpl<>("UnaryType", null, null),
+											 new GenericImpl<>("EffectiveType", null, null));
+		List<Generic<?>> DataType = List.of(new GenericImpl<>("T", null, null));
+		List<Generic<?>> Enum = List.of(new GenericImpl<>("T", null, null));
+		List<Generic<?>> Relation = List.of(new GenericImpl<>("UnaryType", BoundType.Extends, Groups.LM_OBJECT),
+											new GenericImpl<>("EffectiveType", null, null));
+		List<Generic<?>> Unit = List.of(new GenericImpl<>("T", null, null));
+		List<Generic<?>> Reference = List.of(new GenericImpl<>("T",
+															   BoundType.Extends,
+															   LMCoreDefinition.Groups.LM_OBJECT));
+	}
+
 	interface Groups
 	{
 		Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), List.of(), List.of());
@@ -452,20 +466,6 @@ public interface LMCoreDefinition
 		Alias LB_1_DOT_DOT_STAR_RB = new AliasImpl("[1..*]", List.of("mandatory", "many"));
 		Alias DREF = new AliasImpl("dref", List.of("reference=DirectReference"));
 		Alias GREF = new AliasImpl("gref", List.of("reference=GenericReference"));
-	}
-
-	interface Generics
-	{
-		List<Generic<?>> Attribute = List.of(new GenericImpl<>("UnaryType", null, null),
-											 new GenericImpl<>("EffectiveType", null, null));
-		List<Generic<?>> DataType = List.of(new GenericImpl<>("T", null, null));
-		List<Generic<?>> Enum = List.of(new GenericImpl<>("T", null, null));
-		List<Generic<?>> Relation = List.of(new GenericImpl<>("UnaryType", BoundType.Extends, Groups.LM_OBJECT),
-											new GenericImpl<>("EffectiveType", null, null));
-		List<Generic<?>> Unit = List.of(new GenericImpl<>("T", null, null));
-		List<Generic<?>> Reference = List.of(new GenericImpl<>("T",
-															   BoundType.Extends,
-															   LMCoreDefinition.Groups.LM_OBJECT));
 	}
 
 	interface JavaWrappers

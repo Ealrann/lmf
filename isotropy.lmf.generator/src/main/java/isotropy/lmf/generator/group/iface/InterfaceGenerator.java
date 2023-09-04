@@ -4,9 +4,9 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.generator.group.GroupGenerationContext;
-import isotropy.lmf.generator.group.feature.FeatureResolution;
-import isotropy.lmf.generator.group.feature.InternalFeatureBuilder;
-import isotropy.lmf.generator.group.feature.MethodBuilder;
+import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.generator.code.feature.InternalFeatureBuilder;
+import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.Types;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 public final class InterfaceGenerator
 {
-	public static final MethodBuilder METHOD_BUILDER = InterfaceMethodUtil.methodBuilder();
+	public static final FeatureMethodBuilder METHOD_BUILDER = InterfaceMethodUtil.methodBuilder();
 	private final GroupGenerationContext context;
 
 	public InterfaceGenerator(final GroupGenerationContext context)

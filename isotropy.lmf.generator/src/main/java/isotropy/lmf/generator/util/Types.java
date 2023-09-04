@@ -5,6 +5,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.util.ModelUtils;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -81,11 +82,16 @@ public record Types(Group<?> group,
 			final var type = generic.type();
 			final var typeVariableNameRaw = TypeVariableName.get(generic.name());
 			final var typeVariableNameTyped = type != null
-											  ? TypeVariableName.get(generic.name(),
-																	 ClassName.get("", type.name()))
+											  ? TypeVariableName.get(generic.name(), resolveType(type))
 											  : typeVariableNameRaw;
 
 			return new GenericParameter(typeVariableNameRaw, typeVariableNameTyped);
+		}
+
+		private static ClassName resolveType(final Type<?> type)
+		{
+			final var model = (Model) ModelUtils.root(type);
+			return ClassName.get(model.domain(), type.name());
 		}
 	}
 }

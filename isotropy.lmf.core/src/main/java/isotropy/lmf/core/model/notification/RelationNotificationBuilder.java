@@ -16,7 +16,7 @@ public class RelationNotificationBuilder
 		}
 		else
 		{
-			return new RelationSetNotifiation(notifier, feature, newValue, null);
+			return new SetNotifiation(notifier, feature, newValue, null);
 		}
 	}
 
@@ -34,7 +34,7 @@ public class RelationNotificationBuilder
 		}
 		else
 		{
-			return new RelationSetNotifiation(notifier, feature, null, oldValue);
+			return new SetNotifiation(notifier, feature, null, oldValue);
 		}
 	}
 

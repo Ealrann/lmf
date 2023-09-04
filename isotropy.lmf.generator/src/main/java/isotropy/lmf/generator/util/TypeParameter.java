@@ -5,6 +5,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
 import java.util.Arrays;
+import java.util.List;
 
 public interface TypeParameter
 {
@@ -15,6 +16,11 @@ public interface TypeParameter
 	static TypeParameter of(ClassName raw, TypeName... params)
 	{
 		return new SimpleTypeParameter(raw, params);
+	}
+
+	static TypeParameter of(ClassName raw, List<? extends TypeName> params)
+	{
+		return new SimpleTypeParameter(raw, params.toArray(new TypeName[0]));
 	}
 
 	static TypeParameter of(TypeName raw)

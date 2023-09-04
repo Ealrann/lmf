@@ -1,12 +1,24 @@
 package isotropy.lmf.core.lang.impl;
 
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.lang.LMCoreDefinition;
+import isotropy.lmf.core.lang.Primitive;
+import isotropy.lmf.core.lang.Unit;
+import isotropy.lmf.core.model.FeatureGetter;
+import isotropy.lmf.core.model.FeatureSetter;
 import isotropy.lmf.core.model.FeaturedObject;
-
-import java.util.function.Function;
 
 public final class UnitImpl<T> extends FeaturedObject implements Unit<T>
 {
+	public static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>()
+
+			.add(Features.name, Unit::name)
+			.add(Features.matcher, Unit::matcher)
+			.add(Features.defaultValue, Unit::defaultValue)
+			.add(Features.primitive, Unit::primitive)
+			.add(Features.extractor, Unit::extractor)
+			.build();
+
 	private final String name;
 	private final String matcher;
 	private final String defaultValue;
@@ -57,44 +69,15 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T>
 	}
 
 	@Override
-	public <T> T get(final Feature<?, T> feature)
+	protected FeatureGetter<?> getterMap()
 	{
-		return featureGetter(feature).apply(this);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> Function<Unit<?>, T> featureGetter(Feature<?, T> f)
-	{
-		if (f == LMCoreDefinition.Features.UNIT.name)
-		{
-			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::name;
-		}
-		else if (f == LMCoreDefinition.Features.UNIT.matcher)
-		{
-			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::matcher;
-		}
-		else if (f == LMCoreDefinition.Features.UNIT.defaultValue)
-		{
-			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::defaultValue;
-		}
-		else if (f == LMCoreDefinition.Features.UNIT.primitive)
-		{
-			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::primitive;
-		}
-		else if (f == LMCoreDefinition.Features.UNIT.extractor)
-		{
-			return (Function<Unit<?>, T>) (Function<Unit<?>, ?>) Unit::extractor;
-		}
-		else
-		{
-			throw new IllegalArgumentException();
-		}
+		return GET_MAP;
 	}
 
 	@Override
-	public <T> void set(final Feature<?, T> feature, final T value)
+	protected FeatureSetter<?> setterMap()
 	{
-		throw new IllegalAccessError("Group " + Alias.class.getSimpleName() + " is immutable.");
+		return null;
 	}
 
 	@Override

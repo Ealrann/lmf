@@ -1,9 +1,11 @@
 package isotropy.lmf.core.model;
 
+import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.notification.ContainerChange;
 import isotropy.lmf.core.model.notification.RelationNotificationBuilder;
+import isotropy.lmf.core.model.notification.SetNotifiation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,39 @@ public abstract class FeaturedObject implements IFeaturedObject
 			listener.accept(notification);
 		}
 	}
+
+	@Override
+	public <T> T get(final Feature<?, T> feature)
+	{
+		return internalGet(feature);
+	}
+
+	@Override
+	public <T> void set(final Feature<?, T> feature, final T value)
+	{
+		internalSet(feature, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T, O> void internalSet(final Feature<?, T> feature, final T value)
+	{
+		final var getMap = (FeatureGetter<O>) getterMap();
+		final var setMap = (FeatureSetter<O>) setterMap();
+
+		final var oldValue = getMap.get((O) this, feature.rawFeature());
+		setMap.set((O) this, feature.rawFeature(), value);
+		lNotify(new SetNotifiation((LMObject) this, feature.rawFeature(), value, oldValue));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T, O> T internalGet(final Feature<?, T> feature)
+	{
+		final var getMap = (FeatureGetter<O>) getterMap();
+		return getMap.get((O) this, feature.rawFeature());
+	}
+
+	protected FeatureGetter<?> getterMap(){return null;}
+	protected FeatureSetter<?> setterMap(){return null;}
 
 	protected final void setContainer(final LMObject child, final RawFeature<?, ?> feature)
 	{

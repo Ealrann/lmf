@@ -1,4 +1,4 @@
-package isotropy.lmf.generator.group.feature;
+package isotropy.lmf.generator.code.feature;
 
 import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.generator.util.TypeParameter;

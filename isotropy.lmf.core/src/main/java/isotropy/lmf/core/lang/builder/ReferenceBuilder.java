@@ -24,12 +24,12 @@ public final class ReferenceBuilder<UnaryType extends LMObject> implements Refer
 			.build();
 
 	private Supplier<Concept<UnaryType>> group = null;
-	private final List<Supplier<? extends Concept<?>>> parameters = new ArrayList<>();
+	private final List<Supplier<Concept<?>>> parameters = new ArrayList<>();
 
 	@Override
 	public Reference<UnaryType> build()
 	{
-		return new ReferenceImpl<UnaryType>(group, parameters);
+		return new ReferenceImpl<>(group, parameters);
 	}
 
 	@Override
