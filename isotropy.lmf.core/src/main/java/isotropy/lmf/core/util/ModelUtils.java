@@ -10,19 +10,14 @@ public class ModelUtils
 {
 	public static LMObject root(LMObject child)
 	{
-		if(child.lmContainer() != null)
-		{
-			return root(child.lmContainer());
-		}
-		else
-		{
-			return child;
-		}
+		if (child == null) return null;
+		if (child.lmContainer() != null) return root(child.lmContainer());
+		else return child;
+
 	}
 
 	public static boolean isSubGroup(final Concept<?> parent, final Group<?> check)
 	{
-
 		if (parent instanceof Group<?> parentGroup)
 		{
 			return isSubGroup(parentGroup, check);
@@ -43,8 +38,7 @@ public class ModelUtils
 		{
 			return true;
 		}
-		else if (check.includes()
-					  .isEmpty() == false)
+		else if (check.includes().isEmpty() == false)
 		{
 			for (final var include : check.includes())
 			{
@@ -59,8 +53,7 @@ public class ModelUtils
 
 	public static Stream<Feature<?, ?>> streamAllFeatures(Group<?> group)
 	{
-		return streamHierarchy(group).map(Group::features)
-									 .flatMap(Collection::stream);
+		return streamHierarchy(group).map(Group::features).flatMap(Collection::stream);
 	}
 
 	public static Stream<Group<?>> streamHierarchy(Group<?> group)

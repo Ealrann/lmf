@@ -36,6 +36,11 @@ public class ModelGenerator
 			enumGenerator.generate(target);
 		}
 
+		final var modelDefinition = new ModelDefinition(model);
+		modelDefinition.generate(target);
+
+
+
 		final var modelName = model.name();
 		final var className = modelName + "Package";
 		final var packageName = model.domain();

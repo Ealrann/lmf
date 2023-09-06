@@ -3,7 +3,7 @@ package isotropy.lmf.generator.code.type;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.model.FeatureGetter;
-import isotropy.lmf.generator.code.CodeBuilder;
+import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;

@@ -1,4 +1,4 @@
-package isotropy.lmf.generator.code;
+package isotropy.lmf.generator.code.util;
 
 public interface CodeBuilder<Input, Built>
 {

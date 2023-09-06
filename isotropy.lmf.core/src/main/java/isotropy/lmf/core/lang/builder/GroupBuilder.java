@@ -8,14 +8,13 @@ import isotropy.lmf.core.model.RelationLazyInserter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 {
 	private static final FeatureInserter<GroupBuilder<?>> FEATURE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>()
 
-			.add(Group.Features.name, GroupBuilder::name)
-			.add(Group.Features.concrete, GroupBuilder::concrete)
-			.build();
+			.add(Group.Features.name, GroupBuilder::name).add(Group.Features.concrete, GroupBuilder::concrete).build();
 
 	private static final RelationLazyInserter<GroupBuilder<?>> BUILDER_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>()
 
@@ -34,15 +33,11 @@ public final class GroupBuilder<T extends LMObject> implements Group.Builder<T>
 	@Override
 	public Group<T> build()
 	{
-		final var builtIncludes = includes.stream()
-										  .map(Supplier::get)
-										  .toList();
-		final var builtFeatures = features.stream()
-										  .map(Supplier::get)
-										  .toList();
-		final var builtGenerics = generics.stream()
-										  .map(Supplier::get)
-										  .toList();
+		final var builtIncludes = includes.stream().map(Supplier::get).toList();
+		final List<Feature<?, ?>> builtFeatures = features.stream()
+														  .map(Supplier::get)
+														  .collect(Collectors.toUnmodifiableList());
+		final var builtGenerics = generics.stream().map(Supplier::get).toList();
 
 		return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
 	}

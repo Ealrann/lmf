@@ -21,13 +21,13 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 	private final String name;
 	private final boolean concrete;
 	private final List<? extends Reference<?>> includes;
-	private final List<? extends Feature<?, ?>> features;
+	private final List<Feature<?, ?>> features;
 	private final List<? extends Generic<?>> generics;
 
 	public GroupImpl(final String name,
 					 final boolean concrete,
 					 final List<? extends Reference<?>> includes,
-					 final List<? extends Feature<?, ?>> features,
+					 final List<Feature<?, ?>> features,
 					 final List<? extends Generic<?>> generics)
 	{
 		this.name = name;
@@ -60,7 +60,7 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 	}
 
 	@Override
-	public List<? extends Feature<?, ?>> features()
+	public List<Feature<?, ?>> features()
 	{
 		return features;
 	}

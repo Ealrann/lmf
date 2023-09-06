@@ -11,7 +11,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T>
 {
 	boolean concrete();
 	List<? extends Reference<?>> includes();
-	List<? extends Feature<?, ?>> features();
+	List<Feature<?, ?>> features();
 	List<? extends Generic<?>> generics();
 
 	List<Generic<?>> GENERICS = List.of(new GenericImpl<>("T", BoundType.Extends, LMCoreDefinition.Groups.LM_OBJECT));

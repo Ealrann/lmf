@@ -1,4 +1,4 @@
-package isotropy.lmf.generator.code;
+package isotropy.lmf.generator.code.util;
 
 import java.util.List;
 import java.util.function.BiConsumer;

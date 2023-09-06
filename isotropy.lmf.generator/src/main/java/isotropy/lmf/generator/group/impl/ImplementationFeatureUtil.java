@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.generator.code.CodeInstaller;
+import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.FieldBuilder;

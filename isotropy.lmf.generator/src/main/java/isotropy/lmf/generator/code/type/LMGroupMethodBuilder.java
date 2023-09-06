@@ -5,7 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
-import isotropy.lmf.generator.code.CodeBuilder;
+import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;

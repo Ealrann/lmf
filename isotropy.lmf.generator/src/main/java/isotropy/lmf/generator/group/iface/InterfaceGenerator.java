@@ -3,11 +3,11 @@ package isotropy.lmf.generator.group.iface;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.InternalFeatureBuilder;
-import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
-import isotropy.lmf.generator.util.GenUtils;
+import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.generator.util.TypeParameter;
 import isotropy.lmf.generator.util.Types;
 
 import javax.lang.model.element.Modifier;
@@ -54,8 +54,7 @@ public final class InterfaceGenerator
 
 		try
 		{
-			final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build())
-										 .build();
+			final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build()).build();
 			javaFile.writeTo(context.interfaceDirectory());
 		}
 		catch (IOException e)
@@ -81,24 +80,21 @@ public final class InterfaceGenerator
 
 	private boolean matchGroup(final FeatureResolution f)
 	{
-		return f.feature()
-				.lmContainer() == context.group();
+		return f.feature().lmContainer() == context.group();
 	}
 
 	private static TypeSpec buildBuilderInterface(final Types builderTypes,
 												  final List<FeatureResolution> featureResolutions)
 	{
-		final var typedBuilder = GenUtils.parameterize(builderTypes.interfaceName(), builderTypes.finalParameters());
-		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder);
+		final var typedBuilder = TypeParameter.of(builderTypes.interfaceName(), builderTypes.finalParameters());
+		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder.parametrized());
 
 		final var builderTypeBuilder = TypeSpec.interfaceBuilder(builderTypes.interfaceName())
 											   .addSuperinterface(builderTypes.superInterface())
 											   .addTypeVariables(builderTypes.detailedParameters())
 											   .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
-		featureResolutions.stream()
-						  .map(methodBuilder::build)
-						  .forEach(builderTypeBuilder::addMethod);
+		featureResolutions.stream().map(methodBuilder::build).forEach(builderTypeBuilder::addMethod);
 
 		return builderTypeBuilder.build();
 	}

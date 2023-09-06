@@ -24,7 +24,7 @@ public record GroupGenerationContext(Group<?> group,
 
 			final var includes = group.includes();
 			final var refInclude = includes.isEmpty() ? null : includes.get(0);
-			final var types = Types.build(refInclude, group);
+			final var types = Types.from(refInclude, group);
 			final var featureResolutions = ModelUtils.streamAllFeatures(group)
 													 .map(FeatureResolution::from)
 													 .toList();
