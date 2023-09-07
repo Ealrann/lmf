@@ -28,7 +28,7 @@ public final class ImplementationGenerator
 		final var featureResolutions = context.featureResolutions();
 		final var types = context.types();
 		final var typedInterface = TypeParameter.of(types.interfaceName(), types.finalParameters());
-
+		final var typeFeatures = new TypeFeatures(group, typedInterface, featureResolutions);
 		final var className = ClassName.get(packageName, group.name() + "Impl");
 
 		final var classBuilder = TypeSpec.classBuilder(className)
@@ -36,22 +36,17 @@ public final class ImplementationGenerator
 										 .superclass(FEATURE_OBJECT_TYPE)
 										 .addTypeVariables(types.detailedParameters())
 										 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-		final var constructor = MethodSpec.constructorBuilder()
-										  .addModifiers(Modifier.PUBLIC);
-
+		final var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
 		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder, constructor);
 		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(classBuilder);
-		final var typeFeatures = new TypeFeatures(group, typedInterface, featureResolutions);
 
 		featureResolutions.forEach(featureInstallers::install);
 		typeInstallers.install(typeFeatures);
 
-		classBuilder.addMethod(constructor.build());
-
 		try
 		{
-			final var javaFile = JavaFile.builder(packageName, classBuilder.build())
-										 .build();
+			classBuilder.addMethod(constructor.build());
+			final var javaFile = JavaFile.builder(packageName, classBuilder.build()).build();
 			javaFile.writeTo(context.interfaceDirectory());
 		}
 		catch (IOException e)

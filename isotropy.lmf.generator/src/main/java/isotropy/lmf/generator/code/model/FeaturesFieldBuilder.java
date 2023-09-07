@@ -8,11 +8,9 @@ import isotropy.lmf.core.lang.impl.AttributeImpl;
 import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
-import isotropy.lmf.generator.util.CodeblockBuilder;
-import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.TypeParameter;
-import isotropy.lmf.generator.util.TypeResolutionUtil;
+import isotropy.lmf.generator.util.*;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -25,7 +23,6 @@ public final class FeaturesFieldBuilder implements CodeBuilder<Feature<?, ?>, Fi
 	public static final ClassName RELATION_TYPE = ClassName.get(Relation.class);
 	public static final ClassName RELATION_IMPL_TYPE = ClassName.get(RelationImpl.class);
 	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
-	public static final ClassName LIST_TYPE = ClassName.get(List.class);
 
 	private final Group<?> group;
 
@@ -40,10 +37,9 @@ public final class FeaturesFieldBuilder implements CodeBuilder<Feature<?, ?>, Fi
 		final var name = input.name();
 		final var parentGroup = (Group<?>) input.lmContainer();
 		final var constantName = GenUtils.toConstantCase(name);
-		final var type = TypeResolutionUtil.resolveType(input);
-		final var effectiveType = TypeResolutionUtil.effectiveType(input, type);
-
-		final var types = List.of(type.parametrizedWildcard(), effectiveType.parametrizedWildcard());
+		final var resolvedFeature = FeatureResolution.from(input);
+		final var types = List.of(resolvedFeature.singleType().parametrizedWildcard(),
+								  resolvedFeature.effectiveType().parametrizedWildcard());
 		final var isAttribute = input instanceof Attribute<?, ?>;
 		final var mainType = isAttribute
 							 ? TypeParameter.of(ATTRIBUTE_TYPE, types)
@@ -71,7 +67,7 @@ public final class FeaturesFieldBuilder implements CodeBuilder<Feature<?, ?>, Fi
 				final var typeName = GenUtils.toConstantCase(datatype.name());
 
 				initBuilder.add("$N.$N, ", typeHolder, typeName)
-						   .add("$T.of(), ", LIST_TYPE)
+						   .add("$T.of(), ", ConstantTypes.LIST_CLASS_NAME)
 						   .add("$N.Features.$N", parentGroup.name(), name);
 			}
 			else
@@ -114,7 +110,7 @@ public final class FeaturesFieldBuilder implements CodeBuilder<Feature<?, ?>, Fi
 
 		return CodeBlock.builder()
 						.add("new $T<>(() -> $N.$N, ", REFERENCE_IMPL_TYPE, conceptHolder, groupConstantName)
-						.add("$T.of(", LIST_TYPE)
+						.add("$T.of(", ConstantTypes.LIST_CLASS_NAME)
 						.add(genericsBlockBuilder.build())
 						.add("))")
 						.build();

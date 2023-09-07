@@ -5,6 +5,7 @@ import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.lang.Alias;
 import isotropy.lmf.core.lang.impl.AliasImpl;
 import isotropy.lmf.generator.code.util.CodeBuilder;
+import isotropy.lmf.generator.util.ConstantTypes;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -14,7 +15,6 @@ public final class AliasFieldBuilder implements CodeBuilder<Alias, FieldSpec>
 	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName ALIAS_TYPE = ClassName.get(Alias.class);
 	public static final ClassName ALIAS_IMPL_TYPE = ClassName.get(AliasImpl.class);
-	public static final ClassName LIST_TYPE = ClassName.get(List.class);
 
 	@Override
 	public FieldSpec build(Alias input)
@@ -24,7 +24,10 @@ public final class AliasFieldBuilder implements CodeBuilder<Alias, FieldSpec>
 		final var wordList = listify(input.words());
 
 		return FieldSpec.builder(ALIAS_TYPE, javaName, modifiers)
-						.initializer("new $T($S, $T.of( " + wordList + "))", ALIAS_IMPL_TYPE, name, LIST_TYPE)
+						.initializer("new $T($S, $T.of( " + wordList + "))",
+									 ALIAS_IMPL_TYPE,
+									 name,
+									 ConstantTypes.LIST_CLASS_NAME)
 						.build();
 	}
 
@@ -46,10 +49,7 @@ public final class AliasFieldBuilder implements CodeBuilder<Alias, FieldSpec>
 
 	private static String javify(String input)
 	{
-		return input.chars()
-					.mapToObj(AliasFieldBuilder::mapChar)
-					.reduce(CharConversion::join)
-					.orElseThrow().result;
+		return input.chars().mapToObj(AliasFieldBuilder::mapChar).reduce(CharConversion::join).orElseThrow().result;
 	}
 
 	private static CharConversion mapChar(int c)

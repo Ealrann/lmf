@@ -1,9 +1,9 @@
 package isotropy.lmf.generator.code.util;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeSpec;
+import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 public final class FieldBuilder<Input> extends InterfaceBuilder<Input>
 {
-	public static final ClassName LIST_TYPE = ClassName.get(List.class);
 	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 
 	public <CodeInput> FieldBuilder(final String name,
@@ -36,8 +35,8 @@ public final class FieldBuilder<Input> extends InterfaceBuilder<Input>
 	{
 		private void postOperation(List<FieldSpec> outputs, TypeSpec.Builder interfaceBuilder)
 		{
-			final var typedList = TypeParameter.of(LIST_TYPE, builtType.parametrizedWildcard());
-			final var listBlock = CodeBlock.builder().add("$T.of(", LIST_TYPE);
+			final var typedList = TypeParameter.of(ConstantTypes.LIST_CLASS_NAME, builtType.parametrizedWildcard());
+			final var listBlock = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST_CLASS_NAME);
 			boolean first = true;
 			for (final var output : outputs)
 			{

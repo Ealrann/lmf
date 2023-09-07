@@ -9,11 +9,11 @@ import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.CodeblockBuilder;
+import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
-import java.util.List;
 
 public final class GroupFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 {
@@ -21,7 +21,6 @@ public final class GroupFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 	public static final ClassName GROUP_TYPE = ClassName.get(Group.class);
 	public static final ClassName GROUP_IMPL_TYPE = ClassName.get(GroupImpl.class);
 	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
-	public static final ClassName LIST_TYPE = ClassName.get(List.class);
 
 	@Override
 	public FieldSpec build(Group<?> input)
@@ -36,12 +35,12 @@ public final class GroupFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		input.includes().forEach(referenceBlockBuilder::feed);
 
 		final var genericBlock = input.generics().isEmpty()
-								 ? CodeBlock.of("$T.of()", LIST_TYPE)
+								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST_CLASS_NAME)
 								 : CodeBlock.of("Generics.$N", constantName);
 
 		initializerBuilder.add("new $T<>(", GROUP_IMPL_TYPE)
 						  .add("$S, $L, ", name, input.concrete())
-						  .add("$T.of(", LIST_TYPE)
+						  .add("$T.of(", ConstantTypes.LIST_CLASS_NAME)
 						  .add(referenceBlockBuilder.build())
 						  .add("), Features.$N.ALL,", constantName)
 						  .add(genericBlock)
@@ -61,7 +60,7 @@ public final class GroupFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 
 		return CodeBlock.builder()
 						.add("new $T<>(() -> $N, ", REFERENCE_IMPL_TYPE, groupConstantName)
-						.add("$T.of(", LIST_TYPE)
+						.add("$T.of(", ConstantTypes.LIST_CLASS_NAME)
 						.add(genericsBlockBuilder.build())
 						.add("))")
 						.build();
