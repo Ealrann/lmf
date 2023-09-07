@@ -9,15 +9,12 @@ import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
-import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.*;
 
-import javax.lang.model.element.Modifier;
 import java.util.List;
 
-public final class FeaturesFieldBuilder implements CodeBuilder<Feature<?, ?>, FieldSpec>
+public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Feature<?, ?>>
 {
-	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName ATTRIBUTE_TYPE = ClassName.get(Attribute.class);
 	public static final ClassName ATTRIBUTE_IMPL_TYPE = ClassName.get(AttributeImpl.class);
 	public static final ClassName RELATION_TYPE = ClassName.get(Relation.class);

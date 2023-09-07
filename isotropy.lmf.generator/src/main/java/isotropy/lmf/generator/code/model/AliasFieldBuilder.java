@@ -4,15 +4,12 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.lang.Alias;
 import isotropy.lmf.core.lang.impl.AliasImpl;
-import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.ConstantTypes;
 
-import javax.lang.model.element.Modifier;
 import java.util.List;
 
-public final class AliasFieldBuilder implements CodeBuilder<Alias, FieldSpec>
+public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 {
-	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName ALIAS_TYPE = ClassName.get(Alias.class);
 	public static final ClassName ALIAS_IMPL_TYPE = ClassName.get(AliasImpl.class);
 

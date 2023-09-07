@@ -6,14 +6,10 @@ import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.GenericImpl;
 import isotropy.lmf.core.util.ModelUtils;
-import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.*;
 
-import javax.lang.model.element.Modifier;
-
-public final class GenericFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
+public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {
-	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName GENERIC_TYPE = ClassName.get(Generic.class);
 	public static final ClassName GENERIC_IMPL_TYPE = ClassName.get(GenericImpl.class);
 	public static final ClassName BT_TYPE = ClassName.get(BoundType.class);

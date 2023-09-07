@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class InterfaceBuilder<Input> implements CodeBuilder<Input, TypeSpec>
 {
 	private final Function<Input, String> nameSupplier;
-	private final BuilderExtractor<Input, ?, ?> builderExtractor;
+	private final StrongTypedBuilder<Input, ?, ?> typedBuilder;
 
 	public <CodeInput, Output> InterfaceBuilder(final Function<Input, String> nameSupplier,
 												final Function<Input, CodeBuilder<CodeInput, Output>> builderSupplier,
@@ -20,7 +20,7 @@ public class InterfaceBuilder<Input> implements CodeBuilder<Input, TypeSpec>
 												final BiConsumer<List<Output>, TypeSpec.Builder> postOperation)
 	{
 		this.nameSupplier = nameSupplier;
-		builderExtractor = new BuilderExtractor<>(builderSupplier, extractor, installer, postOperation);
+		typedBuilder = new StrongTypedBuilder<>(builderSupplier, extractor, installer, postOperation);
 	}
 
 	@Override
@@ -28,14 +28,14 @@ public class InterfaceBuilder<Input> implements CodeBuilder<Input, TypeSpec>
 	{
 		final var name = nameSupplier.apply(input);
 		final var interfaceBuilder = TypeSpec.interfaceBuilder(name).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-		builderExtractor.install(interfaceBuilder, input);
+		typedBuilder.install(interfaceBuilder, input);
 		return interfaceBuilder.build();
 	}
 
-	private record BuilderExtractor<Input, CodeInput, Output>(Function<Input, CodeBuilder<CodeInput, Output>> builderSupplier,
-															  Function<Input, Stream<CodeInput>> extractor,
-															  BiConsumer<TypeSpec.Builder, Output> installer,
-															  BiConsumer<List<Output>, TypeSpec.Builder> postOperation)
+	private record StrongTypedBuilder<Input, CodeInput, Output>(Function<Input, CodeBuilder<CodeInput, Output>> builderSupplier,
+																Function<Input, Stream<CodeInput>> extractor,
+																BiConsumer<TypeSpec.Builder, Output> installer,
+																BiConsumer<List<Output>, TypeSpec.Builder> postOperation)
 	{
 		public void install(TypeSpec.Builder interfaceBuilder, Input input)
 		{

@@ -11,9 +11,8 @@ import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
 
-public final class UnitFieldBuilder implements CodeBuilder<Unit<?>, FieldSpec>
+public final class UnitFieldBuilder implements DefinitionFieldBuilder<Unit<?>>
 {
-	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName UNIT_TYPE = ClassName.get(Unit.class);
 	public static final ClassName UNIT_IMPL_TYPE = ClassName.get(UnitImpl.class);
 

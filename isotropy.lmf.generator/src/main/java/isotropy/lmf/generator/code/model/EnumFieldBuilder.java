@@ -4,16 +4,13 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.impl.EnumImpl;
-import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 
-import javax.lang.model.element.Modifier;
 import java.util.Arrays;
 
-public final class EnumFieldBuilder implements CodeBuilder<Enum<?>, FieldSpec>
+public final class EnumFieldBuilder implements DefinitionFieldBuilder<Enum<?>>
 {
-	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName ENUM_TYPE = ClassName.get(Enum.class);
 	public static final ClassName ENUM_IMPL_TYPE = ClassName.get(EnumImpl.class);
 	public static final ClassName ARRAYS_TYPE = ClassName.get(Arrays.class);

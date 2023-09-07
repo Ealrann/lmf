@@ -7,17 +7,13 @@ import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.GroupImpl;
 import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.util.ModelUtils;
-import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.CodeblockBuilder;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 
-import javax.lang.model.element.Modifier;
-
-public final class GroupFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
+public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {
-	private static final Modifier[] modifiers = new Modifier[]{Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC};
 	public static final ClassName GROUP_TYPE = ClassName.get(Group.class);
 	public static final ClassName GROUP_IMPL_TYPE = ClassName.get(GroupImpl.class);
 	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
