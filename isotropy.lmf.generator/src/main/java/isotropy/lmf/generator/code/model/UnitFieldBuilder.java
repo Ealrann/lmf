@@ -5,11 +5,8 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.lang.impl.UnitImpl;
-import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
-
-import javax.lang.model.element.Modifier;
 
 public final class UnitFieldBuilder implements DefinitionFieldBuilder<Unit<?>>
 {

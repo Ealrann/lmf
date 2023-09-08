@@ -1,10 +1,11 @@
-(Model domain=isotropy.lmf.core.langg name=LMCore
+(Model domain=isotropy.lmf.core.lang name=LMCore
 
 	(Group LMObject)
 	(Group Named (includes /groups.0) (-att name=name /units.7 mandatory))
 	(Group Type  (includes /groups.1) (generics name=T))
 
 	(Definition Model (includes group=/groups.1)
+		(-att name=domain  /units.7                       [1..1])
 		(-contains groups  (reference group=/groups.4)    [0..*])
 		(-contains enums   (reference group=/groups.10)   [0..*])
 		(-contains units   (reference group=/groups.11)   [0..*])
@@ -19,8 +20,7 @@
 		(-att      concrete       /units.2)
 		(-contains includes       (reference /groups.13)  [0..*])
 		(-contains features       (reference /groups.5)   [0..*])
-		(-contains generics       (reference /groups.12)  [0..*])
-		(-refers   parameters     (reference /groups.12)  [0..*]))
+		(-contains generics       (reference /groups.12)  [0..*]))
 
 	(Group Feature (includes /groups.1) (Generic UnaryType) (Generic EffectiveType)
 		(-att name=immutable  datatype=/units.2)
@@ -52,17 +52,17 @@
 		(-att primitive    /enums.1   [1..1])
 		(-att extractor    /units.1   [0..1]))
 
-	(Definition Generic (includes group=/groups.1)(includes /groups.14 parameters=../generics.0)
+	(Definition Generic (includes /groups.14 parameters=../generics.0)
 	    (Generic T boundType=extends type=/groups.0)
 		(-refers type      (reference group=/groups.2 parameters=../../generics.0))
 		(-att    boundType datatype=/enums.0))
 
 	(Definition Reference (includes group=/groups.0)
 	    (Generic name=T boundType=Extends type=/groups.0)
-    	(-refers   group lazy [1..1] (reference /groups.14 parameters=../../generics.0))
-    	(-contains parameters [0..*] (reference /groups.14)))
+    	(-refers   group      lazy [1..1] (reference /groups.14 parameters=../../generics.0))
+    	(-refers   parameters lazy [0..*] (reference /groups.14)))
 
-    (Group Concept (Generic name=T))
+    (Group Concept (includes /groups.1) (Generic name=T))
 
     (Definition JavaWrapper (Generic name=T)
     	(includes group=/groups.8 parameters=../generics.0)

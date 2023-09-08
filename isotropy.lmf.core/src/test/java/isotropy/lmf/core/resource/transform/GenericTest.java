@@ -2,7 +2,6 @@ package isotropy.lmf.core.resource.transform;
 
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
-import isotropy.lmf.core.resource.transform.PTreeToJava;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -86,7 +85,6 @@ public class GenericTest
 		final var container = model.groups().get(0);
 		final var car = model.groups().get(1);
 		final var carContainer = model.groups().get(2);
-		final var genericOfContainer = container.generics().get(0);
 
 		assertEquals("Container", container.name());
 		assertEquals(1, container.generics().size());

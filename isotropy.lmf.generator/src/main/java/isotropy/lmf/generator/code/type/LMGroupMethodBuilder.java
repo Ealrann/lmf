@@ -7,6 +7,7 @@ import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
@@ -24,11 +25,12 @@ public class LMGroupMethodBuilder implements CodeBuilder<GroupGenerationContext,
 		final var definitionClassName = ClassName.get(model.domain(), modelDefinition);
 		final var typedInterface = context.interfaceType();
 		final var groupType = TypeParameter.of(GROUP_CLASS, typedInterface.parametrizedWildcard());
+		final var groupName = GenUtils.toConstantCase(group.name());
 
 		return MethodSpec.methodBuilder("lmGroup")
 						 .addModifiers(Modifier.PUBLIC)
 						 .returns(groupType.parametrized())
-						 .addStatement("return $T.GROUPS." + group.name(), definitionClassName)
+						 .addStatement("return $T.Groups." + groupName, definitionClassName)
 						 .addAnnotation(Override.class)
 						 .build();
 	}

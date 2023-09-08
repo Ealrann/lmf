@@ -4,10 +4,10 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeVariableName;
-import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
+import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 
@@ -21,7 +21,7 @@ public class RelationPushMethodBuilder implements CodeBuilder<List<FeatureResolu
 	public MethodSpec build(final List<FeatureResolution> context)
 	{
 		final var attributeType = ClassName.get(Relation.class);
-		final var variableName = TypeVariableName.get("RelationType", ClassName.get(LMObject.class));
+		final var variableName = TypeVariableName.get("RelationType", ConstantTypes.LM_OBJECT);
 		final var supplierType = ClassName.get(Supplier.class);
 		final var paramAttribute = TypeParameter.of(attributeType, List.of(variableName, GenUtils.WILDCARD));
 		final var suppliedType = TypeParameter.of(supplierType, variableName);

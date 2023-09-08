@@ -1,6 +1,10 @@
 package isotropy.lmf.core.util;
 
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Concept;
+import isotropy.lmf.core.lang.Feature;
+import isotropy.lmf.core.lang.Generic;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.lang.LMObject;
 
 import java.util.*;
 import java.util.stream.Stream;

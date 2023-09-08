@@ -2,8 +2,8 @@ package isotropy.lmf.generator.code.model;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
-import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.impl.EnumImpl;
+import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 

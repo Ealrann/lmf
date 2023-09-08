@@ -18,8 +18,7 @@ public final class FeatureBuilderInserter<T>
 													   final RawFeature<RelationType, ?> feature,
 													   final IFeaturedObject.Builder<RelationType> builder)
 	{
-		final var value = (BiConsumer<T, IFeaturedObject.Builder<RelationType>>) featureMap.getTuple(feature)
-																						   .value();
+		final var value = (BiConsumer<T, IFeaturedObject.Builder<RelationType>>) featureMap.getTuple(feature).value();
 		value.accept(owner, builder);
 	}
 

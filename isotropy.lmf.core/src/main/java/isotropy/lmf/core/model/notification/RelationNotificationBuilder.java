@@ -20,7 +20,9 @@ public class RelationNotificationBuilder
 		}
 	}
 
-	public static final Notification insert(LMObject notifier, RawFeature<?, ?> feature, List<? extends LMObject> newValues)
+	public static final Notification insert(LMObject notifier,
+											RawFeature<?, ?> feature,
+											List<? extends LMObject> newValues)
 	{
 		assert feature.many();
 		return new RelationAddManyNotifiation(notifier, feature, newValues);
@@ -38,7 +40,9 @@ public class RelationNotificationBuilder
 		}
 	}
 
-	public static final Notification remove(LMObject notifier, RawFeature<?, ?> feature, List<? extends LMObject> oldValues)
+	public static final Notification remove(LMObject notifier,
+											RawFeature<?, ?> feature,
+											List<? extends LMObject> oldValues)
 	{
 		assert feature.many();
 		return new RelationRemoveManyNotifiation(notifier, feature, oldValues);

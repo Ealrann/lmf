@@ -72,8 +72,9 @@ public class ModelPackage
 	private MethodSpec buildBuilderResolver(final String definitionName)
 	{
 		final var t = TypeVariableName.get("T", ConstantTypes.LM_OBJECT);
+		final var rootBuilder = ClassName.get(IFeaturedObject.Builder.class);
+		final var builtType = TypeParameter.of(rootBuilder, t).nestIn(ConstantTypes.OPTIONAL).parametrized();
 
-		final var builtType = TypeParameter.of(ClassName.get(IFeaturedObject.Builder.class), t).parametrized();
 		final var methodBuilder = MethodSpec.methodBuilder("builder")
 											.addModifiers(Modifier.PUBLIC)
 											.addAnnotation(Override.class)

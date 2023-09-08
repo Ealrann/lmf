@@ -17,8 +17,7 @@ public final class RelationLazyInserter<T>
 	@SuppressWarnings("unchecked")
 	public <F extends LMObject> void push(final T object, final RawFeature<F, ?> relation, final Supplier<F> value)
 	{
-		((BiConsumer<T, Supplier<F>>) featureMap.getTuple(relation)
-												.value()).accept(object, value);
+		((BiConsumer<T, Supplier<F>>) featureMap.getTuple(relation).value()).accept(object, value);
 	}
 
 	public static <T> Builder<T> Builder()

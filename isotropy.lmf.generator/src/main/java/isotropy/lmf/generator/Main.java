@@ -1,14 +1,9 @@
 package isotropy.lmf.generator;
 
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.resource.ResourceUtil;
 import isotropy.lmf.generator.model.ModelGenerator;
 
-import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

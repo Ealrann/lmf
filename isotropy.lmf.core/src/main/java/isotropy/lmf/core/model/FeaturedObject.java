@@ -1,8 +1,8 @@
 package isotropy.lmf.core.model;
 
 import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.model.notification.ContainerChange;
 import isotropy.lmf.core.model.notification.RelationNotificationBuilder;
 import isotropy.lmf.core.model.notification.SetNotifiation;
@@ -29,8 +29,7 @@ public abstract class FeaturedObject implements IFeaturedObject
 	@Override
 	public final Relation<?, ?> lmContainingFeature()
 	{
-		return (Relation<?, ?>) containingFeature.featureSupplier()
-												 .get();
+		return (Relation<?, ?>) containingFeature.featureSupplier().get();
 	}
 
 	private void lNotify(final Notification notification)
@@ -71,8 +70,9 @@ public abstract class FeaturedObject implements IFeaturedObject
 		return getMap.get((O) this, feature.rawFeature());
 	}
 
-	protected FeatureGetter<?> getterMap(){return null;}
-	protected FeatureSetter<?> setterMap(){return null;}
+	protected FeatureGetter<?> getterMap() {return null;}
+
+	protected FeatureSetter<?> setterMap() {return null;}
 
 	protected final void setContainer(final LMObject child, final RawFeature<?, ?> feature)
 	{

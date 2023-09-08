@@ -31,9 +31,9 @@ public class ContainmentTest
 							   .get(0);
 
 		assertEquals(model, color.lmContainer());
-		assertEquals(LMCoreDefinition.Features.MODEL.enums, color.lmContainingFeature());
+		assertEquals(LMCoreDefinition.Features.MODEL.ENUMS, color.lmContainingFeature());
 
 		assertEquals(model, group.lmContainer());
-		assertEquals(LMCoreDefinition.Features.MODEL.groups, group.lmContainingFeature());
+		assertEquals(LMCoreDefinition.Features.MODEL.GROUPS, group.lmContainingFeature());
 	}
 }

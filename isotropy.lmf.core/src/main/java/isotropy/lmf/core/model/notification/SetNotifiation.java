@@ -4,10 +4,8 @@ import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.model.Notification;
 import isotropy.lmf.core.model.RawFeature;
 
-public record SetNotifiation(LMObject notifier,
-							 RawFeature<?, ?> feature,
-							 Object newValue,
-							 Object oldValue) implements Notification
+public record SetNotifiation(LMObject notifier, RawFeature<?, ?> feature, Object newValue, Object oldValue) implements
+																											Notification
 {
 	@Override
 	public EventType type()

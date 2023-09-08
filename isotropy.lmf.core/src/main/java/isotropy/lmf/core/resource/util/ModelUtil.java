@@ -1,7 +1,7 @@
 package isotropy.lmf.core.resource.util;
 
-import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.LMObject;
 
 import java.util.List;
 import java.util.stream.Stream;

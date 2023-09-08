@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 public final class BuildUtils
 {
-	public static <T> List<T> collectSuppliers(List<? extends Supplier<? extends T>> suppliers)
+	public static <T> List<T> collectSuppliers(List<Supplier<T>> suppliers)
 	{
-		return suppliers.stream().map(Supplier::get).collect(Collectors.toUnmodifiableList());
+		return suppliers.stream().map(Supplier::get).toList();
 	}
 }

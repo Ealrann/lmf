@@ -31,8 +31,7 @@ public class TypeResolutionUtil
 		}
 		else
 		{
-			final var res = ClassName.get(LMObject.class);
-			return TypeParameter.of(res);
+			return TypeParameter.of(ConstantTypes.LM_OBJECT);
 		}
 	}
 

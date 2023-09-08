@@ -2,8 +2,8 @@ package isotropy.lmf.core.model;
 
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Model;
+import isotropy.lmf.core.lang.LMObject;
 
 import java.util.Optional;
 

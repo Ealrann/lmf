@@ -2,7 +2,6 @@ package isotropy.lmf.core.resource.transform;
 
 import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.resource.ptree.PTreeReader;
-import isotropy.lmf.core.resource.transform.PTreeToJava;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

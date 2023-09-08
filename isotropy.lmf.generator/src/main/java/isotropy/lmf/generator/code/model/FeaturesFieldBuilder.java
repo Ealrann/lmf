@@ -75,6 +75,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 				initBuilder.add(refBlock)
 						   .add(", $L, ", relation.contains())
+						   .add("$L, ", relation.lazy())
 						   .add("$N.Features.$N", parentGroup.name(), name);
 			}
 
