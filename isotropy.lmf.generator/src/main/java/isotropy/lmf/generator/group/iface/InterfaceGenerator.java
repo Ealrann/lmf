@@ -7,8 +7,7 @@ import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.InternalFeatureBuilder;
 import isotropy.lmf.generator.group.GroupGenerationContext;
-import isotropy.lmf.generator.util.TypeParameter;
-import isotropy.lmf.generator.util.Types;
+import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -29,20 +28,17 @@ public final class InterfaceGenerator
 		final var group = context.group();
 		final var packageName = context.packageName();
 		final var featureResolutions = context.featureResolutions();
-		final var types = context.types();
+		final var types = context.interfaceType();
 		final var isFinal = group.concrete();
-
-		final var interfaceBuilder = TypeSpec.interfaceBuilder(types.interfaceName())
-											 .addSuperinterface(types.superInterface())
-											 .addTypeVariables(types.detailedParameters())
-											 .addModifiers(Modifier.PUBLIC);
-
 		final var internalFeaturesInterface = buildInternalFeaturesInterface(group, featureResolutions);
-		interfaceBuilder.addType(internalFeaturesInterface);
+
+		final var interfaceBuilder = types.interfaceSpecBuilder()
+										  .addModifiers(Modifier.PUBLIC)
+										  .addType(internalFeaturesInterface);
 
 		if (isFinal)
 		{
-			final var builderTypes = types.builder();
+			final var builderTypes = types.builderInterface();
 			final var builderInterface = buildBuilderInterface(builderTypes, featureResolutions);
 			interfaceBuilder.addType(builderInterface);
 		}
@@ -74,8 +70,7 @@ public final class InterfaceGenerator
 						  .map(internalFeatureBuilder::toConstantFeature)
 						  .forEach(internalFeaturesInterfaceBuilder::addField);
 
-		final var internalFeaturesInterface = internalFeaturesInterfaceBuilder.build();
-		return internalFeaturesInterface;
+		return internalFeaturesInterfaceBuilder.build();
 	}
 
 	private boolean matchGroup(final FeatureResolution f)
@@ -83,16 +78,14 @@ public final class InterfaceGenerator
 		return f.feature().lmContainer() == context.group();
 	}
 
-	private static TypeSpec buildBuilderInterface(final Types builderTypes,
+	private static TypeSpec buildBuilderInterface(final GroupType builderType,
 												  final List<FeatureResolution> featureResolutions)
 	{
-		final var typedBuilder = TypeParameter.of(builderTypes.interfaceName(), builderTypes.finalParameters());
-		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder.parametrized());
+		final var typedBuilder = builderType.parametrized();
+		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder);
 
-		final var builderTypeBuilder = TypeSpec.interfaceBuilder(builderTypes.interfaceName())
-											   .addSuperinterface(builderTypes.superInterface())
-											   .addTypeVariables(builderTypes.detailedParameters())
-											   .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+		final var builderTypeBuilder = builderType.interfaceSpecBuilder()
+												  .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
 		featureResolutions.stream().map(methodBuilder::build).forEach(builderTypeBuilder::addMethod);
 

@@ -19,14 +19,14 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 	{
 		final var name = input.name();
 		final var generycType = TypeParameter.of(GENERIC_TYPE, 1);
-		final var typedList = TypeParameter.of(ConstantTypes.LIST_CLASS_NAME, generycType.parametrizedWildcard());
+		final var typedList = TypeParameter.of(ConstantTypes.LIST, generycType.parametrizedWildcard());
 		final var constantName = GenUtils.toConstantCase(name);
 		final var initializerBuilder = CodeBlock.builder();
 
 		final var genericBlockBuilder = new CodeblockBuilder<>(", ", GenericFieldBuilder::generateGenericsCodeblock);
 		input.generics().forEach(genericBlockBuilder::feed);
 
-		initializerBuilder.add("$T.of(", ConstantTypes.LIST_CLASS_NAME).add(genericBlockBuilder.build()).add(")");
+		initializerBuilder.add("$T.of(", ConstantTypes.LIST).add(genericBlockBuilder.build()).add(")");
 
 		return FieldSpec.builder(typedList.parametrized(), constantName, modifiers)
 						.initializer(initializerBuilder.build())

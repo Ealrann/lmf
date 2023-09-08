@@ -1,6 +1,7 @@
 package isotropy.lmf.generator.code.feature;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
@@ -9,11 +10,37 @@ import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 import isotropy.lmf.generator.util.TypeResolutionUtil;
 
+import javax.lang.model.element.Modifier;
+
 public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType, TypeParameter effectiveType)
 {
 	public String name()
 	{
 		return feature.name();
+	}
+
+	public TypeName builderType()
+	{
+		final var relation = feature instanceof Relation<?, ?>;
+		final var many = feature.many();
+		if (!relation) return effectiveType().parametrized();
+		else if (many) return singleType.nestIn(ConstantTypes.SUPPLIER).nestIn(ConstantTypes.LIST).parametrized();
+		else return singleType.nestIn(ConstantTypes.SUPPLIER).parametrized();
+	}
+
+	public ParameterSpec parameterSpec()
+	{
+		final var name = MethodUtil.validateParameterName(name());
+		return ParameterSpec.builder(effectiveType.parametrized(), name).addModifiers(Modifier.FINAL).build();
+	}
+
+	public ParameterSpec builderParameterSpec()
+	{
+		final var relation = feature instanceof Relation<?, ?>;
+		final var name = MethodUtil.builderSingleParameterName(this);
+		final var type = relation ? singleType.nestIn(ConstantTypes.SUPPLIER) : singleType;
+		final var paramType = type.parametrized();
+		return ParameterSpec.builder(paramType, name).build();
 	}
 
 	public static FeatureResolution from(Feature<?, ?> feature)
@@ -28,7 +55,7 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 	{
 		if (feature.many())
 		{
-			return singleType.nestIn(ConstantTypes.LIST_CLASS_NAME);
+			return singleType.nestIn(ConstantTypes.LIST);
 		}
 		else
 		{

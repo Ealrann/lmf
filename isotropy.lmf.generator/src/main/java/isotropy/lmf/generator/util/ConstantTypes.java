@@ -1,16 +1,20 @@
 package isotropy.lmf.generator.util;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.model.FeatureInserter;
+import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.generator.code.util.FieldBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ConstantTypes
 {
-	public static final ClassName LIST_CLASS_NAME = ClassName.get(List.class);
-
+	public static final ClassName LIST = ClassName.get(List.class);
 	public static final TypeParameter FEATURE = TypeParameter.of(ClassName.get(Feature.class), 2);
 	public static final TypeParameter GROUP = TypeParameter.of(ClassName.get(Group.class), 1);
 	public static final TypeParameter GENERIC = TypeParameter.of(ClassName.get(Generic.class), 1);
@@ -27,4 +31,8 @@ public class ConstantTypes
 	public static final FieldBuilder.AllListBuilder ENUM_ALL_BUILDER = new FieldBuilder.AllListBuilder(ENUM);
 	public static final FieldBuilder.AllListBuilder JAVA_WRAPPER_ALL_BUILDER = new FieldBuilder.AllListBuilder(
 			JAVA_WRAPPER);
+	public static final ClassName FEATURE_INSERTER_CLASS = ClassName.get(FeatureInserter.class);
+	public static final TypeName ARRAYLIST = ClassName.get(ArrayList.class);
+	public static final ClassName FEATURED_OBJECT_BUILDER = ClassName.get(IFeaturedObject.Builder.class);
+	public static final ClassName SUPPLIER = ClassName.get(Supplier.class);
 }

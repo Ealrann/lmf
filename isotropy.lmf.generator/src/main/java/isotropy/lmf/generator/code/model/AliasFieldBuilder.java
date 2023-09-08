@@ -24,7 +24,7 @@ public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 						.initializer("new $T($S, $T.of( " + wordList + "))",
 									 ALIAS_IMPL_TYPE,
 									 name,
-									 ConstantTypes.LIST_CLASS_NAME)
+									 ConstantTypes.LIST)
 						.build();
 	}
 

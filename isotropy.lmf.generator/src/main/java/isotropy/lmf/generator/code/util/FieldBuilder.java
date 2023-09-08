@@ -35,8 +35,8 @@ public final class FieldBuilder<Input> extends InterfaceBuilder<Input>
 	{
 		private void postOperation(List<FieldSpec> outputs, TypeSpec.Builder interfaceBuilder)
 		{
-			final var typedList = TypeParameter.of(ConstantTypes.LIST_CLASS_NAME, builtType.parametrizedWildcard());
-			final var listBlock = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST_CLASS_NAME);
+			final var typedList = TypeParameter.of(ConstantTypes.LIST, builtType.parametrizedWildcard());
+			final var listBlock = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST);
 			boolean first = true;
 			for (final var output : outputs)
 			{

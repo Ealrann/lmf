@@ -8,9 +8,10 @@ import java.util.List;
 
 public interface TypeParameter
 {
+	ClassName raw();
 	TypeName parametrized();
-
 	TypeName parametrizedWildcard();
+	List<? extends TypeName> parameters();
 
 	static TypeParameter of(ClassName raw, TypeName param)
 	{
@@ -37,39 +38,51 @@ public interface TypeParameter
 		return new CombinedTypeParameter(raw, this);
 	}
 
-	record SimpleType(TypeName raw) implements TypeParameter
+	record SimpleType(TypeName rawType) implements TypeParameter
 	{
+		@Override
+		public ClassName raw()
+		{
+			throw new IllegalStateException();
+		}
+
 		@Override
 		public TypeName parametrized()
 		{
-			return raw;
+			return rawType;
 		}
 
 		@Override
 		public TypeName parametrizedWildcard()
 		{
-			return raw;
+			return rawType;
+		}
+
+		@Override
+		public List<? extends TypeName> parameters()
+		{
+			return List.of();
 		}
 	}
 
-	record SimpleTypeParameter(ClassName raw, List<? extends TypeName> params) implements TypeParameter
+	record SimpleTypeParameter(ClassName raw, List<? extends TypeName> parameters) implements TypeParameter
 	{
 		@Override
 		public TypeName parametrized()
 		{
-			return params.isEmpty() ? raw : ParameterizedTypeName.get(raw, params.toArray(new TypeName[0]));
+			return parameters.isEmpty() ? raw : ParameterizedTypeName.get(raw, parameters.toArray(new TypeName[0]));
 		}
 
 		@Override
 		public TypeName parametrizedWildcard()
 		{
-			if (params.isEmpty())
+			if (parameters.isEmpty())
 			{
 				return raw;
 			}
 			else
 			{
-				final var genericParams = GenUtils.wildcardArray(params.size());
+				final var genericParams = GenUtils.wildcardArray(parameters.size());
 				return ParameterizedTypeName.get(raw, genericParams);
 			}
 		}
@@ -87,6 +100,12 @@ public interface TypeParameter
 		public TypeName parametrizedWildcard()
 		{
 			return ParameterizedTypeName.get(raw, nested.parametrizedWildcard().box());
+		}
+
+		@Override
+		public List<? extends TypeName> parameters()
+		{
+			return List.of(nested.parametrized());
 		}
 	}
 }

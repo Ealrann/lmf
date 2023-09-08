@@ -1,5 +1,6 @@
 package isotropy.lmf.generator.code.feature;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -15,14 +16,14 @@ public final class FeatureMethodBuilder implements FeatureBuilder<MethodSpec>
 	private final Function<FeatureResolution, String> nameResolver;
 	private final Function<FeatureResolution, TypeName> returnResolver;
 	private final Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver;
-	private final Optional<Function<FeatureResolution, List<String>>> statementResolver;
+	private final Optional<Function<FeatureParameter, List<CodeBlock>>> statementResolver;
 	private final boolean overide;
 
 	public FeatureMethodBuilder(final Modifier[] modifiers,
 								final Function<FeatureResolution, String> nameResolver,
 								final Function<FeatureResolution, TypeName> returnResolver,
 								final Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver,
-								final Optional<Function<FeatureResolution, List<String>>> statementResolver,
+								final Optional<Function<FeatureParameter, List<CodeBlock>>> statementResolver,
 								final boolean overide)
 	{
 		assert modifiers != null;
@@ -49,13 +50,28 @@ public final class FeatureMethodBuilder implements FeatureBuilder<MethodSpec>
 								   .addModifiers(modifiers)
 								   .returns(returnResolver.apply(resolution));
 
-		parameterResolver.ifPresent(f -> spec.addParameter(f.apply(resolution)));
+		final var builtParameter = buildParameter(resolution, spec);
 
-		statementResolver.ifPresent(r -> r.apply(resolution)
+		statementResolver.ifPresent(r -> r.apply(builtParameter)
 										  .forEach(spec::addStatement));
 
 		if (overide) spec.addAnnotation(Override.class);
 
 		return spec.build();
+	}
+
+	private FeatureParameter buildParameter(final FeatureResolution resolution, final MethodSpec.Builder spec)
+	{
+		if(parameterResolver.isPresent())
+		{
+			final var resolver = parameterResolver.get();
+			final var parameterSpec = resolver.apply(resolution);
+			spec.addParameter(parameterSpec);
+			return new FeatureParameter(resolution, parameterSpec);
+		}
+		else
+		{
+			return new FeatureParameter(resolution, null);
+		}
 	}
 }

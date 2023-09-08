@@ -64,7 +64,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var typeName = GenUtils.toConstantCase(datatype.name());
 
 				initBuilder.add("$N.$N, ", typeHolder, typeName)
-						   .add("$T.of(), ", ConstantTypes.LIST_CLASS_NAME)
+						   .add("$T.of(), ", ConstantTypes.LIST)
 						   .add("$N.Features.$N", parentGroup.name(), name);
 			}
 			else
@@ -107,7 +107,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 		return CodeBlock.builder()
 						.add("new $T<>(() -> $N.$N, ", REFERENCE_IMPL_TYPE, conceptHolder, groupConstantName)
-						.add("$T.of(", ConstantTypes.LIST_CLASS_NAME)
+						.add("$T.of(", ConstantTypes.LIST)
 						.add(genericsBlockBuilder.build())
 						.add("))")
 						.build();

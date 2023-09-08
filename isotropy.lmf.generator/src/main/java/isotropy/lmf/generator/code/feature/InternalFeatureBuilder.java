@@ -1,6 +1,7 @@
 package isotropy.lmf.generator.code.feature;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import isotropy.lmf.core.lang.Feature;
@@ -9,12 +10,13 @@ import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.RawFeature;
 import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.util.GenUtils;
 
 import javax.lang.model.element.Modifier;
 
 public class InternalFeatureBuilder
 {
-	public static final String INITIALIZER_PATTERN = "new RawFeature<>(%1$b,%2$b,%3$s)";
+	private static final ClassName RAW_FEATURE = ClassName.get(RawFeature.class);
 	private final Group<?> group;
 
 	public InternalFeatureBuilder(Group<?> group)
@@ -25,10 +27,8 @@ public class InternalFeatureBuilder
 	public FieldSpec toConstantFeature(FeatureResolution featureResolution)
 	{
 		final var feature = featureResolution.feature();
-		final var singleType = featureResolution.singleType()
-												.parametrizedWildcard();
-		final var effectiveType = featureResolution.effectiveType()
-												   .parametrizedWildcard();
+		final var singleType = featureResolution.singleType().parametrizedWildcard();
+		final var effectiveType = featureResolution.effectiveType().parametrizedWildcard();
 
 		final var type = ParameterizedTypeName.get(ClassName.get(RawFeature.class),
 												   singleType.box(),
@@ -42,23 +42,29 @@ public class InternalFeatureBuilder
 						.build();
 	}
 
-	private static String localInitializer(final Feature<?, ?> feature)
+	private static CodeBlock localInitializer(final Feature<?, ?> feature)
 	{
 		final var model = (Model) ModelUtils.root(feature);
 		final var definitionFile = model.name() + "Definition";
+		final var modelDefinition = ClassName.get(model.domain(), definitionFile);
+		final var group = (Group<?>) feature.lmContainer();
 		final var many = feature.many();
 		final var relation = feature instanceof Relation<?, ?>;
-		final var featureDefinition = String.format("() -> %1$s.Features.GROUP.includes.%2$s",
-													definitionFile,
-													feature.name());
 
-		return INITIALIZER_PATTERN.formatted(many, relation, featureDefinition);
+		return CodeBlock.of("new $T<>($L,$L,() -> $T.Features.$N.$N)",
+							RAW_FEATURE,
+							many,
+							relation,
+							modelDefinition,
+							GenUtils.toConstantCase(group.name()),
+							GenUtils.toConstantCase(feature.name()));
 	}
 
-	private static String parentInitializer(final Feature<?, ?> feature)
+	private static CodeBlock parentInitializer(final Feature<?, ?> feature)
 	{
 		final var group = (Group<?>) feature.lmContainer();
-		final var parentName = group.name();
-		return parentName + ".Features." + feature.name();
+		final var model = (Model) ModelUtils.root(group);
+		final var groupClass = ClassName.get(model.domain(), group.name());
+		return CodeBlock.of("$T.Features.$N", groupClass, feature.name());
 	}
 }

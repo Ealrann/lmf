@@ -31,12 +31,12 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		input.includes().forEach(referenceBlockBuilder::feed);
 
 		final var genericBlock = input.generics().isEmpty()
-								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST_CLASS_NAME)
+								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST)
 								 : CodeBlock.of("Generics.$N", constantName);
 
 		initializerBuilder.add("new $T<>(", GROUP_IMPL_TYPE)
 						  .add("$S, $L, ", name, input.concrete())
-						  .add("$T.of(", ConstantTypes.LIST_CLASS_NAME)
+						  .add("$T.of(", ConstantTypes.LIST)
 						  .add(referenceBlockBuilder.build())
 						  .add("), Features.$N.ALL,", constantName)
 						  .add(genericBlock)
@@ -56,7 +56,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 
 		return CodeBlock.builder()
 						.add("new $T<>(() -> $N, ", REFERENCE_IMPL_TYPE, groupConstantName)
-						.add("$T.of(", ConstantTypes.LIST_CLASS_NAME)
+						.add("$T.of(", ConstantTypes.LIST)
 						.add(genericsBlockBuilder.build())
 						.add("))")
 						.build();
