@@ -10,9 +10,7 @@ import java.util.Optional;
 public interface IModelPackage
 {
 	Model model();
-	<T extends LMObject> IFeaturedObject.Builder<T> builder(Group<T> group);
+	<T extends LMObject> Optional<IFeaturedObject.Builder<T>> builder(Group<T> group);
 
-	<T> Optional<T> resolveEnum(Enum<T> anEnum, String word);
-	<T> Optional<Class<T>> resolveClass(final Enum<T> _enum);
-	<T extends LMObject> Optional<Class<T>> resolveClass(final Group<T> group);
+	<T> Optional<T> resolveEnumLiteral(Enum<T> anEnum, String word);
 }

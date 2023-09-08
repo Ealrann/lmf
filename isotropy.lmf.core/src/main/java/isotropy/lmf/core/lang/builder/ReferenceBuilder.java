@@ -39,10 +39,10 @@ public final class ReferenceBuilder<UnaryType extends LMObject> implements Refer
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
-	private ReferenceBuilder<UnaryType> _group(final Supplier<? extends Concept<?>> group)
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private ReferenceBuilder<UnaryType> _group(final Supplier group)
 	{
-		this.group = (Supplier<Concept<UnaryType>>) group;
+		this.group = (Supplier) group;
 		return this;
 	}
 

@@ -16,6 +16,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 			.add(Features.mandatory, Relation::mandatory)
 			.add(Features.reference, Relation::reference)
 			.add(Features.contains, Relation::contains)
+			.add(Features.lazy, Relation::lazy)
 			.build();
 
 	private final String name;
@@ -24,6 +25,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 	private final boolean mandatory;
 	private final Reference<UnaryType> reference;
 	private final boolean contains;
+	private final boolean lazy;
 	private final RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	public RelationImpl(final String name,
@@ -32,6 +34,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 						final boolean mandatory,
 						final Reference<UnaryType> reference,
 						final boolean contains,
+						final boolean lazy,
 						final RawFeature<UnaryType, EffectiveType> rawFeature)
 	{
 		this.name = name;
@@ -40,6 +43,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 		this.mandatory = mandatory;
 		this.reference = reference;
 		this.contains = contains;
+		this.lazy = lazy;
 		this.rawFeature = rawFeature;
 
 		setContainer(reference, Features.reference);
@@ -79,6 +83,12 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 	public boolean contains()
 	{
 		return contains;
+	}
+
+	@Override
+	public boolean lazy()
+	{
+		return lazy;
 	}
 
 	@Override

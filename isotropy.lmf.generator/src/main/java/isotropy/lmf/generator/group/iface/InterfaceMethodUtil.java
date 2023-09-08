@@ -6,6 +6,7 @@ import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.MethodUtil;
 
 import javax.lang.model.element.Modifier;
+import java.util.List;
 import java.util.Optional;
 
 public final class InterfaceMethodUtil
@@ -27,7 +28,7 @@ public final class InterfaceMethodUtil
 										f -> typedBuilder,
 										Optional.of(FeatureResolution::builderParameterSpec),
 										Optional.empty(),
-										false);
+										List.of());
 	}
 
 	private static TypeName interfaceReturnType(FeatureResolution resolution)

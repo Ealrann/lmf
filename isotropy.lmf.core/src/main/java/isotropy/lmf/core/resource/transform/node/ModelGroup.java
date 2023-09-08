@@ -14,6 +14,6 @@ public record ModelGroup<T extends LMObject>(IModelPackage modelPackage, Group<T
 
 	public IFeaturedObject.Builder<T> builder()
 	{
-		return modelPackage.builder(group);
+		return modelPackage.builder(group).orElseThrow();
 	}
 }

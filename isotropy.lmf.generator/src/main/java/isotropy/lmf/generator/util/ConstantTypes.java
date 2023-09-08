@@ -1,15 +1,19 @@
 package isotropy.lmf.generator.util;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.impl.ModelImpl;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.model.IModelPackage;
 import isotropy.lmf.generator.code.util.FieldBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ConstantTypes
@@ -35,4 +39,18 @@ public class ConstantTypes
 	public static final TypeName ARRAYLIST = ClassName.get(ArrayList.class);
 	public static final ClassName FEATURED_OBJECT_BUILDER = ClassName.get(IFeaturedObject.Builder.class);
 	public static final ClassName SUPPLIER = ClassName.get(Supplier.class);
+	public static final ClassName OPTIONAL = ClassName.get(Optional.class);
+	public static final ClassName IMODEL_PACKAGE = ClassName.get(IModelPackage.class);
+	public static final ClassName MODEL = ClassName.get(Model.class);
+	public static final ClassName MODEL_IMPL = ClassName.get(ModelImpl.class);
+	public static final ClassName STRING = ClassName.get(String.class);
+	public static final ClassName LM_OBJECT = ClassName.get(LMObject.class);
+	public static final AnnotationSpec SUPPRESS_UNCHECKED = AnnotationSpec.builder(SuppressWarnings.class)
+																		  .addMember("value", "\"unchecked\"")
+																		  .build();
+	public static final AnnotationSpec SUPPRESS_RAW_UNCHECKED = AnnotationSpec.builder(SuppressWarnings.class)
+																			  .addMember("value", "\"unchecked\"")
+																			  .addMember("value", "\"rawtypes\"")
+																			  .build();
+	public static final AnnotationSpec OVERRIDE = AnnotationSpec.builder(Override.class).build();
 }

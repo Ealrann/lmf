@@ -6,6 +6,7 @@ import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.InternalFeatureBuilder;
+import isotropy.lmf.generator.code.type.InterfaceBuildMethodBuilder;
 import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.GroupType;
 
@@ -16,6 +17,9 @@ import java.util.List;
 public final class InterfaceGenerator
 {
 	public static final FeatureMethodBuilder METHOD_BUILDER = InterfaceMethodUtil.methodBuilder();
+
+	private static final InterfaceBuildMethodBuilder buildMethod = new InterfaceBuildMethodBuilder();
+
 	private final GroupGenerationContext context;
 
 	public InterfaceGenerator(final GroupGenerationContext context)
@@ -41,6 +45,8 @@ public final class InterfaceGenerator
 			final var builderTypes = types.builderInterface();
 			final var builderInterface = buildBuilderInterface(builderTypes, featureResolutions);
 			interfaceBuilder.addType(builderInterface);
+
+			interfaceBuilder.addMethod(buildMethod.build(types));
 		}
 
 		featureResolutions.stream()

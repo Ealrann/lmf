@@ -8,6 +8,7 @@ import isotropy.lmf.core.model.IModelPackage;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class LMCorePackage implements IModelPackage
@@ -81,19 +82,19 @@ public final class LMCorePackage implements IModelPackage
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends LMObject> IFeaturedObject.Builder<T> builder(final Group<T> group)
+	public <T extends LMObject> Optional<IFeaturedObject.Builder<T>> builder(final Group<T> group)
 	{
-		return (IFeaturedObject.Builder<T>) groups.stream()
-												  .filter(groupDescriptor -> groupDescriptor.group() == group)
-												  .findAny()
-												  .orElseThrow()
-												  .builder()
-												  .get();
+		return groups.stream()
+					 .filter(groupDescriptor -> groupDescriptor.group() == group)
+					 .map(GroupDescriptor::builder)
+					 .map(Supplier::get)
+					 .map(b -> (IFeaturedObject.Builder<T>) b)
+					 .findAny();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Optional<T> resolveEnum(final Enum<T> _enum, final String value)
+	public <T> Optional<T> resolveEnumLiteral(final Enum<T> _enum, final String value)
 	{
 		if (_enum == LMCoreDefinition.Enums.BOUND_TYPE)
 		{
@@ -106,7 +107,7 @@ public final class LMCorePackage implements IModelPackage
 
 		return Optional.empty();
 	}
-
+/*
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Optional<Class<T>> resolveClass(final Enum<T> _enum)
@@ -143,5 +144,5 @@ public final class LMCorePackage implements IModelPackage
 		else if (group == LMCoreDefinition.Groups.REFERENCE) return Optional.of((Class<T>) Reference.class);
 
 		return Optional.empty();
-	}
+	}*/
 }

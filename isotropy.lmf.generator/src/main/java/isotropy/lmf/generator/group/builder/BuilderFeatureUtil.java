@@ -1,11 +1,13 @@
 package isotropy.lmf.generator.group.builder;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.generator.code.feature.*;
 import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
+import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
@@ -14,7 +16,8 @@ import java.util.Optional;
 
 public final class BuilderFeatureUtil
 {
-	private static final Modifier[] MODIFIERS = {Modifier.PUBLIC};
+	private static final Modifier[] PUBLIC_ONLY = {Modifier.PUBLIC};
+	public static final Modifier[] PRIVATE_ONLY = {Modifier.PRIVATE};
 	private static final FeatureFieldBuilder FIELD_BUILDER = BuilderFeatureUtil.fieldBuilder();
 	public static final AttributePushMethodBuilder ATTRIBUTE_PUSH_BUILDER = new AttributePushMethodBuilder();
 	public static final RelationPushMethodBuilder RELATION_PUSH_BUILDER = new RelationPushMethodBuilder();
@@ -24,9 +27,13 @@ public final class BuilderFeatureUtil
 																		  final TypeName builderType)
 	{
 		final var setterBuilder = BuilderFeatureUtil.setterBuilder(builderType);
+		final var rawSetterBuilder = BuilderFeatureUtil.rawSetterBuilder(builderType);
 
 		return CodeInstaller.compose(CodeInstaller.of(setterBuilder, classBuilder::addMethod),
-									 CodeInstaller.of(FIELD_BUILDER, classBuilder::addField));
+									 CodeInstaller.of(FIELD_BUILDER, classBuilder::addField),
+									 CodeInstaller.of(rawSetterBuilder,
+													  classBuilder::addMethod,
+													  FeatureResolution::hasGeneric));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -52,12 +59,24 @@ public final class BuilderFeatureUtil
 
 	private static FeatureMethodBuilder setterBuilder(TypeName returnType)
 	{
-		return new FeatureMethodBuilder(MODIFIERS,
+		return new FeatureMethodBuilder(PUBLIC_ONLY,
 										MethodUtil::builderMethodName,
 										f -> returnType,
 										Optional.of(FeatureResolution::builderParameterSpec),
 										Optional.of(BuilderFeatureUtil::featureChangeStatement),
-										true);
+										List.of(ConstantTypes.OVERRIDE));
+	}
+
+	private static FeatureMethodBuilder rawSetterBuilder(TypeName returnType)
+	{
+		return new FeatureMethodBuilder(PRIVATE_ONLY,
+										f -> '_' + f.name(),
+										f -> returnType,
+										Optional.of(f -> ParameterSpec.builder(ConstantTypes.SUPPLIER,
+																			   MethodUtil.builderSingleParameterName(f),
+																			   Modifier.FINAL).build()),
+										Optional.of(BuilderFeatureUtil::featureChangeStatement),
+										List.of(ConstantTypes.SUPPRESS_RAW_UNCHECKED));
 	}
 
 	private static List<CodeBlock> featureChangeStatement(final FeatureParameter parameter)

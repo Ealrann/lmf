@@ -12,6 +12,7 @@ import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.code.util.ImplementationCodeUtil;
 import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.generator.util.ConstantTypes;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -23,7 +24,7 @@ public final class ImplementationFeatureUtil
 	private static final FeatureMethodBuilder GETTER_BUILDER = ImplementationFeatureUtil.getterBuilder();
 	private static final FeatureMethodBuilder SETTER_BUILDER = ImplementationFeatureUtil.setterBuilder();
 	private static final FeatureFieldBuilder FIELD_BUILDER = ImplementationFeatureUtil.fieldBuilder();
-	private static final ConstructorBuilder PARAMETER_BUILDER = ImplementationFeatureUtil.parameterBuilder();
+	private static final ConstructorBuilder CONSTRUCTOR_BUILDER = ImplementationFeatureUtil.parameterBuilder();
 	public static final LMGroupMethodBuilder LM_GROUP_METHOD_BUILDER = new LMGroupMethodBuilder();
 	public static final SetMapMethodBuilder SETTERMAP_METHOD_BUILDER = new SetMapMethodBuilder();
 	public static final GetMapMethodBuilder GETTERMAP_METHOD_BUILDER = new GetMapMethodBuilder();
@@ -48,7 +49,7 @@ public final class ImplementationFeatureUtil
 									 CodeInstaller.of(GETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
 									 CodeInstaller.of(GETTERMAP_FIELD_BUILDER, classBuilder::addField),
 									 CodeInstaller.of(SETTERMAP_FIELD_BUILDER, classBuilder::addField),
-									 CodeInstaller.of(PARAMETER_BUILDER, classBuilder::addMethod));
+									 CodeInstaller.of(CONSTRUCTOR_BUILDER, classBuilder::addMethod));
 	}
 
 	private static boolean setterPredicate(final FeatureResolution f)
@@ -59,7 +60,7 @@ public final class ImplementationFeatureUtil
 
 	private static FeatureFieldBuilder fieldBuilder()
 	{
-		return new FeatureFieldBuilder(false, FeatureResolution::name, ImplementationFeatureUtil::featureType);
+		return new FeatureFieldBuilder(false, FeatureResolution::name, ImplementationFeatureUtil::fieldFeatureType);
 	}
 
 	private static ConstructorBuilder parameterBuilder()
@@ -71,10 +72,10 @@ public final class ImplementationFeatureUtil
 	{
 		return new FeatureMethodBuilder(MODIFIERS,
 										FeatureResolution::name,
-										ImplementationFeatureUtil::featureType,
+										ImplementationFeatureUtil::methodFeatureType,
 										Optional.empty(),
 										Optional.of(ImplementationCodeUtil::featureReturnStatement),
-										true);
+										List.of(ConstantTypes.OVERRIDE));
 	}
 
 	private static FeatureMethodBuilder setterBuilder()
@@ -84,7 +85,7 @@ public final class ImplementationFeatureUtil
 										f -> TypeName.VOID,
 										Optional.of(FeatureResolution::parameterSpec),
 										Optional.of(ImplementationFeatureUtil::featureChangeStatement),
-										true);
+										List.of(ConstantTypes.OVERRIDE));
 	}
 
 	private static List<CodeBlock> featureChangeStatement(FeatureParameter parameter)
@@ -100,7 +101,12 @@ public final class ImplementationFeatureUtil
 									 notification) : List.of(assignment, notification);
 	}
 
-	private static TypeName featureType(FeatureResolution resolution)
+	private static TypeName fieldFeatureType(FeatureResolution resolution)
+	{
+		return resolution.implementationType().parametrized();
+	}
+
+	private static TypeName methodFeatureType(FeatureResolution resolution)
 	{
 		return resolution.effectiveType().parametrized();
 	}

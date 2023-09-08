@@ -12,11 +12,27 @@ import isotropy.lmf.generator.util.TypeResolutionUtil;
 
 import javax.lang.model.element.Modifier;
 
-public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType, TypeParameter effectiveType)
+public record FeatureResolution(Feature<?, ?> feature,
+								TypeParameter singleType,
+								TypeParameter effectiveType,
+								boolean hasGeneric)
 {
 	public String name()
 	{
 		return feature.name();
+	}
+
+	public TypeParameter implementationType()
+	{
+		if (feature instanceof Relation<?, ?> relation && relation.lazy())
+		{
+			final var suppliedType = singleType.nestIn(ConstantTypes.SUPPLIER);
+			return feature.many() ? suppliedType.nestIn(ConstantTypes.LIST) : suppliedType;
+		}
+		else
+		{
+			return effectiveType;
+		}
 	}
 
 	public TypeName builderType()
@@ -31,7 +47,8 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 	public ParameterSpec parameterSpec()
 	{
 		final var name = MethodUtil.validateParameterName(name());
-		return ParameterSpec.builder(effectiveType.parametrized(), name).addModifiers(Modifier.FINAL).build();
+		final var type = implementationType().parametrized();
+		return ParameterSpec.builder(type, name).addModifiers(Modifier.FINAL).build();
 	}
 
 	public ParameterSpec builderParameterSpec()
@@ -45,10 +62,13 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 
 	public static FeatureResolution from(Feature<?, ?> feature)
 	{
-		final var singleTypeParameter = resolveType(feature);
-		final var effectiveType = encapsulateEffectiveType(feature, singleTypeParameter);
+		final var partialResolution = resolveType(feature);
+		final var effectiveType = encapsulateEffectiveType(feature, partialResolution.singleType());
 
-		return new FeatureResolution(feature, singleTypeParameter, effectiveType);
+		return new FeatureResolution(feature,
+									 partialResolution.singleType(),
+									 effectiveType,
+									 partialResolution.containsGeneric());
 	}
 
 	private static TypeParameter encapsulateEffectiveType(final Feature<?, ?> feature, TypeParameter singleType)
@@ -63,7 +83,7 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 		}
 	}
 
-	private static TypeParameter resolveType(final Feature<?, ?> feature)
+	private static PartialFeatureResolution resolveType(final Feature<?, ?> feature)
 	{
 		if (feature instanceof Attribute<?, ?> attribute)
 		{
@@ -72,13 +92,13 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 			{
 				final var primitiveType = GenUtils.resolvePrimitiveClass(unit.primitive());
 				final var typeName = TypeName.get(primitiveType);
-				return TypeParameter.of(typeName);
+				return new PartialFeatureResolution(TypeParameter.of(typeName), false);
 			}
 			else if (datatype instanceof Enum<?> enumeration)
 			{
 				final var model = (Model) enumeration.lmContainer();
 				final var className = ClassName.get(model.domain(), enumeration.name());
-				return TypeParameter.of(className);
+				return new PartialFeatureResolution(TypeParameter.of(className), false);
 			}
 			else
 			{
@@ -88,11 +108,11 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 				if (!parameters.isEmpty())
 				{
 					final var params = TypeResolutionUtil.toParameters(parameters);
-					return TypeParameter.of(className, params);
+					return new PartialFeatureResolution(TypeParameter.of(className, params), true);
 				}
 				else
 				{
-					return TypeParameter.of(className);
+					return new PartialFeatureResolution(TypeParameter.of(className), false);
 				}
 			}
 		}
@@ -103,14 +123,19 @@ public record FeatureResolution(Feature<?, ?> feature, TypeParameter singleType,
 			final var concept = reference.group();
 			if (concept instanceof Group<?> group)
 			{
-				return TypeResolutionUtil.parametrizedType(group, reference.parameters());
+				final var parameters = reference.parameters();
+				final var containsGeneric = parameters.stream().anyMatch(Generic.class::isInstance);
+				return new PartialFeatureResolution(TypeResolutionUtil.parametrizedType(group, parameters),
+													containsGeneric);
 			}
 			else
 			{
 				final var generic = (Generic<?>) concept;
 				final var className = ClassName.get("", generic.name());
-				return TypeParameter.of(className);
+				return new PartialFeatureResolution(TypeParameter.of(className), true);
 			}
 		}
 	}
+
+	private record PartialFeatureResolution(TypeParameter singleType, boolean containsGeneric) {}
 }

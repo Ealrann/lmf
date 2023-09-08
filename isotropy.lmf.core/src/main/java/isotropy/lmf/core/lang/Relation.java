@@ -10,6 +10,7 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
 {
 	Reference<UnaryType> reference();
 	boolean contains();
+	boolean lazy();
 
 	interface Features
 	{
@@ -20,6 +21,9 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
 		RawFeature<Boolean, Boolean> contains = new RawFeature<>(false,
 																 false,
 																 () -> LMCoreDefinition.Features.RELATION.contains);
+		RawFeature<Boolean, Boolean> lazy = new RawFeature<>(false,
+																 false,
+																 () -> LMCoreDefinition.Features.RELATION.lazy);
 		RawFeature<Reference<?>, Reference<?>> reference = new RawFeature<>(false,
 																			true,
 																			() -> LMCoreDefinition.Features.RELATION.reference);
@@ -34,6 +38,7 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
 		Builder<UnaryType, EffectiveType> mandatory(boolean mandatory);
 
 		Builder<UnaryType, EffectiveType> contains(boolean contains);
+		Builder<UnaryType, EffectiveType> lazy(boolean lazy);
 		Builder<UnaryType, EffectiveType> reference(Supplier<Reference<UnaryType>> groupReference);
 		Builder<UnaryType, EffectiveType> rawFeature(RawFeature<UnaryType, EffectiveType> rawFeature);
 	}

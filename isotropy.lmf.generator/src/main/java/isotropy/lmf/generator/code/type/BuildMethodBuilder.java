@@ -75,7 +75,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 				final var arg = CodeBlock.of("$N", newName);
 				return new BuildArgument(arg, Optional.of(buildBlock));
 			}
-			else if (feature instanceof Relation<?, ?>)
+			else if (feature instanceof Relation<?, ?> relation && !relation.lazy())
 			{
 				return new BuildArgument(CodeBlock.of("$N.get()", name), Optional.empty());
 

@@ -2,6 +2,7 @@ package isotropy.lmf.generator.code.util;
 
 import com.squareup.javapoet.CodeBlock;
 import isotropy.lmf.core.lang.Feature;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.code.feature.FeatureParameter;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class ImplementationCodeUtil
 	public static List<CodeBlock> featureReturnStatement(FeatureParameter parameter)
 	{
 		final var name = parameter.parameterName();
-		return List.of(CodeBlock.of("return $N", name));
+		final var lazy = parameter.feature().feature() instanceof Relation<?,?> r && r.lazy();
+		return List.of(CodeBlock.of(lazy ? "return $N.get()" : "return $N", name));
 	}
 }

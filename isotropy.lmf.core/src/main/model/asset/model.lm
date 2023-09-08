@@ -59,7 +59,7 @@
 
 	(Definition Reference (includes group=/groups.0)
 	    (Generic name=T boundType=Extends type=/groups.0)
-    	(-refers   group      [1..1] (reference /groups.14 parameters=../../generics.0))
+    	(-refers   group lazy [1..1] (reference /groups.14 parameters=../../generics.0))
     	(-contains parameters [0..*] (reference /groups.14)))
 
     (Group Concept (Generic name=T))

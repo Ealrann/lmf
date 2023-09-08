@@ -51,6 +51,7 @@ public interface LMCoreDefinition
 																 true,
 																 new ReferenceImpl<>(() -> Groups.TYPE, List.of()),
 																 false,
+																 false,
 																 Generic.Features.type);
 			Attribute<BoundType, BoundType> boundType = new AttributeImpl<>("boundType",
 																			true,
@@ -109,6 +110,7 @@ public interface LMCoreDefinition
 																			 new ReferenceImpl<>(() -> Groups.DATATYPE,
 																								 List.of()),
 																			 false,
+																			 false,
 																			 Attribute.Features.datatype);
 			Relation<Generic<?>, List<? extends Generic<?>>> parameters = new RelationImpl<>("parameters",
 																							 true,
@@ -116,6 +118,7 @@ public interface LMCoreDefinition
 																							 false,
 																							 new ReferenceImpl<>(() -> Groups.GENERIC,
 																												 List.of()),
+																							 false,
 																							 false,
 																							 Attribute.Features.parameters);
 			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, datatype, parameters);
@@ -192,6 +195,7 @@ public interface LMCoreDefinition
 																							   new ReferenceImpl<>(() -> Groups.REFERENCE,
 																												   List.of()),
 																							   true,
+																							   false,
 																							   Group.Features.includes);
 			Relation<Feature<?, ?>, List<? extends Feature<?, ?>>> features = new RelationImpl<>("features",
 																								 true,
@@ -200,6 +204,7 @@ public interface LMCoreDefinition
 																								 new ReferenceImpl<>(() -> Groups.FEATURE,
 																													 List.of()),
 																								 true,
+																								 false,
 																								 Group.Features.features);
 			Relation<Generic<?>, List<? extends Generic<?>>> generics = new RelationImpl<>("generics",
 																						   true,
@@ -208,6 +213,7 @@ public interface LMCoreDefinition
 																						   new ReferenceImpl<>(() -> Groups.GENERIC,
 																											   List.of()),
 																						   true,
+																						   false,
 																						   Group.Features.generics);
 			List<Feature<?, ?>> all = List.of(name, concrete, includes, features, generics);
 		}
@@ -226,6 +232,7 @@ public interface LMCoreDefinition
 																									List.of(() -> Groups.RELATION.generics()
 																																 .get(0))),
 																				true,
+																				false,
 																				Relation.Features.reference);
 			Attribute<Boolean, Boolean> contains = new AttributeImpl<>("contains",
 																	   true,
@@ -234,8 +241,15 @@ public interface LMCoreDefinition
 																	   Units.BOOLEAN,
 																	   List.of(),
 																	   Relation.Features.contains);
+			Attribute<Boolean, Boolean> lazy = new AttributeImpl<>("lazy",
+																   true,
+																   false,
+																   false,
+																   Units.BOOLEAN,
+																   List.of(),
+																   Relation.Features.lazy);
 
-			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, reference, contains);
+			List<Feature<?, ?>> all = List.of(name, immutable, many, mandatory, reference, contains, lazy);
 		}
 
 		interface MODEL
@@ -255,6 +269,7 @@ public interface LMCoreDefinition
 																		   new ReferenceImpl<>(() -> Groups.GROUP,
 																							   List.of()),
 																		   true,
+																		   false,
 																		   Model.Features.groups);
 			Relation<Enum<?>, List<Enum<?>>> enums = new RelationImpl<>("enums",
 																		true,
@@ -263,6 +278,7 @@ public interface LMCoreDefinition
 																		new ReferenceImpl<>(() -> Groups.ENUM,
 																							List.of()),
 																		true,
+																		false,
 																		Model.Features.enums);
 			Relation<Unit<?>, List<Unit<?>>> units = new RelationImpl<>("units",
 																		true,
@@ -271,6 +287,7 @@ public interface LMCoreDefinition
 																		new ReferenceImpl<>(() -> Groups.UNIT,
 																							List.of()),
 																		true,
+																		false,
 																		Model.Features.units);
 			Relation<Alias, List<Alias>> aliases = new RelationImpl<>("aliases",
 																	  true,
@@ -279,6 +296,7 @@ public interface LMCoreDefinition
 																	  new ReferenceImpl<>(() -> Groups.ALIAS,
 																						  List.of()),
 																	  true,
+																	  false,
 																	  Model.Features.aliases);
 			Relation<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RelationImpl<>("javaWrappers",
 																							 true,
@@ -287,6 +305,7 @@ public interface LMCoreDefinition
 																							 new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER,
 																												 List.of()),
 																							 true,
+																							 false,
 																							 Model.Features.javaWrappers);
 			List<Feature<?, ?>> all = List.of(name, domain, groups, enums, units, aliases, javaWrappers);
 		}
@@ -300,6 +319,7 @@ public interface LMCoreDefinition
 																		new ReferenceImpl<>(() -> Groups.CONCEPT,
 																							List.of()),
 																		false,
+																		true,
 																		Reference.Features.group);
 			Relation<Concept<?>, List<Concept<?>>> parameters = new RelationImpl<>("parameters",
 																				   true,
@@ -307,6 +327,7 @@ public interface LMCoreDefinition
 																				   false,
 																				   new ReferenceImpl<>(() -> Groups.CONCEPT,
 																									   List.of()),
+																				   false,
 																				   false,
 																				   Reference.Features.parameters);
 			List<Feature<?, ?>> all = List.of(group, parameters);

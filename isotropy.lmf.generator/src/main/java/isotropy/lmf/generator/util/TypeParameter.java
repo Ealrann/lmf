@@ -37,6 +37,10 @@ public interface TypeParameter
 	{
 		return new CombinedTypeParameter(raw, this);
 	}
+	default TypeParameter nest(TypeName newParam)
+	{
+		return TypeParameter.of(raw(), newParam);
+	}
 
 	record SimpleType(TypeName rawType) implements TypeParameter
 	{

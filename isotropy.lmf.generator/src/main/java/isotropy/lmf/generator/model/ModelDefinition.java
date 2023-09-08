@@ -43,7 +43,7 @@ public class ModelDefinition
 																					.stream()
 																					.filter(g -> !g.generics()
 																								   .isEmpty()),
-																			  ConstantTypes.GENERIC_ALL_BUILDER);
+																			  null);
 
 	private final InterfaceBuilder<Group<?>> groupInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
 																						FeaturesFieldBuilder::new,

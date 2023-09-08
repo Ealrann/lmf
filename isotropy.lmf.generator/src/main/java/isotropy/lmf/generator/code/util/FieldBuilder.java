@@ -20,7 +20,11 @@ public final class FieldBuilder<Input> extends InterfaceBuilder<Input>
 									final Function<Input, Stream<CodeInput>> extractor,
 									final AllListBuilder allBuilder)
 	{
-		super(i -> name, i -> builder, extractor, TypeSpec.Builder::addField, allBuilder::postOperation);
+		super(i -> name,
+			  i -> builder,
+			  extractor,
+			  TypeSpec.Builder::addField,
+			  allBuilder != null ? allBuilder::postOperation : (n, l) -> {});
 	}
 
 	public <CodeInput> FieldBuilder(final Function<Input, String> nameSupplier,
@@ -28,7 +32,11 @@ public final class FieldBuilder<Input> extends InterfaceBuilder<Input>
 									final Function<Input, Stream<CodeInput>> extractor,
 									final AllListBuilder allBuilder)
 	{
-		super(nameSupplier, builderSupplier, extractor, TypeSpec.Builder::addField, allBuilder::postOperation);
+		super(nameSupplier,
+			  builderSupplier,
+			  extractor,
+			  TypeSpec.Builder::addField,
+			  allBuilder != null ? allBuilder::postOperation : (n, l) -> {});
 	}
 
 	public record AllListBuilder(TypeParameter builtType)

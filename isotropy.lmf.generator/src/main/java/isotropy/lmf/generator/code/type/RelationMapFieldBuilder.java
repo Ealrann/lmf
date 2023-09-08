@@ -55,13 +55,15 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 
 	private CodeBlock buildStatement(final FeatureResolution resolution)
 	{
+		final var hasGenerics = resolution.hasGeneric();
 		final var methodName = MethodUtil.builderMethodName(resolution);
+		final var usedMethod = hasGenerics ? '_' + methodName : methodName;
 		final var featureName = resolution.name();
 		return CodeBlock.of(".add($T.Features.$N, $T::$N)",
 							interfaceClassName,
 							featureName,
 							builderClassName,
-							methodName);
+							usedMethod);
 	}
 
 	private static boolean isRelation(final FeatureResolution f)

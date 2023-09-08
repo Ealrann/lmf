@@ -20,6 +20,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 			.add(Relation.Features.many, RelationBuilder::many)
 			.add(Relation.Features.mandatory, RelationBuilder::mandatory)
 			.add(Relation.Features.contains, RelationBuilder::contains)
+			.add(Relation.Features.lazy, RelationBuilder::lazy)
 			.build();
 
 	private static final RelationLazyInserter<RelationBuilder<?, ?>> BUILDER_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>()
@@ -32,6 +33,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	private boolean immutable;
 	private boolean mandatory;
 	private boolean contains;
+	private boolean lazy;
 	private RawFeature<UnaryType, EffectiveType> rawFeature;
 
 	private Supplier<Reference<UnaryType>> reference = () -> null;
@@ -39,7 +41,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	@Override
 	public Relation<UnaryType, EffectiveType> build()
 	{
-		return new RelationImpl<>(name, immutable, many, mandatory, reference.get(), contains, rawFeature);
+		return new RelationImpl<>(name, immutable, many, mandatory, reference.get(), contains, lazy, rawFeature);
 	}
 
 	@Override
@@ -95,6 +97,13 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 	public RelationBuilder<UnaryType, EffectiveType> contains(final boolean contains)
 	{
 		this.contains = contains;
+		return this;
+	}
+
+	@Override
+	public RelationBuilder<UnaryType, EffectiveType> lazy(final boolean lazy)
+	{
+		this.lazy = lazy;
 		return this;
 	}
 

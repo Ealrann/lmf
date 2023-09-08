@@ -1,9 +1,6 @@
 package isotropy.lmf.generator.code.feature;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -17,14 +14,14 @@ public final class FeatureMethodBuilder implements FeatureBuilder<MethodSpec>
 	private final Function<FeatureResolution, TypeName> returnResolver;
 	private final Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver;
 	private final Optional<Function<FeatureParameter, List<CodeBlock>>> statementResolver;
-	private final boolean overide;
+	private final List<AnnotationSpec> annotations;
 
 	public FeatureMethodBuilder(final Modifier[] modifiers,
 								final Function<FeatureResolution, String> nameResolver,
 								final Function<FeatureResolution, TypeName> returnResolver,
 								final Optional<Function<FeatureResolution, ParameterSpec>> parameterResolver,
 								final Optional<Function<FeatureParameter, List<CodeBlock>>> statementResolver,
-								final boolean overide)
+								final List<AnnotationSpec> annotations)
 	{
 		assert modifiers != null;
 
@@ -33,14 +30,14 @@ public final class FeatureMethodBuilder implements FeatureBuilder<MethodSpec>
 		this.returnResolver = returnResolver;
 		this.parameterResolver = parameterResolver;
 		this.statementResolver = statementResolver;
-		this.overide = overide;
+		this.annotations = annotations;
 	}
 
 	public FeatureMethodBuilder(final Modifier[] modifiers,
 								final Function<FeatureResolution, String> nameResolver,
 								final Function<FeatureResolution, TypeName> returnResolver)
 	{
-		this(modifiers, nameResolver, returnResolver, Optional.empty(), Optional.empty(), false);
+		this(modifiers, nameResolver, returnResolver, Optional.empty(), Optional.empty(), List.of());
 	}
 
 	@Override
@@ -52,17 +49,16 @@ public final class FeatureMethodBuilder implements FeatureBuilder<MethodSpec>
 
 		final var builtParameter = buildParameter(resolution, spec);
 
-		statementResolver.ifPresent(r -> r.apply(builtParameter)
-										  .forEach(spec::addStatement));
+		statementResolver.ifPresent(r -> r.apply(builtParameter).forEach(spec::addStatement));
 
-		if (overide) spec.addAnnotation(Override.class);
+		spec.addAnnotations(annotations);
 
 		return spec.build();
 	}
 
 	private FeatureParameter buildParameter(final FeatureResolution resolution, final MethodSpec.Builder spec)
 	{
-		if(parameterResolver.isPresent())
+		if (parameterResolver.isPresent())
 		{
 			final var resolver = parameterResolver.get();
 			final var parameterSpec = resolver.apply(resolution);
