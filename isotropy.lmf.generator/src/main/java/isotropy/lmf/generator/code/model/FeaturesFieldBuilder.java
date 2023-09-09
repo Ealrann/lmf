@@ -54,7 +54,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 					   .add("$S, ", name)
 					   .add("$L, ", input.immutable())
 					   .add("$L, ", input.many())
-					   .add("$L, ", input.mandatory());
+					   .add("$L, ", input.mandatory())
+					   .add("$N.Features.$N, ", parentGroup.name(), name);
 
 			if (isAttribute)
 			{
@@ -64,8 +65,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var typeName = GenUtils.toConstantCase(datatype.name());
 
 				initBuilder.add("$N.$N, ", typeHolder, typeName)
-						   .add("$T.of(), ", ConstantTypes.LIST)
-						   .add("$N.Features.$N", parentGroup.name(), name);
+						   .add("$T.of()", ConstantTypes.LIST);
 			}
 			else
 			{
@@ -74,9 +74,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var refBlock = generateReferencesCodeblock(reference);
 
 				initBuilder.add(refBlock)
-						   .add(", $L, ", relation.contains())
-						   .add("$L, ", relation.lazy())
-						   .add("$N.Features.$N", parentGroup.name(), name);
+						   .add(", $L, ", relation.lazy())
+						   .add("$L", relation.contains());
 			}
 
 			initBuilder.add(")");
