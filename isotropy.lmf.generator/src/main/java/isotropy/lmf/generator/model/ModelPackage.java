@@ -24,7 +24,6 @@ public class ModelPackage
 	{
 		final var currentClass = ClassName.get(model.domain(), model.name() + "Package");
 		final var definitionName = model.name() + "Definition";
-		final var definitionClass = ClassName.get(model.domain(), definitionName);
 
 		final var packageClass = TypeSpec.classBuilder(currentClass)
 										 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -41,8 +40,8 @@ public class ModelPackage
 												Modifier.PUBLIC,
 												Modifier.STATIC,
 												Modifier.FINAL)
-									   .initializer("new $T(Instance, $S, $S, $N.Groups.ALL, $N.Enums.ALL, $N.Units" +
-													".ALL, $N.Aliases.ALL, $N.JavaWrappers.ALL)",
+									   .initializer("new $T($S, $S, $N.Groups.ALL, $N.Enums.ALL, $N.Units" +
+													".ALL, $N.Aliases.ALL, $N.JavaWrappers.ALL, Instance)",
 													ConstantTypes.MODEL_IMPL,
 													model.name(),
 													model.domain(),
@@ -52,6 +51,13 @@ public class ModelPackage
 													definitionName,
 													definitionName)
 									   .build());
+
+		packageClass.addMethod(MethodSpec.methodBuilder("model")
+										 .addModifiers(Modifier.PUBLIC)
+										 .returns(ConstantTypes.MODEL)
+										 .addStatement("return MODEL")
+										 .addAnnotation(ConstantTypes.OVERRIDE)
+										 .build());
 
 		packageClass.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
@@ -100,10 +106,8 @@ public class ModelPackage
 
 				final var groupName = group.name();
 				final var groupConstantName = GenUtils.toConstantCase(groupName);
-				statement.add("if (group == $N.Groups.$N) return (Optional<T>) Optional.of($N::builder)",
-							  definitionName,
-							  groupConstantName,
-							  groupName);
+				statement.add("if (group == $N.Groups.$N) return Optional.of((IFeaturedObject.Builder<T>) $N.builder" +
+							  "())", definitionName, groupConstantName, groupName);
 				final var build = statement.build();
 				methodBuilder.addStatement(build);
 			}
