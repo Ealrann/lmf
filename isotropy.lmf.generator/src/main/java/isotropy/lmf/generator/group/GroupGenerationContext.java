@@ -23,8 +23,7 @@ public record GroupGenerationContext(Group<?> group,
 			final var packageName = model.domain();
 
 			final var includes = group.includes();
-			final var refInclude = includes.isEmpty() ? null : includes.get(0);
-			final var types = GroupType.from(refInclude, group);
+			final var types = GroupType.from(includes, group);
 			final var featureResolutions = ModelUtils.streamAllFeatures(group).map(FeatureResolution::from).toList();
 
 			return new GroupGenerationContext(group, directory, packageName, featureResolutions, types);

@@ -16,19 +16,19 @@ public final class GroupType implements TypeParameter
 	private static final boolean INCLUDE_SELF_TYPE = false;
 
 	private final TypeParameter mainClass;
-	public final TypeName superInterface;
+	public final List<TypeName> superInterfaces;
 	public final Group<?> group;
 	public final List<TypeVariableName> detailedParameters;
 
 	public GroupType(final Group<?> group,
 					 final TypeParameter mainClass,
-					 final TypeName superInterface,
+					 final List<TypeName> superInterfaces,
 					 final List<TypeVariableName> detailedParameters)
 	{
 
 		this.group = group;
 		this.mainClass = mainClass;
-		this.superInterface = superInterface;
+		this.superInterfaces = List.copyOf(superInterfaces);
 		this.detailedParameters = detailedParameters;
 	}
 
@@ -59,14 +59,14 @@ public final class GroupType implements TypeParameter
 	public TypeSpec.Builder interfaceSpecBuilder()
 	{
 		return TypeSpec.interfaceBuilder(mainClass.raw())
-					   .addSuperinterface(superInterface)
+					   .addSuperinterfaces(superInterfaces)
 					   .addTypeVariables(detailedParameters);
 	}
 
 	public TypeSpec.Builder classSpecBuilder()
 	{
 		return TypeSpec.classBuilder(mainClass.raw())
-					   .addSuperinterface(superInterface)
+					   .addSuperinterfaces(superInterfaces)
 					   .addTypeVariables(detailedParameters);
 	}
 
@@ -79,7 +79,7 @@ public final class GroupType implements TypeParameter
 		final var superBuilder = GenUtils.parameterize(ConstantTypes.FEATURED_OBJECT_BUILDER,
 													   List.of(rawParametrizedClass));
 		final var builderType = TypeParameter.of(builderName, finalParameters);
-		return new GroupType(group, builderType, superBuilder, detailedParameters);
+		return new GroupType(group, builderType, List.of(superBuilder), detailedParameters);
 	}
 
 	public GroupType builderClass()
@@ -90,7 +90,7 @@ public final class GroupType implements TypeParameter
 		final var builderName = ClassName.get(raw.packageName() + ".builder", raw.simpleName() + "Builder");
 		final var builderType = TypeParameter.of(builderName, finalParameters);
 		final var superInterface = TypeParameter.of(builderInterface, finalParameters);
-		return new GroupType(group, builderType, superInterface.parametrized(), detailedParameters);
+		return new GroupType(group, builderType, List.of(superInterface.parametrized()), detailedParameters);
 	}
 
 	public GroupType implementation()
@@ -99,12 +99,15 @@ public final class GroupType implements TypeParameter
 		final var finalParameters = mainClass.parameters();
 		final var implementationName = ClassName.get(raw.packageName() + ".impl", raw.simpleName() + "Impl");
 		final var implType = TypeParameter.of(implementationName, finalParameters);
-		return new GroupType(group, implType, mainClass.parametrized(), detailedParameters);
+		return new GroupType(group, implType, List.of(mainClass.parametrized()), detailedParameters);
 	}
 
-	public static GroupType from(final Reference<?> refInclude, final Group<?> group)
+	public static GroupType from(final List<Reference<?>> includes, final Group<?> group)
 	{
-		final var superInterface = TypeResolutionUtil.resolveInclude(refInclude, group);
+		final var superInterfaces = includes.stream()
+											.map(i -> TypeResolutionUtil.resolveInclude(i, group))
+											.map(TypeParameter::parametrized)
+											.toList();
 		final var model = (Model) group.lmContainer();
 		final var interfaceName = ClassName.get(model.domain(), group.name());
 
@@ -120,6 +123,6 @@ public final class GroupType implements TypeParameter
 									? Stream.concat(typedStream, Stream.of(varNameSelf)).toList()
 									: typedStream.toList();
 		final var groupType = TypeParameter.of(interfaceName, rawParameters);
-		return new GroupType(group, groupType, superInterface.parametrized(), typedParameters);
+		return new GroupType(group, groupType, superInterfaces, typedParameters);
 	}
 }
