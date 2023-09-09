@@ -16,15 +16,16 @@ public class TypeResolutionUtil
 
 	static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)
 	{
-		if (refInclude != null)
-		{
 			final var params = toParameters(refInclude.parameters());
 			final var refIncludeGroup = refInclude.group();
 			final var model = (Model) refIncludeGroup.lmContainer();
 			final var className = ClassName.get(model.domain(), refIncludeGroup.name());
 			return TypeParameter.of(className, params);
-		}
-		else if (group.name().equals("LMObject"))
+	}
+
+	static TypeParameter resolveNoInclude(final Group<?> group)
+	{
+		 if (group.name().equals("LMObject"))
 		{
 			final var res = ClassName.get(IFeaturedObject.class);
 			return TypeParameter.of(res);

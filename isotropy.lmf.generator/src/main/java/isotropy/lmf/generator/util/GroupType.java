@@ -104,10 +104,7 @@ public final class GroupType implements TypeParameter
 
 	public static GroupType from(final List<Reference<?>> includes, final Group<?> group)
 	{
-		final var superInterfaces = includes.stream()
-											.map(i -> TypeResolutionUtil.resolveInclude(i, group))
-											.map(TypeParameter::parametrized)
-											.toList();
+		final var superInterfaces = resolveIncludes(includes, group);
 		final var model = (Model) group.lmContainer();
 		final var interfaceName = ClassName.get(model.domain(), group.name());
 
@@ -124,5 +121,20 @@ public final class GroupType implements TypeParameter
 									: typedStream.toList();
 		final var groupType = TypeParameter.of(interfaceName, rawParameters);
 		return new GroupType(group, groupType, superInterfaces, typedParameters);
+	}
+
+	private static List<TypeName> resolveIncludes(final List<Reference<?>> includes, final Group<?> group)
+	{
+		if (includes.isEmpty())
+		{
+			return List.of(TypeResolutionUtil.resolveNoInclude(group).parametrized());
+		}
+		else
+		{
+			return includes.stream()
+						   .map(i -> TypeResolutionUtil.resolveInclude(i, group))
+						   .map(TypeParameter::parametrized)
+						   .toList();
+		}
 	}
 }
