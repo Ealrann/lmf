@@ -46,7 +46,7 @@ public class FullModelTest
 			(Model name=LMCore domain=isotrpoy.lmf.core.lang
 			   
 				(Group LMObject)
-				(Group Named (includes /groups.0) (-att name=name /units.7 mandatory))
+				(Group Named (includes /groups.0) (-att name=name datatype=/units.7 mandatory))
 				(Group Type  (includes /groups.1))
 			   
 				(Definition Model (includes group=/groups.1)
@@ -89,7 +89,7 @@ public class FullModelTest
 					(-att literals /units.7 [0..*]))
 				(Definition Unit  (includes /groups.8 parameters=../generics.0) (Generic T)
 					(-att matcher      /units.0   [0..1])
-					(-att defaultValue /units.7   [0..1])
+					(-att name=defaultValue /units.7   [0..1])
 					(-att primitive    /enums.1   [1..1])
 					(-att extractor    /units.1   [0..1]))
 			   

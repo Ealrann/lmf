@@ -1,9 +1,9 @@
 package isotropy.lmf.core.lang.impl;
 
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.Primitive;
 import isotropy.lmf.core.lang.Unit;
-import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.model.FeatureGetter;
 import isotropy.lmf.core.model.FeatureSetter;
 import isotropy.lmf.core.model.FeaturedObject;

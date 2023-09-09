@@ -92,7 +92,7 @@ public record FeatureResolution(Feature<?, ?> feature,
 			{
 				final var primitiveType = GenUtils.resolvePrimitiveClass(unit.primitive());
 				final var typeName = TypeName.get(primitiveType);
-				return new PartialFeatureResolution(TypeParameter.of(typeName), false);
+				return new PartialFeatureResolution(TypeParameter.ofPrimitive(typeName), false);
 			}
 			else if (datatype instanceof Enum<?> enumeration)
 			{

@@ -1,8 +1,5 @@
 package isotropy.lmf.core.lang;
 
-import isotropy.lmf.core.lang.Enum;
-import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.impl.ModelImpl;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.IModelPackage;
@@ -14,32 +11,29 @@ import java.util.Optional;
 public final class LMCorePackage implements IModelPackage {
   public static final LMCorePackage Instance = new LMCorePackage();
 
-  public static final Model MODEL = new ModelImpl("LMCore", "isotropy.lmf.core.lang", LMCoreDefinition.Groups.ALL,
-												  LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL,
-												  LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
+  public static final Model MODEL = new ModelImpl("LMCore", "isotropy.lmf.core.lang", LMCoreDefinition.Groups.ALL, LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL, LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
 
   private LMCorePackage() {
   }
 
-	@Override
-	public Model model()
-	{
-		return MODEL;
-	}
+  @Override
+  public Model model() {
+    return MODEL;
+  }
 
-	@Override
+  @Override
   @SuppressWarnings("unchecked")
   public <T extends LMObject> Optional<IFeaturedObject.Builder<T>> builder(Group<T> group) {
-    if (group == LMCoreDefinition.Groups.MODEL) return (Optional) Optional.of(Model.builder());
-    else if (group == LMCoreDefinition.Groups.GROUP) return (Optional) Optional.of(Group.builder());
-    else if (group == LMCoreDefinition.Groups.ATTRIBUTE) return (Optional) Optional.of(Attribute.builder());
-    else if (group == LMCoreDefinition.Groups.RELATION) return (Optional) Optional.of(Relation.builder());
-    else if (group == LMCoreDefinition.Groups.ALIAS) return (Optional) Optional.of(Alias.builder());
-    else if (group == LMCoreDefinition.Groups.ENUM) return (Optional) Optional.of(Enum.builder());
-    else if (group == LMCoreDefinition.Groups.UNIT) return (Optional) Optional.of(Unit.builder());
-    else if (group == LMCoreDefinition.Groups.GENERIC) return (Optional) Optional.of(Generic.builder());
-    else if (group == LMCoreDefinition.Groups.REFERENCE) return (Optional) Optional.of(Reference.builder());
-    else if (group == LMCoreDefinition.Groups.JAVA_WRAPPER) return (Optional) Optional.of(JavaWrapper.builder());
+    if (group == LMCoreDefinition.Groups.MODEL) return Optional.of((IFeaturedObject.Builder<T>) Model.builder());
+    else if (group == LMCoreDefinition.Groups.GROUP) return Optional.of((IFeaturedObject.Builder<T>) Group.builder());
+    else if (group == LMCoreDefinition.Groups.ATTRIBUTE) return Optional.of((IFeaturedObject.Builder<T>) Attribute.builder());
+    else if (group == LMCoreDefinition.Groups.RELATION) return Optional.of((IFeaturedObject.Builder<T>) Relation.builder());
+    else if (group == LMCoreDefinition.Groups.ALIAS) return Optional.of((IFeaturedObject.Builder<T>) Alias.builder());
+    else if (group == LMCoreDefinition.Groups.ENUM) return Optional.of((IFeaturedObject.Builder<T>) Enum.builder());
+    else if (group == LMCoreDefinition.Groups.UNIT) return Optional.of((IFeaturedObject.Builder<T>) Unit.builder());
+    else if (group == LMCoreDefinition.Groups.GENERIC) return Optional.of((IFeaturedObject.Builder<T>) Generic.builder());
+    else if (group == LMCoreDefinition.Groups.REFERENCE) return Optional.of((IFeaturedObject.Builder<T>) Reference.builder());
+    else if (group == LMCoreDefinition.Groups.JAVA_WRAPPER) return Optional.of((IFeaturedObject.Builder<T>) JavaWrapper.builder());
     return Optional.empty();
   }
 

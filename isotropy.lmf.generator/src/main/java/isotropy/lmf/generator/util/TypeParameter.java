@@ -18,6 +18,11 @@ public interface TypeParameter
 		return new SimpleTypeParameter(raw, List.of(param.box()));
 	}
 
+	static TypeParameter of(ClassName raw)
+	{
+		return new SimpleTypeParameter(raw, List.of());
+	}
+
 	static TypeParameter of(ClassName raw, int genericCount)
 	{
 		return new SimpleTypeParameter(raw, GenUtils.wildcardList(genericCount));
@@ -28,7 +33,7 @@ public interface TypeParameter
 		return new SimpleTypeParameter(raw, params.stream().map(TypeName::box).toList());
 	}
 
-	static TypeParameter of(TypeName raw)
+	static TypeParameter ofPrimitive(TypeName raw)
 	{
 		return new SimpleType(raw);
 	}

@@ -22,7 +22,11 @@ public final class ConstructorBuilder implements CodeBuilder<GroupGenerationCont
 	public MethodSpec build(GroupGenerationContext context)
 	{
 		final var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-		final var codeList = context.featureResolutions().stream().map(ConstructorBuilder::bakeCode).toList();
+		final var codeList = context.featureResolutions()
+									.stream()
+									.filter(ConstructorBuilder::mandatoryOrImmutable)
+									.map(ConstructorBuilder::bakeCode)
+									.toList();
 
 		codeList.forEach(c -> c.installStep1(constructor));
 
@@ -35,7 +39,13 @@ public final class ConstructorBuilder implements CodeBuilder<GroupGenerationCont
 		return constructor.build();
 	}
 
-	private static ParameterCode bakeCode(FeatureResolution resolution)
+	private static boolean mandatoryOrImmutable(final FeatureResolution resolution)
+	{
+		final var feature = resolution.feature();
+		return feature.immutable() || feature.mandatory();
+	}
+
+	private static ParameterCode bakeCode(final FeatureResolution resolution)
 	{
 		final var paramSpec = resolution.parameterSpec();
 		final var assignCode = ImplementationCodeUtil.assignationStatement(resolution.feature(), paramSpec.name);

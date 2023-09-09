@@ -1,11 +1,11 @@
 package isotropy.lmf.core.lang.builder;
 
+import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Reference;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.Relation.Builder;
 import isotropy.lmf.core.lang.impl.RelationImpl;
-import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.RawFeature;
 import isotropy.lmf.core.model.RelationLazyInserter;
@@ -105,7 +105,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 
   @Override
   public Relation<UnaryType, EffectiveType> build() {
-    return new RelationImpl<>(name, immutable, many, mandatory, reference.get(), contains, lazy, rawFeature);
+    return new RelationImpl<>(name, immutable, many, mandatory, rawFeature, reference.get(), lazy, contains);
   }
 
   @Override
@@ -115,8 +115,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   }
 
   @Override
-  public <RelationType extends LMObject> void push(
-      final isotropy.lmf.core.lang.Relation<RelationType, ?> relation,
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
     RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
   }

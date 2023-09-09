@@ -1,13 +1,13 @@
 package isotropy.lmf.core.lang.builder;
 
+import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.BoundType;
 import isotropy.lmf.core.lang.Generic;
 import isotropy.lmf.core.lang.Generic.Builder;
 import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.Type;
 import isotropy.lmf.core.lang.impl.GenericImpl;
-import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.RelationLazyInserter;
 import java.lang.Override;
@@ -55,7 +55,7 @@ public final class GenericBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public Generic<T> build() {
-    return new GenericImpl<>(name, boundType, type.get());
+    return new GenericImpl<>(name, type.get(), boundType);
   }
 
   @Override

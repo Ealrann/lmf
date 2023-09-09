@@ -2,10 +2,10 @@ package isotropy.lmf.core.lang.impl;
 
 import isotropy.lmf.core.lang.BoundType;
 import isotropy.lmf.core.lang.Generic;
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Type;
-import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.model.FeatureGetter;
 import isotropy.lmf.core.model.FeatureSetter;
 import isotropy.lmf.core.model.FeaturedObject;
@@ -23,7 +23,7 @@ public final class GenericImpl<T extends LMObject> extends FeaturedObject implem
 
   private final BoundType boundType;
 
-  public GenericImpl(final String name, final BoundType boundType, final Type<T> type) {
+  public GenericImpl(final String name, final Type<T> type, final BoundType boundType) {
     this.name = name;
     this.type = type;
     this.boundType = boundType;

@@ -60,7 +60,24 @@ public final class ImplementationFeatureUtil
 
 	private static FeatureFieldBuilder fieldBuilder()
 	{
-		return new FeatureFieldBuilder(false, FeatureResolution::name, ImplementationFeatureUtil::fieldFeatureType);
+		return new FeatureFieldBuilder(false, FeatureResolution::name, ImplementationFeatureUtil::fieldFeatureType,
+									   ImplementationFeatureUtil::fieldInitializer );
+	}
+
+	private static Optional<CodeBlock> fieldInitializer(FeatureResolution resolution)
+	{
+		final var feature = resolution.feature();
+		final var many = feature.many();
+		final var immutable = feature.immutable();
+
+		if (many && !immutable)
+		{
+			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
+		}
+		else
+		{
+			return Optional.empty();
+		}
 	}
 
 	private static ConstructorBuilder parameterBuilder()

@@ -1,16 +1,16 @@
 package isotropy.lmf.core.lang.builder;
 
 import isotropy.lmf.core.lang.Alias;
+import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.JavaWrapper;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Model.Builder;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.lang.impl.ModelImpl;
-import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.IModelPackage;
 import isotropy.lmf.core.model.RelationLazyInserter;
@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public final class ModelBuilder implements Builder {
-  private static final FeatureInserter<ModelBuilder> ATTRIBUTE_INSERTER =
-		  new FeatureInserter.Builder<ModelBuilder>().add(Model.Features.name, ModelBuilder::name).add(Model.Features.domain, ModelBuilder::domain).add(Model.Features.lPackage, ModelBuilder::lPackage).build();
+  private static final FeatureInserter<ModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<ModelBuilder>().add(Model.Features.name, ModelBuilder::name).add(Model.Features.domain, ModelBuilder::domain).add(Model.Features.lPackage, ModelBuilder::lPackage).build();
 
-  private static final RelationLazyInserter<ModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>().add(Model.Features.groups, ModelBuilder::addGroup).add(Model.Features.enums, ModelBuilder::addEnum).add(Model.Features.units, ModelBuilder::addUnit).add(Model.Features.aliases, ModelBuilder::addAlias).add(Model.Features.javaWrappers, ModelBuilder::addJavaWrapper).build();
+  private static final RelationLazyInserter<ModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>().add(Model.Features.groups, ModelBuilder::addGroup).add(Model.Features.enums, ModelBuilder::addEnum).add(Model.Features.units, ModelBuilder::addUnit).add(Model.Features.aliases, ModelBuilder::addAliase).add(Model.Features.javaWrappers, ModelBuilder::addJavaWrapper).build();
 
-	private String name;
-	private String domain;
+  private String name;
+
+  private String domain;
 
   private final List<Supplier<Group<?>>> groups = new ArrayList<>();
 
@@ -42,17 +42,17 @@ public final class ModelBuilder implements Builder {
 
   private IModelPackage lPackage;
 
-	@Override
-	public ModelBuilder name(String name) {
-		this.name = name;
-		return this;
-	}
+  @Override
+  public ModelBuilder name(String name) {
+    this.name = name;
+    return this;
+  }
 
-	@Override
-	public ModelBuilder domain(String domain) {
-		this.domain = domain;
-		return this;
-	}
+  @Override
+  public ModelBuilder domain(String domain) {
+    this.domain = domain;
+    return this;
+  }
 
   @Override
   public ModelBuilder addGroup(Supplier<Group<?>> group) {
@@ -73,7 +73,7 @@ public final class ModelBuilder implements Builder {
   }
 
   @Override
-  public ModelBuilder addAlias(Supplier<Alias> aliase) {
+  public ModelBuilder addAliase(Supplier<Alias> aliase) {
     this.aliases.add(aliase);
     return this;
   }

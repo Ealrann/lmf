@@ -15,6 +15,8 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
 
   Datatype<UnaryType> datatype();
 
+  String defaultValue();
+
   List<Generic<?>> parameters();
 
   interface Features {
@@ -29,6 +31,8 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
     RawFeature<RawFeature<?, ?>, RawFeature<?, ?>> rawFeature = Feature.Features.rawFeature;
 
     RawFeature<Datatype<?>, Datatype<?>> datatype = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.ATTRIBUTE.DATATYPE);
+
+    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.ATTRIBUTE.DEFAULT_VALUE);
 
     RawFeature<Generic<?>, List<Generic<?>>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.ATTRIBUTE.PARAMETERS);
   }
@@ -45,6 +49,8 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
     Builder<UnaryType, EffectiveType> rawFeature(RawFeature<UnaryType, EffectiveType> rawFeature);
 
     Builder<UnaryType, EffectiveType> datatype(Supplier<Datatype<UnaryType>> datatype);
+
+    Builder<UnaryType, EffectiveType> defaultValue(String defaultValue);
 
     Builder<UnaryType, EffectiveType> addParameter(Supplier<Generic<?>> parameter);
   }

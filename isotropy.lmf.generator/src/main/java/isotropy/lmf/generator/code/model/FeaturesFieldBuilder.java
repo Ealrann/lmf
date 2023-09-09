@@ -65,6 +65,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var typeName = GenUtils.toConstantCase(datatype.name());
 
 				initBuilder.add("$N.$N, ", typeHolder, typeName)
+						   .add("$S, ", attribute.defaultValue())
 						   .add("$T.of()", ConstantTypes.LIST);
 			}
 			else

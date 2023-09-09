@@ -4,12 +4,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.*;
 import isotropy.lmf.generator.code.feature.*;
 import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.util.ConstantTypes;
+import isotropy.lmf.generator.util.DefaultValueUtil;
 import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
@@ -18,6 +18,7 @@ import java.util.Optional;
 
 public final class BuilderFeatureUtil
 {
+	private static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
 	private static final Modifier[] PUBLIC_ONLY = {Modifier.PUBLIC};
 	public static final Modifier[] PRIVATE_ONLY = {Modifier.PRIVATE};
 	private static final FeatureFieldBuilder FIELD_BUILDER = BuilderFeatureUtil.fieldBuilder();
@@ -56,7 +57,38 @@ public final class BuilderFeatureUtil
 
 	private static FeatureFieldBuilder fieldBuilder()
 	{
-		return new FeatureFieldBuilder(true, FeatureResolution::name, FeatureResolution::builderType);
+		return new FeatureFieldBuilder(true,
+									   FeatureResolution::name,
+									   FeatureResolution::builderType,
+									   BuilderFeatureUtil::fieldInitializer);
+	}
+
+	private static Optional<CodeBlock> fieldInitializer(FeatureResolution resolution)
+	{
+		final var feature = resolution.feature();
+		final var many = feature.many();
+		final var immutable = feature.immutable();
+		final var mandatory = feature.mandatory();
+
+		if (many)
+		{
+			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
+		}
+		else if (immutable && !mandatory)
+		{
+			if (feature instanceof Relation<?, ?>)
+			{
+				return Optional.of(CodeBlock.of("() -> null"));
+			}
+			else
+			{
+				return DefaultValueUtil.resolveDefaultValue(resolution);
+			}
+		}
+		else
+		{
+			return Optional.empty();
+		}
 	}
 
 	private static FeatureMethodBuilder setterBuilder(TypeName returnType)

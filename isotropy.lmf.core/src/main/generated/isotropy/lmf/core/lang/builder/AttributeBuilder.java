@@ -5,8 +5,8 @@ import isotropy.lmf.core.lang.Attribute.Builder;
 import isotropy.lmf.core.lang.Datatype;
 import isotropy.lmf.core.lang.Generic;
 import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.lang.impl.AttributeImpl;
 import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.lang.impl.AttributeImpl;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.RawFeature;
 import isotropy.lmf.core.model.RelationLazyInserter;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder<UnaryType, EffectiveType> {
-  private static final FeatureInserter<AttributeBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.name, AttributeBuilder::name).add(Attribute.Features.immutable, AttributeBuilder::immutable).add(Attribute.Features.many, AttributeBuilder::many).add(Attribute.Features.mandatory, AttributeBuilder::mandatory).add(Attribute.Features.rawFeature, AttributeBuilder::_rawFeature).build();
+  private static final FeatureInserter<AttributeBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.name, AttributeBuilder::name).add(Attribute.Features.immutable, AttributeBuilder::immutable).add(Attribute.Features.many, AttributeBuilder::many).add(Attribute.Features.mandatory, AttributeBuilder::mandatory).add(Attribute.Features.rawFeature, AttributeBuilder::_rawFeature).add(Attribute.Features.defaultValue, AttributeBuilder::defaultValue).build();
 
   private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.datatype, AttributeBuilder::_datatype).add(Attribute.Features.parameters, AttributeBuilder::addParameter).build();
 
@@ -34,6 +34,8 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   private RawFeature<UnaryType, EffectiveType> rawFeature;
 
   private Supplier<Datatype<UnaryType>> datatype;
+
+  private String defaultValue;
 
   private final List<Supplier<Generic<?>>> parameters = new ArrayList<>();
 
@@ -73,7 +75,7 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
       "rawtypes"
   })
   private AttributeBuilder<UnaryType, EffectiveType> _rawFeature(final RawFeature rawFeature) {
-    this.rawFeature = rawFeature;
+    this.rawFeature = (RawFeature<UnaryType, EffectiveType>) rawFeature;
     return this;
   }
 
@@ -94,6 +96,12 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   }
 
   @Override
+  public AttributeBuilder<UnaryType, EffectiveType> defaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+    return this;
+  }
+
+  @Override
   public AttributeBuilder<UnaryType, EffectiveType> addParameter(Supplier<Generic<?>> parameter) {
     this.parameters.add(parameter);
     return this;
@@ -102,12 +110,11 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   @Override
   public Attribute<UnaryType, EffectiveType> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    return new AttributeImpl<>(name, immutable, many, mandatory, datatype.get(), builtParameters, rawFeature);
+    return new AttributeImpl<>(name, immutable, many, mandatory, rawFeature, datatype.get(), defaultValue, builtParameters);
   }
 
   @Override
-  public <AttributeType> void push(
-      final isotropy.lmf.core.lang.Attribute<AttributeType, ?> attribute,
+  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
     ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
   }

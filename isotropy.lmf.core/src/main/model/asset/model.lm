@@ -30,9 +30,10 @@
 
 	(Definition Attribute
 		(includes /groups.5 parameters=../generics.0,../generics.1)
-	    (Generic UnaryType) (Generic EffectiveType)
-		(-refers datatype (reference /groups.8 parameters=/groups.6/generics.0) [1..1])
-		(-refers parameters (reference /groups.12)  [0..*]))
+	    (Generic UnaryType)        (Generic EffectiveType)
+		(-refers datatype          (reference /groups.8 parameters=/groups.6/generics.0) [1..1])
+		(-att    name=defaultValue /units.7)
+		(-refers parameters        (reference /groups.12)  [0..*]))
 
 	(Definition Relation
 		(includes /groups.5 parameters=../generics.0,../generics.1)
@@ -47,14 +48,14 @@
 	(Definition Enum  (includes /groups.8 parameters=../generics.0) (Generic T)
 		(-att literals /units.7 [0..*]))
 	(Definition Unit  (includes /groups.8 parameters=../generics.0) (Generic T)
-		(-att matcher      /units.0   [0..1])
-		(-att defaultValue /units.7   [0..1])
-		(-att primitive    /enums.1   [1..1])
-		(-att extractor    /units.1   [0..1]))
+		(-att matcher           /units.0   [0..1])
+		(-att name=defaultValue /units.7   [0..1])
+		(-att primitive         /enums.1   [0..1] defaultValue=String)
+		(-att extractor         /units.1   [0..1]))
 
 	(Definition Generic (includes /groups.14 parameters=../generics.0)
 	    (Generic T boundType=extends type=/groups.0)
-		(-refers type      (reference group=/groups.2 parameters=../../generics.0))
+		(-refers type [0..1] (reference group=/groups.2 parameters=../../generics.0))
 		(-att    boundType datatype=/enums.0))
 
 	(Definition Reference (includes group=/groups.0)
