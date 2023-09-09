@@ -38,13 +38,15 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 		final var type = generic.type();
 		final var boundType = generic.boundType();
 
-		final var btBlock = boundType == null ? CodeBlock.of("null, ") : CodeBlock.of("$T.$L, ", BT_TYPE, boundType);
+		final var btBlock = boundType == null ? CodeBlock.of("null") : CodeBlock.of("$T.$L", BT_TYPE, boundType);
 
 		final var typeCodeblock = typeBlock(type);
 		return CodeBlock.builder()
 						.add("new $T<>($S, ", GENERIC_IMPL_TYPE, generic.name())
-						.add(btBlock)
 						.add(typeCodeblock)
+						.add(", ")
+						.add(btBlock)
+						.add(")")
 						.build();
 	}
 
@@ -56,11 +58,11 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var typeConstantName = GenUtils.toConstantCase(type.name());
 			final var typeHolder = TypeResolutionUtil.resolveTypeHolder(type);
-			return CodeBlock.of("$T.$N.$N)", modelDefinition, typeHolder, typeConstantName);
+			return CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeConstantName);
 		}
 		else
 		{
-			return CodeBlock.of("null)");
+			return CodeBlock.of("null");
 		}
 	}
 }
