@@ -12,6 +12,7 @@ import isotropy.lmf.generator.code.util.SubInterfaceBuilder;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 
+import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
 
@@ -20,7 +21,7 @@ public class ModelDefinition
 	private final InterfaceBuilder<Model> javaWrapperBuilder = new FieldBuilder<>("JavaWrappers",
 																				  new JavaWrapperFieldBuilder(),
 																				  m -> m.javaWrappers().stream(),
-																				  ConstantTypes.JAVA_WRAPPER_ALL_BUILDER );
+																				  ConstantTypes.JAVA_WRAPPER_ALL_BUILDER);
 	private final InterfaceBuilder<Model> aliasBuilder = new FieldBuilder<>("Aliases",
 																			new AliasFieldBuilder(),
 																			m -> m.aliases().stream(),
@@ -64,7 +65,8 @@ public class ModelDefinition
 
 	public void generate(final File target)
 	{
-		final var definitionInterface = TypeSpec.interfaceBuilder(model.name() + "Definition");
+		final var definitionInterface = TypeSpec.interfaceBuilder(model.name() + "Definition")
+												.addModifiers(Modifier.PUBLIC);
 
 		definitionInterface.addType(featureInterfacesBuilder.build(model));
 		definitionInterface.addType(genericBuilder.build(model));
