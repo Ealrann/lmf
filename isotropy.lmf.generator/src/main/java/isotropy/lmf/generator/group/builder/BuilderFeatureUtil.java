@@ -4,6 +4,8 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.code.feature.*;
 import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
@@ -43,7 +45,7 @@ public final class BuilderFeatureUtil
 		final var builderType = groupType.builderClass();
 		final var attributeMapBuilder = new AttributeMapFieldBuilder(groupType, builderType);
 		final var relationMapBuilder = new RelationMapFieldBuilder(groupType, builderType);
-		final var buildMethodBuilder = new BuildMethodBuilder(groupType, builderType);
+		final var buildMethodBuilder = new BuildMethodBuilder(groupType);
 
 		return CodeInstaller.compose(CodeInstaller.of(buildMethodBuilder, classBuilder::addMethod),
 									 CodeInstaller.of(ATTRIBUTE_PUSH_BUILDER, classBuilder::addMethod),
@@ -63,7 +65,7 @@ public final class BuilderFeatureUtil
 										MethodUtil::builderMethodName,
 										f -> returnType,
 										Optional.of(FeatureResolution::builderParameterSpec),
-										Optional.of(BuilderFeatureUtil::featureChangeStatement),
+										Optional.of(p -> featureChangeStatement(p, false)),
 										List.of(ConstantTypes.OVERRIDE));
 	}
 
@@ -72,25 +74,54 @@ public final class BuilderFeatureUtil
 		return new FeatureMethodBuilder(PRIVATE_ONLY,
 										f -> '_' + f.name(),
 										f -> returnType,
-										Optional.of(f -> ParameterSpec.builder(ConstantTypes.SUPPLIER,
+										Optional.of(f -> ParameterSpec.builder(f.feature() instanceof Relation<?, ?>
+																			   ? ConstantTypes.SUPPLIER
+																			   : f.singleType().raw(),
 																			   MethodUtil.builderSingleParameterName(f),
 																			   Modifier.FINAL).build()),
-										Optional.of(BuilderFeatureUtil::featureChangeStatement),
+										Optional.of(p -> featureChangeStatement(p, true)),
 										List.of(ConstantTypes.SUPPRESS_RAW_UNCHECKED));
 	}
 
-	private static List<CodeBlock> featureChangeStatement(final FeatureParameter parameter)
+	private static List<CodeBlock> featureChangeStatement(final FeatureParameter parameter, final boolean raw)
 	{
-		return List.of(assignationStatement(parameter), CodeBlock.of("return this"));
+		return List.of(assignationStatement(parameter, raw), CodeBlock.of("return this"));
 	}
 
-	private static CodeBlock assignationStatement(final FeatureParameter parameter)
+	private static CodeBlock assignationStatement(final FeatureParameter parameter, final boolean raw)
 	{
-		final var feature = parameter.feature().feature();
+		final var resolution = parameter.feature();
+		final var feature = resolution.feature();
 		final var many = feature.many();
-		final var paramName = parameter.parameterName();
-		final var assignPattern = many ? "this." + feature.name() + ".add(%1$s)" : "this.%1$s = %1$s";
+		final boolean isGenericAttribute = resolution.hasGeneric() && feature instanceof Attribute<?, ?>;
+		final boolean needSupplyResolution = raw && isGenericAttribute;
 
-		return CodeBlock.of(String.format(assignPattern, paramName));
+		if (many) return assignPatternMany(parameter);
+		else if (needSupplyResolution) return assignPatternCast(parameter);
+		else return assignPatternSingle(parameter);
+	}
+
+	private static CodeBlock assignPatternMany(final FeatureParameter parameter)
+	{
+		final var resolution = parameter.feature();
+		final var feature = resolution.feature();
+		final var paramName = parameter.parameterName();
+		return CodeBlock.of("this.$N.add($N)", feature.name(), paramName);
+	}
+
+	private static CodeBlock assignPatternCast(final FeatureParameter parameter)
+	{
+		final var resolution = parameter.feature();
+		final var feature = resolution.feature();
+		final var paramName = parameter.parameterName();
+		final var cast = resolution.effectiveType().parametrized();
+		return CodeBlock.of("this.$N = ($T) $N", feature.name(), cast, paramName);
+	}
+
+	private static CodeBlock assignPatternSingle(final FeatureParameter parameter)
+	{
+		final var resolution = parameter.feature();
+		final var feature = resolution.feature();
+		return CodeBlock.of("this.$N = $N", feature.name(), feature.name());
 	}
 }

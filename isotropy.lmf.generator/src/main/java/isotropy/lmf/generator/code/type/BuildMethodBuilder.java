@@ -19,7 +19,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 	private final TypeName buildType;
 	private final GroupType interfaceType;
 
-	public BuildMethodBuilder(final GroupType interfaceType, final GroupType builderType)
+	public BuildMethodBuilder(final GroupType interfaceType)
 	{
 		this.interfaceType = interfaceType;
 		this.buildType = interfaceType.implementation().raw();
@@ -87,7 +87,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 		private static boolean isSuppliedList(FeatureResolution resolution)
 		{
 			final var feature = resolution.feature();
-			return feature.many() && feature instanceof Relation<?, ?>;
+			return feature.many() && feature instanceof Relation<?, ?> relation && !relation.lazy();
 		}
 	}
 }
