@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.code.feature.FeatureParameter;
+import isotropy.lmf.generator.util.ConstantTypes;
 
 import java.util.List;
 
@@ -30,7 +31,21 @@ public class ImplementationCodeUtil
 	public static List<CodeBlock> featureReturnStatement(FeatureParameter parameter)
 	{
 		final var name = parameter.parameterName();
-		final var lazy = parameter.feature().feature() instanceof Relation<?,?> r && r.lazy();
-		return List.of(CodeBlock.of(lazy ? "return $N.get()" : "return $N", name));
+		final var feature = parameter.feature().feature();
+		if (feature instanceof Relation<?, ?> relation && relation.lazy())
+		{
+			if (feature.many())
+			{
+				return List.of(CodeBlock.of("return $T.collectSuppliers($N)", ConstantTypes.BUILD_UTILS, name));
+			}
+			else
+			{
+				return List.of(CodeBlock.of("return $N.get()", name));
+			}
+		}
+		else
+		{
+			return List.of(CodeBlock.of("return $N", name));
+		}
 	}
 }

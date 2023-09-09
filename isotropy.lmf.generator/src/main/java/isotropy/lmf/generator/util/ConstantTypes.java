@@ -9,6 +9,7 @@ import isotropy.lmf.core.lang.impl.ModelImpl;
 import isotropy.lmf.core.model.FeatureInserter;
 import isotropy.lmf.core.model.IFeaturedObject;
 import isotropy.lmf.core.model.IModelPackage;
+import isotropy.lmf.core.util.BuildUtils;
 import isotropy.lmf.generator.code.util.FieldBuilder;
 
 import java.util.ArrayList;
@@ -53,4 +54,5 @@ public class ConstantTypes
 																			  .addMember("value", "\"rawtypes\"")
 																			  .build();
 	public static final AnnotationSpec OVERRIDE = AnnotationSpec.builder(Override.class).build();
+	public static final ClassName BUILD_UTILS = ClassName.get(BuildUtils.class);
 }

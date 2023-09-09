@@ -1,13 +1,12 @@
 package isotropy.lmf.generator.code.type;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.core.util.BuildUtils;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
+import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.GroupType;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
 
 public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, MethodSpec>
 {
-	private static final ClassName BUILD_UTILS = ClassName.get(BuildUtils.class);
 	private final TypeName buildType;
 	private final GroupType interfaceType;
 
@@ -70,7 +68,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 				final var newName = "built" + GenUtils.capitalizeFirstLetter(name);
 				final var buildBlock = CodeBlock.of("final var $N = $T.collectSuppliers($N)",
 													newName,
-													BUILD_UTILS,
+													ConstantTypes.BUILD_UTILS,
 													name);
 				final var arg = CodeBlock.of("$N", newName);
 				return new BuildArgument(arg, Optional.of(buildBlock));
