@@ -49,7 +49,7 @@ public final class FieldBuilder<Input> extends InterfaceBuilder<Input>
 			for (final var output : outputs)
 			{
 				if (first) first = false;
-				else listBlock.add(",");
+				else listBlock.add(", ");
 				listBlock.add(output.name);
 			}
 			listBlock.add(")");

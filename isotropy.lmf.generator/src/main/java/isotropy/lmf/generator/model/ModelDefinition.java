@@ -15,6 +15,10 @@ import isotropy.lmf.generator.util.GenUtils;
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class ModelDefinition
 {
@@ -36,14 +40,13 @@ public class ModelDefinition
 																		   ConstantTypes.UNIT_ALL_BUILDER);
 	private final InterfaceBuilder<Model> groupBuilder = new FieldBuilder<>("Groups",
 																			new GroupFieldBuilder(),
-																			m -> m.groups().stream(),
+																			this::streamOrderedGroup,
 																			ConstantTypes.GROUP_ALL_BUILDER);
 	private final InterfaceBuilder<Model> genericBuilder = new FieldBuilder<>("Generics",
 																			  new GenericFieldBuilder(),
-																			  m -> m.groups()
-																					.stream()
-																					.filter(g -> !g.generics()
-																								   .isEmpty()),
+																			  m -> this.streamOrderedGroup(m)
+																					   .filter(g -> !g.generics()
+																									  .isEmpty()),
 																			  null);
 
 	private final InterfaceBuilder<Group<?>> groupInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
@@ -53,14 +56,21 @@ public class ModelDefinition
 
 	private final InterfaceBuilder<Model> featureInterfacesBuilder = new SubInterfaceBuilder<>("Features",
 																							   groupInterfaceBuilder,
-																							   m -> m.groups()
-																									 .stream());
+																							   this::streamOrderedGroup);
 
 	private final Model model;
+
+	private final GroupTopologyBuilder topology;
 
 	public ModelDefinition(Model model)
 	{
 		this.model = model;
+		this.topology = new GroupTopologyBuilder(model);
+	}
+
+	private Stream<Group<?>> streamOrderedGroup(Model model)
+	{
+		return topology.stream();
 	}
 
 	public void generate(final File target)
@@ -84,6 +94,41 @@ public class ModelDefinition
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	private final class GroupTopologyBuilder
+	{
+		private final List<Group<?>> topology;
+
+		public GroupTopologyBuilder(Model model)
+		{
+			final Set<Group<?>> topology = new LinkedHashSet<>();
+			model.groups().forEach(g -> push(g, topology));
+			this.topology = topology.stream().toList();
+		}
+
+		public Stream<Group<?>> stream()
+		{
+			return topology.stream();
+		}
+
+		private void push(Group<?> group, Set<Group<?>> topology)
+		{
+			for (final var include : group.includes())
+			{
+				final var concept = include.group();
+
+				if (concept instanceof Group<?> includedGroup && model.groups().contains(includedGroup))
+				{
+					push(includedGroup, topology);
+				}
+			}
+			//noinspection RedundantCollectionOperation
+			if (!topology.contains(group))
+			{
+				topology.add(group);
+			}
 		}
 	}
 }
