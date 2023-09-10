@@ -5,9 +5,9 @@ import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.api.notification.Notification;
-import isotropy.lmf.core.notification.ContainerChange;
-import isotropy.lmf.core.notification.RelationNotificationBuilder;
-import isotropy.lmf.core.notification.SetNotifiation;
+import isotropy.lmf.core.notification.impl.ContainerChange;
+import isotropy.lmf.core.notification.impl.RelationNotificationBuilder;
+import isotropy.lmf.core.notification.impl.SetNotifiation;
 import isotropy.lmf.core.feature.FeatureGetter;
 import isotropy.lmf.core.feature.FeatureSetter;
 

@@ -1,4 +1,4 @@
-package isotropy.lmf.core.notification;
+package isotropy.lmf.core.notification.impl;
 
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.api.notification.Notification;
