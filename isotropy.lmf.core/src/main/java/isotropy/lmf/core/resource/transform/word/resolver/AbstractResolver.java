@@ -1,7 +1,7 @@
 package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.api.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 

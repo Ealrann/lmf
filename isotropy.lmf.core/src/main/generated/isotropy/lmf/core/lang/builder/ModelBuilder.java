@@ -1,5 +1,8 @@
 package isotropy.lmf.core.lang.builder;
 
+import isotropy.lmf.core.api.model.IModelPackage;
+import isotropy.lmf.core.feature.FeatureInserter;
+import isotropy.lmf.core.feature.RelationLazyInserter;
 import isotropy.lmf.core.lang.Alias;
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Enum;
@@ -11,9 +14,6 @@ import isotropy.lmf.core.lang.Model.Builder;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.Unit;
 import isotropy.lmf.core.lang.impl.ModelImpl;
-import isotropy.lmf.core.model.FeatureInserter;
-import isotropy.lmf.core.model.IModelPackage;
-import isotropy.lmf.core.model.RelationLazyInserter;
 import isotropy.lmf.core.util.BuildUtils;
 import java.lang.Override;
 import java.lang.String;

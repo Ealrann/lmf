@@ -1,6 +1,6 @@
 package isotropy.lmf.core.lang;
 
-import isotropy.lmf.core.model.RawFeature;
+import isotropy.lmf.core.api.feature.RawFeature;
 import java.lang.String;
 
 public interface Type<T> extends Named {

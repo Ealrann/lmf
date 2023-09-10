@@ -1,6 +1,7 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.util;
 
 import isotropy.lmf.core.lang.LMCorePackage;
+import isotropy.lmf.core.api.model.IModelPackage;
 
 import java.util.HashMap;
 import java.util.Map;

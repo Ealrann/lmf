@@ -1,8 +1,8 @@
 package isotropy.lmf.core.lang;
 
+import isotropy.lmf.core.api.model.IFeaturedObject;
+import isotropy.lmf.core.api.model.IModelPackage;
 import isotropy.lmf.core.lang.impl.ModelImpl;
-import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.core.model.IModelPackage;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;

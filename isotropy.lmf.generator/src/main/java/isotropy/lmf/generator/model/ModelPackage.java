@@ -2,7 +2,7 @@ package isotropy.lmf.generator.model;
 
 import com.squareup.javapoet.*;
 import isotropy.lmf.core.lang.Model;
-import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.api.model.IFeaturedObject;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;

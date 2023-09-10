@@ -3,7 +3,7 @@ package isotropy.lmf.generator.util;
 import com.squareup.javapoet.ClassName;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
-import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.api.model.IFeaturedObject;
 
 import java.util.List;
 

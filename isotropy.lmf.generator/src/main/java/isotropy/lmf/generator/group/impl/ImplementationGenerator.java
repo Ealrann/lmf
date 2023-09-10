@@ -2,6 +2,7 @@ package isotropy.lmf.generator.group.impl;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import isotropy.lmf.core.api.model.FeaturedObject;
 import isotropy.lmf.generator.group.GroupGenerationContext;
 
 import javax.lang.model.element.Modifier;
@@ -9,7 +10,7 @@ import java.io.IOException;
 
 public final class ImplementationGenerator
 {
-	public static final ClassName FEATURE_OBJECT_TYPE = ClassName.get("isotropy.lmf.core.model", "FeaturedObject");
+	public static final ClassName FEATURE_OBJECT_TYPE = ClassName.get(FeaturedObject.class);
 	private final GroupGenerationContext context;
 
 	public ImplementationGenerator(final GroupGenerationContext context)

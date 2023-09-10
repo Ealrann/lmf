@@ -1,4 +1,4 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.api.model;
 
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.Group;

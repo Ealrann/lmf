@@ -35,9 +35,9 @@ public class JavaWrapperTest
 							   .get(0);
 		final var attribute = (Attribute<?, ?>) group.features()
 													 .get(0);
-		final var wrapper = (JavaWrapper) attribute.datatype();
+		final var wrapper = (JavaWrapper<?>) attribute.datatype();
 
-		assertEquals(wrapper.name(), "RawFeature");
-		assertEquals(wrapper.domain(), "isotropy.lmf.core.model");
+		assertEquals("RawFeature", wrapper.name());
+		assertEquals("isotropy.lmf.core.api.feature", wrapper.domain());
 	}
 }

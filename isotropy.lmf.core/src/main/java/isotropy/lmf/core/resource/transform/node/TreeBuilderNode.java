@@ -2,7 +2,7 @@ package isotropy.lmf.core.resource.transform.node;
 
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.api.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 import isotropy.lmf.core.resource.util.AbstractTree;
 

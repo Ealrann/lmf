@@ -1,6 +1,7 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.api.notification;
 
 import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.api.feature.RawFeature;
 
 import java.util.List;
 

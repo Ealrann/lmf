@@ -1,5 +1,7 @@
 package isotropy.lmf.core.lang;
 
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.api.model.IModelPackage;
 import isotropy.lmf.core.lang.impl.AliasImpl;
 import isotropy.lmf.core.lang.impl.AttributeImpl;
 import isotropy.lmf.core.lang.impl.EnumImpl;
@@ -9,8 +11,6 @@ import isotropy.lmf.core.lang.impl.JavaWrapperImpl;
 import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.lang.impl.UnitImpl;
-import isotropy.lmf.core.model.IModelPackage;
-import isotropy.lmf.core.model.RawFeature;
 import java.lang.Boolean;
 import java.lang.Double;
 import java.lang.Float;
@@ -318,9 +318,9 @@ public interface LMCoreDefinition {
   }
 
   interface JavaWrappers {
-    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "isotropy.lmf.core.model");
+    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "isotropy.lmf.core.api.feature");
 
-    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "isotropy.lmf.core.model");
+    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "isotropy.lmf.core.api.model");
 
     List<JavaWrapper<?>> ALL = List.of(RAW_FEATURE, I_MODEL_PACKAGE);
   }

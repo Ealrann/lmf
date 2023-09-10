@@ -2,8 +2,8 @@ package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.core.model.ModelRegistry;
+import isotropy.lmf.core.api.model.IFeaturedObject;
+import isotropy.lmf.core.util.ModelRegistry;
 import isotropy.lmf.core.resource.transform.node.TreeBuilderNode;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 import isotropy.lmf.core.util.ModelUtils;

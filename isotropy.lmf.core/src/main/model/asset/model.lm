@@ -93,6 +93,6 @@
 	(Alias [0..*]     words=mandatory=false,many)
 	(Alias [1..*]     words=mandatory,many)
 
-	(JavaWrapper name=RawFeature domain=isotropy.lmf.core.model)
-	(JavaWrapper name=IModelPackage domain=isotropy.lmf.core.model)
+	(JavaWrapper name=RawFeature domain=isotropy.lmf.core.api.feature)
+	(JavaWrapper name=IModelPackage domain=isotropy.lmf.core.api.model)
 )

@@ -1,11 +1,15 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.api.model;
 
+import isotropy.lmf.core.api.feature.RawFeature;
 import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.core.model.notification.ContainerChange;
-import isotropy.lmf.core.model.notification.RelationNotificationBuilder;
-import isotropy.lmf.core.model.notification.SetNotifiation;
+import isotropy.lmf.core.api.notification.Notification;
+import isotropy.lmf.core.notification.ContainerChange;
+import isotropy.lmf.core.notification.RelationNotificationBuilder;
+import isotropy.lmf.core.notification.SetNotifiation;
+import isotropy.lmf.core.feature.FeatureGetter;
+import isotropy.lmf.core.feature.FeatureSetter;
 
 import java.util.ArrayList;
 import java.util.List;

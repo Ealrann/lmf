@@ -1,5 +1,7 @@
 package isotropy.lmf.core.lang.builder;
 
+import isotropy.lmf.core.feature.FeatureInserter;
+import isotropy.lmf.core.feature.RelationLazyInserter;
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.BoundType;
 import isotropy.lmf.core.lang.Generic;
@@ -8,8 +10,6 @@ import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.Type;
 import isotropy.lmf.core.lang.impl.GenericImpl;
-import isotropy.lmf.core.model.FeatureInserter;
-import isotropy.lmf.core.model.RelationLazyInserter;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;

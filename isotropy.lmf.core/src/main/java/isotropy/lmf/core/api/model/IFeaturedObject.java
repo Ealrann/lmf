@@ -1,10 +1,11 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.api.model;
 
 import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.api.notification.Notification;
 import isotropy.lmf.core.resource.util.ModelUtil;
 
 import java.util.function.Consumer;

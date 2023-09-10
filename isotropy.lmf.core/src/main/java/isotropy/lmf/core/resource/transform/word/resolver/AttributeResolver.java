@@ -1,7 +1,7 @@
 package isotropy.lmf.core.resource.transform.word.resolver;
 
 import isotropy.lmf.core.lang.Attribute;
-import isotropy.lmf.core.model.IFeaturedObject;
+import isotropy.lmf.core.api.model.IFeaturedObject;
 import isotropy.lmf.core.resource.transform.word.IFeatureResolution;
 
 public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements IWordResolver<T>

@@ -8,7 +8,7 @@ import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.core.model.RawFeature;
+import isotropy.lmf.core.api.feature.RawFeature;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.util.GenUtils;
 

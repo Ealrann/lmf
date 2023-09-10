@@ -1,8 +1,8 @@
 package isotropy.lmf.core.lang;
 
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.api.model.IFeaturedObject;
 import isotropy.lmf.core.lang.builder.ReferenceBuilder;
-import isotropy.lmf.core.model.IFeaturedObject;
-import isotropy.lmf.core.model.RawFeature;
 import java.util.List;
 import java.util.function.Supplier;
 

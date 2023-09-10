@@ -1,14 +1,14 @@
 package isotropy.lmf.core.lang.impl;
 
+import isotropy.lmf.core.api.model.FeaturedObject;
+import isotropy.lmf.core.feature.FeatureGetter;
+import isotropy.lmf.core.feature.FeatureSetter;
 import isotropy.lmf.core.lang.BoundType;
 import isotropy.lmf.core.lang.Generic;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMCoreDefinition;
 import isotropy.lmf.core.lang.LMObject;
 import isotropy.lmf.core.lang.Type;
-import isotropy.lmf.core.model.FeatureGetter;
-import isotropy.lmf.core.model.FeatureSetter;
-import isotropy.lmf.core.model.FeaturedObject;
 import java.lang.Override;
 import java.lang.String;
 

@@ -1,4 +1,4 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.api.feature;
 
 import isotropy.lmf.core.lang.Feature;
 

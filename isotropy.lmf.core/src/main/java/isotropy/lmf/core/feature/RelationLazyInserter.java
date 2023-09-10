@@ -1,5 +1,6 @@
-package isotropy.lmf.core.model;
+package isotropy.lmf.core.feature;
 
+import isotropy.lmf.core.api.feature.RawFeature;
 import isotropy.lmf.core.lang.LMObject;
 
 import java.util.function.BiConsumer;
