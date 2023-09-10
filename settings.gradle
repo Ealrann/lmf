@@ -1,5 +1,7 @@
 rootProject.name = "LMF"
 
-
+include ':isotropy.lmf.adapter'
 include ':isotropy.lmf.core'
+include ':isotropy.lmf.extender'
 include ':isotropy.lmf.generator'
+include ':isotropy.lmf.notification'
