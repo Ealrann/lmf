@@ -16,13 +16,12 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObject
+public abstract class AdaptableStructureObject extends LilyBasicNotifier implements ILilyEObject
 {
 	private static final String CANNOT_FIND_ADAPTER = "Cannot find adapter [%s] for class [%s]";
 	private static final String CANNOT_FIND_IDENTIFIED_ADAPTER = "Cannot find adapter [%s] (id = %s) for class [%s]";
 
 	private BasicAdapterManager extenderManager = null;
-
 	private boolean loaded = false;
 
 	@Override
@@ -38,7 +37,7 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 
 	private void setupChild(ILilyEObject notifier)
 	{
-		if (loaded && notifier instanceof LilyEObject child)
+		if (loaded && notifier instanceof AdaptableStructureObject child)
 		{
 			child.loadExtenderManager();
 		}
@@ -46,7 +45,7 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 
 	private void disposeChild(ILilyEObject notifier)
 	{
-		if (loaded && notifier instanceof LilyEObject child)
+		if (loaded && notifier instanceof AdaptableStructureObject child)
 		{
 			child.disposeExtenderManager();
 		}
@@ -125,12 +124,12 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 
 	public final void loadExtenderManager()
 	{
-		treeIterator().forEachRemaining(object -> ((LilyEObject) object).load());
+		treeIterator().forEachRemaining(object -> ((AdaptableStructureObject) object).load());
 	}
 
 	public final void disposeExtenderManager()
 	{
-		treeIterator().forEachRemaining(object -> ((LilyEObject) object).dispose());
+		treeIterator().forEachRemaining(object -> ((AdaptableStructureObject) object).dispose());
 	}
 
 	private void load()

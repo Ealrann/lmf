@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class FeaturedObject extends LilyEObject implements IFeaturedObject
+public abstract class FeaturedObject extends AdaptableStructureObject implements IFeaturedObject
 {
 	private final List<Consumer<Notification>> structureListeners = new ArrayList<>();
 	private LMObject container;
@@ -36,7 +36,7 @@ public abstract class FeaturedObject extends LilyEObject implements IFeaturedObj
 		return (Relation<?, ?>) containingFeature.featureSupplier().get();
 	}
 
-	private void lNotify(final Notification notification)
+	private void structureNotify(final Notification notification)
 	{
 		for (final var listener : structureListeners)
 		{
@@ -64,7 +64,12 @@ public abstract class FeaturedObject extends LilyEObject implements IFeaturedObj
 
 		final var oldValue = getMap.get((O) this, feature.rawFeature());
 		setMap.set((O) this, feature.rawFeature(), value);
-		lNotify(new SetNotifiation((LMObject) this, feature.rawFeature(), value, oldValue));
+		final var notification = new SetNotifiation((LMObject) this, feature.rawFeature(), value, oldValue);
+		if(feature instanceof Relation<?,?> relation && relation.contains())
+		{
+			structureNotify(notification);
+		}
+		super.eNotify(notification);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -137,7 +142,7 @@ public abstract class FeaturedObject extends LilyEObject implements IFeaturedObj
 			if (oldContainer != null)
 			{
 				final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer, oldFeature, child);
-				((FeaturedObject) oldContainer).lNotify(oldParentNotification);
+				((FeaturedObject) oldContainer).structureNotify(oldParentNotification);
 			}
 
 			final var childNotification = new ContainerChange(child,
@@ -145,7 +150,7 @@ public abstract class FeaturedObject extends LilyEObject implements IFeaturedObj
 															  newFeature,
 															  newContainer,
 															  oldContainer);
-			featuredChild.lNotify(childNotification);
+			featuredChild.structureNotify(childNotification);
 		}
 	}
 }
