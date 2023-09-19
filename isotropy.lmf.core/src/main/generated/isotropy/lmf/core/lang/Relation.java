@@ -18,7 +18,7 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
 
   boolean contains();
 
-  interface Features {
+  interface Features extends Feature.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<Boolean, Boolean> immutable = Feature.Features.immutable;

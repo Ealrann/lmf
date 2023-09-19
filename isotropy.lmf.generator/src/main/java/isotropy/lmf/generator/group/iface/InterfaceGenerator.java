@@ -2,10 +2,8 @@ package isotropy.lmf.generator.group.iface;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
-import isotropy.lmf.generator.code.feature.InternalFeatureBuilder;
 import isotropy.lmf.generator.code.type.InterfaceBuildMethodBuilder;
 import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.GroupType;
@@ -34,11 +32,12 @@ public final class InterfaceGenerator
 		final var featureResolutions = context.featureResolutions();
 		final var types = context.interfaceType();
 		final var isFinal = group.concrete();
-		final var internalFeaturesInterface = buildInternalFeaturesInterface(group, featureResolutions);
+		final var internalFeaturesGenerator = new InternalFeaturesGenerator(context);
+		final var internalFeatures = internalFeaturesGenerator.build();
 
 		final var interfaceBuilder = types.interfaceSpecBuilder()
 										  .addModifiers(Modifier.PUBLIC)
-										  .addType(internalFeaturesInterface);
+										  .addType(internalFeatures);
 
 		if (isFinal)
 		{
@@ -63,20 +62,6 @@ public final class InterfaceGenerator
 		{
 			e.printStackTrace();
 		}
-	}
-
-	private static TypeSpec buildInternalFeaturesInterface(final Group<?> group,
-														   final List<FeatureResolution> featureResolutions)
-	{
-		final var internalFeaturesInterfaceBuilder = TypeSpec.interfaceBuilder("Features")
-															 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-
-		final var internalFeatureBuilder = new InternalFeatureBuilder(group);
-		featureResolutions.stream()
-						  .map(internalFeatureBuilder::toConstantFeature)
-						  .forEach(internalFeaturesInterfaceBuilder::addField);
-
-		return internalFeaturesInterfaceBuilder.build();
 	}
 
 	private boolean matchGroup(final FeatureResolution f)

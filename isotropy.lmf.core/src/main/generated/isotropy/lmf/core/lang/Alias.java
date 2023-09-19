@@ -13,7 +13,7 @@ public interface Alias extends Named {
 
   List<String> words();
 
-  interface Features {
+  interface Features extends Named.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<String, List<String>> words = new RawFeature<>(true,false,() -> LMCoreDefinition.Features.ALIAS.WORDS);

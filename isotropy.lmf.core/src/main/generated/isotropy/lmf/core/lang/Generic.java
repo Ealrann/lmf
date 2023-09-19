@@ -15,7 +15,7 @@ public interface Generic<T extends LMObject> extends Concept<T> {
 
   BoundType boundType();
 
-  interface Features {
+  interface Features extends Concept.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.TYPE);

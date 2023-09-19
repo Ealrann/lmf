@@ -12,7 +12,7 @@ public interface JavaWrapper<T> extends Datatype<T> {
 
   String domain();
 
-  interface Features {
+  interface Features extends Datatype.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.JAVA_WRAPPER.DOMAIN);

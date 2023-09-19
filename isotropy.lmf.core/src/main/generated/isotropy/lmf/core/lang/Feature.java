@@ -13,7 +13,7 @@ public interface Feature<UnaryType, EffectiveType> extends Named {
 
   RawFeature<UnaryType, EffectiveType> rawFeature();
 
-  interface Features {
+  interface Features<T extends Features<T>> extends Named.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<Boolean, Boolean> immutable = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.FEATURE.IMMUTABLE);

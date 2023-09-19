@@ -21,7 +21,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
 
   List<Generic<?>> generics();
 
-  interface Features {
+  interface Features extends Type.Features<Features>, Concept.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<Boolean, Boolean> concrete = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.CONCRETE);

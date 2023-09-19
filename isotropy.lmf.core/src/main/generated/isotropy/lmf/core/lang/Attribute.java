@@ -19,7 +19,7 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
 
   List<Generic<?>> parameters();
 
-  interface Features {
+  interface Features extends Feature.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<Boolean, Boolean> immutable = Feature.Features.immutable;

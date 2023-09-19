@@ -27,7 +27,7 @@ public interface Model extends Named {
 
   IModelPackage lPackage();
 
-  interface Features {
+  interface Features extends Named.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.MODEL.DOMAIN);

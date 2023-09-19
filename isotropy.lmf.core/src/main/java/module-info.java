@@ -1,8 +1,8 @@
 module isotropy.lmf.core
 {
-	requires logoce.adapter;
-	requires logoce.extender;
-	requires logoce.notification;
+	requires transitive logoce.adapter;
+	requires transitive logoce.extender;
+	requires transitive logoce.notification;
 
 	exports isotropy.lmf.core.lang;
 	exports isotropy.lmf.core.lang.impl;

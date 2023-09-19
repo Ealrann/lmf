@@ -15,7 +15,7 @@ public interface Reference<T extends LMObject> extends LMObject {
 
   List<Concept<?>> parameters();
 
-  interface Features {
+  interface Features extends LMObject.Features<Features> {
     RawFeature<Concept<?>, Concept<?>> group = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.REFERENCE.GROUP);
 
     RawFeature<Concept<?>, List<Concept<?>>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.REFERENCE.PARAMETERS);
