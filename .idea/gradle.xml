@@ -11,6 +11,9 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/isotropy.lmf.core" />
             <option value="$PROJECT_DIR$/isotropy.lmf.generator" />
+            <option value="$PROJECT_DIR$/logoce.adapter" />
+            <option value="$PROJECT_DIR$/logoce.extender" />
+            <option value="$PROJECT_DIR$/logoce.notification" />
           </set>
         </option>
       </GradleProjectSettings>

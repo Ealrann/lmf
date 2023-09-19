@@ -1,10 +1,7 @@
 package isotropy.lmf.core.util.oldlogoce;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.util.EcoreUtil;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.lang.LMObject;
 
 import java.util.List;
 
@@ -23,16 +20,17 @@ public final class FeatureCopier
 	}
 
 	@SuppressWarnings("unchecked")
-	public void copyFeatures(final EObject src, final EObject trg, final List<EStructuralFeature> features)
+	public void copyFeatures(final LMObject src, final LMObject trg, final List<RawFeature<?, ?>> features)
 	{
-		for (final var feature : features)
+		// TODO
+		/*for (final var feature : features)
 		{
-			final boolean isContainment = feature instanceof EReference reference && reference.isContainment();
-			if (isContainment)
+			if (feature.featureSupplier().get() instanceof Relation<?, ?> reference &&
+				reference.contains())
 			{
-				if (feature.isMany() == false)
+				if (feature.many() == false)
 				{
-					final var srcValue = (EObject) src.eGet(feature);
+					final var srcValue = (LMObject) src.get(reference);
 					final var trgValue = EcoreUtil.copy(srcValue);
 					trg.eSet(feature, trgValue);
 				}
@@ -71,9 +69,10 @@ public final class FeatureCopier
 					}
 				}
 			}
-		}
+		}*/
 	}
 
+/*
 	private Object resolve(final EObject src, final EObject trg, final Object srcValue)
 	{
 		if (resolve && srcValue instanceof EObject srcEOValue)
@@ -84,5 +83,5 @@ public final class FeatureCopier
 		{
 			return srcValue;
 		}
-	}
+	}*/
 }

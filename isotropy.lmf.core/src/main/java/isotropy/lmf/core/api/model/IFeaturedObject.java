@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public interface IFeaturedObject
+public interface IFeaturedObject extends ILilyEObject
 {
 	Group<?> lmGroup();
 	LMObject lmContainer();

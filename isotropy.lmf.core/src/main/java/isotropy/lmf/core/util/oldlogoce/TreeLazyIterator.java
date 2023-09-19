@@ -1,17 +1,18 @@
 package isotropy.lmf.core.util.oldlogoce;
 
-import org.eclipse.emf.common.notify.Notification;
-import org.sheepy.lily.core.api.model.ILilyEObject;
+import isotropy.lmf.core.api.notification.Notification;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.util.ModelUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class TreeLazyIterator implements Spliterator<ILilyEObject>
+public class TreeLazyIterator implements Spliterator<LMObject>
 {
 	private final Deque<IIterationWrapper> iteratorStack = new ArrayDeque<>();
 	private final Deque<IIterationWrapper> oldNodes = new ArrayDeque<>();
 
-	public TreeLazyIterator(final ILilyEObject root)
+	public TreeLazyIterator(final LMObject root)
 	{
 		final var node = new IterationRoot();
 		node.load(root);
@@ -19,7 +20,7 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 	}
 
 	@Override
-	public boolean tryAdvance(final Consumer<? super ILilyEObject> action)
+	public boolean tryAdvance(final Consumer<? super LMObject> action)
 	{
 		progress();
 
@@ -37,7 +38,7 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 		}
 	}
 
-	private IIterationWrapper newNode(final ILilyEObject element)
+	private IIterationWrapper newNode(final LMObject element)
 	{
 		final var res = oldNodes.isEmpty() ? new IterationNode() : oldNodes.pop();
 		res.load(element);
@@ -60,7 +61,7 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 	}
 
 	@Override
-	public Spliterator<ILilyEObject> trySplit()
+	public Spliterator<LMObject> trySplit()
 	{
 		return null;
 	}
@@ -77,18 +78,18 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 		return CONCURRENT | ORDERED | DISTINCT | NONNULL;
 	}
 
-	private interface IIterationWrapper extends Iterator<ILilyEObject>
+	private interface IIterationWrapper extends Iterator<LMObject>
 	{
-		void load(final ILilyEObject element);
+		void load(final LMObject element);
 		void dispose();
 	}
 
 	private static final class IterationRoot implements IIterationWrapper
 	{
-		private ILilyEObject root = null;
+		private LMObject root = null;
 
 		@Override
-		public void load(final ILilyEObject element)
+		public void load(final LMObject element)
 		{
 			root = element;
 		}
@@ -105,7 +106,7 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 		}
 
 		@Override
-		public ILilyEObject next()
+		public LMObject next()
 		{
 			final var res = root;
 			root = null;
@@ -116,12 +117,12 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 	private static final class IterationNode implements IIterationWrapper
 	{
 		private final Consumer<Notification> listener = this::notifyChanged;
-		private final Deque<ILilyEObject> course = new ArrayDeque<>();
+		private final Deque<LMObject> course = new ArrayDeque<>();
 
 		private ElementContext elementContext = null;
 
 		@Override
-		public void load(final ILilyEObject element)
+		public void load(final LMObject element)
 		{
 			assert course.isEmpty();
 			this.elementContext = new ElementContext(element);
@@ -144,7 +145,7 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 		}
 
 		@Override
-		public ILilyEObject next()
+		public LMObject next()
 		{
 			assert elementContext != null;
 			return course.pop();
@@ -153,46 +154,44 @@ public class TreeLazyIterator implements Spliterator<ILilyEObject>
 		@SuppressWarnings("unchecked")
 		private void notifyChanged(final Notification notification)
 		{
-			final var newVal = notification.getNewValue();
-			final var oldVal = notification.getOldValue();
+			final var newVal = notification.newValue();
+			final var oldVal = notification.oldValue();
 
-			switch (notification.getEventType())
+			switch (notification.type())
 			{
-				case Notification.ADD, Notification.SET -> {
-					if (newVal != null) course.add((ILilyEObject) newVal);
+				case ADD, SET ->
+				{
+					if (newVal != null) course.add((LMObject) newVal);
 				}
-				case Notification.ADD_MANY -> course.addAll((List<ILilyEObject>) newVal);
-				case Notification.REMOVE -> {
-					if (oldVal != null)
-						course.remove((ILilyEObject) oldVal);
+				case ADD_MANY -> course.addAll((List<LMObject>) newVal);
+				case REMOVE ->
+				{
+					if (oldVal != null) course.remove((LMObject) oldVal);
 				}
-				case Notification.REMOVE_MANY -> course.removeAll((List<ILilyEObject>) oldVal);
+				case REMOVE_MANY -> course.removeAll((List<LMObject>) oldVal);
 			}
 		}
 
-		private record ElementContext(ILilyEObject element)
+		private record ElementContext(LMObject element)
 		{
 			@SuppressWarnings("unchecked")
-			public void load(final Consumer<Notification> listener, final Deque<ILilyEObject> course)
+			public void load(final Consumer<Notification> listener, final Deque<LMObject> course)
 			{
-				final var eClass = element.eClass();
-				for (final var feature : eClass.getEAllContainments())
-				{
-					final var val = element.eGet(feature);
-					if (feature.isMany()) course.addAll((List<ILilyEObject>) val);
-					else if (val != null) course.add((ILilyEObject) val);
-
-					element.listen(listener, eClass.getFeatureID(feature));
-				}
+				final var group = element.lmGroup();
+				ModelUtils.streamContainmentFeatures(group).forEach(feature -> {
+					final var val = element.get(feature.featureSupplier().get());
+					if (feature.many()) course.addAll((List<LMObject>) val);
+					else if (val != null) course.add((LMObject) val);
+					element.listen(listener, feature);
+				});
 			}
 
 			public void dispose(Consumer<Notification> listener)
 			{
-				final var eClass = element.eClass();
-				for (final var feature : eClass.getEAllContainments())
-				{
-					element.sulk(listener, eClass.getFeatureID(feature));
-				}
+				final var group = element.lmGroup();
+				ModelUtils.streamContainmentFeatures(group).forEach(feature -> {
+					element.sulk(listener, feature);
+				});
 			}
 		}
 	}

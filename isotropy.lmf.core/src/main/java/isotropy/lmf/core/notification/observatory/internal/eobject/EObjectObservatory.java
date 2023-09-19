@@ -1,23 +1,24 @@
 package isotropy.lmf.core.notification.observatory.internal.eobject;
 
-import org.eclipse.emf.ecore.EReference;
-import org.sheepy.lily.core.api.model.ILilyEObject;
-import org.sheepy.lily.core.api.notification.observatory.IEObjectObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.IObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.InternalObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.listener.GatherBulkListener;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.listener.GatherListener;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.poi.IEObjectPOI;
-import org.sheepy.lily.core.api.notification.util.ModelStructureBulkObserver;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.notification.observatory.IEObjectObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.IObservatory;
+import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.internal.eobject.listener.GatherBulkListener;
+import isotropy.lmf.core.notification.observatory.internal.eobject.listener.GatherListener;
+import isotropy.lmf.core.notification.observatory.internal.eobject.poi.IEObjectPOI;
+import isotropy.lmf.core.notification.util.ModelStructureBulkObserver;
 
 import java.util.List;
 
-public final class EObjectObservatory<T extends ILilyEObject> extends AbstractEObjectObservatory<T>
+public final class EObjectObservatory<T extends LMObject> extends AbstractEObjectObservatory<T>
 {
 	private final ModelStructureBulkObserver structureObserver;
-	private final int referenceId;
+	private final RawFeature<?, ?> relation;
 
-	public EObjectObservatory(final int referenceId,
+	public EObjectObservatory(final RawFeature<?, ?> relation,
 							  final Class<T> cast,
 							  final List<IObservatory> children,
 							  final List<IEObjectPOI> pois,
@@ -25,70 +26,68 @@ public final class EObjectObservatory<T extends ILilyEObject> extends AbstractEO
 							  final List<GatherBulkListener<T>> gatherBulkListeners)
 	{
 		super(cast, children, pois, gatherListeners, gatherBulkListeners);
-		structureObserver = new ModelStructureBulkObserver(referenceId, this::startObserve, this::stopObserve);
-		this.referenceId = referenceId;
+		structureObserver = new ModelStructureBulkObserver(relation, this::startObserve, this::stopObserve);
+		this.relation = relation;
 	}
 
 	@Override
-	public void observe(final ILilyEObject parent)
+	public void observe(final LMObject parent)
 	{
 		assert checkParent(parent);
 		structureObserver.startObserve(parent);
 	}
 
 	@Override
-	public void shut(final ILilyEObject parent)
+	public void shut(final LMObject parent)
 	{
 		structureObserver.stopObserve(parent);
 	}
 
 	@SuppressWarnings("SameReturnValue")
-	private boolean checkParent(final ILilyEObject parent)
+	private boolean checkParent(final LMObject parent)
 	{
-		final var eStructuralFeature = parent.eClass().getEStructuralFeature(referenceId);
-		if (eStructuralFeature instanceof EReference)
+		if (((Relation<?, ?>) relation.featureSupplier().get()).contains())
 		{
 			return true;
 		}
 		else
 		{
-			throw new IllegalArgumentException("Observation failed, the explored feature " + referenceId + " on " + parent
-					.eClass()
-					.getName() + " is not a EReference.");
+			throw new IllegalArgumentException("Observation failed, the explored feature " +
+											   relation.featureSupplier().get().name() +
+											   " on " +
+											   parent.lmGroup().name() +
+											   " is not a Relation.");
 		}
 	}
 
-	private void startObserve(List<? extends ILilyEObject> objects)
+	private void startObserve(List<? extends LMObject> objects)
 	{
 		register(objects);
 	}
 
-	private void stopObserve(List<? extends ILilyEObject> objects)
+	private void stopObserve(List<? extends LMObject> objects)
 	{
 		unregister(objects);
 	}
 
-	public static final class Builder<T extends ILilyEObject> extends AbstractEObjectObservatory.Builder<T> implements
-																											IEObjectObservatoryBuilder<T>,
-																											InternalObservatoryBuilder
+	public static final class Builder<T extends LMObject> extends AbstractEObjectObservatory.Builder<T> implements
+																										IEObjectObservatoryBuilder<T>,
+																										InternalObservatoryBuilder
 	{
-		private final int referenceId;
+		private final RawFeature<?, ?> relation;
 
-		public Builder(int referenceId, Class<T> cast)
+		public Builder(RawFeature<?, ?> relation, Class<T> cast)
 		{
 			super(cast);
-			assert referenceId >= 0;
-			this.referenceId = referenceId;
+			this.relation = relation;
 		}
 
 		@Override
 		public IObservatory build()
 		{
-			final var builtChildren = children.stream()
-											  .map(InternalObservatoryBuilder::build)
-											  .toList();
+			final var builtChildren = children.stream().map(InternalObservatoryBuilder::build).toList();
 
-			return new EObjectObservatory<>(referenceId,
+			return new EObjectObservatory<>(relation,
 											cast,
 											builtChildren,
 											pois,

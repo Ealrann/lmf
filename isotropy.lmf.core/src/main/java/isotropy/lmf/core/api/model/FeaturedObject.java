@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class FeaturedObject implements IFeaturedObject
+public abstract class FeaturedObject extends LilyEObject implements IFeaturedObject
 {
 	private final List<Consumer<Notification>> structureListeners = new ArrayList<>();
 	private LMObject container;

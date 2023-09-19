@@ -1,9 +1,9 @@
 package isotropy.lmf.core.notification.observatory;
 
-import org.sheepy.lily.core.api.model.ILilyEObject;
+import isotropy.lmf.core.lang.LMObject;
 
 public interface IObservatory
 {
-	void observe(ILilyEObject source);
-	void shut(ILilyEObject source);
+	void observe(LMObject source);
+	void shut(LMObject source);
 }

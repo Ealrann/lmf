@@ -1,15 +1,15 @@
 package isotropy.lmf.core.api.model;
 
-import org.eclipse.emf.ecore.InternalEObject;
+import isotropy.lmf.core.lang.LMObject;
 import org.logoce.extender.api.IAdaptable;
 import org.logoce.extender.api.IAdapter;
 
 import java.util.stream.Stream;
 
-public interface ILilyEObject extends InternalEObject, IEMFNotifier, IAdaptable
+public interface ILilyEObject extends IEMFNotifier, IAdaptable
 {
-	Stream<ILilyEObject> streamChildren();
-	Stream<ILilyEObject> streamTree();
+	Stream<LMObject> streamChildren();
+	Stream<LMObject> streamTree();
 
 	@Override
 	<T extends IAdapter> T adapt(Class<T> type);

@@ -1,28 +1,29 @@
 package isotropy.lmf.core.util.oldlogoce;
 
-import org.sheepy.lily.core.api.model.ILilyEObject;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.lang.LMObject;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-public record ReferenceExplorer(int reference)
+public record ReferenceExplorer(RawFeature<?, ?> reference)
 {
 	@SuppressWarnings("unchecked")
-	public Stream<ILilyEObject> stream(ILilyEObject object)
+	public Stream<LMObject> stream(LMObject object)
 	{
 		final var val = getValue(object);
 		if (val instanceof List)
 		{
-			return ((List<ILilyEObject>) val).stream();
+			return ((List<LMObject>) val).stream();
 		}
 		else
 		{
-			return Stream.ofNullable((ILilyEObject) val);
+			return Stream.ofNullable((LMObject) val);
 		}
 	}
 
-	private Object getValue(ILilyEObject target)
+	private Object getValue(LMObject target)
 	{
-		return target.eGet(reference, true, true);
+		return target.get(reference.featureSupplier().get());
 	}
 }

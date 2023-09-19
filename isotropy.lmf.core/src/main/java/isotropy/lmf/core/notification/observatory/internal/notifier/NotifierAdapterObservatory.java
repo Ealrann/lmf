@@ -1,22 +1,22 @@
 package isotropy.lmf.core.notification.observatory.internal.notifier;
 
+import isotropy.lmf.core.notification.observatory.INotifierAdapterObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.IObservatory;
+import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.internal.allocation.AdapterObservatory;
+import isotropy.lmf.core.notification.observatory.internal.allocation.IAdapterPOI;
 import org.logoce.extender.api.IAdapter;
 import org.logoce.notification.api.Feature;
 import org.logoce.notification.api.IFeatures;
 import org.logoce.notification.api.INotifier;
-import org.sheepy.lily.core.api.notification.observatory.INotifierAdapterObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.IObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.InternalObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.internal.allocation.AdapterObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.allocation.IAdapterPOI;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public final class NotifierAdapterObservatory<Type extends IFeatures<?>, Notifier extends IAdapter & INotifier<? extends Type>> extends
-																																 AdapterObservatory<Notifier> implements
-																																							  IObservatory
+																																AdapterObservatory<Notifier> implements
+																																							 IObservatory
 {
 	private final List<INotifierPOI<Type>> observationPoints;
 
@@ -51,9 +51,9 @@ public final class NotifierAdapterObservatory<Type extends IFeatures<?>, Notifie
 	}
 
 	public static final class Builder<Type extends IFeatures<?>, Notifier extends IAdapter & INotifier<? extends Type>> extends
-																														 AdapterObservatory.Builder<Notifier> implements
-																																							  INotifierAdapterObservatoryBuilder<Type, Notifier>,
-																																							  InternalObservatoryBuilder
+																														AdapterObservatory.Builder<Notifier> implements
+																																							 INotifierAdapterObservatoryBuilder<Type, Notifier>,
+																																							 InternalObservatoryBuilder
 	{
 		private final List<INotifierPOI<Type>> observationPoints = new ArrayList<>();
 

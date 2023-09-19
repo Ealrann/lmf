@@ -1,18 +1,18 @@
 package isotropy.lmf.core.notification.observatory;
 
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.notification.observatory.internal.eobject.RootObservatory;
 import org.logoce.notification.api.IFeatures;
 import org.logoce.notification.api.INotifier;
-import org.sheepy.lily.core.api.model.ILilyEObject;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.RootObservatory;
 
-public interface IObservatoryBuilder extends IEObjectObservatoryBuilder<ILilyEObject>
+public interface IObservatoryBuilder extends IEObjectObservatoryBuilder<LMObject>
 {
 	static IObservatoryBuilder newObservatoryBuilder()
 	{
 		return new RootObservatory.Builder();
 	}
 
-	IObservatoryBuilder focus(ILilyEObject focus);
+	IObservatoryBuilder focus(LMObject focus);
 	<Y extends IFeatures<Y>> INotifierObservatoryBuilder<Y> focus(INotifier<Y> notifier);
 
 	IObservatory build();

@@ -1,14 +1,18 @@
 package isotropy.lmf.core.api.model;
 
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.ecore.EReference;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.api.notification.Notification;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.lang.Named;
+import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.core.notification.util.NotificationUnifier;
+import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.core.util.oldlogoce.TreeLazyIterator;
 import org.logoce.adapter.api.BasicAdapterManager;
 import org.logoce.extender.api.IAdapter;
-import org.sheepy.lily.core.api.notification.util.NotificationUnifier;
-import org.sheepy.lily.core.api.util.TreeLazyIterator;
-import org.sheepy.lily.core.model.types.LNamedElement;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -24,17 +28,12 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 	@Override
 	public final void eNotify(final Notification notification)
 	{
-		final var feature = notification.getFeature();
-		final boolean isContainment = feature instanceof EReference reference && reference.isContainment();
+		final var feature = notification.feature();
+		final boolean isContainment = feature.featureSupplier().get() instanceof Relation<?, ?> relation &&
+									  relation.contains();
 		if (isContainment) NotificationUnifier.unifyAdded(notification, this::setupChild);
 		super.eNotify(notification);
 		if (isContainment) NotificationUnifier.unifyRemoved(notification, this::disposeChild);
-	}
-
-	@Override
-	public final boolean eNotificationRequired()
-	{
-		return true;
 	}
 
 	private void setupChild(ILilyEObject notifier)
@@ -85,10 +84,10 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 		final T adapt = adapt(type);
 		if (adapt == null)
 		{
-			var message = String.format(CANNOT_FIND_ADAPTER, type.getSimpleName(), eClass().getName());
-			if (this instanceof LNamedElement)
+			var message = String.format(CANNOT_FIND_ADAPTER, type.getSimpleName(), lmGroup().name());
+			if (this instanceof Named)
 			{
-				message += ": " + ((LNamedElement) this).getName();
+				message += ": " + ((Named) this).name();
 			}
 			throw new NullPointerException(message);
 		}
@@ -104,10 +103,10 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 			var message = String.format(CANNOT_FIND_IDENTIFIED_ADAPTER,
 										type.getSimpleName(),
 										identifier,
-										eClass().getName());
-			if (this instanceof LNamedElement)
+										lmGroup().name());
+			if (this instanceof Named)
 			{
-				message += ": " + ((LNamedElement) this).getName();
+				message += ": " + ((Named) this).name();
 			}
 			throw new NullPointerException(message);
 		}
@@ -153,34 +152,36 @@ public abstract class LilyEObject extends LilyBasicNotifier implements ILilyEObj
 	}
 
 	@Override
-	public final Stream<ILilyEObject> streamTree()
+	public final Stream<LMObject> streamTree()
 	{
 		return StreamSupport.stream(treeIterator(), false);
 	}
 
 	private TreeLazyIterator treeIterator()
 	{
-		return new TreeLazyIterator(this);
+		return new TreeLazyIterator((LMObject) this);
 	}
 
 	@Override
-	public final Stream<ILilyEObject> streamChildren()
+	public final Stream<LMObject> streamChildren()
 	{
-		return eClass().getEAllContainments()
-					   .stream()
-					   .flatMap(this::streamReference);
+		return ModelUtils.streamContainmentFeatures(lmGroup())
+						 .map(RawFeature::featureSupplier)
+						 .map(Supplier::get)
+						 .map(Relation.class::cast)
+						 .flatMap(this::streamReference);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Stream<ILilyEObject> streamReference(EReference ref)
+	private Stream<LMObject> streamReference(Relation<?, ?> ref)
 	{
-		if (ref.isMany())
+		if (ref.many())
 		{
-			return ((List<ILilyEObject>) eGet(ref)).stream();
+			return ((List<LMObject>) ((LMObject) this).get(ref)).stream();
 		}
 		else
 		{
-			return Stream.ofNullable((ILilyEObject) eGet(ref));
+			return Stream.ofNullable((LMObject) ((LMObject) this).get(ref));
 		}
 	}
 }

@@ -1,9 +1,9 @@
 package isotropy.lmf.core.notification.observatory.internal.eobject.poi;
 
-import org.sheepy.lily.core.api.model.ILilyEObject;
+import isotropy.lmf.core.lang.LMObject;
 
 public interface IEObjectPOI
 {
-	void listen(ILilyEObject object);
-	void sulk(ILilyEObject object);
+	void listen(LMObject object);
+	void sulk(LMObject object);
 }

@@ -1,26 +1,27 @@
 package isotropy.lmf.core.notification.observatory.internal.eobject;
 
-import org.eclipse.emf.common.notify.Notification;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.api.notification.Notification;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.notification.observatory.IAdapterObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.IEObjectObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.INotifierAdapterObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.IObservatory;
+import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.internal.allocation.AdapterObservatory;
+import isotropy.lmf.core.notification.observatory.internal.eobject.listener.GatherBulkListener;
+import isotropy.lmf.core.notification.observatory.internal.eobject.listener.GatherListener;
+import isotropy.lmf.core.notification.observatory.internal.eobject.poi.*;
+import isotropy.lmf.core.notification.observatory.internal.notifier.NotifierAdapterObservatory;
 import org.logoce.extender.api.IAdapter;
 import org.logoce.notification.api.IFeatures;
 import org.logoce.notification.api.INotifier;
-import org.sheepy.lily.core.api.model.ILilyEObject;
-import org.sheepy.lily.core.api.notification.observatory.IAdapterObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.IEObjectObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.INotifierAdapterObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.IObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.InternalObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.internal.allocation.AdapterObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.listener.GatherBulkListener;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.listener.GatherListener;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.poi.*;
-import org.sheepy.lily.core.api.notification.observatory.internal.notifier.NotifierAdapterObservatory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class AbstractEObjectObservatory<T extends ILilyEObject> implements IObservatory
+public abstract class AbstractEObjectObservatory<T extends LMObject> implements IObservatory
 {
 	private final Class<T> cast;
 	private final List<IObservatory> children;
@@ -42,12 +43,11 @@ public abstract class AbstractEObjectObservatory<T extends ILilyEObject> impleme
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void register(List<? extends ILilyEObject> objects)
+	protected void register(List<? extends LMObject> objects)
 	{
 		for (var listener : gatherBulkListeners)
 		{
-			listener.discoverObjects()
-					.accept((List<T>) objects);
+			listener.discoverObjects().accept((List<T>) objects);
 		}
 
 		for (var object : objects)
@@ -56,8 +56,7 @@ public abstract class AbstractEObjectObservatory<T extends ILilyEObject> impleme
 			{
 				if (cast.isInstance(object))
 				{
-					listener.discoverObject()
-							.accept(cast.cast(object));
+					listener.discoverObject().accept(cast.cast(object));
 				}
 			}
 
@@ -74,7 +73,7 @@ public abstract class AbstractEObjectObservatory<T extends ILilyEObject> impleme
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void unregister(List<? extends ILilyEObject> objects)
+	protected void unregister(List<? extends LMObject> objects)
 	{
 		for (var object : objects)
 		{
@@ -92,20 +91,18 @@ public abstract class AbstractEObjectObservatory<T extends ILilyEObject> impleme
 			{
 				if (cast.isInstance(object))
 				{
-					listener.removedObject()
-							.accept(cast.cast(object));
+					listener.removedObject().accept(cast.cast(object));
 				}
 			}
 		}
 
 		for (var listener : gatherBulkListeners)
 		{
-			listener.removedObjects()
-					.accept((List<T>) objects);
+			listener.removedObjects().accept((List<T>) objects);
 		}
 	}
 
-	protected static abstract class Builder<T extends ILilyEObject> implements IEObjectObservatoryBuilder<T>
+	protected static abstract class Builder<T extends LMObject> implements IEObjectObservatoryBuilder<T>
 	{
 		protected final Class<T> cast;
 		protected final List<InternalObservatoryBuilder> children = new ArrayList<>();
@@ -119,32 +116,32 @@ public abstract class AbstractEObjectObservatory<T extends ILilyEObject> impleme
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<ILilyEObject> explore(final int referenceId)
+		public IEObjectObservatoryBuilder<LMObject> explore(final RawFeature<?, ?> relation)
 		{
-			final var child = new EObjectObservatory.Builder<>(referenceId, ILilyEObject.class);
+			final var child = new EObjectObservatory.Builder<>(relation, LMObject.class);
 			children.add(child);
 			return child;
 		}
 
 		@Override
-		public <Y extends ILilyEObject> IEObjectObservatoryBuilder<Y> explore(final int referenceId,
-																			  final Class<Y> cast)
+		public <Y extends LMObject> IEObjectObservatoryBuilder<Y> explore(final RawFeature<?, ?> relation,
+																		  final Class<Y> cast)
 		{
-			final var child = new EObjectObservatory.Builder<>(referenceId, cast);
+			final var child = new EObjectObservatory.Builder<>(relation, cast);
 			children.add(child);
 			return child;
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<ILilyEObject> exploreParent()
+		public IEObjectObservatoryBuilder<LMObject> exploreParent()
 		{
-			final var child = new ParentObservatory.Builder<>(ILilyEObject.class);
+			final var child = new ParentObservatory.Builder<>(LMObject.class);
 			children.add(child);
 			return child;
 		}
 
 		@Override
-		public <Y extends ILilyEObject> IEObjectObservatoryBuilder<Y> exploreParent(final Class<Y> cast)
+		public <Y extends LMObject> IEObjectObservatoryBuilder<Y> exploreParent(final Class<Y> cast)
 		{
 			final var child = new ParentObservatory.Builder<>(cast);
 			children.add(child);
@@ -169,14 +166,16 @@ public abstract class AbstractEObjectObservatory<T extends ILilyEObject> impleme
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<T> listen(final Consumer<Notification> listener, final int... features)
+		public IEObjectObservatoryBuilder<T> listen(final Consumer<Notification> listener,
+													final List<RawFeature<?, ?>> features)
 		{
 			pois.add(new EObjectPOI(listener, features));
 			return this;
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<T> listenNoParam(final Runnable listener, final int... features)
+		public IEObjectObservatoryBuilder<T> listenNoParam(final Runnable listener,
+														   final List<RawFeature<?, ?>> features)
 		{
 			pois.add(new EObjectNoParamPOI(listener, features));
 			return this;

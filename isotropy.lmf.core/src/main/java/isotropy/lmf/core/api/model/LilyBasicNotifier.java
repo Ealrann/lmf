@@ -1,55 +1,63 @@
 package isotropy.lmf.core.api.model;
 
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.ecore.impl.EObjectImpl;
-import org.sheepy.lily.core.api.notification.util.EMFListenerMap;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.api.notification.Notification;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.notification.util.EMFListenerMap;
 
+import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class LilyBasicNotifier extends EObjectImpl implements IEMFNotifier
+public abstract class LilyBasicNotifier implements IEMFNotifier
 {
 	private final EMFListenerMap listenerMap;
 
+	private boolean deliver;
+
 	public LilyBasicNotifier()
 	{
-		final int featureCount = eStaticClass().getEAllStructuralFeatures().size();
+		final int featureCount = 100;
 		listenerMap = new EMFListenerMap(featureCount);
 	}
 
-	@Override
 	public void eNotify(final Notification notification)
 	{
 		if (eDeliver()) listenerMap.notify(notification);
-		super.eNotify(notification);
 	}
 
-	@Override
-	public boolean eNotificationRequired()
+	public boolean eDeliver()
 	{
-		return eDeliver() || super.eNotificationRequired();
+		return deliver;
+	}
+
+	public void eDeliver(boolean deliver)
+	{
+		this.deliver = deliver;
 	}
 
 	@Override
-	public final void listen(Consumer<Notification> listener, int... features)
+	public final void listen(Consumer<Notification> listener, List<RawFeature<?, ?>> features)
 	{
 		listenerMap.listen(listener, features);
 	}
 
 	@Override
-	public final void sulk(Consumer<Notification> listener, int... features)
+	public final void sulk(Consumer<Notification> listener, List<RawFeature<?, ?>> features)
 	{
 		listenerMap.sulk(listener, features);
 	}
 
 	@Override
-	public final void listenNoParam(Runnable listener, int... features)
+	public final void listenNoParam(Runnable listener, List<RawFeature<?, ?>> features)
 	{
 		listenerMap.listenNoParam(listener, features);
 	}
 
 	@Override
-	public final void sulkNoParam(Runnable listener, int... features)
+	public final void sulkNoParam(Runnable listener, List<RawFeature<?, ?>> features)
 	{
 		listenerMap.sulkNoParam(listener, features);
 	}
+
+	public abstract Group<?> lmGroup();
 }

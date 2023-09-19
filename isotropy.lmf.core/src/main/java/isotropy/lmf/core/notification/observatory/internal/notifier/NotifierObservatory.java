@@ -1,12 +1,12 @@
 package isotropy.lmf.core.notification.observatory.internal.notifier;
 
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.notification.observatory.INotifierObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.IObservatory;
+import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBuilder;
 import org.logoce.notification.api.Feature;
 import org.logoce.notification.api.IFeatures;
 import org.logoce.notification.api.INotifier;
-import org.sheepy.lily.core.api.model.ILilyEObject;
-import org.sheepy.lily.core.api.notification.observatory.INotifierObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.IObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.InternalObservatoryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public final class NotifierObservatory<Type extends IFeatures<? extends Type>> i
 	}
 
 	@Override
-	public void observe(ILilyEObject object)
+	public void observe(LMObject object)
 	{
 		for (final var point : observationPoints)
 		{
@@ -32,7 +32,7 @@ public final class NotifierObservatory<Type extends IFeatures<? extends Type>> i
 	}
 
 	@Override
-	public void shut(ILilyEObject object)
+	public void shut(LMObject object)
 	{
 		for (final var point : observationPoints)
 		{

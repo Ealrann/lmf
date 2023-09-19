@@ -1,6 +1,7 @@
 package isotropy.lmf.core.notification.observatory.internal.eobject.poi;
 
-import org.sheepy.lily.core.api.model.ILilyEObject;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.util.ModelUtils;
 
 public final class EObjectStructureNoParamPOI implements IEObjectPOI
 {
@@ -12,18 +13,18 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 	}
 
 	@Override
-	public void listen(final ILilyEObject object)
+	public void listen(final LMObject object)
 	{
-		final var eClass = object.eClass();
-		final var containmentFeatures = eClass.getEAllContainments().stream().mapToInt(eClass::getFeatureID).toArray();
+		final var group = object.lmGroup();
+		final var containmentFeatures = ModelUtils.streamContainmentFeatures(group).toList();
 		object.listenNoParam(listener, containmentFeatures);
 	}
 
 	@Override
-	public void sulk(final ILilyEObject object)
+	public void sulk(final LMObject object)
 	{
-		final var eClass = object.eClass();
-		final var containmentFeatures = eClass.getEAllContainments().stream().mapToInt(eClass::getFeatureID).toArray();
+		final var group = object.lmGroup();
+		final var containmentFeatures = ModelUtils.streamContainmentFeatures(group).toList();
 		object.sulkNoParam(listener, containmentFeatures);
 	}
 }

@@ -1,8 +1,9 @@
 package isotropy.lmf.core.util.oldlogoce;
 
-import org.eclipse.emf.ecore.EReference;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.util.ModelUtils;
 import org.logoce.extender.api.IAdapter;
-import org.sheepy.lily.core.api.model.ILilyEObject;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,76 +12,75 @@ import java.util.stream.Stream;
 public final class ModelExplorer implements IModelExplorer
 {
 	private final int parentHeight;
-	private final List<EReference> references;
+	private final List<RawFeature<?, ?>> references;
 
-	public ModelExplorer(List<EReference> references)
+	public ModelExplorer(List<RawFeature<?, ?>> references)
 	{
 		this(0, references);
 	}
 
-	public ModelExplorer(int parentHeight, List<EReference> references)
+	public ModelExplorer(int parentHeight, List<RawFeature<?, ?>> references)
 	{
 		this.parentHeight = parentHeight;
 		this.references = List.copyOf(references);
 	}
 
 	@Override
-	public <T extends ILilyEObject> List<T> explore(ILilyEObject root, Class<T> targetClass)
+	public <T extends LMObject> List<T> explore(LMObject root, Class<T> targetClass)
 	{
 		return stream(root, targetClass).toList();
 	}
 
 	@Override
-	public List<ILilyEObject> explore(ILilyEObject root)
+	public List<LMObject> explore(LMObject root)
 	{
 		return stream(root).toList();
 	}
 
 	@Override
-	public <T extends ILilyEObject> Stream<T> stream(ILilyEObject root, Class<T> targetClass)
+	public <T extends LMObject> Stream<T> stream(LMObject root, Class<T> targetClass)
 	{
 		return stream(root).map(targetClass::cast);
 	}
 
 	@Override
-	public <T extends IAdapter> List<T> exploreAdapt(ILilyEObject root, Class<T> adapterType)
+	public <T extends IAdapter> List<T> exploreAdapt(LMObject root, Class<T> adapterType)
 	{
 		return streamAdapt(root, adapterType).toList();
 	}
 
 	@Override
-	public <T extends IAdapter> List<T> exploreAdaptGeneric(ILilyEObject root, Class<? extends IAdapter> adapterType)
+	public <T extends IAdapter> List<T> exploreAdaptGeneric(LMObject root, Class<? extends IAdapter> adapterType)
 	{
-		return this.<T>streamAdaptGeneric(root, adapterType)
-				   .toList();
+		return this.<T>streamAdaptGeneric(root, adapterType).toList();
 	}
 
 	@Override
-	public <T extends IAdapter> Stream<T> streamAdapt(ILilyEObject root, Class<T> adapterType)
+	public <T extends IAdapter> Stream<T> streamAdapt(LMObject root, Class<T> adapterType)
 	{
 		return stream(root).map(e -> e.adapt(adapterType)).filter(Objects::nonNull);
 	}
 
 	@Override
-	public <T extends IAdapter> Stream<T> streamAdaptGeneric(ILilyEObject root, Class<? extends IAdapter> adapterType)
+	public <T extends IAdapter> Stream<T> streamAdaptGeneric(LMObject root, Class<? extends IAdapter> adapterType)
 	{
 		return stream(root).map(e -> e.<T>adaptGeneric(adapterType)).filter(Objects::nonNull);
 	}
 
 	@Override
-	public <T extends IAdapter> List<T> exploreAdaptNotNull(ILilyEObject root, Class<T> adapterType)
+	public <T extends IAdapter> List<T> exploreAdaptNotNull(LMObject root, Class<T> adapterType)
 	{
 		return streamAdaptNotNull(root, adapterType).toList();
 	}
 
 	@Override
-	public <T extends IAdapter> Stream<T> streamAdaptNotNull(ILilyEObject root, Class<T> adapterType)
+	public <T extends IAdapter> Stream<T> streamAdaptNotNull(LMObject root, Class<T> adapterType)
 	{
 		return stream(root).map(e -> e.adaptNotNull(adapterType));
 	}
 
 	@Override
-	public Stream<ILilyEObject> stream(ILilyEObject source)
+	public Stream<LMObject> stream(LMObject source)
 	{
 		final var root = parent(source);
 		var stream = Stream.of(root);
@@ -91,34 +91,35 @@ public final class ModelExplorer implements IModelExplorer
 		return stream;
 	}
 
-	private ILilyEObject parent(ILilyEObject source)
+	private LMObject parent(LMObject source)
 	{
 		for (int i = 0; i < parentHeight; i++)
 		{
-			source = (ILilyEObject) source.eContainer();
+			source = source.lmContainer();
 		}
 		return source;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Stream<ILilyEObject> extractList(ILilyEObject object, EReference reference)
+	private static Stream<LMObject> extractList(LMObject object, final RawFeature<?, ?> reference)
 	{
 		final var val = getValue(object, reference);
 		if (val instanceof List)
 		{
-			return ((List<ILilyEObject>) val).stream();
+			return ((List<LMObject>) val).stream();
 		}
 		else
 		{
-			return Stream.ofNullable((ILilyEObject) val);
+			return Stream.ofNullable((LMObject) val);
 		}
 	}
 
-	private static Object getValue(ILilyEObject target, final EReference reference)
+	private static Object getValue(LMObject target, final RawFeature<?, ?> reference)
 	{
-		if (target.eClass().getEAllStructuralFeatures().contains(reference))
+		final var found = ModelUtils.streamContainmentFeatures(target.lmGroup()).anyMatch(f -> f == reference);
+		if (found)
 		{
-			return target.eGet(reference);
+			return target.get(reference.featureSupplier().get());
 		}
 		else
 		{

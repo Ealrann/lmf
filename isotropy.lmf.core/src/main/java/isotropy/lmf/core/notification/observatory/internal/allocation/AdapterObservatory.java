@@ -1,11 +1,11 @@
 package isotropy.lmf.core.notification.observatory.internal.allocation;
 
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.notification.observatory.IAdapterObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.IObservatory;
+import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBuilder;
 import org.logoce.extender.api.IAdapter;
 import org.logoce.extender.api.IAdapterHandle;
-import org.sheepy.lily.core.api.model.ILilyEObject;
-import org.sheepy.lily.core.api.notification.observatory.IAdapterObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.IObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.InternalObservatoryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,19 +31,15 @@ public class AdapterObservatory<Type extends IAdapter> implements IObservatory
 	}
 
 	@Override
-	public void observe(ILilyEObject object)
+	public void observe(LMObject object)
 	{
-		object.adapterManager()
-			  .adaptHandles(adapterClass)
-			  .forEach(this::observeHandle);
+		object.adapterManager().adaptHandles(adapterClass).forEach(this::observeHandle);
 	}
 
 	@Override
-	public void shut(ILilyEObject object)
+	public void shut(LMObject object)
 	{
-		object.adapterManager()
-			  .adaptHandles(adapterClass)
-			  .forEach(this::sulkHandle);
+		object.adapterManager().adaptHandles(adapterClass).forEach(this::sulkHandle);
 	}
 
 	protected void observeHandle(final IAdapterHandle<Type> handle)

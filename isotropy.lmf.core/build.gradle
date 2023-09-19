@@ -1,5 +1,9 @@
 dependencies {
 
+	api project(":logoce.adapter")
+	api project(":logoce.extender")
+	api project(":logoce.notification")
+
 	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
 	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
 

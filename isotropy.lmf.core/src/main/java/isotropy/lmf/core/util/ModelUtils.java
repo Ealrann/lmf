@@ -1,10 +1,7 @@
 package isotropy.lmf.core.util;
 
-import isotropy.lmf.core.lang.Concept;
-import isotropy.lmf.core.lang.Feature;
-import isotropy.lmf.core.lang.Generic;
-import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.api.feature.RawFeature;
+import isotropy.lmf.core.lang.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -58,6 +55,17 @@ public class ModelUtils
 	public static Stream<Feature<?, ?>> streamAllFeatures(Group<?> group)
 	{
 		return streamHierarchy(group).map(Group::features).flatMap(Collection::stream);
+	}
+
+	public static Stream<RawFeature<?, ?>> streamContainmentFeatures(Group<?> group)
+	{
+		return group.features()
+					.stream()
+					.filter(Relation.class::isInstance)
+					.map(Relation.class::cast)
+					.filter(Relation::contains)
+					.map(Feature::rawFeature)
+					.map(r -> (RawFeature<?, ?>) r);
 	}
 
 	public static Stream<Group<?>> streamHierarchy(Group<?> group)

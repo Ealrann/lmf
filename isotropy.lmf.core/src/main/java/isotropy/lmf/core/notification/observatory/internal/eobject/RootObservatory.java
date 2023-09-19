@@ -1,11 +1,11 @@
 package isotropy.lmf.core.notification.observatory.internal.eobject;
 
-import org.sheepy.lily.core.api.model.ILilyEObject;
-import org.sheepy.lily.core.api.notification.observatory.IObservatory;
-import org.sheepy.lily.core.api.notification.observatory.internal.InternalObservatoryBuilder;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.listener.GatherBulkListener;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.listener.GatherListener;
-import org.sheepy.lily.core.api.notification.observatory.internal.eobject.poi.IEObjectPOI;
+import isotropy.lmf.core.lang.LMObject;
+import isotropy.lmf.core.notification.observatory.IObservatory;
+import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBuilder;
+import isotropy.lmf.core.notification.observatory.internal.eobject.listener.GatherBulkListener;
+import isotropy.lmf.core.notification.observatory.internal.eobject.listener.GatherListener;
+import isotropy.lmf.core.notification.observatory.internal.eobject.poi.IEObjectPOI;
 
 import java.util.List;
 
@@ -13,20 +13,20 @@ public final class RootObservatory extends AbstractRootObservatory
 {
 	private RootObservatory(final List<IObservatory> children,
 							final List<IEObjectPOI> pois,
-							final List<GatherListener<ILilyEObject>> gatherListeners,
-							final List<GatherBulkListener<ILilyEObject>> gatherBulkListeners)
+							final List<GatherListener<LMObject>> gatherListeners,
+							final List<GatherBulkListener<LMObject>> gatherBulkListeners)
 	{
 		super(children, pois, gatherListeners, gatherBulkListeners);
 	}
 
 	@Override
-	public void observe(final ILilyEObject parent)
+	public void observe(final LMObject parent)
 	{
 		register(parent);
 	}
 
 	@Override
-	public void shut(final ILilyEObject parent)
+	public void shut(final LMObject parent)
 	{
 		unregister(parent);
 	}
@@ -36,9 +36,7 @@ public final class RootObservatory extends AbstractRootObservatory
 		@Override
 		public IObservatory build()
 		{
-			final var builtChildren = children.stream()
-											  .map(InternalObservatoryBuilder::build)
-											  .toList();
+			final var builtChildren = children.stream().map(InternalObservatoryBuilder::build).toList();
 
 			return new RootObservatory(builtChildren, pois, gatherListeners, gatherBulkListeners);
 		}
