@@ -7,16 +7,16 @@ import isotropy.lmf.core.feature.FeatureGetter;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
 
-public class GetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, FieldSpec>
+public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 {
 	public static final ClassName GETTER_MAP_CLASS = ClassName.get(FeatureGetter.class);
 	public static final ClassName GETTER_MAP_BUILDER_CLASS = ClassName.get(FeatureGetter.Builder.class);
@@ -29,15 +29,18 @@ public class GetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, F
 	}
 
 	@Override
-	public FieldSpec build(final GroupGenerationContext context)
+	public FieldSpec build(final Group<?> group)
 	{
-		final var wildcardInterface = context.interfaceType().parametrizedWildcard();
+		final var wildcardInterface = group.adapt(GroupResolution.class).interfaceType.parametrizedWildcard();
 		final var type = TypeParameter.of(GETTER_MAP_CLASS, wildcardInterface);
 		final var builderType = TypeParameter.of(GETTER_MAP_BUILDER_CLASS, wildcardInterface);
 		final var statementBuilder = new StringBuilder();
 		statementBuilder.append("new $T()");
 
-		context.featureResolutions().stream().map(this::buildStatement).forEach(statementBuilder::append);
+		ModelUtils.streamAllFeatures(group)
+				  .map(f -> f.adapt(FeatureResolution.class))
+				  .map(this::buildStatement)
+				  .forEach(statementBuilder::append);
 		statementBuilder.append(".build()");
 
 		return FieldSpec.builder(type.parametrized(), "GET_MAP")

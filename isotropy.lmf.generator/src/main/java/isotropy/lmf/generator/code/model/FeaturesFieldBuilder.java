@@ -8,7 +8,7 @@ import isotropy.lmf.core.lang.impl.AttributeImpl;
 import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.lang.impl.RelationImpl;
 import isotropy.lmf.core.util.ModelUtils;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.util.*;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		final var name = input.name();
 		final var parentGroup = (Group<?>) input.lmContainer();
 		final var constantName = GenUtils.toConstantCase(name);
-		final var resolvedFeature = FeatureResolution.from(input);
+		final var resolvedFeature = input.adapt(FeatureResolution.class);
 		final var types = List.of(resolvedFeature.singleType().parametrizedWildcard(),
 								  resolvedFeature.effectiveType().parametrizedWildcard());
 		final var isAttribute = input instanceof Attribute<?, ?>;

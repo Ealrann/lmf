@@ -1,14 +1,18 @@
-package isotropy.lmf.generator.code.feature;
+package isotropy.lmf.generator.adapter;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.*;
+import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 import isotropy.lmf.generator.util.TypeResolutionUtil;
+import org.logoce.adapter.api.Adapter;
+import org.logoce.extender.api.IAdapter;
+import org.logoce.extender.api.ModelExtender;
 import org.logoce.notification.api.BooleanConsumer;
 import org.logoce.notification.api.FloatConsumer;
 
@@ -18,11 +22,46 @@ import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
-public record FeatureResolution(Feature<?, ?> feature,
-								TypeParameter singleType,
-								TypeParameter effectiveType,
-								boolean hasGeneric)
+@ModelExtender(scope = Feature.class)
+@Adapter
+public final class FeatureResolution implements IAdapter
 {
+	public final Feature<?, ?> feature;
+	public final TypeParameter singleType;
+	public final TypeParameter effectiveType;
+	public final boolean hasGeneric;
+
+	private FeatureResolution(final Feature<?, ?> feature)
+	{
+		final var partialResolution = resolveType(feature);
+		final var effectiveType = encapsulateEffectiveType(feature, partialResolution.singleType());
+
+		this.feature = feature;
+		this.singleType = partialResolution.singleType();
+		this.effectiveType = effectiveType;
+		this.hasGeneric = partialResolution.containsGeneric();
+	}
+
+	public Feature<?, ?> feature()
+	{
+		return feature;
+	}
+
+	public TypeParameter singleType()
+	{
+		return singleType;
+	}
+
+	public TypeParameter effectiveType()
+	{
+		return effectiveType;
+	}
+
+	public boolean hasGeneric()
+	{
+		return hasGeneric;
+	}
+
 	public String name()
 	{
 		return feature.name();
@@ -100,17 +139,6 @@ public record FeatureResolution(Feature<?, ?> feature,
 		{
 			return false;
 		}
-	}
-
-	public static FeatureResolution from(Feature<?, ?> feature)
-	{
-		final var partialResolution = resolveType(feature);
-		final var effectiveType = encapsulateEffectiveType(feature, partialResolution.singleType());
-
-		return new FeatureResolution(feature,
-									 partialResolution.singleType(),
-									 effectiveType,
-									 partialResolution.containsGeneric());
 	}
 
 	private static TypeParameter encapsulateEffectiveType(final Feature<?, ?> feature, TypeParameter singleType)

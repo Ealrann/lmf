@@ -5,25 +5,24 @@ import com.squareup.javapoet.MethodSpec;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.adapter.GroupResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
 
-public class LMGroupMethodBuilder implements CodeBuilder<GroupGenerationContext, MethodSpec>
+public class LMGroupMethodBuilder implements CodeBuilder<Group<?>, MethodSpec>
 {
 	public static final ClassName GROUP_CLASS = ClassName.get(Group.class);
 
 	@Override
-	public MethodSpec build(final GroupGenerationContext context)
+	public MethodSpec build(final Group<?> group)
 	{
-		final var group = context.group();
 		final var model = (Model) ModelUtils.root(group);
 		final var modelDefinition = model.name() + "Definition";
 		final var definitionClassName = ClassName.get(model.domain(), modelDefinition);
-		final var typedInterface = context.interfaceType();
+		final var typedInterface = group.adapt(GroupResolution.class).interfaceType;
 		final var groupType = TypeParameter.of(GROUP_CLASS, typedInterface.parametrizedWildcard());
 		final var groupName = GenUtils.toConstantCase(group.name());
 

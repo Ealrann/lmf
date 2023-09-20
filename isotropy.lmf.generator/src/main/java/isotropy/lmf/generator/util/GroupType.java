@@ -102,8 +102,9 @@ public final class GroupType implements TypeParameter
 		return new GroupType(group, implType, List.of(mainClass.parametrized()), detailedParameters);
 	}
 
-	public static GroupType from(final List<Reference<?>> includes, final Group<?> group)
+	public static GroupType from(final Group<?> group)
 	{
+		final var includes = group.includes();
 		final var superInterfaces = resolveIncludes(includes, group);
 		final var model = (Model) group.lmContainer();
 		final var interfaceName = ClassName.get(model.domain(), group.name());

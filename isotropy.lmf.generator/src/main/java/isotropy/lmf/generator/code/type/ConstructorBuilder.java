@@ -3,30 +3,31 @@ package isotropy.lmf.generator.code.type;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.code.util.ImplementationCodeUtil;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
 
-public final class ConstructorBuilder implements CodeBuilder<GroupGenerationContext, MethodSpec>
+public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpec>
 {
 	public ConstructorBuilder()
 	{
 	}
 
 	@Override
-	public MethodSpec build(GroupGenerationContext context)
+	public MethodSpec build(Group<?> group)
 	{
 		final var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-		final var codeList = context.featureResolutions()
-									.stream()
-									.filter(ConstructorBuilder::mandatoryOrImmutable)
-									.map(ConstructorBuilder::bakeCode)
-									.toList();
+		final var codeList = ModelUtils.streamAllFeatures(group)
+									   .map(g -> g.adapt(FeatureResolution.class))
+									   .filter(ConstructorBuilder::mandatoryOrImmutable)
+									   .map(ConstructorBuilder::bakeCode)
+									   .toList();
 
 		codeList.forEach(c -> c.installStep1(constructor));
 

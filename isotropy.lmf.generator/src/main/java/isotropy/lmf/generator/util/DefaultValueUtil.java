@@ -5,7 +5,7 @@ import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.lang.Enum;
 import isotropy.lmf.core.lang.Primitive;
 import isotropy.lmf.core.lang.Unit;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 
 import java.util.Optional;
 

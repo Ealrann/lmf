@@ -2,6 +2,7 @@ package isotropy.lmf.generator.code.feature;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeSpec;
+import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.generator.util.GenUtils;
 
@@ -14,9 +15,8 @@ public class NotificationFeatureBuilder
 		this.group = group;
 	}
 
-	public EnumSpec buildSpec(FeatureResolution featureResolution)
+	public EnumSpec buildSpec(final Feature<?, ?> feature)
 	{
-		final var feature = featureResolution.feature();
 		final var parent = (Group<?>) feature.lmContainer();
 		final var local = parent == group;
 		final var name = GenUtils.toConstantCase(feature.name());

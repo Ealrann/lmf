@@ -12,5 +12,5 @@ public @interface ModelExtender
 	Class<? extends IAdaptable> scope();
 	String name() default "";
 	String identifier() default "";
-	boolean inherited() default false;
+	boolean inherited() default true;
 }

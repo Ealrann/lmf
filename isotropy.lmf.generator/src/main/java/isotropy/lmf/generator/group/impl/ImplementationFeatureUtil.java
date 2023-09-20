@@ -3,15 +3,15 @@ package isotropy.lmf.generator.group.impl;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Relation;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.code.feature.FeatureFieldBuilder;
 import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureParameter;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.code.util.ImplementationCodeUtil;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GroupType;
 
@@ -41,8 +41,8 @@ public final class ImplementationFeatureUtil
 	}
 
 	@SuppressWarnings("unchecked")
-	public static CodeInstaller<GroupGenerationContext> buildTypeInstallers(final GroupType interfaceGroupType,
-																			final TypeSpec.Builder classBuilder)
+	public static CodeInstaller<Group<?>> buildTypeInstallers(final GroupType interfaceGroupType,
+															  final TypeSpec.Builder classBuilder)
 	{
 		final var getterMapFieldBuilder = new GetMapFieldBuilder(interfaceGroupType);
 		final var setterMapFieldBuilder = new SetMapFieldBuilder(interfaceGroupType);
@@ -63,8 +63,10 @@ public final class ImplementationFeatureUtil
 
 	private static FeatureFieldBuilder fieldBuilder()
 	{
-		return new FeatureFieldBuilder(false, FeatureResolution::name, ImplementationFeatureUtil::fieldFeatureType,
-									   ImplementationFeatureUtil::fieldInitializer );
+		return new FeatureFieldBuilder(false,
+									   FeatureResolution::name,
+									   ImplementationFeatureUtil::fieldFeatureType,
+									   ImplementationFeatureUtil::fieldInitializer);
 	}
 
 	private static Optional<CodeBlock> fieldInitializer(FeatureResolution resolution)
@@ -111,7 +113,7 @@ public final class ImplementationFeatureUtil
 	private static List<CodeBlock> featureChangeStatement(FeatureParameter parameter)
 	{
 		final var paramName = parameter.parameterName();
-		final var feature = parameter.feature().feature();
+		final var feature = parameter.feature().feature;
 		final var assignment = ImplementationCodeUtil.assignationStatement(feature, paramName);
 		final var notification = ImplementationCodeUtil.notificationStatement(paramName);
 		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();

@@ -3,25 +3,31 @@ package isotropy.lmf.generator.group.impl;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import isotropy.lmf.core.api.model.FeaturedObject;
-import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupResolution;
 
 import javax.lang.model.element.Modifier;
+import java.io.File;
 import java.io.IOException;
 
 public final class ImplementationGenerator
 {
 	public static final ClassName FEATURE_OBJECT_TYPE = ClassName.get(FeaturedObject.class);
-	private final GroupGenerationContext context;
+	private final File targetDirectory;
+	private final Group<?> group;
 
-	public ImplementationGenerator(final GroupGenerationContext context)
+	public ImplementationGenerator(final File targetDirectory, final Group<?> group)
 	{
-		this.context = context;
+		this.targetDirectory = targetDirectory;
+		this.group = group;
 	}
 
 	public void generate()
 	{
-		final var featureResolutions = context.featureResolutions();
-		final var interfaceType = context.interfaceType();
+		final var context = group.adapt(GroupResolution.class);
+		final var interfaceType = context.interfaceType;
 		final var implementationType = interfaceType.implementation();
 		final var classBuilder = implementationType.classSpecBuilder()
 												   .superclass(FEATURE_OBJECT_TYPE)
@@ -29,13 +35,15 @@ public final class ImplementationGenerator
 		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder);
 		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(interfaceType, classBuilder);
 
-		featureResolutions.forEach(featureInstallers::install);
-		typeInstallers.install(context);
+		ModelUtils.streamAllFeatures(group)
+				  .map(f -> f.adapt(FeatureResolution.class))
+				  .forEach(featureInstallers::install);
+		typeInstallers.install(group);
 
 		try
 		{
 			final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build()).build();
-			javaFile.writeTo(context.interfaceDirectory());
+			javaFile.writeTo(targetDirectory);
 		}
 		catch (IOException e)
 		{

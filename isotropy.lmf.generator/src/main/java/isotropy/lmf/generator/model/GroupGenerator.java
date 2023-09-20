@@ -1,10 +1,11 @@
 package isotropy.lmf.generator.model;
 
-import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.generator.group.builder.BuilderGenerator;
-import isotropy.lmf.generator.group.impl.ImplementationGenerator;
 import isotropy.lmf.generator.group.iface.InterfaceGenerator;
+import isotropy.lmf.generator.group.impl.ImplementationGenerator;
 
+import java.io.File;
 import java.util.Optional;
 
 public class GroupGenerator
@@ -13,13 +14,13 @@ public class GroupGenerator
 	private final Optional<ImplementationGenerator> implementationGenerator;
 	private final Optional<BuilderGenerator> builderGenerator;
 
-	public GroupGenerator(final GroupGenerationContext context)
+	public GroupGenerator(final File targetDirectory, final Group<?> group)
 	{
-		final var isFinal = context.group()
-								   .concrete();
-		interfaceGenerator = new InterfaceGenerator(context);
-		implementationGenerator = isFinal ? Optional.of(new ImplementationGenerator(context)) : Optional.empty();
-		builderGenerator = isFinal ? Optional.of(new BuilderGenerator(context)) : Optional.empty();
+		final var isFinal = group.concrete();
+		interfaceGenerator = new InterfaceGenerator(targetDirectory, group);
+		implementationGenerator = isFinal ? Optional.of(new ImplementationGenerator(targetDirectory, group)) :
+								  Optional.empty();
+		builderGenerator = isFinal ? Optional.of(new BuilderGenerator(targetDirectory, group)) : Optional.empty();
 	}
 
 	public void generate()

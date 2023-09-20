@@ -5,24 +5,21 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.code.feature.InternalFeatureBuilder;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.TypeParameter;
 import org.logoce.notification.api.IFeatures;
 
 import javax.lang.model.element.Modifier;
-import java.util.List;
 
 public class InternalFeaturesGenerator
 {
 	private final Group<?> group;
-	private final List<FeatureResolution> featureResolutions;
 
-	public InternalFeaturesGenerator(final GroupGenerationContext context)
+	public InternalFeaturesGenerator(final Group<?> group)
 	{
-		this.group = context.group();
-		this.featureResolutions = context.featureResolutions();
+		this.group = group;
 	}
 
 	public TypeSpec build()
@@ -62,9 +59,11 @@ public class InternalFeaturesGenerator
 		}
 
 		final var internalFeatureBuilder = new InternalFeatureBuilder(group);
-		featureResolutions.stream()
-						  .map(internalFeatureBuilder::toConstantFeature)
-						  .forEach(internalFeaturesInterfaceBuilder::addField);
+
+		ModelUtils.streamAllFeatures(group)
+				  .map(f -> f.adapt(FeatureResolution.class))
+				  .map(internalFeatureBuilder::toConstantFeature)
+				  .forEach(internalFeaturesInterfaceBuilder::addField);
 
 		return internalFeaturesInterfaceBuilder.build();
 	}

@@ -7,9 +7,8 @@ import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.api.feature.INotificationFeature;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.LMObject;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.code.feature.NotificationFeatureBuilder;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.ConstantTypes;
 
 import javax.lang.model.element.Modifier;
@@ -18,17 +17,14 @@ import java.util.List;
 public class NotificationFeaturesGenerator
 {
 	private final Group<?> group;
-	private final List<FeatureResolution> featureResolutions;
 
-	public NotificationFeaturesGenerator(final GroupGenerationContext context)
+	public NotificationFeaturesGenerator(final Group<?> group)
 	{
-		this.group = context.group();
-		this.featureResolutions = context.featureResolutions();
+		this.group = group;
 	}
 
 	public List<TypeSpec> build()
 	{
-		final var concrete = group.concrete();
 		final var featureInterfaceType = ClassName.get("", "NotificationFeature");
 		final var featureInterfaceBuilder = TypeSpec.interfaceBuilder(featureInterfaceType)
 													.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
@@ -55,16 +51,16 @@ public class NotificationFeaturesGenerator
 			featureInterfaceBuilder.addSuperinterface(notificationFeature);
 		}
 
-		if (!featureResolutions.isEmpty())
+		if (!group.features().isEmpty())
 		{
 			final var localType = ClassName.get(INotificationFeature.class);
 			final var featuresEnumBuilder = TypeSpec.enumBuilder("NotificationFeatures")
 													.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 													.addSuperinterface(featureInterfaceType);
 			final var notificationFeatureBuilder = new NotificationFeatureBuilder(group);
-			final var enumConstantSpecs = featureResolutions.stream()
-															.map(notificationFeatureBuilder::buildSpec)
-															.toList();
+			final var enumConstantSpecs = ModelUtils.streamAllFeatures(group)
+													.map(notificationFeatureBuilder::buildSpec)
+													.toList();
 
 			final var anyLocal = enumConstantSpecs.stream().anyMatch(NotificationFeatureBuilder.EnumSpec::local);
 			final var allLocal = enumConstantSpecs.stream().allMatch(NotificationFeatureBuilder.EnumSpec::local);

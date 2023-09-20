@@ -1,6 +1,7 @@
 package isotropy.lmf.generator.code.feature;
 
 import com.squareup.javapoet.ParameterSpec;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 
 public record FeatureParameter(FeatureResolution feature, ParameterSpec parameterSpec)
 {

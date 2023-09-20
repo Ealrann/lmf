@@ -10,6 +10,7 @@ import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.util.GenUtils;
 
 import javax.lang.model.element.Modifier;

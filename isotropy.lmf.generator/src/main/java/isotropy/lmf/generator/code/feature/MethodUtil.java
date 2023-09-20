@@ -1,5 +1,6 @@
 package isotropy.lmf.generator.code.feature;
 
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.util.GenUtils;
 
 import javax.lang.model.SourceVersion;
@@ -11,13 +12,13 @@ public final class MethodUtil
 	public static String builderMethodName(final FeatureResolution f)
 	{
 		final var name = f.name();
-		return f.feature().many() ? PREFIX + GenUtils.capitalizeFirstLetter(removeLastS(name)) : name;
+		return f.feature.many() ? PREFIX + GenUtils.capitalizeFirstLetter(removeLastS(name)) : name;
 	}
 
 	public static String builderSingleParameterName(final FeatureResolution f)
 	{
 		final var featureName = f.name();
-		final var many = f.feature().many();
+		final var many = f.feature.many();
 		final var resolved = many ? removeLastS(featureName) : featureName;
 
 		return validateParameterName(resolved);

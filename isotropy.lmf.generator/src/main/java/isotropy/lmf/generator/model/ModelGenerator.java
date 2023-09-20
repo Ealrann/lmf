@@ -1,7 +1,6 @@
 package isotropy.lmf.generator.model;
 
 import isotropy.lmf.core.lang.Model;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 
 import java.io.File;
 
@@ -16,13 +15,7 @@ public class ModelGenerator
 
 	public void generateJava(final File target)
 	{
-		final var groupContextBuilder = new GroupGenerationContext.Builder(target);
-
-		model.groups()
-			 .stream()
-			 .map(groupContextBuilder::build)
-			 .map(GroupGenerator::new)
-			 .forEach(GroupGenerator::generate);
+		model.groups().stream().map(g -> new GroupGenerator(target, g)).forEach(GroupGenerator::generate);
 
 		for (final var enumeration : model.enums())
 		{

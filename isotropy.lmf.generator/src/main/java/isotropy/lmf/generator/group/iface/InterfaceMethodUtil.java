@@ -1,8 +1,8 @@
 package isotropy.lmf.generator.group.iface;
 
 import com.squareup.javapoet.TypeName;
+import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.MethodUtil;
 
 import javax.lang.model.element.Modifier;

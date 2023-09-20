@@ -4,20 +4,20 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.feature.FeatureSetter;
+import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
-import isotropy.lmf.generator.code.feature.FeatureResolution;
-import isotropy.lmf.generator.code.feature.MethodUtil;
+import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupResolution;
 import isotropy.lmf.generator.code.util.CodeBuilder;
-import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
 
-public class SetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, FieldSpec>
+public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 {
 	public static final ClassName SETTER_MAP_CLASS = ClassName.get(FeatureSetter.class);
 	public static final ClassName SETTER_MAP_BUILDER_CLASS = ClassName.get(FeatureSetter.Builder.class);
@@ -31,20 +31,19 @@ public class SetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, F
 	}
 
 	@Override
-	public FieldSpec build(final GroupGenerationContext context)
+	public FieldSpec build(final Group<?> group)
 	{
-		final var typedInterface = context.interfaceType();
+		final var typedInterface = group.adapt(GroupResolution.class).interfaceType;
 		final var type = TypeParameter.of(SETTER_MAP_CLASS, typedInterface.parametrizedWildcard());
 		final var builderType = TypeParameter.of(SETTER_MAP_BUILDER_CLASS, typedInterface.parametrizedWildcard());
-		final var groupName = context.group().name();
 		final var statementBuilder = new StringBuilder();
 		statementBuilder.append("new $T()");
 
-		context.featureResolutions()
-			   .stream()
-			   .filter(SetMapFieldBuilder::isSingleMutable)
-			   .map(this::buildStatement)
-			   .forEach(statementBuilder::append);
+		ModelUtils.streamAllFeatures(group)
+				  .filter(SetMapFieldBuilder::isSingleMutable)
+				  .map(f -> f.adapt(FeatureResolution.class))
+				  .map(this::buildStatement)
+				  .forEach(statementBuilder::append);
 
 		statementBuilder.append(".build()");
 
@@ -81,9 +80,8 @@ public class SetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, F
 		}
 	}
 
-	private static boolean isSingleMutable(final FeatureResolution resolution)
+	private static boolean isSingleMutable(final Feature<?, ?> feature)
 	{
-		final var feature = resolution.feature();
 		return !feature.immutable() && !feature.many();
 	}
 }
