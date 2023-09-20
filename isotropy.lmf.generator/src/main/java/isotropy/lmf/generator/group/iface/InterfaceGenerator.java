@@ -14,6 +14,7 @@ import java.util.List;
 
 public final class InterfaceGenerator
 {
+	private static final boolean ENUM_NOTIFICATION_FEATURES = false;
 	public static final FeatureMethodBuilder METHOD_BUILDER = InterfaceMethodUtil.methodBuilder();
 
 	private static final InterfaceBuildMethodBuilder buildMethod = new InterfaceBuildMethodBuilder();
@@ -33,11 +34,15 @@ public final class InterfaceGenerator
 		final var types = context.interfaceType();
 		final var isFinal = group.concrete();
 		final var internalFeaturesGenerator = new InternalFeaturesGenerator(context);
+		final var notificationFeaturesGenerator = new NotificationFeaturesGenerator(context);
 		final var internalFeatures = internalFeaturesGenerator.build();
+		final var notificationFeatures = notificationFeaturesGenerator.build();
 
 		final var interfaceBuilder = types.interfaceSpecBuilder()
 										  .addModifiers(Modifier.PUBLIC)
 										  .addType(internalFeatures);
+
+		if (ENUM_NOTIFICATION_FEATURES) interfaceBuilder.addTypes(notificationFeatures);
 
 		if (isFinal)
 		{
