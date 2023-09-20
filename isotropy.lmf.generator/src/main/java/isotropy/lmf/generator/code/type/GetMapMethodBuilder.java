@@ -1,6 +1,5 @@
 package isotropy.lmf.generator.code.type;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import isotropy.lmf.core.feature.FeatureGetter;
 import isotropy.lmf.core.lang.Group;
@@ -12,13 +11,12 @@ import javax.lang.model.element.Modifier;
 
 public class GetMapMethodBuilder implements CodeBuilder<Group<?>, MethodSpec>
 {
-	public static final ClassName GETTER_MAP_CLASS = ClassName.get(FeatureGetter.class);
+	public static final TypeParameter GETTER_MAP_CLASS = TypeParameter.of(FeatureGetter.class);
 
 	@Override
 	public MethodSpec build(final Group<?> group)
 	{
-		final var type = TypeParameter.of(GETTER_MAP_CLASS,
-										  group.adapt(GroupInterfaceType.class).parametrizedWildcard());
+		final var type = GETTER_MAP_CLASS.nest(group.adapt(GroupInterfaceType.class).parametrizedWildcard());
 
 		return MethodSpec.methodBuilder("getterMap")
 						 .addModifiers(Modifier.PROTECTED)

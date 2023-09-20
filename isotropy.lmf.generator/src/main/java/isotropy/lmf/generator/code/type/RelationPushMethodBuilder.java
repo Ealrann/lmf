@@ -17,8 +17,15 @@ import java.util.function.Supplier;
 
 public class RelationPushMethodBuilder implements CodeBuilder<List<FeatureResolution>, MethodSpec>
 {
+	private static final MethodSpec.Builder METHOD_BUILDER = prepareBuilder();
+
 	@Override
 	public MethodSpec build(final List<FeatureResolution> context)
+	{
+		return METHOD_BUILDER.build();
+	}
+
+	private static MethodSpec.Builder prepareBuilder()
 	{
 		final var attributeType = ClassName.get(Relation.class);
 		final var variableName = TypeVariableName.get("RelationType", ConstantTypes.LM_OBJECT);
@@ -35,7 +42,6 @@ public class RelationPushMethodBuilder implements CodeBuilder<List<FeatureResolu
 						 .addParameter(ParameterSpec.builder(suppliedType.parametrized(), "supplier", Modifier.FINAL)
 													.build())
 						 .addStatement("RELATION_INSERTER.push(this, $N, supplier)", featureRes)
-						 .addAnnotation(Override.class)
-						 .build();
+						 .addAnnotation(Override.class);
 	}
 }

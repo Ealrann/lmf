@@ -13,6 +13,11 @@ import java.io.IOException;
 
 public class ModelPackage
 {
+	public static final TypeVariableName T = TypeVariableName.get("T");
+	private static final TypeVariableName T_EXTENDS_LMOBJECT = TypeVariableName.get("T", ConstantTypes.LM_OBJECT);
+	private static final ClassName ROOT_BUILDER = ClassName.get(IFeaturedObject.Builder.class);
+	private static final TypeName ROOT_BUILDER_OF_T = TypeParameter.of(ROOT_BUILDER, T_EXTENDS_LMOBJECT).nestIn(ConstantTypes.OPTIONAL).parametrized();
+
 	private final Model model;
 
 	public ModelPackage(Model model)
@@ -77,17 +82,13 @@ public class ModelPackage
 
 	private MethodSpec buildBuilderResolver(final String definitionName)
 	{
-		final var t = TypeVariableName.get("T", ConstantTypes.LM_OBJECT);
-		final var rootBuilder = ClassName.get(IFeaturedObject.Builder.class);
-		final var builtType = TypeParameter.of(rootBuilder, t).nestIn(ConstantTypes.OPTIONAL).parametrized();
-
 		final var methodBuilder = MethodSpec.methodBuilder("builder")
 											.addModifiers(Modifier.PUBLIC)
 											.addAnnotation(Override.class)
 											.addAnnotation(ConstantTypes.SUPPRESS_UNCHECKED)
-											.returns(builtType)
-											.addTypeVariable(t)
-											.addParameter(ConstantTypes.GROUP.nest(t).parametrized(), "group");
+											.returns(ROOT_BUILDER_OF_T)
+											.addTypeVariable(T_EXTENDS_LMOBJECT)
+											.addParameter(ConstantTypes.GROUP.nest(T_EXTENDS_LMOBJECT).parametrized(), "group");
 
 		installBuilderResolutionStatements(definitionName, methodBuilder);
 		return methodBuilder.build();
@@ -117,14 +118,13 @@ public class ModelPackage
 
 	private MethodSpec buildEnumResolver(final String definitionName)
 	{
-		final var t = TypeVariableName.get("T");
 		final var enumResolve = MethodSpec.methodBuilder("resolveEnumLiteral")
 										  .addModifiers(Modifier.PUBLIC)
 										  .addAnnotation(Override.class)
 										  .addAnnotation(ConstantTypes.SUPPRESS_UNCHECKED)
-										  .returns(TypeParameter.of(ConstantTypes.OPTIONAL, t).parametrized())
-										  .addTypeVariable(t)
-										  .addParameter(ConstantTypes.ENUM.nest(t).parametrized(), "_enum")
+										  .returns(TypeParameter.of(ConstantTypes.OPTIONAL, T).parametrized())
+										  .addTypeVariable(T)
+										  .addParameter(ConstantTypes.ENUM.nest(T).parametrized(), "_enum")
 										  .addParameter(ConstantTypes.STRING, "value");
 
 		installEnumResolutionStatements(definitionName, enumResolve);

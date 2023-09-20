@@ -13,14 +13,21 @@ import isotropy.lmf.generator.util.TypeParameter;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
-public class AttributePushMethodBuilder implements CodeBuilder<List<FeatureResolution>, MethodSpec>
+public final class AttributePushMethodBuilder implements CodeBuilder<List<FeatureResolution>, MethodSpec>
 {
+	private static final MethodSpec.Builder METHOD_BUILDER = prepareBuilder();
+
 	@Override
 	public MethodSpec build(final List<FeatureResolution> context)
 	{
-		final var attributeType = ClassName.get(Attribute.class);
+		return METHOD_BUILDER.build();
+	}
+
+	private static MethodSpec.Builder prepareBuilder()
+	{
 		final var typeVariable = TypeVariableName.get("AttributeType");
-		final var paramAttribute = TypeParameter.of(attributeType, List.of(typeVariable, GenUtils.WILDCARD));
+		final var paramAttribute = TypeParameter.of(ClassName.get(Attribute.class),
+													List.of(typeVariable, GenUtils.WILDCARD));
 		final var featureRes = GenUtils.USE_RAWFEATURE_FOR_MODEL ? "attribute.rawFeature()" : "attribute";
 
 		return MethodSpec.methodBuilder("push")
@@ -30,7 +37,6 @@ public class AttributePushMethodBuilder implements CodeBuilder<List<FeatureResol
 													.build())
 						 .addParameter(ParameterSpec.builder(typeVariable, "value", Modifier.FINAL).build())
 						 .addStatement("ATTRIBUTE_INSERTER.push(this, $N, value)", featureRes)
-						 .addAnnotation(Override.class)
-						 .build();
+						 .addAnnotation(Override.class);
 	}
 }

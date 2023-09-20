@@ -11,6 +11,7 @@ import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.adapter.FeatureResolution;
 import isotropy.lmf.generator.adapter.GroupBuilderClassType;
 import isotropy.lmf.generator.adapter.GroupInterfaceType;
+import isotropy.lmf.generator.adapter.ModelResolution;
 import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.GenUtils;
@@ -21,9 +22,10 @@ import java.util.List;
 
 public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolution>, FieldSpec>
 {
-	public static final ClassName ATTRIBUTE_MAP_CLASS = ClassName.get(FeatureInserter.class);
-	public static final ClassName ATTRIBUTE_MAP_BUILDER_CLASS = ClassName.get(FeatureInserter.Builder.class);
+	private static final TypeParameter ATTRIBUTE_MAP_CLASS = TypeParameter.of(FeatureInserter.class);
+	private static final TypeParameter ATTRIBUTE_MAP_BUILDER_CLASS = TypeParameter.of(FeatureInserter.Builder.class);
 	private static final Modifier[] modifiers = new Modifier[]{Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL};
+
 	private final TypeParameter inserterType;
 	private final TypeParameter inserterBuilderType;
 	private final ClassName interfaceClassName;
@@ -37,8 +39,8 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 
 		interfaceClassName = interfaceType.raw();
 		builderClassName = builderType.raw();
-		inserterType = TypeParameter.of(ATTRIBUTE_MAP_CLASS, wildcardBuilder);
-		inserterBuilderType = TypeParameter.of(ATTRIBUTE_MAP_BUILDER_CLASS, wildcardBuilder);
+		inserterType = ATTRIBUTE_MAP_CLASS.nest(wildcardBuilder);
+		inserterBuilderType = ATTRIBUTE_MAP_BUILDER_CLASS.nest(wildcardBuilder);
 	}
 
 	@Override
@@ -79,7 +81,7 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 		else
 		{
 			final var model = (Model) ModelUtils.root(resolution.feature());
-			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
 			final var constantGroupName = GenUtils.toConstantCase(group.name());
 			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
 								modelDefinition,

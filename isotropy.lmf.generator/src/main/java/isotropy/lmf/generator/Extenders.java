@@ -16,7 +16,8 @@ public class Extenders implements IAdapterProvider
 					   GroupInterfaceType.class,
 					   GroupImplementationType.class,
 					   GroupBuilderInterfaceType.class,
-					   GroupBuilderClassType.class);
+					   GroupBuilderClassType.class,
+					   ModelResolution.class);
 	}
 
 	@Override

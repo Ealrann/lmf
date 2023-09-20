@@ -26,11 +26,11 @@ public final class EnumFieldBuilder implements DefinitionFieldBuilder<Enum<?>>
 
 		return FieldSpec.builder(typedEnum.parametrized(), constantName, modifiers)
 						.initializer("new $T<>($S,\n" +
-									 "\t\t\t\t\t\t\t\t$T.stream(" +
+									 "$T.stream(" +
 									 name +
 									 ".values())\n" +
-									 "\t\t\t\t\t\t\t\t\t\t.map(java.lang.Enum::name)\n" +
-									 "\t\t\t\t\t\t\t\t\t\t.toList())", ENUM_IMPL_TYPE, name, ARRAYS_TYPE)
+									 ".map(java.lang.Enum::name)\n" +
+									 ".toList())", ENUM_IMPL_TYPE, name, ARRAYS_TYPE)
 						.build();
 	}
 }

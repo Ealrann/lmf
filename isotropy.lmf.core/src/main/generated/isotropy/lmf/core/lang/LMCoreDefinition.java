@@ -279,14 +279,14 @@ public interface LMCoreDefinition {
 
   interface Enums {
     Enum<BoundType> BOUND_TYPE = new EnumImpl<>("BoundType",
-    								Arrays.stream(BoundType.values())
-    										.map(java.lang.Enum::name)
-    										.toList());
+    Arrays.stream(BoundType.values())
+    .map(java.lang.Enum::name)
+    .toList());
 
     Enum<Primitive> PRIMITIVE = new EnumImpl<>("Primitive",
-    								Arrays.stream(Primitive.values())
-    										.map(java.lang.Enum::name)
-    										.toList());
+    Arrays.stream(Primitive.values())
+    .map(java.lang.Enum::name)
+    .toList());
 
     List<Enum<?>> ALL = List.of(BOUND_TYPE, PRIMITIVE);
   }

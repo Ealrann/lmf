@@ -61,7 +61,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 
 	private record BuildArgument(CodeBlock argumentCodeBlock, Optional<CodeBlock> preOperation)
 	{
-		public static BuildArgument of(FeatureResolution resolution)
+		public static BuildArgument of(final FeatureResolution resolution)
 		{
 			final var feature = resolution.feature();
 			final var name = feature.name();

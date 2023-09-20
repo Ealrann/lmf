@@ -7,35 +7,34 @@ import isotropy.lmf.core.lang.*;
 import isotropy.lmf.core.lang.impl.GroupImpl;
 import isotropy.lmf.core.lang.impl.ReferenceImpl;
 import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.util.CodeblockBuilder;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.TypeParameter;
 
 public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {
-	public static final ClassName GROUP_TYPE = ClassName.get(Group.class);
 	public static final ClassName GROUP_IMPL_TYPE = ClassName.get(GroupImpl.class);
 	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
 
 	@Override
-	public FieldSpec build(Group<?> input)
+	public FieldSpec build(Group<?> group)
 	{
-		final var name = input.name();
-		final var type = TypeParameter.of(ClassName.get("", input.name()), input.generics().size());
-		final var typedGroup = TypeParameter.of(GROUP_TYPE, type.parametrizedWildcard());
+		final var name = group.name();
+		final var interfaceType = group.adapt(GroupInterfaceType.class);
+		final var typedGroup = ConstantTypes.GROUP.nest(interfaceType.parametrizedWildcard());
 		final var constantName = GenUtils.toConstantCase(name);
 		final var initializerBuilder = CodeBlock.builder();
 
 		final var referenceBlockBuilder = new CodeblockBuilder<>(", ", GroupFieldBuilder::generateReferencesCodeblock);
-		input.includes().forEach(referenceBlockBuilder::feed);
+		group.includes().forEach(referenceBlockBuilder::feed);
 
-		final var genericBlock = input.generics().isEmpty()
+		final var genericBlock = group.generics().isEmpty()
 								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST)
 								 : CodeBlock.of("Generics.$N", constantName);
 
 		initializerBuilder.add("new $T<>(", GROUP_IMPL_TYPE)
-						  .add("$S, $L, ", name, input.concrete())
+						  .add("$S, $L, ", name, group.concrete())
 						  .add("$T.of(", ConstantTypes.LIST)
 						  .add(referenceBlockBuilder.build())
 						  .add("), Features.$N.ALL,", constantName)
