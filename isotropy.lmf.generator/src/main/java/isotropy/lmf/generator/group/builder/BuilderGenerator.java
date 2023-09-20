@@ -4,7 +4,7 @@ import com.squareup.javapoet.JavaFile;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.adapter.FeatureResolution;
-import isotropy.lmf.generator.adapter.GroupResolution;
+import isotropy.lmf.generator.adapter.GroupBuilderClassType;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -23,14 +23,13 @@ public final class BuilderGenerator
 
 	public void generate()
 	{
-		final var context = group.adapt(GroupResolution.class);
-		final var packageName = context.packageName + ".builder";
-		final var builderType = context.interfaceType.builderClass();
+		final var builderType = group.adapt(GroupBuilderClassType.class);
+		final var packageName = builderType.packageName;
 		final var typedInterface = builderType.parametrized();
 
 		final var classBuilder = builderType.classSpecBuilder().addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 		final var featureInstallers = BuilderFeatureUtil.buildFeatureInstallers(classBuilder, typedInterface);
-		final var typeInstallers = BuilderFeatureUtil.buildTypeInstallers(classBuilder, context.interfaceType);
+		final var typeInstallers = BuilderFeatureUtil.buildTypeInstallers(classBuilder, group);
 
 		final var featureResolutions = ModelUtils.streamAllFeatures(group)
 												 .map(f -> f.adapt(FeatureResolution.class))

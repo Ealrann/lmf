@@ -7,9 +7,9 @@ import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Type;
 import isotropy.lmf.core.util.ModelUtils;
 
-record GenericParameter(TypeVariableName raw, TypeVariableName defined)
+public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 {
-	static GenericParameter fromGeneric(Generic<?> generic)
+	public static GenericParameter fromGeneric(Generic<?> generic)
 	{
 		final var type = generic.type();
 		final var typeVariableNameRaw = TypeVariableName.get(generic.name());

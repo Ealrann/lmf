@@ -14,7 +14,7 @@ public class TypeResolutionUtil
 		return parameters.stream().map(p -> ClassName.get("", p.name())).toList();
 	}
 
-	static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)
+	public static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)
 	{
 			final var params = toParameters(refInclude.parameters());
 			final var refIncludeGroup = refInclude.group();
@@ -23,7 +23,7 @@ public class TypeResolutionUtil
 			return TypeParameter.of(className, params);
 	}
 
-	static TypeParameter resolveNoInclude(final Group<?> group)
+	public static TypeParameter resolveNoInclude(final Group<?> group)
 	{
 		 if (group.name().equals("LMObject"))
 		{

@@ -9,10 +9,11 @@ import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupBuilderClassType;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
@@ -28,8 +29,10 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 	private final ClassName interfaceClassName;
 	private final ClassName builderClassName;
 
-	public RelationMapFieldBuilder(final GroupType interfaceType, final GroupType builderType)
+	public RelationMapFieldBuilder(final Group<?> group)
 	{
+		final var interfaceType = group.adapt(GroupInterfaceType.class);
+		final var builderType = group.adapt(GroupBuilderClassType.class);
 		final var wildcardInterface = builderType.parametrizedWildcard();
 
 		interfaceClassName = interfaceType.raw();

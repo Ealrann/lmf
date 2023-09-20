@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeSpec;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.code.feature.FeatureFieldBuilder;
 import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
 import isotropy.lmf.generator.code.feature.FeatureParameter;
@@ -13,7 +14,6 @@ import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.code.util.ImplementationCodeUtil;
 import isotropy.lmf.generator.util.ConstantTypes;
-import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -41,7 +41,7 @@ public final class ImplementationFeatureUtil
 	}
 
 	@SuppressWarnings("unchecked")
-	public static CodeInstaller<Group<?>> buildTypeInstallers(final GroupType interfaceGroupType,
+	public static CodeInstaller<Group<?>> buildTypeInstallers(final GroupInterfaceType interfaceGroupType,
 															  final TypeSpec.Builder classBuilder)
 	{
 		final var getterMapFieldBuilder = new GetMapFieldBuilder(interfaceGroupType);

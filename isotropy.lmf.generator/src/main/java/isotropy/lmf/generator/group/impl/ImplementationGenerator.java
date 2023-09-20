@@ -6,7 +6,8 @@ import isotropy.lmf.core.api.model.FeaturedObject;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.adapter.FeatureResolution;
-import isotropy.lmf.generator.adapter.GroupResolution;
+import isotropy.lmf.generator.adapter.GroupImplementationType;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -26,9 +27,8 @@ public final class ImplementationGenerator
 
 	public void generate()
 	{
-		final var context = group.adapt(GroupResolution.class);
-		final var interfaceType = context.interfaceType;
-		final var implementationType = interfaceType.implementation();
+		final var interfaceType = group.adapt(GroupInterfaceType.class);
+		final var implementationType = group.adapt(GroupImplementationType.class);
 		final var classBuilder = implementationType.classSpecBuilder()
 												   .superclass(FEATURE_OBJECT_TYPE)
 												   .addModifiers(Modifier.PUBLIC, Modifier.FINAL);

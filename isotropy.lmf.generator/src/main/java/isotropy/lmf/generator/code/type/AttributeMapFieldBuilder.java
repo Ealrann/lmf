@@ -9,10 +9,11 @@ import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupBuilderClassType;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
@@ -28,8 +29,10 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 	private final ClassName interfaceClassName;
 	private final ClassName builderClassName;
 
-	public AttributeMapFieldBuilder(final GroupType interfaceType, final GroupType builderType)
+	public AttributeMapFieldBuilder(final Group<?> group)
 	{
+		final var interfaceType = group.adapt(GroupInterfaceType.class);
+		final var builderType = group.adapt(GroupBuilderClassType.class);
 		final var wildcardBuilder = builderType.parametrizedWildcard();
 
 		interfaceClassName = interfaceType.raw();

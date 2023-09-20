@@ -4,7 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import isotropy.lmf.core.feature.FeatureSetter;
 import isotropy.lmf.core.lang.Group;
-import isotropy.lmf.generator.adapter.GroupResolution;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.TypeParameter;
 
@@ -18,9 +18,7 @@ public class SetMapMethodBuilder implements CodeBuilder<Group<?>, MethodSpec>
 	public MethodSpec build(final Group<?> group)
 	{
 		final var type = TypeParameter.of(SETTER_MAP_CLASS,
-										  group.adapt(GroupResolution.class)
-											   .interfaceType
-											   .parametrizedWildcard());
+										  group.adapt(GroupInterfaceType.class).parametrizedWildcard());
 
 		return MethodSpec.methodBuilder("setterMap")
 						 .addModifiers(Modifier.PROTECTED)

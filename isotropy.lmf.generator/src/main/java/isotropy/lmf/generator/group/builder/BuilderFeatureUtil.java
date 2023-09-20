@@ -4,14 +4,18 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import isotropy.lmf.core.lang.*;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.adapter.FeatureResolution;
-import isotropy.lmf.generator.code.feature.*;
+import isotropy.lmf.generator.code.feature.FeatureFieldBuilder;
+import isotropy.lmf.generator.code.feature.FeatureMethodBuilder;
+import isotropy.lmf.generator.code.feature.FeatureParameter;
+import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.code.type.*;
 import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.DefaultValueUtil;
-import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -42,12 +46,11 @@ public final class BuilderFeatureUtil
 
 	@SuppressWarnings("unchecked")
 	public static CodeInstaller<List<FeatureResolution>> buildTypeInstallers(final TypeSpec.Builder classBuilder,
-																			 final GroupType groupType)
+																			 final Group<?> group)
 	{
-		final var builderType = groupType.builderClass();
-		final var attributeMapBuilder = new AttributeMapFieldBuilder(groupType, builderType);
-		final var relationMapBuilder = new RelationMapFieldBuilder(groupType, builderType);
-		final var buildMethodBuilder = new BuildMethodBuilder(groupType);
+		final var attributeMapBuilder = new AttributeMapFieldBuilder(group);
+		final var relationMapBuilder = new RelationMapFieldBuilder(group);
+		final var buildMethodBuilder = new BuildMethodBuilder(group);
 
 		return CodeInstaller.compose(CodeInstaller.of(buildMethodBuilder, classBuilder::addMethod),
 									 CodeInstaller.of(ATTRIBUTE_PUSH_BUILDER, classBuilder::addMethod),

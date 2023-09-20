@@ -9,10 +9,9 @@ import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.adapter.FeatureResolution;
-import isotropy.lmf.generator.adapter.GroupResolution;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
@@ -23,9 +22,9 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 	public static final ClassName SETTER_MAP_BUILDER_CLASS = ClassName.get(FeatureSetter.Builder.class);
 	private static final Modifier[] modifiers = new Modifier[]{Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL};
 
-	private final GroupType interfaceType;
+	private final GroupInterfaceType interfaceType;
 
-	public SetMapFieldBuilder(final GroupType interfaceType)
+	public SetMapFieldBuilder(final GroupInterfaceType interfaceType)
 	{
 		this.interfaceType = interfaceType;
 	}
@@ -33,9 +32,8 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 	@Override
 	public FieldSpec build(final Group<?> group)
 	{
-		final var typedInterface = group.adapt(GroupResolution.class).interfaceType;
-		final var type = TypeParameter.of(SETTER_MAP_CLASS, typedInterface.parametrizedWildcard());
-		final var builderType = TypeParameter.of(SETTER_MAP_BUILDER_CLASS, typedInterface.parametrizedWildcard());
+		final var type = TypeParameter.of(SETTER_MAP_CLASS, interfaceType.parametrizedWildcard());
+		final var builderType = TypeParameter.of(SETTER_MAP_BUILDER_CLASS, interfaceType.parametrizedWildcard());
 		final var statementBuilder = new StringBuilder();
 		statementBuilder.append("new $T()");
 

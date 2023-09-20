@@ -3,12 +3,14 @@ package isotropy.lmf.generator.code.type;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Relation;
 import isotropy.lmf.generator.adapter.FeatureResolution;
+import isotropy.lmf.generator.adapter.GroupImplementationType;
+import isotropy.lmf.generator.adapter.GroupInterfaceType;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
-import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -17,12 +19,12 @@ import java.util.Optional;
 public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, MethodSpec>
 {
 	private final TypeName buildType;
-	private final GroupType interfaceType;
+	private final GroupInterfaceType interfaceType;
 
-	public BuildMethodBuilder(final GroupType interfaceType)
+	public BuildMethodBuilder(final Group<?> group)
 	{
-		this.interfaceType = interfaceType;
-		this.buildType = interfaceType.implementation().raw();
+		this.interfaceType = group.adapt(GroupInterfaceType.class);
+		this.buildType = group.adapt(GroupImplementationType.class).raw();
 	}
 
 	@Override
