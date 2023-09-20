@@ -13,6 +13,7 @@ import isotropy.lmf.generator.code.util.CodeInstaller;
 import isotropy.lmf.generator.code.util.ImplementationCodeUtil;
 import isotropy.lmf.generator.group.GroupGenerationContext;
 import isotropy.lmf.generator.util.ConstantTypes;
+import isotropy.lmf.generator.util.GroupType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -28,8 +29,6 @@ public final class ImplementationFeatureUtil
 	public static final LMGroupMethodBuilder LM_GROUP_METHOD_BUILDER = new LMGroupMethodBuilder();
 	public static final SetMapMethodBuilder SETTERMAP_METHOD_BUILDER = new SetMapMethodBuilder();
 	public static final GetMapMethodBuilder GETTERMAP_METHOD_BUILDER = new GetMapMethodBuilder();
-	public static final GetMapFieldBuilder GETTERMAP_FIELD_BUILDER = new GetMapFieldBuilder();
-	public static final SetMapFieldBuilder SETTERMAP_FIELD_BUILDER = new SetMapFieldBuilder();
 
 	@SuppressWarnings("unchecked")
 	public static CodeInstaller<FeatureResolution> buildFeatureInstallers(final TypeSpec.Builder classBuilder)
@@ -42,13 +41,17 @@ public final class ImplementationFeatureUtil
 	}
 
 	@SuppressWarnings("unchecked")
-	public static CodeInstaller<GroupGenerationContext> buildTypeInstallers(final TypeSpec.Builder classBuilder)
+	public static CodeInstaller<GroupGenerationContext> buildTypeInstallers(final GroupType interfaceGroupType,
+																			final TypeSpec.Builder classBuilder)
 	{
+		final var getterMapFieldBuilder = new GetMapFieldBuilder(interfaceGroupType);
+		final var setterMapFieldBuilder = new SetMapFieldBuilder(interfaceGroupType);
+
 		return CodeInstaller.compose(CodeInstaller.of(LM_GROUP_METHOD_BUILDER, classBuilder::addMethod),
 									 CodeInstaller.of(SETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
 									 CodeInstaller.of(GETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(GETTERMAP_FIELD_BUILDER, classBuilder::addField),
-									 CodeInstaller.of(SETTERMAP_FIELD_BUILDER, classBuilder::addField),
+									 CodeInstaller.of(getterMapFieldBuilder, classBuilder::addField),
+									 CodeInstaller.of(setterMapFieldBuilder, classBuilder::addField),
 									 CodeInstaller.of(CONSTRUCTOR_BUILDER, classBuilder::addMethod));
 	}
 

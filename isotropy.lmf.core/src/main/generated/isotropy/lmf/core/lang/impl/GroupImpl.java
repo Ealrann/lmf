@@ -14,7 +14,7 @@ import java.lang.String;
 import java.util.List;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T> {
-  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(Features.name, Group::name).add(Features.concrete, Group::concrete).add(Features.includes, Group::includes).add(Features.features, Group::features).add(Features.generics, Group::generics).build();
+  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(isotropy.lmf.core.lang.Group.Features.name, isotropy.lmf.core.lang.Group::name).add(isotropy.lmf.core.lang.Group.Features.concrete, isotropy.lmf.core.lang.Group::concrete).add(isotropy.lmf.core.lang.Group.Features.includes, isotropy.lmf.core.lang.Group::includes).add(isotropy.lmf.core.lang.Group.Features.features, isotropy.lmf.core.lang.Group::features).add(isotropy.lmf.core.lang.Group.Features.generics, isotropy.lmf.core.lang.Group::generics).build();
 
   private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>().build();
 

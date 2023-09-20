@@ -25,6 +25,7 @@ public class RelationPushMethodBuilder implements CodeBuilder<List<FeatureResolu
 		final var supplierType = ClassName.get(Supplier.class);
 		final var paramAttribute = TypeParameter.of(attributeType, List.of(variableName, GenUtils.WILDCARD));
 		final var suppliedType = TypeParameter.of(supplierType, variableName);
+		final var featureRes = GenUtils.USE_RAWFEATURE_FOR_MODEL ? "relation.rawFeature()" : "relation";
 
 		return MethodSpec.methodBuilder("push")
 						 .addModifiers(Modifier.PUBLIC)
@@ -33,7 +34,7 @@ public class RelationPushMethodBuilder implements CodeBuilder<List<FeatureResolu
 													.build())
 						 .addParameter(ParameterSpec.builder(suppliedType.parametrized(), "supplier", Modifier.FINAL)
 													.build())
-						 .addStatement("RELATION_INSERTER.push(this, relation.rawFeature(), supplier)")
+						 .addStatement("RELATION_INSERTER.push(this, $N, supplier)", featureRes)
 						 .addAnnotation(Override.class)
 						 .build();
 	}

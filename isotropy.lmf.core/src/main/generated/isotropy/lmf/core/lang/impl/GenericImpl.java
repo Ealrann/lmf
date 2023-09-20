@@ -13,7 +13,7 @@ import java.lang.Override;
 import java.lang.String;
 
 public final class GenericImpl<T extends LMObject> extends FeaturedObject implements Generic<T> {
-  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(Features.name, Generic::name).add(Features.type, Generic::type).add(Features.boundType, Generic::boundType).build();
+  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(isotropy.lmf.core.lang.Generic.Features.name, isotropy.lmf.core.lang.Generic::name).add(isotropy.lmf.core.lang.Generic.Features.type, isotropy.lmf.core.lang.Generic::type).add(isotropy.lmf.core.lang.Generic.Features.boundType, isotropy.lmf.core.lang.Generic::boundType).build();
 
   private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
 

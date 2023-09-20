@@ -21,6 +21,7 @@ public class AttributePushMethodBuilder implements CodeBuilder<List<FeatureResol
 		final var attributeType = ClassName.get(Attribute.class);
 		final var typeVariable = TypeVariableName.get("AttributeType");
 		final var paramAttribute = TypeParameter.of(attributeType, List.of(typeVariable, GenUtils.WILDCARD));
+		final var featureRes = GenUtils.USE_RAWFEATURE_FOR_MODEL ? "attribute.rawFeature()" : "attribute";
 
 		return MethodSpec.methodBuilder("push")
 						 .addModifiers(Modifier.PUBLIC)
@@ -28,7 +29,7 @@ public class AttributePushMethodBuilder implements CodeBuilder<List<FeatureResol
 						 .addParameter(ParameterSpec.builder(paramAttribute.parametrized(), "attribute", Modifier.FINAL)
 													.build())
 						 .addParameter(ParameterSpec.builder(typeVariable, "value", Modifier.FINAL).build())
-						 .addStatement("ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value)")
+						 .addStatement("ATTRIBUTE_INSERTER.push(this, $N, value)", featureRes)
 						 .addAnnotation(Override.class)
 						 .build();
 	}

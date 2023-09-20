@@ -18,7 +18,7 @@ public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<Jav
 		final var domain = input.domain();
 		final var name = input.name();
 		final var type = ClassName.get(domain, name);
-		final var genericCount = genericCount(domain + "." + name);
+		final var genericCount = GenUtils.genericCount(domain + "." + name);
 		final var typed = TypeParameter.of(type, genericCount);
 
 		final var fullType = TypeParameter.of(JAVA_WRAPPER_TYPE, typed.parametrized());
@@ -27,19 +27,5 @@ public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<Jav
 		return FieldSpec.builder(fullType.parametrized(), constantName, modifiers)
 						.initializer("new $T<>($S, $S)", JAVA_WRAPPER_IMPL_TYPE, name, domain)
 						.build();
-	}
-
-	private static int genericCount(String qualifiedName)
-	{
-		try
-		{
-			final var clazz = Class.forName(qualifiedName);
-			final var typeParameters = clazz.getTypeParameters();
-			return typeParameters.length;
-		}
-		catch (ClassNotFoundException e)
-		{
-			throw new RuntimeException(e);
-		}
 	}
 }

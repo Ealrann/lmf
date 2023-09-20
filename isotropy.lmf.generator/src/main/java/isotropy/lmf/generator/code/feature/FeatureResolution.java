@@ -9,8 +9,14 @@ import isotropy.lmf.generator.util.ConstantTypes;
 import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.TypeParameter;
 import isotropy.lmf.generator.util.TypeResolutionUtil;
+import org.logoce.notification.api.BooleanConsumer;
+import org.logoce.notification.api.FloatConsumer;
 
 import javax.lang.model.element.Modifier;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 public record FeatureResolution(Feature<?, ?> feature,
 								TypeParameter singleType,
@@ -60,6 +66,42 @@ public record FeatureResolution(Feature<?, ?> feature,
 		return ParameterSpec.builder(paramType, name).build();
 	}
 
+	public TypeName notificationCallbackType()
+	{
+		if (!isPrimitive())
+		{
+			final var consumerType = TypeParameter.of(Consumer.class);
+			final var res = consumerType.nest(singleType.parametrizedWildcard());
+			return res.parametrized();
+		}
+		else
+		{
+			final var attribute = (Attribute<?, ?>) feature;
+			final var unit = (Unit<?>) attribute.datatype();
+			return switch (unit.primitive())
+			{
+				case Boolean -> ClassName.get(BooleanConsumer.class);
+				case Int -> ClassName.get(IntConsumer.class);
+				case Long -> ClassName.get(LongConsumer.class);
+				case Float -> ClassName.get(FloatConsumer.class);
+				case Double -> ClassName.get(DoubleConsumer.class);
+				case String -> throw new IllegalStateException();
+			};
+		}
+	}
+
+	private boolean isPrimitive()
+	{
+		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Unit<?> unit)
+		{
+			return unit.primitive() != Primitive.String;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	public static FeatureResolution from(Feature<?, ?> feature)
 	{
 		final var partialResolution = resolveType(feature);
@@ -104,11 +146,21 @@ public record FeatureResolution(Feature<?, ?> feature,
 			{
 				final var javaWrapper = (JavaWrapper<?>) datatype;
 				final var parameters = attribute.parameters();
-				final var className = ClassName.get(javaWrapper.domain(), javaWrapper.name());
-				if (!parameters.isEmpty())
+				final var domain = javaWrapper.domain();
+				final var name = javaWrapper.name();
+				final var className = ClassName.get(domain, name);
+				final var genricCount = GenUtils.genericCount(domain + "." + name);
+				if (genricCount != 0)
 				{
-					final var params = TypeResolutionUtil.toParameters(parameters);
-					return new PartialFeatureResolution(TypeParameter.of(className, params), true);
+					if (parameters.isEmpty())
+					{
+						return new PartialFeatureResolution(TypeParameter.of(className, genricCount), true);
+					}
+					else
+					{
+						final var params = TypeResolutionUtil.toParameters(parameters);
+						return new PartialFeatureResolution(TypeParameter.of(className, params), true);
+					}
 				}
 				else
 				{

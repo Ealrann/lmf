@@ -11,7 +11,7 @@ import java.lang.Override;
 import java.lang.String;
 
 public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
-  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(Features.name, Unit::name).add(Features.matcher, Unit::matcher).add(Features.defaultValue, Unit::defaultValue).add(Features.primitive, Unit::primitive).add(Features.extractor, Unit::extractor).build();
+  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(isotropy.lmf.core.lang.Unit.Features.name, isotropy.lmf.core.lang.Unit::name).add(isotropy.lmf.core.lang.Unit.Features.matcher, isotropy.lmf.core.lang.Unit::matcher).add(isotropy.lmf.core.lang.Unit.Features.defaultValue, isotropy.lmf.core.lang.Unit::defaultValue).add(isotropy.lmf.core.lang.Unit.Features.primitive, isotropy.lmf.core.lang.Unit::primitive).add(isotropy.lmf.core.lang.Unit.Features.extractor, isotropy.lmf.core.lang.Unit::extractor).build();
 
   private static final FeatureSetter<Unit<?>> SET_MAP = new FeatureSetter.Builder<Unit<?>>().build();
 

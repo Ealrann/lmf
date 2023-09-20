@@ -16,7 +16,7 @@ import java.lang.String;
 import java.util.List;
 
 public final class ModelImpl extends FeaturedObject implements Model {
-  private static final FeatureGetter<Model> GET_MAP = new FeatureGetter.Builder<Model>().add(Features.name, Model::name).add(Features.domain, Model::domain).add(Features.groups, Model::groups).add(Features.enums, Model::enums).add(Features.units, Model::units).add(Features.aliases, Model::aliases).add(Features.javaWrappers, Model::javaWrappers).add(Features.lPackage, Model::lPackage).build();
+  private static final FeatureGetter<Model> GET_MAP = new FeatureGetter.Builder<Model>().add(isotropy.lmf.core.lang.Model.Features.name, isotropy.lmf.core.lang.Model::name).add(isotropy.lmf.core.lang.Model.Features.domain, isotropy.lmf.core.lang.Model::domain).add(isotropy.lmf.core.lang.Model.Features.groups, isotropy.lmf.core.lang.Model::groups).add(isotropy.lmf.core.lang.Model.Features.enums, isotropy.lmf.core.lang.Model::enums).add(isotropy.lmf.core.lang.Model.Features.units, isotropy.lmf.core.lang.Model::units).add(isotropy.lmf.core.lang.Model.Features.aliases, isotropy.lmf.core.lang.Model::aliases).add(isotropy.lmf.core.lang.Model.Features.javaWrappers, isotropy.lmf.core.lang.Model::javaWrappers).add(isotropy.lmf.core.lang.Model.Features.lPackage, isotropy.lmf.core.lang.Model::lPackage).build();
 
   private static final FeatureSetter<Model> SET_MAP = new FeatureSetter.Builder<Model>().build();
 

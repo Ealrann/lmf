@@ -6,7 +6,7 @@ import isotropy.lmf.core.notification.observatory.internal.InternalObservatoryBu
 import isotropy.lmf.core.notification.observatory.internal.allocation.AdapterObservatory;
 import isotropy.lmf.core.notification.observatory.internal.allocation.IAdapterPOI;
 import org.logoce.extender.api.IAdapter;
-import org.logoce.notification.api.Feature;
+import org.logoce.notification.api.IFeature;
 import org.logoce.notification.api.IFeatures;
 import org.logoce.notification.api.INotifier;
 
@@ -64,7 +64,7 @@ public final class NotifierAdapterObservatory<Type extends IFeatures<?>, Notifie
 
 		@Override
 		public <Listener> INotifierAdapterObservatoryBuilder<Type, Notifier> listen(Listener listener,
-																					Feature<Listener, ? super Type> feature)
+																					IFeature<Listener, ? super Type> feature)
 		{
 			observationPoints.add(new NotifierPOI<>(listener, feature));
 			return this;
@@ -72,7 +72,7 @@ public final class NotifierAdapterObservatory<Type extends IFeatures<?>, Notifie
 
 		@Override
 		public INotifierAdapterObservatoryBuilder<Type, Notifier> listenNoParam(final Runnable listener,
-																				final Feature<?, ? super Type> feature)
+																				final IFeature<?, ? super Type> feature)
 		{
 			observationPoints.add(new NoParamNotifierPOI<>(listener, feature));
 			return this;

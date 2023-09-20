@@ -14,7 +14,7 @@ import java.lang.String;
 import java.util.List;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(Features.name, Attribute::name).add(Features.immutable, Attribute::immutable).add(Features.many, Attribute::many).add(Features.mandatory, Attribute::mandatory).add(Features.rawFeature, Attribute::rawFeature).add(Features.datatype, Attribute::datatype).add(Features.defaultValue, Attribute::defaultValue).add(Features.parameters, Attribute::parameters).build();
+  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(isotropy.lmf.core.lang.Attribute.Features.name, isotropy.lmf.core.lang.Attribute::name).add(isotropy.lmf.core.lang.Attribute.Features.immutable, isotropy.lmf.core.lang.Attribute::immutable).add(isotropy.lmf.core.lang.Attribute.Features.many, isotropy.lmf.core.lang.Attribute::many).add(isotropy.lmf.core.lang.Attribute.Features.mandatory, isotropy.lmf.core.lang.Attribute::mandatory).add(isotropy.lmf.core.lang.Attribute.Features.rawFeature, isotropy.lmf.core.lang.Attribute::rawFeature).add(isotropy.lmf.core.lang.Attribute.Features.datatype, isotropy.lmf.core.lang.Attribute::datatype).add(isotropy.lmf.core.lang.Attribute.Features.defaultValue, isotropy.lmf.core.lang.Attribute::defaultValue).add(isotropy.lmf.core.lang.Attribute.Features.parameters, isotropy.lmf.core.lang.Attribute::parameters).build();
 
   private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>().build();
 

@@ -21,13 +21,13 @@ public final class ImplementationGenerator
 	public void generate()
 	{
 		final var featureResolutions = context.featureResolutions();
-		final var types = context.interfaceType();
-		final var implementationType = types.implementation();
+		final var interfaceType = context.interfaceType();
+		final var implementationType = interfaceType.implementation();
 		final var classBuilder = implementationType.classSpecBuilder()
 												   .superclass(FEATURE_OBJECT_TYPE)
 												   .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder);
-		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(classBuilder);
+		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(interfaceType, classBuilder);
 
 		featureResolutions.forEach(featureInstallers::install);
 		typeInstallers.install(context);

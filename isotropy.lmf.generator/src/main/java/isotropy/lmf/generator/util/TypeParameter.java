@@ -23,6 +23,11 @@ public interface TypeParameter
 		return new SimpleTypeParameter(raw, List.of());
 	}
 
+	static TypeParameter of(Class<?> classifier)
+	{
+		return TypeParameter.of(ClassName.get(classifier));
+	}
+
 	static TypeParameter of(ClassName raw, int genericCount)
 	{
 		return new SimpleTypeParameter(raw, GenUtils.wildcardList(genericCount));

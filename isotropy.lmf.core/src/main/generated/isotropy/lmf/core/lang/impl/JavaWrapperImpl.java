@@ -10,7 +10,7 @@ import java.lang.Override;
 import java.lang.String;
 
 public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrapper<T> {
-  private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(Features.name, JavaWrapper::name).add(Features.domain, JavaWrapper::domain).build();
+  private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(isotropy.lmf.core.lang.JavaWrapper.Features.name, isotropy.lmf.core.lang.JavaWrapper::name).add(isotropy.lmf.core.lang.JavaWrapper.Features.domain, isotropy.lmf.core.lang.JavaWrapper::domain).build();
 
   private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>().build();
 

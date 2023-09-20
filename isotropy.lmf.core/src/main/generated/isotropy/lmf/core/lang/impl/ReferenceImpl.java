@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public final class ReferenceImpl<T extends LMObject> extends FeaturedObject implements Reference<T> {
-  private static final FeatureGetter<Reference<?>> GET_MAP = new FeatureGetter.Builder<Reference<?>>().add(Features.group, Reference::group).add(Features.parameters, Reference::parameters).build();
+  private static final FeatureGetter<Reference<?>> GET_MAP = new FeatureGetter.Builder<Reference<?>>().add(isotropy.lmf.core.lang.Reference.Features.group, isotropy.lmf.core.lang.Reference::group).add(isotropy.lmf.core.lang.Reference.Features.parameters, isotropy.lmf.core.lang.Reference::parameters).build();
 
   private static final FeatureSetter<Reference<?>> SET_MAP = new FeatureSetter.Builder<Reference<?>>().build();
 

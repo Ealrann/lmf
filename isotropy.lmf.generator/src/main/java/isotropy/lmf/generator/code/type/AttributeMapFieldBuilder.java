@@ -3,11 +3,15 @@ package isotropy.lmf.generator.code.type;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import isotropy.lmf.core.lang.Attribute;
 import isotropy.lmf.core.feature.FeatureInserter;
+import isotropy.lmf.core.lang.Attribute;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.lang.Model;
+import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.code.feature.FeatureResolution;
 import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.code.util.CodeBuilder;
+import isotropy.lmf.generator.util.GenUtils;
 import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
@@ -58,12 +62,29 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 		final var hasGenerics = resolution.hasGeneric();
 		final var methodName = MethodUtil.builderMethodName(resolution);
 		final var usedMethod = hasGenerics ? '_' + methodName : methodName;
+		final var group = (Group<?>) resolution.feature().lmContainer();
 		final var featureName = resolution.name();
-		return CodeBlock.of(".add($T.Features.$N, $T::$N)",
-							interfaceClassName,
-							featureName,
-							builderClassName,
-							usedMethod);
+
+		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
+		{
+			return CodeBlock.of(".add($T.Features.$N, $T::$N)",
+								interfaceClassName,
+								featureName,
+								builderClassName,
+								usedMethod);
+		}
+		else
+		{
+			final var model = (Model) ModelUtils.root(resolution.feature());
+			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+			final var constantGroupName = GenUtils.toConstantCase(group.name());
+			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
+								modelDefinition,
+								constantGroupName,
+								GenUtils.toConstantCase(featureName),
+								builderClassName,
+								usedMethod);
+		}
 	}
 
 	private static boolean isAttribute(final FeatureResolution f)

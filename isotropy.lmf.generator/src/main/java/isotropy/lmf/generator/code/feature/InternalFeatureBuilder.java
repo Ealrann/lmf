@@ -4,11 +4,11 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import isotropy.lmf.core.api.feature.RawFeature;
 import isotropy.lmf.core.lang.Feature;
 import isotropy.lmf.core.lang.Group;
 import isotropy.lmf.core.lang.Model;
 import isotropy.lmf.core.lang.Relation;
-import isotropy.lmf.core.api.feature.RawFeature;
 import isotropy.lmf.core.util.ModelUtils;
 import isotropy.lmf.generator.util.GenUtils;
 
@@ -22,6 +22,28 @@ public class InternalFeatureBuilder
 	public InternalFeatureBuilder(Group<?> group)
 	{
 		this.group = group;
+	}
+
+	public FieldSpec toConstantFeatureWithConsumer(FeatureResolution featureResolution)
+	{
+		final var feature = featureResolution.feature();
+		final var callbackType = featureResolution.notificationCallbackType();
+		final var parent = (Group<?>) feature.lmContainer();
+		final var local = parent == group;
+		final var concrete = group.concrete();
+		final var featuresType = local
+								 ? concrete ? ClassName.get("", "Features") : ClassName.get("", "Features<?>")
+								 : ClassName.get("", parent.name() + ".Features<?>");
+		final var type = ParameterizedTypeName.get(ClassName.get(RawFeature.class),
+												   callbackType.box(),
+												   featuresType.box());
+
+		final var initializer = local ? localInitializer(feature) : parentInitializer(feature);
+
+		return FieldSpec.builder(type, feature.name())
+						.addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+						.initializer(initializer)
+						.build();
 	}
 
 	public FieldSpec toConstantFeature(FeatureResolution featureResolution)

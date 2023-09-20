@@ -1,10 +1,18 @@
 package isotropy.lmf.generator.code.type;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import isotropy.lmf.core.feature.FeatureSetter;
+import isotropy.lmf.core.lang.Group;
+import isotropy.lmf.core.lang.Model;
+import isotropy.lmf.core.util.ModelUtils;
+import isotropy.lmf.generator.code.feature.FeatureResolution;
+import isotropy.lmf.generator.code.feature.MethodUtil;
 import isotropy.lmf.generator.code.util.CodeBuilder;
 import isotropy.lmf.generator.group.GroupGenerationContext;
+import isotropy.lmf.generator.util.GenUtils;
+import isotropy.lmf.generator.util.GroupType;
 import isotropy.lmf.generator.util.TypeParameter;
 
 import javax.lang.model.element.Modifier;
@@ -15,6 +23,13 @@ public class SetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, F
 	public static final ClassName SETTER_MAP_BUILDER_CLASS = ClassName.get(FeatureSetter.Builder.class);
 	private static final Modifier[] modifiers = new Modifier[]{Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL};
 
+	private final GroupType interfaceType;
+
+	public SetMapFieldBuilder(final GroupType interfaceType)
+	{
+		this.interfaceType = interfaceType;
+	}
+
 	@Override
 	public FieldSpec build(final GroupGenerationContext context)
 	{
@@ -24,15 +39,13 @@ public class SetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, F
 		final var groupName = context.group().name();
 		final var statementBuilder = new StringBuilder();
 		statementBuilder.append("new $T()");
-		for (final var resolution : context.featureResolutions())
-		{
-			final var feature = resolution.feature();
-			if (!feature.immutable() && !feature.many())
-			{
-				final var fname = feature.name();
-				statementBuilder.append(String.format(".add(Features.%1$s, %2$s::%1$s)", fname, groupName));
-			}
-		}
+
+		context.featureResolutions()
+			   .stream()
+			   .filter(SetMapFieldBuilder::isSingleMutable)
+			   .map(this::buildStatement)
+			   .forEach(statementBuilder::append);
+
 		statementBuilder.append(".build()");
 
 		return FieldSpec.builder(type.parametrized(), "SET_MAP")
@@ -41,4 +54,36 @@ public class SetMapFieldBuilder implements CodeBuilder<GroupGenerationContext, F
 						.build();
 	}
 
+	private CodeBlock buildStatement(final FeatureResolution resolution)
+	{
+		final var featureName = resolution.name();
+		final var group = (Group<?>) resolution.feature().lmContainer();
+		final var constantGroupName = GenUtils.toConstantCase(group.name());
+
+		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
+		{
+			return CodeBlock.of(".add($T.Features.$N, $T::$N)",
+								interfaceType.raw(),
+								featureName,
+								constantGroupName,
+								featureName);
+		}
+		else
+		{
+			final var model = (Model) ModelUtils.root(resolution.feature());
+			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
+								modelDefinition,
+								constantGroupName,
+								GenUtils.toConstantCase(featureName),
+								constantGroupName,
+								featureName);
+		}
+	}
+
+	private static boolean isSingleMutable(final FeatureResolution resolution)
+	{
+		final var feature = resolution.feature();
+		return !feature.immutable() && !feature.many();
+	}
 }

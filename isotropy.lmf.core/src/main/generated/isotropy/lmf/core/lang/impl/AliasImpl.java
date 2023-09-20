@@ -11,7 +11,7 @@ import java.lang.String;
 import java.util.List;
 
 public final class AliasImpl extends FeaturedObject implements Alias {
-  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(Features.name, Alias::name).add(Features.words, Alias::words).build();
+  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(isotropy.lmf.core.lang.Alias.Features.name, isotropy.lmf.core.lang.Alias::name).add(isotropy.lmf.core.lang.Alias.Features.words, isotropy.lmf.core.lang.Alias::words).build();
 
   private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>().build();
 
