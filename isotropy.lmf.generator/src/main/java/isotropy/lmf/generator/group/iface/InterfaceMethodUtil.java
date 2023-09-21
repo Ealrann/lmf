@@ -11,8 +11,8 @@ import java.util.Optional;
 
 public final class InterfaceMethodUtil
 {
-	public static final Modifier[] METHOD_MODIFIERS = {Modifier.ABSTRACT, Modifier.PUBLIC};
-	public static final Modifier[] BUILDER_METHOD_MODIFIERS = {Modifier.ABSTRACT, Modifier.PUBLIC};
+	private static final Modifier[] METHOD_MODIFIERS = {Modifier.ABSTRACT, Modifier.PUBLIC};
+	private static final Modifier[] BUILDER_METHOD_MODIFIERS = {Modifier.ABSTRACT, Modifier.PUBLIC};
 
 	public static FeatureMethodBuilder methodBuilder()
 	{

@@ -23,7 +23,6 @@ import java.util.Optional;
 
 public final class BuilderFeatureUtil
 {
-	private static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
 	private static final Modifier[] PUBLIC_ONLY = {Modifier.PUBLIC};
 	public static final Modifier[] PRIVATE_ONLY = {Modifier.PRIVATE};
 	private static final FeatureFieldBuilder FIELD_BUILDER = BuilderFeatureUtil.fieldBuilder();

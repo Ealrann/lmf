@@ -28,7 +28,7 @@ public class InternalFeaturesGenerator
 															 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		final var hasSuperInterfaces = !group.includes().isEmpty();
 		final var concrete = group.concrete();
-		final var superVType = concrete ? "Features" : "T";
+		final var superVType = ClassName.get("", concrete ? "Features" : "T");
 
 		if (!concrete)
 		{
@@ -41,20 +41,20 @@ public class InternalFeaturesGenerator
 			for (final var superInterface : group.includes())
 			{
 				final var iFeatures = ClassName.get("", superInterface.group().name() + ".Features");
-				final var typed = TypeParameter.of(iFeatures, ClassName.get("", superVType));
+				final var typed = TypeParameter.of(iFeatures, superVType);
 				internalFeaturesInterfaceBuilder.addSuperinterface(typed.parametrized());
 			}
 		}
 		else if (group.name().equals("LMObject"))
 		{
 			final var iFeatures = ClassName.get(IFeatures.class);
-			final var typed = TypeParameter.of(iFeatures, ClassName.get("", superVType));
+			final var typed = TypeParameter.of(iFeatures, superVType);
 			internalFeaturesInterfaceBuilder.addSuperinterface(typed.parametrized());
 		}
 		else
 		{
 			final var iFeatures = ClassName.get(LMObject.Features.class);
-			final var typed = TypeParameter.of(iFeatures, ClassName.get("", superVType));
+			final var typed = TypeParameter.of(iFeatures, superVType);
 			internalFeaturesInterfaceBuilder.addSuperinterface(typed.parametrized());
 		}
 
