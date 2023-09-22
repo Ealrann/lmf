@@ -1,0 +1,44 @@
+package logoce.lmf.model.notification.observatory.internal.eobject;
+
+import logoce.lmf.model.lang.LMObject;
+import logoce.lmf.model.notification.observatory.IObservatory;
+import logoce.lmf.model.notification.observatory.internal.InternalObservatoryBuilder;
+import logoce.lmf.model.notification.observatory.internal.eobject.listener.GatherBulkListener;
+import logoce.lmf.model.notification.observatory.internal.eobject.listener.GatherListener;
+import logoce.lmf.model.notification.observatory.internal.eobject.poi.IEObjectPOI;
+
+import java.util.List;
+
+public final class RootObservatory extends AbstractRootObservatory
+{
+	private RootObservatory(final List<IObservatory> children,
+							final List<IEObjectPOI> pois,
+							final List<GatherListener<LMObject>> gatherListeners,
+							final List<GatherBulkListener<LMObject>> gatherBulkListeners)
+	{
+		super(children, pois, gatherListeners, gatherBulkListeners);
+	}
+
+	@Override
+	public void observe(final LMObject parent)
+	{
+		register(parent);
+	}
+
+	@Override
+	public void shut(final LMObject parent)
+	{
+		unregister(parent);
+	}
+
+	public static final class Builder extends AbstractRootObservatory.Builder
+	{
+		@Override
+		public IObservatory build()
+		{
+			final var builtChildren = children.stream().map(InternalObservatoryBuilder::build).toList();
+
+			return new RootObservatory(builtChildren, pois, gatherListeners, gatherBulkListeners);
+		}
+	}
+}

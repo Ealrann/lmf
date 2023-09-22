@@ -1,0 +1,77 @@
+package logoce.lmf.generator.code.type;
+
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import logoce.lmf.generator.adapter.FeatureResolution;
+import logoce.lmf.generator.adapter.GroupInterfaceType;
+import logoce.lmf.generator.adapter.ModelResolution;
+import logoce.lmf.generator.util.GenUtils;
+import logoce.lmf.generator.util.TypeParameter;
+import logoce.lmf.model.feature.FeatureGetter;
+import logoce.lmf.model.lang.Group;
+import logoce.lmf.model.lang.Model;
+import logoce.lmf.model.util.ModelUtils;
+import logoce.lmf.generator.code.util.CodeBuilder;
+
+import javax.lang.model.element.Modifier;
+
+public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
+{
+	public static final TypeParameter GETTER_MAP_CLASS = TypeParameter.of(FeatureGetter.class);
+	public static final TypeParameter GETTER_MAP_BUILDER_CLASS = TypeParameter.of(FeatureGetter.Builder.class);
+	private static final Modifier[] modifiers = new Modifier[]{Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL};
+	private final GroupInterfaceType interfaceType;
+
+	public GetMapFieldBuilder(final GroupInterfaceType interfaceType)
+	{
+		this.interfaceType = interfaceType;
+	}
+
+	@Override
+	public FieldSpec build(final Group<?> group)
+	{
+		final var wildcardInterface = interfaceType.parametrizedWildcard();
+		final var type = GETTER_MAP_CLASS.nest(wildcardInterface);
+		final var builderType = GETTER_MAP_BUILDER_CLASS.nest(wildcardInterface);
+		final var statementBuilder = new StringBuilder();
+		statementBuilder.append("new $T()");
+
+		ModelUtils.streamAllFeatures(group)
+				  .map(f -> f.adapt(FeatureResolution.class))
+				  .map(this::buildStatement)
+				  .forEach(statementBuilder::append);
+		statementBuilder.append(".build()");
+
+		return FieldSpec.builder(type.parametrized(), "GET_MAP")
+						.addModifiers(modifiers)
+						.initializer(statementBuilder.toString(), builderType.parametrized())
+						.build();
+	}
+
+	private CodeBlock buildStatement(final FeatureResolution resolution)
+	{
+		final var featureName = resolution.name();
+		final var group = (Group<?>) resolution.feature().lmContainer();
+		final var constantGroupName = GenUtils.toConstantCase(group.name());
+
+		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
+		{
+			return CodeBlock.of(".add($T.Features.$N, $T::$N)",
+								interfaceType.raw(),
+								featureName,
+								interfaceType.raw(),
+								featureName);
+		}
+		else
+		{
+			final var model = (Model) ModelUtils.root(resolution.feature());
+			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
+			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
+								modelDefinition,
+								constantGroupName,
+								GenUtils.toConstantCase(featureName),
+								interfaceType.raw(),
+								featureName);
+		}
+	}
+}

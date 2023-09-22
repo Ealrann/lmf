@@ -9,11 +9,11 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/isotropy.lmf.core" />
-            <option value="$PROJECT_DIR$/isotropy.lmf.generator" />
-            <option value="$PROJECT_DIR$/logoce.adapter" />
-            <option value="$PROJECT_DIR$/logoce.extender" />
-            <option value="$PROJECT_DIR$/logoce.notification" />
+            <option value="$PROJECT_DIR$/logoce.lmf.adapter" />
+            <option value="$PROJECT_DIR$/logoce.lmf.extender" />
+            <option value="$PROJECT_DIR$/logoce.lmf.generator" />
+            <option value="$PROJECT_DIR$/logoce.lmf.model" />
+            <option value="$PROJECT_DIR$/logoce.lmf.notification" />
           </set>
         </option>
       </GradleProjectSettings>
