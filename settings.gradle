@@ -5,3 +5,5 @@ include ':logoce.lmf.model'
 include ':logoce.lmf.extender'
 include ':logoce.lmf.generator'
 include ':logoce.lmf.notification'
+
+include ':logoce.lmf.editor'

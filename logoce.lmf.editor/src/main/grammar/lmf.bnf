@@ -1,0 +1,25 @@
+{
+  parserClass="org.logoce.lmf.editor.parser.LMParser"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="LMF"
+  psiPackage="org.logoce.lmf.editor.psi"
+  psiImplPackage="org.logoce.lmf.editor.psi.impl"
+
+  elementTypeClass="org.logoce.lmf.editor.psi.LMElementType"
+  tokenTypeClass="org.logoce.lmf.editor.psi.LMTokenType"
+  elementTypeHolderClass="org.logoce.lmf.editor.LMTypes"
+
+  tokens = [
+    IDENTIFIER = 'regexp:[a-zA-Z_][a-zA-Z0-9_]*'
+    WHITE_SPACE = 'regexp:\s+'
+  ]
+}
+
+lmFile ::= list*
+
+word ::= atom | list
+
+atom ::= IDENTIFIER
+
+list ::= '(' word* ')'

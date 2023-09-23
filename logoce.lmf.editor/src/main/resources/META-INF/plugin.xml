@@ -1,0 +1,21 @@
+<idea-plugin>
+    <id>logoce.lmf.editor</id>
+    <name>LMF-Editor</name>
+    <version>1.0</version>
+    <vendor email="later@logoce.com" url="http://www.logoce.com">Logoce</vendor>
+
+    <idea-version since-build="232.0" until-build="232.*"/>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+                name="LightModel"
+                implementationClass="org.logoce.lmf.editor.LMFileType"
+                fieldName="INSTANCE"
+                language="LightModel"
+                extensions="lm"/>
+        <lang.parserDefinition
+                language="LightModel"
+                implementationClass="org.logoce.lmf.editor.parser.LMParserDefinition"/>
+    </extensions>
+
+</idea-plugin>
