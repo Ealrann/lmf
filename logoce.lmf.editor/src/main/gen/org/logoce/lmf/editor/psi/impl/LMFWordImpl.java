@@ -7,7 +7,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static org.logoce.lmf.editor.LMTypes.*;
+import static org.logoce.lmf.editor.psi.LMTokenTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.logoce.lmf.editor.psi.*;
 
@@ -29,14 +29,14 @@ public class LMFWordImpl extends ASTWrapperPsiElement implements LMFWord {
 
   @Override
   @Nullable
-  public LMFAtom getAtom() {
-    return findChildByClass(LMFAtom.class);
+  public LMFList getList() {
+    return findChildByClass(LMFList.class);
   }
 
   @Override
   @Nullable
-  public LMFList getList() {
-    return findChildByClass(LMFList.class);
+  public LMFValue getValue() {
+    return findChildByClass(LMFValue.class);
   }
 
 }

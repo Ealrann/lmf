@@ -13,55 +13,60 @@ import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.LMFile;
 import org.logoce.lmf.editor.LMLanguage;
-import org.logoce.lmf.editor.LMTypes;
 import org.logoce.lmf.editor.lexer.LMLexerAdapter;
-import org.logoce.lmf.editor.psi.LMTokenSets;
+import org.logoce.lmf.editor.psi.LMTokenTypes;
 
 public class LMParserDefinition implements ParserDefinition
 {
+	public static final IFileElementType FILE = new IFileElementType(LMLanguage.INSTANCE);
 
-  public static final IFileElementType FILE = new IFileElementType(LMLanguage.INSTANCE);
+	@NotNull
+	@Override
+	public Lexer createLexer(Project project)
+	{
+		return new LMLexerAdapter();
+	}
 
-  @NotNull
-  @Override
-  public Lexer createLexer(Project project) {
-    return new LMLexerAdapter();
-  }
+	@NotNull
+	@Override
+	public TokenSet getCommentTokens()
+	{
+		return TokenSet.WHITE_SPACE;
+	}
 
-  @NotNull
-  @Override
-  public TokenSet getCommentTokens() {
-    return LMTokenSets.COMMENTS;
-  }
+	@NotNull
+	@Override
+	public TokenSet getStringLiteralElements()
+	{
+		return TokenSet.EMPTY;
+	}
 
-  @NotNull
-  @Override
-  public TokenSet getStringLiteralElements() {
-    return TokenSet.EMPTY;
-  }
+	@NotNull
+	@Override
+	public PsiParser createParser(final Project project)
+	{
+		return new LMParser();
+	}
 
-  @NotNull
-  @Override
-  public PsiParser createParser(final Project project) {
-    return new LMParser();
-  }
+	@NotNull
+	@Override
+	public IFileElementType getFileNodeType()
+	{
+		return FILE;
+	}
 
-  @NotNull
-  @Override
-  public IFileElementType getFileNodeType() {
-    return FILE;
-  }
+	@NotNull
+	@Override
+	public PsiFile createFile(@NotNull FileViewProvider viewProvider)
+	{
+		return new LMFile(viewProvider);
+	}
 
-  @NotNull
-  @Override
-  public PsiFile createFile(@NotNull FileViewProvider viewProvider) {
-    return new LMFile(viewProvider);
-  }
-
-  @NotNull
-  @Override
-  public PsiElement createElement(ASTNode node) {
-    return LMTypes.Factory.createElement(node);
-  }
+	@NotNull
+	@Override
+	public PsiElement createElement(ASTNode node)
+	{
+		return LMTokenTypes.Factory.createElement(node);
+	}
 
 }

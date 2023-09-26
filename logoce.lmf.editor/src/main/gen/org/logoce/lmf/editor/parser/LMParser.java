@@ -3,7 +3,7 @@ package org.logoce.lmf.editor.parser;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import static org.logoce.lmf.editor.LMTypes.*;
+import static org.logoce.lmf.editor.psi.LMTokenTypes.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
@@ -36,37 +36,27 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IDENTIFIER
-  public static boolean atom(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "atom")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
-    exit_section_(b, m, ATOM, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // '(' word* ')'
+  // '(' type word* ')'
   public static boolean list(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "list")) return false;
+    if (!nextTokenIs(b, OPEN_NODE)) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _NONE_, LIST, "<list>");
-    r = consumeToken(b, "(");
-    r = r && list_1(b, l + 1);
-    r = r && consumeToken(b, ")");
-    exit_section_(b, l, m, r, false, null);
+    Marker m = enter_section_(b);
+    r = consumeToken(b, OPEN_NODE);
+    r = r && type(b, l + 1);
+    r = r && list_2(b, l + 1);
+    r = r && consumeToken(b, CLOSE_NODE);
+    exit_section_(b, m, LIST, r);
     return r;
   }
 
   // word*
-  private static boolean list_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "list_1")) return false;
+  private static boolean list_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "list_2")) return false;
     while (true) {
       int c = current_position_(b);
       if (!word(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "list_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "list_2", c)) break;
     }
     return true;
   }
@@ -84,12 +74,37 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // atom | list
+  // IDENTIFIER
+  public static boolean type(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "type")) return false;
+    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    exit_section_(b, m, TYPE, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // IDENTIFIER
+  public static boolean value(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "value")) return false;
+    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    exit_section_(b, m, VALUE, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // value | list
   public static boolean word(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "word")) return false;
+    if (!nextTokenIs(b, "<word>", IDENTIFIER, OPEN_NODE)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, WORD, "<word>");
-    r = atom(b, l + 1);
+    r = value(b, l + 1);
     if (!r) r = list(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;

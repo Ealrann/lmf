@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface LMFList extends PsiElement {
 
   @NotNull
+  LMFType getType();
+
+  @NotNull
   List<LMFWord> getWordList();
 
 }

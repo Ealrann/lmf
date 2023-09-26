@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class LMFile extends PsiFileBase
 {
-
   public LMFile(@NotNull FileViewProvider viewProvider) {
     super(viewProvider, LMLanguage.INSTANCE);
   }
@@ -22,5 +21,4 @@ public class LMFile extends PsiFileBase
   public String toString() {
     return "Simple File";
   }
-
 }

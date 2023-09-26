@@ -8,18 +8,22 @@
 
   elementTypeClass="org.logoce.lmf.editor.psi.LMElementType"
   tokenTypeClass="org.logoce.lmf.editor.psi.LMTokenType"
-  elementTypeHolderClass="org.logoce.lmf.editor.LMTypes"
+  elementTypeHolderClass="org.logoce.lmf.editor.psi.LMTokenTypes"
 
   tokens = [
-    IDENTIFIER = 'regexp:[a-zA-Z_][a-zA-Z0-9_]*'
+    IDENTIFIER = 'regexp:[a-zA-Z_+\-=][a-zA-Z0-9_+\-=]*'
     WHITE_SPACE = 'regexp:\s+'
+    OPEN_NODE = '('
+    CLOSE_NODE = ')'
   ]
 }
 
 lmFile ::= list*
 
-word ::= atom | list
+word ::= value | list
 
-atom ::= IDENTIFIER
+type ::= IDENTIFIER
 
-list ::= '(' word* ')'
+value ::= IDENTIFIER
+
+list ::= '(' type word* ')'

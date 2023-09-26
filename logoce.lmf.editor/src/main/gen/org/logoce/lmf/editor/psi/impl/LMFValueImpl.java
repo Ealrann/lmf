@@ -7,18 +7,18 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static org.logoce.lmf.editor.LMTypes.*;
+import static org.logoce.lmf.editor.psi.LMTokenTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.logoce.lmf.editor.psi.*;
 
-public class LMFAtomImpl extends ASTWrapperPsiElement implements LMFAtom {
+public class LMFValueImpl extends ASTWrapperPsiElement implements LMFValue {
 
-  public LMFAtomImpl(@NotNull ASTNode node) {
+  public LMFValueImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull LMFVisitor visitor) {
-    visitor.visitAtom(this);
+    visitor.visitValue(this);
   }
 
   @Override
