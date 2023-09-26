@@ -11,14 +11,14 @@ import static org.logoce.lmf.editor.psi.LMTokenTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.logoce.lmf.editor.psi.*;
 
-public class LMFValueImpl extends ASTWrapperPsiElement implements LMFValue {
+public class LMFElementImpl extends ASTWrapperPsiElement implements LMFElement {
 
-  public LMFValueImpl(@NotNull ASTNode node) {
+  public LMFElementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull LMFVisitor visitor) {
-    visitor.visitValue(this);
+    visitor.visitElement(this);
   }
 
   @Override
@@ -29,8 +29,8 @@ public class LMFValueImpl extends ASTWrapperPsiElement implements LMFValue {
 
   @Override
   @NotNull
-  public PsiElement getIdentifier() {
-    return findNotNullChildByType(IDENTIFIER);
+  public List<LMFWord> getWordList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFWord.class);
   }
 
 }

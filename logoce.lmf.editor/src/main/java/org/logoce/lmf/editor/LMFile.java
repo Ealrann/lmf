@@ -5,7 +5,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
 import org.jetbrains.annotations.NotNull;
 
-public class LMFile extends PsiFileBase
+public final class LMFile extends PsiFileBase
 {
   public LMFile(@NotNull FileViewProvider viewProvider) {
     super(viewProvider, LMLanguage.INSTANCE);

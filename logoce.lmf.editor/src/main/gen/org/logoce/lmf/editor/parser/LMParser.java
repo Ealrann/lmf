@@ -36,76 +36,114 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '(' type word* ')'
-  public static boolean list(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "list")) return false;
+  // OPEN_NODE TYPE word* CLOSE_NODE
+  public static boolean element(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element")) return false;
     if (!nextTokenIs(b, OPEN_NODE)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, OPEN_NODE);
-    r = r && type(b, l + 1);
-    r = r && list_2(b, l + 1);
+    r = consumeTokens(b, 0, OPEN_NODE, TYPE);
+    r = r && element_2(b, l + 1);
     r = r && consumeToken(b, CLOSE_NODE);
-    exit_section_(b, m, LIST, r);
+    exit_section_(b, m, ELEMENT, r);
     return r;
   }
 
   // word*
+  private static boolean element_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!word(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "element_2", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // VALUE list_extension list_extension*
+  public static boolean list(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "list")) return false;
+    if (!nextTokenIs(b, VALUE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, VALUE);
+    r = r && list_extension(b, l + 1);
+    r = r && list_2(b, l + 1);
+    exit_section_(b, m, LIST, r);
+    return r;
+  }
+
+  // list_extension*
   private static boolean list_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "list_2")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!word(b, l + 1)) break;
+      if (!list_extension(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "list_2", c)) break;
     }
     return true;
   }
 
   /* ********************************************************** */
-  // list*
+  // LIST_SEPARATOR VALUE
+  public static boolean list_extension(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "list_extension")) return false;
+    if (!nextTokenIs(b, LIST_SEPARATOR)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, LIST_SEPARATOR, VALUE);
+    exit_section_(b, m, LIST_EXTENSION, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // element*
   static boolean lmFile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "lmFile")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!list(b, l + 1)) break;
+      if (!element(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "lmFile", c)) break;
     }
     return true;
   }
 
   /* ********************************************************** */
-  // IDENTIFIER
-  public static boolean type(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "type")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+  // NAME val
+  public static boolean named(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "named")) return false;
+    if (!nextTokenIs(b, NAME)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
-    exit_section_(b, m, TYPE, r);
+    r = consumeToken(b, NAME);
+    r = r && val(b, l + 1);
+    exit_section_(b, m, NAMED, r);
     return r;
   }
 
   /* ********************************************************** */
-  // IDENTIFIER
-  public static boolean value(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "value")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+  // list | VALUE
+  public static boolean val(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "val")) return false;
+    if (!nextTokenIs(b, VALUE)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
-    exit_section_(b, m, VALUE, r);
+    r = list(b, l + 1);
+    if (!r) r = consumeToken(b, VALUE);
+    exit_section_(b, m, VAL, r);
     return r;
   }
 
   /* ********************************************************** */
-  // value | list
+  // val | named | element
   public static boolean word(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "word")) return false;
-    if (!nextTokenIs(b, "<word>", IDENTIFIER, OPEN_NODE)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, WORD, "<word>");
-    r = value(b, l + 1);
-    if (!r) r = list(b, l + 1);
+    r = val(b, l + 1);
+    if (!r) r = named(b, l + 1);
+    if (!r) r = element(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }

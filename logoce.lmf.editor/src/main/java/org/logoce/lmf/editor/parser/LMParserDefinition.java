@@ -16,7 +16,7 @@ import org.logoce.lmf.editor.LMLanguage;
 import org.logoce.lmf.editor.lexer.LMLexerAdapter;
 import org.logoce.lmf.editor.psi.LMTokenTypes;
 
-public class LMParserDefinition implements ParserDefinition
+public final class LMParserDefinition implements ParserDefinition
 {
 	public static final IFileElementType FILE = new IFileElementType(LMLanguage.INSTANCE);
 

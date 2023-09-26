@@ -29,14 +29,8 @@ public class LMFListImpl extends ASTWrapperPsiElement implements LMFList {
 
   @Override
   @NotNull
-  public LMFType getType() {
-    return findNotNullChildByClass(LMFType.class);
-  }
-
-  @Override
-  @NotNull
-  public List<LMFWord> getWordList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFWord.class);
+  public List<LMFListExtension> getListExtensionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFListExtension.class);
   }
 
 }

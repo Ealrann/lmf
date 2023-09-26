@@ -11,19 +11,27 @@
   elementTypeHolderClass="org.logoce.lmf.editor.psi.LMTokenTypes"
 
   tokens = [
-    IDENTIFIER = 'regexp:[a-zA-Z_+\-=][a-zA-Z0-9_+\-=]*'
-    WHITE_SPACE = 'regexp:\s+'
-    OPEN_NODE = '('
-    CLOSE_NODE = ')'
+    TYPE = 'TYPE'
+    VALUE = 'VALUE'
+    LIST_VALUE = 'LIST_VALUE'
+    LIST_SEPARATOR = 'LIST_SEPARATOR'
+    WHITE_SPACE = 'WHITE_SPACE'
+    OPEN_NODE = 'OPEN_NODE'
+    CLOSE_NODE = 'CLOSE_NODE'
+    NAME = 'NAME'
   ]
 }
 
-lmFile ::= list*
+lmFile ::= element*
 
-word ::= value | list
+element ::= OPEN_NODE TYPE word* CLOSE_NODE
 
-type ::= IDENTIFIER
+word ::= val | named | element
 
-value ::= IDENTIFIER
+named ::= NAME val
 
-list ::= '(' type word* ')'
+val ::= list | VALUE
+
+list ::= VALUE list_extension list_extension*
+
+list_extension ::= LIST_SEPARATOR VALUE

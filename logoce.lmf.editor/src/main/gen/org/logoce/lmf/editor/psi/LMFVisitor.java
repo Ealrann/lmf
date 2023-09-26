@@ -7,15 +7,23 @@ import com.intellij.psi.PsiElement;
 
 public class LMFVisitor extends PsiElementVisitor {
 
+  public void visitElement(@NotNull LMFElement o) {
+    visitPsiElement(o);
+  }
+
   public void visitList(@NotNull LMFList o) {
     visitPsiElement(o);
   }
 
-  public void visitType(@NotNull LMFType o) {
+  public void visitListExtension(@NotNull LMFListExtension o) {
     visitPsiElement(o);
   }
 
-  public void visitValue(@NotNull LMFValue o) {
+  public void visitNamed(@NotNull LMFNamed o) {
+    visitPsiElement(o);
+  }
+
+  public void visitVal(@NotNull LMFVal o) {
     visitPsiElement(o);
   }
 

@@ -16,6 +16,9 @@
         <lang.parserDefinition
                 language="LightModel"
                 implementationClass="org.logoce.lmf.editor.parser.LMParserDefinition"/>
+        <lang.syntaxHighlighterFactory
+                language="LightModel"
+                implementationClass="org.logoce.lmf.editor.highlight.LMSyntaxHighlighterFactory"/>
     </extensions>
 
 </idea-plugin>

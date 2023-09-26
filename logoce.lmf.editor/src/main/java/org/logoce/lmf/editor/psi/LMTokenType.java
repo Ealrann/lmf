@@ -9,10 +9,4 @@ public final class LMTokenType extends IElementType
 	{
 		super(debugName, LMLanguage.INSTANCE);
 	}
-
-	@Override
-	public String toString()
-	{
-		return "SimpleTokenType." + super.toString();
-	}
 }

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.LMLanguage;
 
-public class LMElementType extends IElementType
+public final class LMElementType extends IElementType
 {
 	public LMElementType(@NonNls @NotNull final String debugName)
 	{

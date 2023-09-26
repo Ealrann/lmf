@@ -8,9 +8,12 @@ import com.intellij.psi.PsiElement;
 public interface LMFWord extends PsiElement {
 
   @Nullable
-  LMFList getList();
+  LMFElement getElement();
 
   @Nullable
-  LMFValue getValue();
+  LMFNamed getNamed();
+
+  @Nullable
+  LMFVal getVal();
 
 }
