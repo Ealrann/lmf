@@ -28,9 +28,9 @@ public class LMFNamedImpl extends ASTWrapperPsiElement implements LMFNamed {
   }
 
   @Override
-  @NotNull
-  public LMFVal getVal() {
-    return findNotNullChildByClass(LMFVal.class);
+  @Nullable
+  public LMFList getList() {
+    return findChildByClass(LMFList.class);
   }
 
 }

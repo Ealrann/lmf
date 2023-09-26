@@ -35,14 +35,14 @@ public class LMFWordImpl extends ASTWrapperPsiElement implements LMFWord {
 
   @Override
   @Nullable
-  public LMFNamed getNamed() {
-    return findChildByClass(LMFNamed.class);
+  public LMFList getList() {
+    return findChildByClass(LMFList.class);
   }
 
   @Override
   @Nullable
-  public LMFVal getVal() {
-    return findChildByClass(LMFVal.class);
+  public LMFNamed getNamed() {
+    return findChildByClass(LMFNamed.class);
   }
 
 }

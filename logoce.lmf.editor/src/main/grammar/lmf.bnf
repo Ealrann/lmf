@@ -13,7 +13,6 @@
   tokens = [
     TYPE = 'TYPE'
     VALUE = 'VALUE'
-    LIST_VALUE = 'LIST_VALUE'
     LIST_SEPARATOR = 'LIST_SEPARATOR'
     WHITE_SPACE = 'WHITE_SPACE'
     OPEN_NODE = 'OPEN_NODE'
@@ -24,14 +23,10 @@
 
 lmFile ::= element*
 
-element ::= OPEN_NODE TYPE word* CLOSE_NODE
+element ::= OPEN_NODE TYPE (word | WHITE_SPACE)* CLOSE_NODE
 
-word ::= val | named | element
+word ::= named | list | VALUE | element
 
-named ::= NAME val
+named ::= NAME (list | VALUE)
 
-val ::= list | VALUE
-
-list ::= VALUE list_extension list_extension*
-
-list_extension ::= LIST_SEPARATOR VALUE
+list ::= VALUE LIST_SEPARATOR VALUE (LIST_SEPARATOR VALUE)*

@@ -15,15 +15,7 @@ public class LMFVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitListExtension(@NotNull LMFListExtension o) {
-    visitPsiElement(o);
-  }
-
   public void visitNamed(@NotNull LMFNamed o) {
-    visitPsiElement(o);
-  }
-
-  public void visitVal(@NotNull LMFVal o) {
     visitPsiElement(o);
   }
 

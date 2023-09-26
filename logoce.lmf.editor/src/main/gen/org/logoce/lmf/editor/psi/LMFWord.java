@@ -11,9 +11,9 @@ public interface LMFWord extends PsiElement {
   LMFElement getElement();
 
   @Nullable
-  LMFNamed getNamed();
+  LMFList getList();
 
   @Nullable
-  LMFVal getVal();
+  LMFNamed getNamed();
 
 }

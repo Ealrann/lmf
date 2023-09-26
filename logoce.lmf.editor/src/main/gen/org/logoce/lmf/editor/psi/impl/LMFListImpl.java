@@ -27,10 +27,4 @@ public class LMFListImpl extends ASTWrapperPsiElement implements LMFList {
     else super.accept(visitor);
   }
 
-  @Override
-  @NotNull
-  public List<LMFListExtension> getListExtensionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFListExtension.class);
-  }
-
 }
