@@ -1,4 +1,4 @@
-	(Model domain=logoce.lmf.model.lang name=LMCore
+	(Model domain=org.logoce.lmf.model.lang name=LMCore
 
 		(Group LMObject)
 		(Group Named (includes /groups.0) (-att name=name /units.7 mandatory))
@@ -93,6 +93,6 @@
 		(Alias [0..*]     words=mandatory=false,many)
 		(Alias [1..*]     words=mandatory,many)
 
-		(JavaWrapper name=RawFeature domain=logoce.lmf.model.api.feature)
-		(JavaWrapper name=IModelPackage domain=logoce.lmf.model.api.model)
+		(JavaWrapper name=RawFeature domain=org.logoce.lmf.model.api.feature)
+		(JavaWrapper name=IModelPackage domain=org.logoce.lmf.model.api.model)
 	)

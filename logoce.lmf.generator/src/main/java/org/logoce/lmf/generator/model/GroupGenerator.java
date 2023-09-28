@@ -1,0 +1,33 @@
+package org.logoce.lmf.generator.model;
+
+import org.logoce.lmf.generator.group.builder.BuilderGenerator;
+import org.logoce.lmf.generator.group.iface.InterfaceGenerator;
+import org.logoce.lmf.generator.group.impl.ImplementationGenerator;
+import org.logoce.lmf.model.lang.Group;
+
+import java.io.File;
+import java.util.Optional;
+
+public class GroupGenerator
+{
+	private final InterfaceGenerator interfaceGenerator;
+	private final Optional<ImplementationGenerator> implementationGenerator;
+	private final Optional<BuilderGenerator> builderGenerator;
+
+	public GroupGenerator(final File targetDirectory, final Group<?> group)
+	{
+		final var isFinal = group.concrete();
+		interfaceGenerator = new InterfaceGenerator(targetDirectory, group);
+		implementationGenerator = isFinal ? Optional.of(new ImplementationGenerator(targetDirectory, group)) :
+								  Optional.empty();
+		builderGenerator = isFinal ? Optional.of(new BuilderGenerator(targetDirectory, group)) : Optional.empty();
+	}
+
+	public void generate()
+	{
+		interfaceGenerator.generate();
+
+		implementationGenerator.ifPresent(ImplementationGenerator::generate);
+		builderGenerator.ifPresent(BuilderGenerator::generate);
+	}
+}

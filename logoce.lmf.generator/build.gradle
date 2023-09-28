@@ -5,7 +5,7 @@ plugins {
 
 application {
 	mainModule = 'logoce.lmf.generator'
-	mainClass = 'logoce.lmf.generator.Main'
+	mainClass = 'org.logoce.lmf.generator.Main'
 }
 
 dependencies {
