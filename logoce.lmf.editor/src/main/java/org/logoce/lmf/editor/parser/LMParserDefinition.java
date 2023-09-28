@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.LMFile;
 import org.logoce.lmf.editor.LMLanguage;
 import org.logoce.lmf.editor.lexer.LMLexerAdapter;
-import org.logoce.lmf.editor.psi.LMTokenTypes;
+import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 
 public final class LMParserDefinition implements ParserDefinition
 {
@@ -66,7 +66,7 @@ public final class LMParserDefinition implements ParserDefinition
 	@Override
 	public PsiElement createElement(ASTNode node)
 	{
-		return LMTokenTypes.Factory.createElement(node);
+		return LMIntellijTokenTypes.Factory.createElement(node);
 	}
 
 }

@@ -3,6 +3,7 @@
 
 package org.logoce.lmf.model.lexer;
 
+
 public class LMLexer {
 
   /** This character denotes the end of file */

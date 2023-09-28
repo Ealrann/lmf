@@ -6,6 +6,6 @@ public final class LMLexerAdapter extends FlexAdapter
 {
 	public LMLexerAdapter()
 	{
-		super(new LMLexer(null));
+		super(new LMIntellijLexer(null));
 	}
 }

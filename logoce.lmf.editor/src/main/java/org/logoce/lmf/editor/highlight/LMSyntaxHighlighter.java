@@ -7,7 +7,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.lexer.LMLexerAdapter;
-import org.logoce.lmf.editor.psi.LMTokenTypes;
+import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
@@ -35,15 +35,15 @@ public final class LMSyntaxHighlighter extends SyntaxHighlighterBase
 	@Override
 	public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType)
 	{
-		if (tokenType == LMTokenTypes.OPEN_NODE || tokenType == LMTokenTypes.CLOSE_NODE)
+		if (tokenType == LMIntellijTokenTypes.OPEN_NODE || tokenType == LMIntellijTokenTypes.CLOSE_NODE)
 		{
 			return PARENTHESES_KEYS;
 		}
-		else if (tokenType == LMTokenTypes.TYPE)
+		else if (tokenType == LMIntellijTokenTypes.TYPE)
 		{
 			return KEY_KEYS;
 		}
-		else if (tokenType == LMTokenTypes.VALUE)
+		else if (tokenType == LMIntellijTokenTypes.VALUE)
 		{
 			return VALUE_KEYS;
 		}

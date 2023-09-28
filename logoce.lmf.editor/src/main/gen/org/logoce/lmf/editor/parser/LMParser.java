@@ -3,7 +3,7 @@ package org.logoce.lmf.editor.parser;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import static org.logoce.lmf.editor.psi.LMTokenTypes.*;
+import static org.logoce.lmf.editor.psi.LMIntellijTokenTypes.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
@@ -36,7 +36,7 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OPEN_NODE TYPE (word | WHITE_SPACE)* CLOSE_NODE
+  // OPEN_NODE TYPE (word | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
   public static boolean element(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "element")) return false;
     if (!nextTokenIs(b, OPEN_NODE)) return false;
@@ -45,6 +45,7 @@ public class LMParser implements PsiParser, LightPsiParser {
     r = consumeTokens(b, 0, OPEN_NODE, TYPE);
     r = r && element_2(b, l + 1);
     r = r && consumeToken(b, CLOSE_NODE);
+    r = r && element_4(b, l + 1);
     exit_section_(b, m, ELEMENT, r);
     return r;
   }
@@ -67,6 +68,13 @@ public class LMParser implements PsiParser, LightPsiParser {
     r = word(b, l + 1);
     if (!r) r = consumeToken(b, WHITE_SPACE);
     return r;
+  }
+
+  // WHITE_SPACE?
+  private static boolean element_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_4")) return false;
+    consumeToken(b, WHITE_SPACE);
+    return true;
   }
 
   /* ********************************************************** */

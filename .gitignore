@@ -1,6 +1,7 @@
 .gradle/
 .metadata
 *.class
+*.java~
 bin/
 .project
 .classpath

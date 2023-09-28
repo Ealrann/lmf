@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.logoce.lmf.editor.psi.impl.*;
 
-public interface LMTokenTypes {
+public interface LMIntellijTokenTypes {
 
   IElementType ELEMENT = new LMElementType("ELEMENT");
   IElementType LIST = new LMElementType("LIST");
@@ -15,6 +15,7 @@ public interface LMTokenTypes {
   IElementType WORD = new LMElementType("WORD");
 
   IElementType ASSIGN = new LMTokenType("ASSIGN");
+  IElementType BAD_CHARACTER = new LMTokenType("BAD_CHARACTER");
   IElementType CLOSE_NODE = new LMTokenType("CLOSE_NODE");
   IElementType LIST_SEPARATOR = new LMTokenType("LIST_SEPARATOR");
   IElementType NAME = new LMTokenType("NAME");
