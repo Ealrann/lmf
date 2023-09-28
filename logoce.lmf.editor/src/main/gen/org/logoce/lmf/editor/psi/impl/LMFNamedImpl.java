@@ -33,4 +33,10 @@ public class LMFNamedImpl extends ASTWrapperPsiElement implements LMFNamed {
     return findChildByClass(LMFList.class);
   }
 
+  @Override
+  @Nullable
+  public LMFVal getVal() {
+    return findChildByClass(LMFVal.class);
+  }
+
 }

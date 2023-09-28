@@ -19,6 +19,10 @@ public class LMFVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitVal(@NotNull LMFVal o) {
+    visitPsiElement(o);
+  }
+
   public void visitWord(@NotNull LMFWord o) {
     visitPsiElement(o);
   }

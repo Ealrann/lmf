@@ -18,36 +18,42 @@ import static com.intellij.psi.TokenType.WHITE_SPACE;
 
 LIST_SEPARATOR=[,]
 TYPE=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*
-VALUE=[a-zA-Z_+\-./\[\]][a-zA-Z0-9_+\-./\[\]*]*
+VALUE=[a-zA-Z0-9_+\-./\[\]*]+
 WHITE_SPACE=[ \t\n\x0B\f\r]+
 NAME=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*[=]
+QUOTE=[\"]
+ALL_EXCEPT_QUOTES = [^\"]
+ASSIGN=[=]
 
 %state WAITING_TYPE
-%state WAITING_VALUE
-%state WAITING_LIST_VALUE
+%state ASSIGNED_VALUE
+%state FORCED_VALUE
 
 %%
 
 <YYINITIAL> {
 
-	{NAME}              { yybegin(WAITING_VALUE); return LMTokenTypes.NAME;	}
-	{VALUE}       	    { yybegin(WAITING_LIST_VALUE); return LMTokenTypes.VALUE; }
+	{NAME}              { yybegin(ASSIGNED_VALUE); yypushback(1); return LMTokenTypes.NAME;	}
+	{VALUE}       	    { return LMTokenTypes.VALUE; }
+	{LIST_SEPARATOR}    { return LMTokenTypes.LIST_SEPARATOR;}
+
 	"(" 			    { yybegin(WAITING_TYPE); return LMTokenTypes.OPEN_NODE; }
 	")"				    { return LMTokenTypes.CLOSE_NODE; }
 	{WHITE_SPACE}       { return WHITE_SPACE; }
+    {QUOTE}             { yybegin(FORCED_VALUE); return LMTokenTypes.QUOTE; }
 }
 
 <WAITING_TYPE> {TYPE}   { yybegin(YYINITIAL); return LMTokenTypes.TYPE; }
 
-<WAITING_VALUE> {
-    {VALUE}             { yybegin(WAITING_LIST_VALUE); return LMTokenTypes.VALUE; }
+<ASSIGNED_VALUE> {
+    {ASSIGN}            { return LMTokenTypes.ASSIGN;	}
+    {VALUE}             { yybegin(YYINITIAL); return LMTokenTypes.VALUE; }
+    {QUOTE}             { yybegin(FORCED_VALUE); return LMTokenTypes.QUOTE; }
 }
 
-<WAITING_LIST_VALUE> {
-	{LIST_SEPARATOR}    { return LMTokenTypes.LIST_SEPARATOR;}
-	{WHITE_SPACE}       { yybegin(YYINITIAL); return WHITE_SPACE; }
-	")"				    { yybegin(YYINITIAL); return LMTokenTypes.CLOSE_NODE; }
-    {VALUE}             { return LMTokenTypes.VALUE; }
+<FORCED_VALUE> {
+    {ALL_EXCEPT_QUOTES}+ { return LMTokenTypes.VALUE; }
+    {QUOTE}              { yybegin(YYINITIAL); return LMTokenTypes.QUOTE; }
 }
 
 [^] { return BAD_CHARACTER; }

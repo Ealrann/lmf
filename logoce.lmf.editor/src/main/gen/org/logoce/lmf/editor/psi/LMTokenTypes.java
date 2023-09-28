@@ -11,12 +11,15 @@ public interface LMTokenTypes {
   IElementType ELEMENT = new LMElementType("ELEMENT");
   IElementType LIST = new LMElementType("LIST");
   IElementType NAMED = new LMElementType("NAMED");
+  IElementType VAL = new LMElementType("VAL");
   IElementType WORD = new LMElementType("WORD");
 
+  IElementType ASSIGN = new LMTokenType("ASSIGN");
   IElementType CLOSE_NODE = new LMTokenType("CLOSE_NODE");
   IElementType LIST_SEPARATOR = new LMTokenType("LIST_SEPARATOR");
   IElementType NAME = new LMTokenType("NAME");
   IElementType OPEN_NODE = new LMTokenType("OPEN_NODE");
+  IElementType QUOTE = new LMTokenType("QUOTE");
   IElementType TYPE = new LMTokenType("TYPE");
   IElementType VALUE = new LMTokenType("VALUE");
   IElementType WHITE_SPACE = new LMTokenType("WHITE_SPACE");
@@ -32,6 +35,9 @@ public interface LMTokenTypes {
       }
       else if (type == NAMED) {
         return new LMFNamedImpl(node);
+      }
+      else if (type == VAL) {
+        return new LMFValImpl(node);
       }
       else if (type == WORD) {
         return new LMFWordImpl(node);

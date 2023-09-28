@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface LMFList extends PsiElement {
 
+  @NotNull
+  List<LMFVal> getValList();
+
 }

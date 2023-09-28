@@ -18,6 +18,8 @@
     OPEN_NODE = 'OPEN_NODE'
     CLOSE_NODE = 'CLOSE_NODE'
     NAME = 'NAME'
+    QUOTE = 'QUOTE'
+    ASSIGN = 'ASSIGN'
   ]
 }
 
@@ -25,8 +27,10 @@ lmFile ::= element*
 
 element ::= OPEN_NODE TYPE (word | WHITE_SPACE)* CLOSE_NODE
 
-word ::= named | list | VALUE | element
+word ::= named | list | val | element
 
-named ::= NAME (list | VALUE)
+val ::= QUOTE? VALUE QUOTE?
 
-list ::= VALUE LIST_SEPARATOR VALUE (LIST_SEPARATOR VALUE)*
+named ::= NAME ASSIGN (list | val)
+
+list ::= val (LIST_SEPARATOR val)+
