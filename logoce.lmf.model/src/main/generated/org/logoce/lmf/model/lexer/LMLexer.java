@@ -3,6 +3,7 @@
 
 package org.logoce.lmf.model.lexer;
 
+@SuppressWarnings("ALL")
 
 public class LMLexer {
 
@@ -62,10 +63,10 @@ public class LMLexer {
   private static final int [] ZZ_CMAP_BLOCKS = zzUnpackcmap_blocks();
 
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
-    "\11\0\5\1\22\0\1\1\1\0\1\2\5\0\1\3"+
-    "\1\4\1\5\1\6\1\7\1\6\2\5\12\10\3\0"+
-    "\1\11\3\0\32\6\1\5\1\0\1\5\1\0\1\6"+
-    "\1\0\32\6\u0185\0";
+    "\11\0\5\1\22\0\1\1\1\0\1\2\1\3\4\0"+
+    "\1\4\1\5\1\3\1\6\1\7\1\6\2\3\12\10"+
+    "\3\0\1\11\3\0\32\6\1\3\1\0\1\3\1\0"+
+    "\1\6\1\0\32\6\u0185\0";
 
   private static int [] zzUnpackcmap_blocks() {
     int [] result = new int[512];
@@ -92,11 +93,11 @@ public class LMLexer {
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-    "\4\0\1\1\1\2\1\3\1\4\1\5\2\6\1\7"+
-    "\1\10\1\11\1\12\1\6\1\13\1\14";
+    "\4\0\1\1\1\2\1\3\1\4\1\5\1\6\1\4"+
+    "\1\7\1\10\1\11\1\12\1\4\1\13\1\14\1\15";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[18];
+    int [] result = new int[19];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -121,12 +122,12 @@ public class LMLexer {
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\12\0\24\0\36\0\50\0\62\0\50\0\50"+
-    "\0\50\0\74\0\106\0\50\0\120\0\132\0\50\0\144"+
-    "\0\50\0\50";
+    "\0\0\0\12\0\24\0\36\0\50\0\62\0\50\0\74"+
+    "\0\50\0\50\0\106\0\50\0\120\0\50\0\132\0\144"+
+    "\0\50\0\50\0\50";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[18];
+    int [] result = new int[19];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -150,11 +151,12 @@ public class LMLexer {
 
   private static final String ZZ_TRANS_PACKED_0 =
     "\1\5\1\6\1\7\1\10\1\11\1\12\1\13\1\14"+
-    "\1\12\7\5\1\15\5\5\1\7\2\5\2\16\1\5"+
-    "\1\16\1\17\2\20\1\21\7\20\13\0\1\6\15\0"+
-    "\2\12\1\0\1\12\6\0\1\12\1\13\1\0\1\13"+
-    "\1\22\6\0\1\15\1\0\1\15\6\0\2\16\1\0"+
-    "\1\16\1\0\2\20\1\0\7\20";
+    "\1\10\7\5\1\15\2\5\1\16\2\5\1\7\1\17"+
+    "\2\5\1\17\1\5\1\17\1\16\2\20\1\21\7\20"+
+    "\13\0\1\6\13\0\1\10\2\0\1\10\1\0\1\10"+
+    "\4\0\1\10\2\0\1\13\1\0\1\13\1\22\6\0"+
+    "\1\15\1\0\1\15\1\23\3\0\1\17\2\0\1\17"+
+    "\1\0\1\17\1\0\2\20\1\0\7\20";
 
   private static int [] zzUnpacktrans() {
     int [] result = new int[110];
@@ -195,11 +197,11 @@ public class LMLexer {
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\4\0\1\11\1\1\3\11\2\1\1\11\2\1\1\11"+
-    "\1\1\2\11";
+    "\4\0\1\11\1\1\1\11\1\1\2\11\1\1\1\11"+
+    "\1\1\1\11\2\1\3\11";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[18];
+    int [] result = new int[19];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -319,7 +321,7 @@ public class LMLexer {
    *
    * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  private boolean zzRefill() throws java.io.IOException {
+  private boolean zzRefill() {
     return true;
   }
 
@@ -424,7 +426,7 @@ public class LMLexer {
    * @return      the next token
    * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  public LMLexerToken next() throws java.io.IOException
+  public ELMTokenType next() throws java.io.IOException
   {
     int zzInput;
     int zzAction;
@@ -509,65 +511,70 @@ public class LMLexer {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { return LMTokenTypes.BAD_CHARACTER;
-            }
-          // fall through
-          case 13: break;
-          case 2:
-            { return LMTokenTypes.WHITE_SPACE;
+            { return ELMTokenType.BAD_CHARACTER;
             }
           // fall through
           case 14: break;
-          case 3:
-            { yybegin(FORCED_VALUE); return LMTokenTypes.QUOTE;
+          case 2:
+            { return ELMTokenType.WHITE_SPACE;
             }
           // fall through
           case 15: break;
-          case 4:
-            { yybegin(WAITING_TYPE); return LMTokenTypes.OPEN_NODE;
+          case 3:
+            { yybegin(FORCED_VALUE); return ELMTokenType.QUOTE;
             }
           // fall through
           case 16: break;
-          case 5:
-            { return LMTokenTypes.CLOSE_NODE;
+          case 4:
+            { return ELMTokenType.VALUE;
             }
           // fall through
           case 17: break;
-          case 6:
-            { return LMTokenTypes.VALUE;
+          case 5:
+            { yybegin(WAITING_TYPE); return ELMTokenType.OPEN_NODE;
             }
           // fall through
           case 18: break;
-          case 7:
-            { return LMTokenTypes.LIST_SEPARATOR;
+          case 6:
+            { return ELMTokenType.CLOSE_NODE;
             }
           // fall through
           case 19: break;
-          case 8:
-            { yybegin(YYINITIAL); return LMTokenTypes.TYPE;
+          case 7:
+            { return ELMTokenType.LIST_SEPARATOR;
             }
           // fall through
           case 20: break;
-          case 9:
-            { yybegin(YYINITIAL); return LMTokenTypes.VALUE;
+          case 8:
+            { yybegin(YYINITIAL); return ELMTokenType.TYPE;
             }
           // fall through
           case 21: break;
-          case 10:
-            { return LMTokenTypes.ASSIGN;
+          case 9:
+            { return ELMTokenType.ASSIGN;
             }
           // fall through
           case 22: break;
-          case 11:
-            { yybegin(YYINITIAL); return LMTokenTypes.QUOTE;
+          case 10:
+            { yybegin(YYINITIAL); return ELMTokenType.VALUE;
             }
           // fall through
           case 23: break;
-          case 12:
-            { yybegin(ASSIGNED_VALUE); yypushback(1); return LMTokenTypes.NAME;
+          case 11:
+            { yybegin(YYINITIAL); return ELMTokenType.QUOTE;
             }
           // fall through
           case 24: break;
+          case 12:
+            { yybegin(ASSIGNED_VALUE); yypushback(1); return ELMTokenType.VALUE_NAME;
+            }
+          // fall through
+          case 25: break;
+          case 13:
+            { yypushback(1); return ELMTokenType.TYPE_NAME;
+            }
+          // fall through
+          case 26: break;
           default:
             zzScanError(ZZ_NO_MATCH);
           }

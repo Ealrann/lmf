@@ -36,34 +36,53 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OPEN_NODE TYPE (word | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+  // OPEN_NODE (TYPE_NAME ASSIGN)? TYPE (word | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
   public static boolean element(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "element")) return false;
     if (!nextTokenIs(b, OPEN_NODE)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, OPEN_NODE, TYPE);
-    r = r && element_2(b, l + 1);
+    r = consumeToken(b, OPEN_NODE);
+    r = r && element_1(b, l + 1);
+    r = r && consumeToken(b, TYPE);
+    r = r && element_3(b, l + 1);
     r = r && consumeToken(b, CLOSE_NODE);
-    r = r && element_4(b, l + 1);
+    r = r && element_5(b, l + 1);
     exit_section_(b, m, ELEMENT, r);
     return r;
   }
 
+  // (TYPE_NAME ASSIGN)?
+  private static boolean element_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_1")) return false;
+    element_1_0(b, l + 1);
+    return true;
+  }
+
+  // TYPE_NAME ASSIGN
+  private static boolean element_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, TYPE_NAME, ASSIGN);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
   // (word | WHITE_SPACE)*
-  private static boolean element_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element_2")) return false;
+  private static boolean element_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_3")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!element_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "element_2", c)) break;
+      if (!element_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "element_3", c)) break;
     }
     return true;
   }
 
   // word | WHITE_SPACE
-  private static boolean element_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element_2_0")) return false;
+  private static boolean element_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_3_0")) return false;
     boolean r;
     r = word(b, l + 1);
     if (!r) r = consumeToken(b, WHITE_SPACE);
@@ -71,8 +90,8 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   // WHITE_SPACE?
-  private static boolean element_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element_4")) return false;
+  private static boolean element_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element_5")) return false;
     consumeToken(b, WHITE_SPACE);
     return true;
   }

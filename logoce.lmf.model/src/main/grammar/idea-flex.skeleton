@@ -78,7 +78,7 @@
    *
    * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  private boolean zzRefill() throws java.io.IOException {
+  private boolean zzRefill() {
     return true;
   }
 

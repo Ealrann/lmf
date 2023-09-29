@@ -9,12 +9,12 @@ import java.util.Optional;
 
 public class JavaWrapperResolver extends AttributeResolver<Object>
 {
-	private final JavaWrapper javaWrapper;
+	private final JavaWrapper<?> javaWrapper;
 
 	public JavaWrapperResolver(final Attribute<Object, ?> attribute)
 	{
 		super(attribute);
-		javaWrapper = (JavaWrapper) attribute.datatype();
+		javaWrapper = (JavaWrapper<?>) attribute.datatype();
 	}
 
 	@Override

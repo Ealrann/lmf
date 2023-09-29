@@ -3,23 +3,25 @@ package org.logoce.lmf.model.resource.transform.node;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.resource.ptree.PToken;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
-import org.logoce.lmf.model.resource.util.Tree;
 import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.Tree;
 
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class TreeBuilderNodeBuilder
 {
-	private final NamedNode.Builder namedNodeBuilder;
+	private final ParsedNode.Builder namedNodeBuilder;
 
 	private final Map<String, ModelGroup<?>> groups;
 
 	private final Map<Group<?>, TreeToFeatureResolver> resolvers;
 
-	public TreeBuilderNodeBuilder(final NamedNode.Builder namedNodeBuilder,
+	public TreeBuilderNodeBuilder(final ParsedNode.Builder namedNodeBuilder,
 								  final Map<String, ModelGroup<?>> groups,
 								  final Map<Group<?>, TreeToFeatureResolver> resolvers)
 	{
@@ -28,12 +30,12 @@ public class TreeBuilderNodeBuilder
 		this.resolvers = resolvers;
 	}
 
-	public <T extends LMObject> TreeBuilderNode<T> mapTree(final Tree<List<String>> node)
+	public <T extends LMObject> TreeBuilderNode<T> mapTree(final Tree<List<PToken>> node)
 	{
 		return node.map(this::buildNodeInfo, TreeBuilderNode<T>::new);
 	}
 
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<List<String>> node)
+	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<List<PToken>> node)
 	{
 		final var namedNode = namedNodeBuilder.build(node.data());
 		final var modelGroup = this.<T>findModelGroup(namedNode, false);
@@ -48,43 +50,26 @@ public class TreeBuilderNodeBuilder
 		}
 		else
 		{
-			return new BuilderNodeInfo<>(null, namedNode.words(), modelGroup);
+			return new BuilderNodeInfo<>(null, namedNode.values(), modelGroup);
 		}
 	}
 
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(NamedNode namedNode,
-																			Group<?> parentGroup,
-																			ModelGroup<T> modelGroup)
+	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(final ParsedNode node,
+																			final Group<?> parentGroup,
+																			final ModelGroup<T> modelGroup)
 	{
 		final var effectiveGroup = modelGroup != null
 								   ? modelGroup
-								   : this.<T>findModelGroupFromParent(namedNode, parentGroup);
-		final var name = namedNode.name();
-		final var equalIndex = name.indexOf('=');
-		final var containmentName = equalIndex == -1 ? null : name.substring(0, equalIndex);
-		final var resolvedRelation = resolveContainmentRelation(containmentName, parentGroup, effectiveGroup.group());
+								   : this.<T>findModelGroupFromParent(node, parentGroup);
+		final var resolvedRelation = resolveContainmentRelation(node, parentGroup, effectiveGroup);
 
-		if (resolvedRelation == null)
-		{
-			throw new NoSuchElementException("Cannot find containment " +
-											 "relation from parent " +
-											 parentGroup.name() +
-											 " (" +
-											 name +
-											 ") to child " +
-											 effectiveGroup.group()
-														   .name());
-		}
-
-		return new BuilderNodeInfo<>(resolvedRelation, namedNode.words(), effectiveGroup);
+		return new BuilderNodeInfo<>(resolvedRelation, node.values(), effectiveGroup);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroup(final NamedNode namedNode, boolean mandatory)
+	private <T extends LMObject> ModelGroup<T> findModelGroup(final ParsedNode node, boolean mandatory)
 	{
-		final var name = namedNode.name();
-		final var equalIndex = name.indexOf('=');
-		final var groupName = equalIndex == -1 ? name : name.substring(equalIndex + 1);
+		final var groupName = node.type().values().get(0);
 		final var modelGroup = groups.get(groupName);
 		if (mandatory && modelGroup == null)
 		{
@@ -94,48 +79,64 @@ public class TreeBuilderNodeBuilder
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final NamedNode namedNode,
+	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final ParsedNode node,
 																		final Group<?> parentGroup)
 	{
+		final var containmentName = node.type().firstToken();
 		final var groupFromParent = parentGroup.features()
 											   .stream()
 											   .filter(Relation.class::isInstance)
 											   .map(Relation.class::cast)
-											   .filter(r -> r.name()
-															 .equals(namedNode.name()))
-											   .map(r -> r.reference()
-														  .group())
+											   .filter(r -> r.name().equals(containmentName))
+											   .map(r -> r.reference().group())
 											   .findAny()
 											   .orElseThrow(() -> new NoSuchElementException("Cannot resolve " +
 																							 "containance of " +
-																							 namedNode.name()));
+																							 containmentName));
 
 		return (ModelGroup<T>) groups.get(groupFromParent.name());
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(String containmentName,
-																		   Group<?> parentGroup,
-																		   Group<T> childGroup)
+	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final ParsedNode node,
+																		   final Group<?> parentGroup,
+																		   final ModelGroup<T> modelGroup)
 	{
-		final var preciseChildren = resolvers.get(parentGroup)
-											 .streamContainmentRelations()
-											 .filter(f -> f.name()
-														   .equals(containmentName))
-											 .findAny();
+		final var containmentName = node.type().firstToken();
+		final var fromName = resolveFromName(parentGroup, containmentName);
+		return (Relation<T, ?>) fromName.or(() -> resolveFromGroup(parentGroup, modelGroup))
+										.orElseThrow(() -> buildNoSuchElementException(parentGroup,
+																					   modelGroup,
+																					   containmentName));
+	}
 
-		if (preciseChildren.isPresent())
-		{
-			return (Relation<T, ?>) preciseChildren.get();
-		}
-		else
-		{
-			return (Relation<T, ?>) resolvers.get(parentGroup)
-											 .streamContainmentRelations()
-											 .filter(r -> ModelUtils.isSubGroup(r.reference()
-																				 .group(), childGroup))
-											 .findAny()
-											 .orElse(null);
-		}
+	private <T extends LMObject> Optional<? extends Relation<?, ?>> resolveFromGroup(final Group<?> parentGroup,
+																					 final ModelGroup<T> modelGroup)
+	{
+		return resolvers.get(parentGroup)
+						.streamContainmentRelations()
+						.filter(r -> ModelUtils.isSubGroup(r.reference().group(), modelGroup.group()))
+						.findAny();
+	}
+
+	private Optional<Relation<?, ?>> resolveFromName(final Group<?> parentGroup, final String containmentName)
+	{
+		return resolvers.get(parentGroup)
+						.streamContainmentRelations()
+						.filter(f -> f.name().equals(containmentName))
+						.findAny();
+	}
+
+	private static <T extends LMObject> NoSuchElementException buildNoSuchElementException(final Group<?> parentGroup,
+																						   final ModelGroup<T> modelGroup,
+																						   final String containmentName)
+	{
+		return new NoSuchElementException("Cannot find containment " +
+										  "relation from parent " +
+										  parentGroup.name() +
+										  " (" +
+										  containmentName +
+										  ") to child " +
+										  modelGroup.group().name());
 	}
 }

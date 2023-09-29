@@ -18,7 +18,7 @@ public class BasicTest
 	@Test
 	public void singleElement()
 	{
-		final var textModel = "(Model test.model:World)";
+		final var textModel = "(Model domain=test.model name=World)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PTreeToJava();
@@ -28,7 +28,8 @@ public class BasicTest
 		assertTrue(root instanceof Model);
 
 		final var model = (Model) root;
-		assertEquals("test.model:World", model.name());
+		assertEquals("World", model.name());
+		assertEquals("test.model", model.domain());
 	}
 
 	@Test

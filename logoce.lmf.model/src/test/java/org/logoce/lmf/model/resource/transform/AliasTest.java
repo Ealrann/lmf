@@ -31,10 +31,10 @@ public class AliasTest
 		assertEquals("concrete", alias.words().get(1));
 	}
 
-	//@Test
+	@Test
 	public void simpleAssignAlias()
 	{
-		final var textModel = "(Alias name=Definition words=Group,\"concrete=false\",contains=true)";
+		final var textModel = "(Alias name=Definition words=Group,\"concrete=false\",\"contains=true\")";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PTreeToJava();
@@ -49,6 +49,25 @@ public class AliasTest
 		assertEquals("Group", alias.words().get(0));
 		assertEquals("concrete=false", alias.words().get(1));
 		assertEquals("contains=true", alias.words().get(2));
+	}
+
+	@Test
+	public void simpleAliasResolution()
+	{
+		final var textModel = "(-att [1..*] name=count datatype=#LMCore/units.3)";
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var ptreeToJava = new PTreeToJava();
+		final var roots = ptreeToJava.transform(ptree);
+
+		final var root = roots.get(0);
+		assertTrue(root instanceof Attribute<?, ?>);
+		final var att0 = (Attribute<?, ?>) root;
+
+		assertEquals("count", att0.name());
+		assertEquals(Primitive.Int, ((Unit<?>) att0.datatype()).primitive());
+		assertTrue(att0.many());
+		assertTrue(att0.immutable());
 	}
 
 	@Test

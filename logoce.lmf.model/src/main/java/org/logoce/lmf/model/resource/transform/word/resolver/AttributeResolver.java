@@ -4,7 +4,7 @@ import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
-public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements IWordResolver<T>
+public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements ITokenResolver<T>
 {
 	public AttributeResolver(final Attribute<T, ?> attribute)
 	{

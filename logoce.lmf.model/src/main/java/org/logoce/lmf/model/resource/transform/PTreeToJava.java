@@ -5,12 +5,13 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Named;
+import org.logoce.lmf.model.resource.ptree.PToken;
 import org.logoce.lmf.model.resource.transform.node.ModelGroup;
-import org.logoce.lmf.model.resource.transform.node.NamedNode;
+import org.logoce.lmf.model.resource.transform.node.ParsedNode;
 import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
 import org.logoce.lmf.model.resource.transform.node.TreeBuilderNodeBuilder;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
-import org.logoce.lmf.model.resource.util.Tree;
+import org.logoce.lmf.model.util.Tree;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.util.Collection;
@@ -35,7 +36,7 @@ public final class PTreeToJava
 												  .collect(Collectors.toUnmodifiableMap(Named::name,
 																						Function.identity()));
 
-		final var namedNodeBuilder = new NamedNode.Builder(aliases);
+		final var namedNodeBuilder = new ParsedNode.Builder(aliases);
 
 		final var groups = ModelRegistry.Instance.models()
 												 .flatMap(PTreeToJava::modelGroups)
@@ -51,7 +52,7 @@ public final class PTreeToJava
 		nodeMapper = new TreeBuilderNodeBuilder(namedNodeBuilder, groups, resolvers);
 	}
 
-	public List<? extends LMObject> transform(final Tree<List<String>> tree)
+	public List<? extends LMObject> transform(final Tree<List<PToken>> tree)
 	{
 		final var builderTrees = tree.children()
 									 .stream()

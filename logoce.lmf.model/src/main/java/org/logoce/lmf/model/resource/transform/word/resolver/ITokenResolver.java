@@ -5,16 +5,17 @@ import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface IWordResolver<T>
+public interface ITokenResolver<T>
 {
 	boolean match(String featureName);
-	IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, String value);
-	Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, String value);
+	IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, List<String> value);
+	Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, List<String> value);
 
 	@SuppressWarnings("unchecked")
-	static Optional<IWordResolver<?>> buildResolver(Feature<?, ?> feature)
+	static Optional<ITokenResolver<?>> buildResolver(Feature<?, ?> feature)
 	{
 		if (feature instanceof Attribute<?, ?> attribute)
 		{
@@ -37,7 +38,7 @@ public interface IWordResolver<T>
 		}
 	}
 
-	static Optional<IWordResolver<?>> buildRelationResolver(Relation<?, ?> relation)
+	static Optional<ITokenResolver<?>> buildRelationResolver(Relation<?, ?> relation)
 	{
 		if (!relation.contains())
 		{

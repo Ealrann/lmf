@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
-import org.logoce.lmf.editor.lexer.LMLexerAdapter;
+import org.logoce.lmf.editor.lexer.LMIntellijLexerAdapter;
 import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
@@ -29,7 +29,7 @@ public final class LMSyntaxHighlighter extends SyntaxHighlighterBase
 	@Override
 	public Lexer getHighlightingLexer()
 	{
-		return new LMLexerAdapter();
+		return new LMIntellijLexerAdapter();
 	}
 
 	@Override

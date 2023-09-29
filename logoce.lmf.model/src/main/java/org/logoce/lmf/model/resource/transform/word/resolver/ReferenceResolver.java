@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public final class ReferenceResolver<T extends LMObject> extends AbstractResolver<T, Relation<T, ?>> implements
-																									 IWordResolver<T>
+																									 ITokenResolver<T>
 {
 	public ReferenceResolver(final Relation<T, ?> relation)
 	{
@@ -66,9 +66,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 				final var children = current.children()
 											.stream()
-											.filter(c -> c.containingRelation()
-														  .name()
-														  .equals(featureName))
+											.filter(c -> c.containingRelation().name().equals(featureName))
 											.toList();
 				if (children.size() < index + 1)
 				{
@@ -78,10 +76,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 		}
 
-		if (ModelUtils.isSubGroup(feature.reference()
-										 .group(),
-								  current.modelGroup()
-										 .group()))
+		if (ModelUtils.isSubGroup(feature.reference().group(), current.modelGroup().group()))
 		{
 			return Optional.of(new DynamicReferenceResolution<>(feature, (TreeBuilderNode<T>) current));
 		}
@@ -99,8 +94,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 		final var modelName = uri.substring(0, firstSlashIndex);
 		final var path = uri.substring(firstSlashIndex + 1);
-		final var model = ModelRegistry.Instance.get(modelName)
-												.model();
+		final var model = ModelRegistry.Instance.get(modelName).model();
 
 		LMObject current = model;
 		final var steps = path.split("/");
@@ -113,8 +107,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			final var feature = current.lmGroup()
 									   .features()
 									   .stream()
-									   .filter(f -> f.name()
-													 .equals(featureName))
+									   .filter(f -> f.name().equals(featureName))
 									   .findAny()
 									   .orElseThrow();
 
@@ -130,8 +123,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 		}
 
-		if (ModelUtils.isSubGroup(feature.reference()
-										 .group(), current.lmGroup()))
+		if (ModelUtils.isSubGroup(feature.reference().group(), current.lmGroup()))
 		{
 			return Optional.of(new StaticReferenceResolution<>(feature, (T) current));
 		}

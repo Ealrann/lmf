@@ -141,7 +141,8 @@ public interface LMCoreDefinition {
     interface ALIAS {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
 
-      Attribute<String, List<String>> WORDS = new AttributeImpl<>("words", true, true, false, Alias.Features.words, Units.STRING, null, List.of());
+      Attribute<String, List<String>> WORDS = new AttributeImpl<>("words", true, true, false, Alias.Features.words,
+																  Units.STRING, null, List.of());
 
       List<Feature<?, ?>> ALL = List.of(NAME, WORDS);
     }

@@ -92,4 +92,33 @@ public class ModelUtils
 			addHierarchy((Group<?>) include.group(), res);
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	public static final Stream<LMObject> streamTree(final LMObject root)
+	{
+		final var childStream = root.lmGroup()
+									.features()
+									.stream()
+									.filter(Relation.class::isInstance)
+									.map(Relation.class::cast)
+									.filter(Relation::contains)
+									.flatMap(r -> streamChildren(root, r));
+
+		return Stream.concat(Stream.of(root), childStream);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static final <T extends LMObject> Stream<T> streamChildren(final LMObject element,
+																	  final Relation<T, ?> relation)
+	{
+		if (relation.many())
+		{
+			final var list = (List<T>) element.get(relation);
+			return list.stream();
+		}
+		else
+		{
+			return Stream.of((T) element.get(relation));
+		}
+	}
 }

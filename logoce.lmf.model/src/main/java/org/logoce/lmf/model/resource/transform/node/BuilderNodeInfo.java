@@ -6,5 +6,5 @@ import org.logoce.lmf.model.lang.Relation;
 import java.util.List;
 
 public record BuilderNodeInfo<T extends LMObject>(Relation<T, ?> containingRelation,
-												  List<String> words,
+												  List<ParsedToken> tokens,
 												  ModelGroup<T> modelGroup) {}

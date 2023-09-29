@@ -1,92 +1,37 @@
 package org.logoce.lmf.model.resource.ptree;
 
-import org.logoce.lmf.model.resource.util.Tree;
+import org.logoce.lmf.model.lexer.ELMTokenType;
+import org.logoce.lmf.model.util.Tree;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class PTreeReader
 {
-	private static final String QUOTED_REGEX = "(?=[\"'])(?:\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\"|'[^'\\\\]*(?:\\\\[\\s\\S][^'\\\\]*)*')";
-	private static final String WORD_REGEX = "[^\\s()\"]+";
-	private static final String PARENTHESIS_REGEX = "[()]";
-
-	private static final String PARSE_REGEX = String.join("|", QUOTED_REGEX, WORD_REGEX, PARENTHESIS_REGEX);
-	private static final Pattern PARSE_PATTERN = Pattern.compile(PARSE_REGEX);
-
-	private ReaderBuildState buildState = null;
-
-	public Tree<List<String>> read(final InputStream inputStream)
+	public Tree<List<PToken>> read(final InputStream inputStream)
 	{
-		try
-		{
-			buildState = new ReaderBuildState();
-			parseFile(inputStream);
-			return buildState.buildTree();
-		}
-		finally
-		{
-			buildState = null;
-		}
-	}
+		final var lexer = new LMIterableLexer();
+		final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+		final var charSequence = reader.lines().collect(Collectors.joining("\n"));
 
-	private void parseFile(final InputStream inputStream)
-	{
-		assert inputStream != null;
-		try (final var inputStreamReader = new InputStreamReader(inputStream))
-		{
-			try (final var reader = new BufferedReader(inputStreamReader))
-			{
-				String line;
-				while ((line = reader.readLine()) != null)
-				{
-					final var matcher = PARSE_PATTERN.matcher(line);
-					while (matcher.find())
-					{
-						final var word = trimQuotes(matcher.group());
-						parseWord(word);
-					}
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
+		lexer.reset(charSequence, 0);
 
-	private void parseWord(final String word)
-	{
-		if (word.equals("("))
+		final var buildState = new ReaderBuildState();
+		for (final PToken token : lexer)
 		{
-			buildState.stack();
+			final var type = token.type();
+			if (type == ELMTokenType.OPEN_NODE) buildState.stack();
+			else if (type == ELMTokenType.CLOSE_NODE) buildState.pop();
+			else buildState.addToken(token);
 		}
-		else if (word.equals(")"))
-		{
-			buildState.pop();
-		}
-		else
-		{
-			buildState.addWord(word);
-		}
-	}
 
-	private static String trimQuotes(final String word)
-	{
-		if (word.startsWith("\""))
-		{
-			return word.substring(1, word.length() - 1);
-		}
-		else
-		{
-			return word;
-		}
+		return buildState.buildTree();
 	}
 
 	private static final class ReaderBuildState
@@ -94,46 +39,25 @@ public final class PTreeReader
 		private final Deque<PTreeBuilder> stack = new ArrayDeque<>();
 		private final PTreeBuilder tree = new PTreeBuilder();
 
-		private boolean mergeWithPreviousWord = false;
-
-		public Tree<List<String>> buildTree()
+		public Tree<List<PToken>> buildTree()
 		{
 			return tree.build();
 		}
 
 		public void stack()
 		{
-			assert !mergeWithPreviousWord;
-			final var newNode = stack.isEmpty()
-					? tree.newChild()
-					: stack.getLast()
-						   .newChild();
+			final var newNode = stack.isEmpty() ? tree.newChild() : stack.getLast().newChild();
 			stack.add(newNode);
 		}
 
 		public void pop()
 		{
-			assert !mergeWithPreviousWord;
 			stack.removeLast();
 		}
 
-		public void addWord(final String word)
+		public void addToken(final PToken token)
 		{
-			if (mergeWithPreviousWord)
-			{
-				stack.getLast()
-					 .mergeWithLastWord(word);
-				mergeWithPreviousWord = false;
-			}
-			else
-			{
-				stack.getLast()
-					 .addWord(word);
-				if (word.endsWith("="))
-				{
-					mergeWithPreviousWord = true;
-				}
-			}
+			if (!stack.isEmpty()) stack.getLast().addWord(token);
 		}
 	}
 }

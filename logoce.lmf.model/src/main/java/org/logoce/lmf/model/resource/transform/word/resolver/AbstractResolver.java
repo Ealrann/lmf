@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IWordResolver<T>
+public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements ITokenResolver<T>
 {
 	protected final F feature;
 
@@ -21,46 +21,39 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IW
 	@Override
 	public final boolean match(final String featureName)
 	{
-		return feature.name()
-					  .equals(featureName);
+		return feature.name().equals(featureName);
 	}
 
 	@Override
-	public IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, String value)
+	public IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, List<String> values)
 	{
-		return resolve(node, value).orElseThrow();
+		return resolve(node, values).orElseThrow();
 	}
 
 	@Override
-	public Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, String value)
+	public Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, List<String> values)
 	{
-		final int indexEqual = value.indexOf(',');
-		if (indexEqual > -1)
+		if (values.size() > 1 && !feature.many())
 		{
-			if (!feature.many())
+			return Optional.empty();
+		}
+
+		final List<IFeatureResolution> resolutions = new ArrayList<>();
+		for (var value : values)
+		{
+			final var resolution = internalResolve(node, value);
+			if (resolution.isEmpty())
 			{
 				return Optional.empty();
 			}
-
-			final List<IFeatureResolution> resolutions = new ArrayList<>();
-			final var split = value.split(",");
-			for (final var val : split)
+			else
 			{
-				final var res = resolve(node, val);
-				if (res.isEmpty())
-				{
-					return Optional.empty();
-				}
-				else
-				{
-					resolutions.add(res.get());
-				}
+				resolutions.add(resolution.get());
 			}
-
-			return Optional.of(new MultipleResolution(resolutions));
 		}
 
-		return internalResolve(node, value);
+		if (resolutions.size() > 1) return Optional.of(new MultipleResolution(resolutions));
+		else return Optional.of(resolutions.get(0));
 	}
 
 	protected abstract Optional<? extends IFeatureResolution> internalResolve(TreeBuilderNode<?> node, String value);

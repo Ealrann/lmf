@@ -18,7 +18,8 @@
     BAD_CHARACTER = 'BAD_CHARACTER'
     OPEN_NODE = 'OPEN_NODE'
     CLOSE_NODE = 'CLOSE_NODE'
-    NAME = 'NAME'
+    VALUE_NAME = 'VALUE_NAME'
+    TYPE_NAME = 'TYPE_NAME'
     QUOTE = 'QUOTE'
     ASSIGN = 'ASSIGN'
   ]
@@ -26,7 +27,7 @@
 
 lmFile ::= element*
 
-element ::= OPEN_NODE TYPE (word | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+element ::= OPEN_NODE (TYPE_NAME ASSIGN)? TYPE (word | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
 
 word ::= named | list | val | element
 

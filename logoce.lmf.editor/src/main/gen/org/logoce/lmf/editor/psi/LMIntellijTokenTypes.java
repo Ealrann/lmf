@@ -22,7 +22,9 @@ public interface LMIntellijTokenTypes {
   IElementType OPEN_NODE = new LMTokenType("OPEN_NODE");
   IElementType QUOTE = new LMTokenType("QUOTE");
   IElementType TYPE = new LMTokenType("TYPE");
+  IElementType TYPE_NAME = new LMTokenType("TYPE_NAME");
   IElementType VALUE = new LMTokenType("VALUE");
+  IElementType VALUE_NAME = new LMTokenType("VALUE_NAME");
   IElementType WHITE_SPACE = new LMTokenType("WHITE_SPACE");
 
   class Factory {

@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.resource.util;
+package org.logoce.lmf.model.util;
 
 import java.util.List;
 import java.util.function.Consumer;

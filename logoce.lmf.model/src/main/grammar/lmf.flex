@@ -1,18 +1,20 @@
 package org.logoce.lmf.model.lexer;
 
+@SuppressWarnings("ALL")
 %%
 
 %public
 %class LMLexer
 %function next
-%type LMLexerToken
+%type ELMTokenType
 %unicode
 
 LIST_SEPARATOR=[,]
 TYPE=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*
-VALUE=[a-zA-Z0-9_+\-./\[\]*]+
+TYPE_NAME=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*[=]
+VALUE=[a-zA-Z0-9_+\-./\[\]*#]+
+VALUE_NAME=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*[=]
 WHITE_SPACE=[ \t\n\x0B\f\r]+
-NAME=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*[=]
 QUOTE=[\"]
 ALL_EXCEPT_QUOTES = [^\"]
 ASSIGN=[=]
@@ -25,27 +27,31 @@ ASSIGN=[=]
 
 <YYINITIAL> {
 
-	{NAME}              { yybegin(ASSIGNED_VALUE); yypushback(1); return LMTokenTypes.NAME;	}
-	{VALUE}       	    { return LMTokenTypes.VALUE; }
-	{LIST_SEPARATOR}    { return LMTokenTypes.LIST_SEPARATOR;}
+	{VALUE_NAME}        { yybegin(ASSIGNED_VALUE); yypushback(1); return ELMTokenType.VALUE_NAME;	}
+	{VALUE}       	    { return ELMTokenType.VALUE; }
+	{LIST_SEPARATOR}    { return ELMTokenType.LIST_SEPARATOR;}
 
-	"(" 			    { yybegin(WAITING_TYPE); return LMTokenTypes.OPEN_NODE; }
-	")"				    { return LMTokenTypes.CLOSE_NODE; }
-	{WHITE_SPACE}       { return LMTokenTypes.WHITE_SPACE; }
-    {QUOTE}             { yybegin(FORCED_VALUE); return LMTokenTypes.QUOTE; }
+	"(" 			    { yybegin(WAITING_TYPE); return ELMTokenType.OPEN_NODE; }
+	")"				    { return ELMTokenType.CLOSE_NODE; }
+	{WHITE_SPACE}       { return ELMTokenType.WHITE_SPACE; }
+    {QUOTE}             { yybegin(FORCED_VALUE); return ELMTokenType.QUOTE; }
 }
 
-<WAITING_TYPE> {TYPE}   { yybegin(YYINITIAL); return LMTokenTypes.TYPE; }
+<WAITING_TYPE> {
+	{TYPE_NAME}         { yypushback(1); return ELMTokenType.TYPE_NAME; }
+    {ASSIGN}            { return ELMTokenType.ASSIGN;	}
+	{TYPE}              { yybegin(YYINITIAL); return ELMTokenType.TYPE; }
+}
 
 <ASSIGNED_VALUE> {
-    {ASSIGN}            { return LMTokenTypes.ASSIGN;	}
-    {VALUE}             { yybegin(YYINITIAL); return LMTokenTypes.VALUE; }
-    {QUOTE}             { yybegin(FORCED_VALUE); return LMTokenTypes.QUOTE; }
+    {ASSIGN}            { return ELMTokenType.ASSIGN;	}
+    {VALUE}             { yybegin(YYINITIAL); return ELMTokenType.VALUE; }
+    {QUOTE}             { yybegin(FORCED_VALUE); return ELMTokenType.QUOTE; }
 }
 
 <FORCED_VALUE> {
-    {ALL_EXCEPT_QUOTES}+ { return LMTokenTypes.VALUE; }
-    {QUOTE}              { yybegin(YYINITIAL); return LMTokenTypes.QUOTE; }
+    {ALL_EXCEPT_QUOTES}+ { return ELMTokenType.VALUE; }
+    {QUOTE}              { yybegin(YYINITIAL); return ELMTokenType.QUOTE; }
 }
 
-[^] { return LMTokenTypes.BAD_CHARACTER; }
+[^] { return ELMTokenType.BAD_CHARACTER; }

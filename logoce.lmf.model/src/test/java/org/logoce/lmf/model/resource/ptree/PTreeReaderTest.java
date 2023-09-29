@@ -22,7 +22,7 @@ public class PTreeReaderTest
 		final var root = ptree.children().get(0);
 		Assertions.assertEquals(0, root.children().size());
 		Assertions.assertEquals(1, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0));
+		Assertions.assertEquals("model", root.data().get(0).value());
 	}
 
 	@Test
@@ -38,11 +38,11 @@ public class PTreeReaderTest
 		final var root1 = ptree.children().get(0);
 		Assertions.assertEquals(0, root1.children().size());
 		Assertions.assertEquals(1, root1.data().size());
-		Assertions.assertEquals("model1", root1.data().get(0));
+		Assertions.assertEquals("model1", root1.data().get(0).value());
 		final var root2 = ptree.children().get(1);
 		Assertions.assertEquals(0, root2.children().size());
 		Assertions.assertEquals(1, root2.data().size());
-		Assertions.assertEquals("model2", root2.data().get(0));
+		Assertions.assertEquals("model2", root2.data().get(0).value());
 	}
 
 	@Test
@@ -57,25 +57,25 @@ public class PTreeReaderTest
 
 		final var root = ptree.children().get(0);
 		Assertions.assertEquals(1, root.children().size());
-		Assertions.assertEquals(1, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0));
+		Assertions.assertEquals(2, root.data().size());
+		Assertions.assertEquals("model", root.data().get(0).value());
 
 		final var car = root.children().get(0);
 		Assertions.assertEquals(2, car.children().size());
-		Assertions.assertEquals(1, car.data().size());
-		Assertions.assertEquals("car", car.data().get(0));
+		Assertions.assertEquals(3, car.data().size());
+		Assertions.assertEquals("car", car.data().get(0).value());
 
 		final var count = car.children().get(0);
 		Assertions.assertEquals(0, count.children().size());
-		Assertions.assertEquals(2, count.data().size());
-		Assertions.assertEquals("-int", count.data().get(0));
-		Assertions.assertEquals("count", count.data().get(1));
+		Assertions.assertEquals(3, count.data().size());
+		Assertions.assertEquals("-int", count.data().get(0).value());
+		Assertions.assertEquals("count", count.data().get(2).value());
 
 		final var name = car.children().get(1);
 		Assertions.assertEquals(0, name.children().size());
-		Assertions.assertEquals(2, name.data().size());
-		Assertions.assertEquals("-string", name.data().get(0));
-		Assertions.assertEquals("name", name.data().get(1));
+		Assertions.assertEquals(3, name.data().size());
+		Assertions.assertEquals("-string", name.data().get(0).value());
+		Assertions.assertEquals("name", name.data().get(2).value());
 	}
 
 	@Test
@@ -87,26 +87,25 @@ public class PTreeReaderTest
 
 		final var root = ptree.children().get(0);
 		Assertions.assertEquals(3, root.children().size());
-		Assertions.assertEquals(1, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0));
+		Assertions.assertEquals("model", root.data().get(0).value());
 
 		final var matcher = root.children().get(0);
 		Assertions.assertEquals(0, matcher.children().size());
-		Assertions.assertEquals(2, matcher.data().size());
-		Assertions.assertEquals("-matcher", matcher.data().get(0));
-		Assertions.assertEquals("\\b(true|false)\\b", matcher.data().get(1));
+		Assertions.assertEquals(5, matcher.data().size());
+		Assertions.assertEquals("-matcher", matcher.data().get(0).value());
+		Assertions.assertEquals("\\b(true|false)\\b", matcher.data().get(3).value());
 
 		final var count = root.children().get(1);
 		Assertions.assertEquals(0, count.children().size());
-		Assertions.assertEquals(2, count.data().size());
-		Assertions.assertEquals("+int", count.data().get(0));
-		Assertions.assertEquals("count", count.data().get(1));
+		Assertions.assertEquals(3, count.data().size());
+		Assertions.assertEquals("+int", count.data().get(0).value());
+		Assertions.assertEquals("count", count.data().get(2).value());
 
 		final var name = root.children().get(2);
 		Assertions.assertEquals(0, name.children().size());
-		Assertions.assertEquals(2, name.data().size());
-		Assertions.assertEquals("-string", name.data().get(0));
-		Assertions.assertEquals("name", name.data().get(1));
+		Assertions.assertEquals(3, name.data().size());
+		Assertions.assertEquals("-string", name.data().get(0).value());
+		Assertions.assertEquals("name", name.data().get(2).value());
 	}
 
 	@Test
@@ -117,8 +116,8 @@ public class PTreeReaderTest
 		final var ptree = treeBuilder.read(inputStream);
 
 		final var root = ptree.children().get(0);
-		Assertions.assertEquals(2, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0));
-		Assertions.assertEquals("matcher=\\b(true|false)\\b", root.data().get(1));
+		Assertions.assertEquals(7, root.data().size());
+		Assertions.assertEquals("model", root.data().get(0).value());
+		Assertions.assertEquals("\\b(true|false)\\b", root.data().get(5).value());
 	}
 }

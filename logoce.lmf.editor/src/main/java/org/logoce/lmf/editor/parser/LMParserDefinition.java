@@ -13,7 +13,7 @@ import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.LMFile;
 import org.logoce.lmf.editor.LMLanguage;
-import org.logoce.lmf.editor.lexer.LMLexerAdapter;
+import org.logoce.lmf.editor.lexer.LMIntellijLexerAdapter;
 import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 
 public final class LMParserDefinition implements ParserDefinition
@@ -24,7 +24,7 @@ public final class LMParserDefinition implements ParserDefinition
 	@Override
 	public Lexer createLexer(Project project)
 	{
-		return new LMLexerAdapter();
+		return new LMIntellijLexerAdapter();
 	}
 
 	@NotNull

@@ -4,14 +4,14 @@ import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
-import org.logoce.lmf.model.resource.util.AbstractTree;
+import org.logoce.lmf.model.util.AbstractTree;
 
 import java.util.List;
 
 public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<BuilderNodeInfo<T>, TreeBuilderNode<T>>
 {
 	private final IFeaturedObject.Builder<T> builder;
-	private List<? extends IFeatureResolution> wordsResolutions;
+	private List<? extends IFeatureResolution> tokenResolutions;
 
 	public T builtObject = null;
 
@@ -19,8 +19,7 @@ public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<Buil
 	{
 		super(info);
 
-		builder = data().modelGroup()
-						.builder();
+		builder = data().modelGroup().builder();
 
 		children().forEach(this::injectContainment);
 	}
@@ -35,9 +34,9 @@ public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<Buil
 		return data().containingRelation();
 	}
 
-	public List<String> words()
+	public List<ParsedToken> tokens()
 	{
-		return data().words();
+		return data().tokens();
 	}
 
 	public ModelGroup<T> modelGroup()
@@ -45,16 +44,16 @@ public final class TreeBuilderNode<T extends LMObject> extends AbstractTree<Buil
 		return data().modelGroup();
 	}
 
-	public void setResolutions(List<? extends IFeatureResolution> wordsResolutions)
+	public void setResolutions(List<? extends IFeatureResolution> tokenResolutions)
 	{
-		this.wordsResolutions = wordsResolutions;
+		this.tokenResolutions = tokenResolutions;
 	}
 
 	public T build()
 	{
 		if (builtObject == null)
 		{
-			wordsResolutions.forEach(r -> r.pushValue(builder));
+			tokenResolutions.forEach(r -> r.pushValue(builder));
 			builtObject = builder.build();
 		}
 		return builtObject;
