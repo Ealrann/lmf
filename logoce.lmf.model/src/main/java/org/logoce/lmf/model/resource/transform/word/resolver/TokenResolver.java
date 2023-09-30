@@ -6,6 +6,7 @@ import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class TokenResolver
 {
@@ -58,17 +59,15 @@ public class TokenResolver
 			this.node = node;
 		}
 
-		public List<IFeatureResolution> filterNameValueResolvers(final List<NameValues> nameValueTokens)
+		public List<IFeatureResolution> filterNameValueResolvers(final List<NameValues> tokens)
 		{
 			final List<IFeatureResolution> resolutions = new ArrayList<>();
-			for (final var nameValueToken : nameValueTokens)
+			for (final var token : tokens)
 			{
-				final var resolved = findMandatory(r -> r.match(nameValueToken.name()) ? Optional.of(r.resolveOrThrow(
-						node,
-						nameValueToken.values())) : Optional.empty(), nameValueToken.name());
-				resolutions.add(resolved);
+				resolutions.add(findMandatory(r -> r.match(token.name()),
+											  r -> r.resolve(node, token.values()),
+											  token.name()));
 			}
-
 			return resolutions;
 		}
 
@@ -78,37 +77,40 @@ public class TokenResolver
 			final List<ParsedToken> notFound = new ArrayList<>();
 			for (final var token : simpleTokens)
 			{
-				final var resolved = findOptional(r -> r.match(token.firstToken())
-													   ? Optional.of(r.resolveOrThrow(node,
-																					  List.of("true")))
-													   : Optional.empty());
+				final var resolved = findOptional(r -> r.match(token.firstToken()),
+												  r -> r.resolve(node, List.of("true")));
 				resolved.ifPresentOrElse(resolutions::add, () -> notFound.add(token));
 			}
 			for (final var token : notFound)
 			{
-				resolutions.add(findMandatory(r -> r.resolve(node, token.values()), token.firstToken()));
+				resolutions.add(findMandatory(r -> true, r -> r.resolve(node, token.values()), token.firstToken()));
 			}
 
 			return resolutions;
 		}
 
-		private IFeatureResolution findMandatory(final Function<ITokenResolver<?>, Optional<? extends IFeatureResolution>> resolver,
+		private IFeatureResolution findMandatory(final Predicate<ITokenResolver<?>> filter,
+												 final Function<ITokenResolver<?>, Optional<? extends IFeatureResolution>> resolver,
 												 final String message)
 		{
-			return findOptional(resolver).orElseThrow(() -> new NoSuchElementException(message));
+			return findOptional(filter, resolver).orElseThrow(() -> new NoSuchElementException(message));
 		}
 
-		private Optional<IFeatureResolution> findOptional(final Function<ITokenResolver<?>, Optional<? extends IFeatureResolution>> resolver)
+		private Optional<IFeatureResolution> findOptional(final Predicate<ITokenResolver<?>> filter,
+														  final Function<ITokenResolver<?>, Optional<? extends IFeatureResolution>> resolver)
 		{
 			final var it = availableResolvers.iterator();
 			while (it.hasNext())
 			{
 				final var currentResolver = it.next();
-				final var resolution = resolver.apply(currentResolver);
-				if (resolution.isPresent())
+				if (filter.test(currentResolver))
 				{
-					it.remove();
-					return Optional.of(resolution.get());
+					final var resolution = resolver.apply(currentResolver);
+					if (resolution.isPresent())
+					{
+						it.remove();
+						return Optional.of(resolution.get());
+					}
 				}
 			}
 			return Optional.empty();

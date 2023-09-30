@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface ITokenResolver<T>
 {
 	boolean match(String featureName);
-	IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, List<String> value);
 	Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, List<String> value);
 
 	@SuppressWarnings("unchecked")

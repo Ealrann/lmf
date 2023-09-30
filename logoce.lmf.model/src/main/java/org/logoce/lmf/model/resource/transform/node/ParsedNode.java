@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record ParsedNode(ParsedToken type, List<ParsedToken> values)
@@ -53,9 +52,9 @@ public record ParsedNode(ParsedToken type, List<ParsedToken> values)
 		{
 			if (aliases.containsKey(word.value()))
 			{
-				final var aliasedWords = aliases.get(word.value()).words();
+				final var value = aliases.get(word.value()).value();
 				final var mapper = new AliasMapper(word.type() == ELMTokenType.TYPE);
-				return mapper.map(String.join(" ", aliasedWords));
+				return mapper.map(value);
 			}
 			else
 			{

@@ -2,11 +2,8 @@ package org.logoce.lmf.generator.code.model;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
-import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.impl.AliasImpl;
-
-import java.util.List;
 
 public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 {
@@ -18,30 +15,11 @@ public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 	{
 		final var name = input.name();
 		final var javaName = javify(name);
-		final var wordList = listify(input.words());
+		final var value = input.value();
 
 		return FieldSpec.builder(ALIAS_TYPE, javaName, modifiers)
-						.initializer("new $T($S, $T.of( " + wordList + "))",
-									 ALIAS_IMPL_TYPE,
-									 name,
-									 ConstantTypes.LIST)
+						.initializer("new $T($S, \"" + value + "\")", ALIAS_IMPL_TYPE, name)
 						.build();
-	}
-
-	private static String listify(final List<String> words)
-	{
-		final var stringBuilder = new StringBuilder();
-		stringBuilder.append('"');
-		for (int i = 0; i < words.size(); i++)
-		{
-			stringBuilder.append(words.get(i));
-			if (i < words.size() - 1)
-			{
-				stringBuilder.append("\", \"");
-			}
-		}
-		stringBuilder.append('"');
-		return stringBuilder.toString();
 	}
 
 	private static String javify(String input)

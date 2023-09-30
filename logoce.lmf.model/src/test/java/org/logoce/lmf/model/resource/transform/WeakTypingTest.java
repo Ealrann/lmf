@@ -19,9 +19,9 @@ public class WeakTypingTest
 	public void alias()
 	{
 		final var textModel = "(Model Test " +
-							  "    (Alias Definition Group,concrete)" +
+							  "    (Alias Definition \"Group concrete\")" +
 							  "    (Definition Oui)" +
-							  "    (Alias [1..*]     mandatory,many)" +
+							  "    (Alias [1..*]     \"mandatory many\")" +
 							  "    (Definition Atts" +
 							  "        (-att [1..*] count  #LMCore/units.3)" +
 							  "        (+att [1..*] exists #LMCore/units.2)" +
@@ -40,10 +40,8 @@ public class WeakTypingTest
 		final var alias = model.aliases()
 							   .get(0);
 		assertEquals("Definition", alias.name());
-		final var words = alias.words();
-		assertEquals(2, words.size());
-		assertEquals("Group", words.get(0));
-		assertEquals("concrete", words.get(1));
+		final var value = alias.value();
+		assertEquals("Group concrete", value);
 
 		final var group0 = model.groups()
 								.get(0);

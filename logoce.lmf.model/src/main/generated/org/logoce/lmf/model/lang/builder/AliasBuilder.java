@@ -2,8 +2,6 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
@@ -15,13 +13,13 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.AliasImpl;
 
 public final class AliasBuilder implements Builder {
-  private static final FeatureInserter<AliasBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AliasBuilder>().add(Alias.Features.name, AliasBuilder::name).add(Alias.Features.words, AliasBuilder::addWord).build();
+  private static final FeatureInserter<AliasBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AliasBuilder>().add(Alias.Features.name, AliasBuilder::name).add(Alias.Features.value, AliasBuilder::value).build();
 
   private static final RelationLazyInserter<AliasBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<AliasBuilder>().build();
 
   private String name;
 
-  private final List<String> words = new ArrayList<>();
+  private String value;
 
   @Override
   public AliasBuilder name(String name) {
@@ -30,14 +28,14 @@ public final class AliasBuilder implements Builder {
   }
 
   @Override
-  public AliasBuilder addWord(String word) {
-    this.words.add(word);
+  public AliasBuilder value(String value) {
+    this.value = value;
     return this;
   }
 
   @Override
   public Alias build() {
-    return new AliasImpl(name, words);
+    return new AliasImpl(name, value);
   }
 
   @Override

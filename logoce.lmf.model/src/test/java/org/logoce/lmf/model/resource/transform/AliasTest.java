@@ -15,7 +15,7 @@ public class AliasTest
 	@Test
 	public void simpleAlias()
 	{
-		final var textModel = "(Alias name=Definition words=Group,concrete) ";
+		final var textModel = "(Alias name=Definition value=\"Group concrete\") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PTreeToJava();
@@ -26,15 +26,13 @@ public class AliasTest
 
 		final var alias = (Alias) root;
 		assertEquals("Definition", alias.name());
-		assertEquals(2, alias.words().size());
-		assertEquals("Group", alias.words().get(0));
-		assertEquals("concrete", alias.words().get(1));
+		assertEquals("Group concrete", alias.value());
 	}
 
 	@Test
 	public void simpleAssignAlias()
 	{
-		final var textModel = "(Alias name=Definition words=Group,\"concrete=false\",\"contains=true\")";
+		final var textModel = "(Alias name=Definition \"Group concrete=false contains=true\")";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PTreeToJava();
@@ -45,10 +43,7 @@ public class AliasTest
 
 		final var alias = (Alias) root;
 		assertEquals("Definition", alias.name());
-		assertEquals(3, alias.words().size());
-		assertEquals("Group", alias.words().get(0));
-		assertEquals("concrete=false", alias.words().get(1));
-		assertEquals("contains=true", alias.words().get(2));
+		assertEquals("Group concrete=false contains=true", alias.value());
 	}
 
 	@Test
@@ -74,9 +69,9 @@ public class AliasTest
 	public void alias()
 	{
 		final var textModel = "(Model Test " +
-							  "    (Alias name=Definition words=Group,concrete)" +
+							  "    (Alias name=Definition value=\"Group concrete\")" +
 							  "    (Definition name=Oui)" +
-							  "    (Alias name=[1..*]     mandatory,many)" +
+							  "    (Alias name=[1..*]     value=\"mandatory many\")" +
 							  "    (Definition name=Atts" +
 							  "        (-att [1..*] name=count datatype=#LMCore/units.3)" +
 							  "        (+att [1..*] name=exists datatype=#LMCore/units.2)" +
@@ -93,10 +88,6 @@ public class AliasTest
 
 		final var alias = model.aliases().get(0);
 		assertEquals("Definition", alias.name());
-		final var words = alias.words();
-		assertEquals(2, words.size());
-		assertEquals("Group", words.get(0));
-		assertEquals("concrete", words.get(1));
 
 		final var group0 = model.groups().get(0);
 		assertEquals("Oui", group0.name());

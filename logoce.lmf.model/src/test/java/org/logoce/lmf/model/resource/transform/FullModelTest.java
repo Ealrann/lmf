@@ -116,18 +116,21 @@ public class FullModelTest
 			    (Unit name=float   matcher="rgx_match:<[0-9.]+[Ff]>"  defaultValue=0f    primitive=float   )
 			    (Unit name=double  matcher="rgx_match:<[0-9.]+>"      defaultValue=0.    primitive=double  )
 			    (Unit name=string)
-			   
-				(Alias Definition words=Group,concrete)
-				(Alias +contains  words=Relation,contains,"immutable=false")
-				(Alias -contains  words=Relation,contains,immutable)
-				(Alias +refers    words=Relation,"contains=false","immutable=false")
-				(Alias -refers    words=Relation,"contains=false",immutable)
-				(Alias +att       words=Attribute,"immutable=false")
-				(Alias -att       words=Attribute,immutable)
-				(Alias [0..1]     words="mandatory=false","many=false")
-				(Alias [1..1]     words=mandatory,"many=false")
-				(Alias [0..*]     words="mandatory=false",many)
-				(Alias [1..*]     words=mandatory,many)
+
+				(Alias Definition value="Group,concrete")
+				(Alias +contains  value="Relation contains immutable=false")
+				(Alias -contains  value="Relation contains immutable")
+				(Alias +refers    value="Relation contains=false immutable=false")
+				(Alias -refers    value="Relation contains=false immutable")
+				(Alias +att       value="Attribute immutable=false")
+				(Alias -att       value="Attribute immutable")
+				(Alias [0..1]     value="mandatory=false many=false")
+				(Alias [1..1]     value="mandatory many=false")
+				(Alias [0..*]     value="mandatory=false many")
+				(Alias [1..*]     value="mandatory many")
+		
+				(JavaWrapper name=RawFeature domain=org.logoce.lmf.model.api.feature)
+				(JavaWrapper name=IModelPackage domain=org.logoce.lmf.model.api.model)
 			)
 			""";
 }

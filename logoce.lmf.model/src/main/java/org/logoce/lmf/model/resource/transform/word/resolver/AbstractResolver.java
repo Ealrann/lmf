@@ -25,12 +25,6 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 	}
 
 	@Override
-	public IFeatureResolution resolveOrThrow(TreeBuilderNode<?> node, List<String> values)
-	{
-		return resolve(node, values).orElseThrow();
-	}
-
-	@Override
 	public Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, List<String> values)
 	{
 		if (values.size() > 1 && !feature.many())

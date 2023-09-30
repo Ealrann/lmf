@@ -2,7 +2,6 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.lang.Override;
 import java.lang.String;
-import java.util.List;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -11,17 +10,17 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class AliasImpl extends FeaturedObject implements Alias {
-  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(org.logoce.lmf.model.lang.Alias.Features.name, org.logoce.lmf.model.lang.Alias::name).add(org.logoce.lmf.model.lang.Alias.Features.words, org.logoce.lmf.model.lang.Alias::words).build();
+  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(org.logoce.lmf.model.lang.Alias.Features.name, org.logoce.lmf.model.lang.Alias::name).add(org.logoce.lmf.model.lang.Alias.Features.value, org.logoce.lmf.model.lang.Alias::value).build();
 
   private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>().build();
 
   private final String name;
 
-  private final List<String> words;
+  private final String value;
 
-  public AliasImpl(final String name, final List<String> words) {
+  public AliasImpl(final String name, final String value) {
     this.name = name;
-    this.words = List.copyOf(words);
+    this.value = value;
   }
 
   @Override
@@ -30,8 +29,8 @@ public final class AliasImpl extends FeaturedObject implements Alias {
   }
 
   @Override
-  public List<String> words() {
-    return words;
+  public String value() {
+    return value;
   }
 
   @Override

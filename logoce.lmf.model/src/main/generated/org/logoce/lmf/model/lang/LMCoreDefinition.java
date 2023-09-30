@@ -141,10 +141,9 @@ public interface LMCoreDefinition {
     interface ALIAS {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
 
-      Attribute<String, List<String>> WORDS = new AttributeImpl<>("words", true, true, false, Alias.Features.words,
-																  Units.STRING, null, List.of());
+      Attribute<String, String> VALUE = new AttributeImpl<>("value", true, false, true, Alias.Features.value, Units.STRING, null, List.of());
 
-      List<Feature<?, ?>> ALL = List.of(NAME, WORDS);
+      List<Feature<?, ?>> ALL = List.of(NAME, VALUE);
     }
 
     interface ENUM {
@@ -293,27 +292,27 @@ public interface LMCoreDefinition {
   }
 
   interface Aliases {
-    Alias DEFINITION = new AliasImpl("Definition", List.of( "Group", "concrete"));
+    Alias DEFINITION = new AliasImpl("Definition", "Group concrete");
 
-    Alias PLUS_CONTAINS = new AliasImpl("+contains", List.of( "Relation", "contains", "immutable=false"));
+    Alias PLUS_CONTAINS = new AliasImpl("+contains", "Relation contains immutable=false");
 
-    Alias MINUS_CONTAINS = new AliasImpl("-contains", List.of( "Relation", "contains", "immutable"));
+    Alias MINUS_CONTAINS = new AliasImpl("-contains", "Relation contains immutable");
 
-    Alias PLUS_REFERS = new AliasImpl("+refers", List.of( "Relation", "contains=false", "immutable=false"));
+    Alias PLUS_REFERS = new AliasImpl("+refers", "Relation contains=false immutable=false");
 
-    Alias MINUS_REFERS = new AliasImpl("-refers", List.of( "Relation", "contains=false", "immutable"));
+    Alias MINUS_REFERS = new AliasImpl("-refers", "Relation contains=false immutable");
 
-    Alias PLUS_ATT = new AliasImpl("+att", List.of( "Attribute", "immutable=false"));
+    Alias PLUS_ATT = new AliasImpl("+att", "Attribute immutable=false");
 
-    Alias MINUS_ATT = new AliasImpl("-att", List.of( "Attribute", "immutable"));
+    Alias MINUS_ATT = new AliasImpl("-att", "Attribute immutable");
 
-    Alias LSB_0_DOT_DOT_1_RSB = new AliasImpl("[0..1]", List.of( "mandatory=false", "many=false"));
+    Alias LSB_0_DOT_DOT_1_RSB = new AliasImpl("[0..1]", "mandatory=false many=false");
 
-    Alias LSB_1_DOT_DOT_1_RSB = new AliasImpl("[1..1]", List.of( "mandatory", "many=false"));
+    Alias LSB_1_DOT_DOT_1_RSB = new AliasImpl("[1..1]", "mandatory many=false");
 
-    Alias LSB_0_DOT_DOT_STAR_RSB = new AliasImpl("[0..*]", List.of( "mandatory=false", "many"));
+    Alias LSB_0_DOT_DOT_STAR_RSB = new AliasImpl("[0..*]", "mandatory=false many");
 
-    Alias LSB_1_DOT_DOT_STAR_RSB = new AliasImpl("[1..*]", List.of( "mandatory", "many"));
+    Alias LSB_1_DOT_DOT_STAR_RSB = new AliasImpl("[1..*]", "mandatory many");
 
     List<Alias> ALL = List.of(DEFINITION, PLUS_CONTAINS, MINUS_CONTAINS, PLUS_REFERS, MINUS_REFERS, PLUS_ATT, MINUS_ATT, LSB_0_DOT_DOT_1_RSB, LSB_1_DOT_DOT_1_RSB, LSB_0_DOT_DOT_STAR_RSB, LSB_1_DOT_DOT_STAR_RSB);
   }
