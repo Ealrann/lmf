@@ -25,14 +25,12 @@
   ]
 }
 
-lmFile ::= element*
+lmFile ::= group*
 
-element ::= OPEN_NODE (TYPE_NAME ASSIGN)? TYPE (word | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+group ::= OPEN_NODE (TYPE_NAME ASSIGN)? TYPE (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
 
-word ::= named | list | val | element
+node ::= leaf | group
+
+leaf ::= (VALUE_NAME ASSIGN)? val (LIST_SEPARATOR val)*
 
 val ::= QUOTE? VALUE QUOTE?
-
-named ::= NAME ASSIGN (list | val)
-
-list ::= val (LIST_SEPARATOR val)+

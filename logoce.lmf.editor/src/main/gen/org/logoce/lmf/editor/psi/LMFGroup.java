@@ -5,18 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LMFWord extends PsiElement {
+public interface LMFGroup extends PsiElement {
 
-  @Nullable
-  LMFElement getElement();
-
-  @Nullable
-  LMFList getList();
-
-  @Nullable
-  LMFNamed getNamed();
-
-  @Nullable
-  LMFVal getVal();
+  @NotNull
+  List<LMFNode> getNodeList();
 
 }

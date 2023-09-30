@@ -8,17 +8,15 @@ import org.logoce.lmf.editor.psi.impl.*;
 
 public interface LMIntellijTokenTypes {
 
-  IElementType ELEMENT = new LMElementType("ELEMENT");
-  IElementType LIST = new LMElementType("LIST");
-  IElementType NAMED = new LMElementType("NAMED");
+  IElementType GROUP = new LMElementType("GROUP");
+  IElementType LEAF = new LMElementType("LEAF");
+  IElementType NODE = new LMElementType("NODE");
   IElementType VAL = new LMElementType("VAL");
-  IElementType WORD = new LMElementType("WORD");
 
   IElementType ASSIGN = new LMTokenType("ASSIGN");
   IElementType BAD_CHARACTER = new LMTokenType("BAD_CHARACTER");
   IElementType CLOSE_NODE = new LMTokenType("CLOSE_NODE");
   IElementType LIST_SEPARATOR = new LMTokenType("LIST_SEPARATOR");
-  IElementType NAME = new LMTokenType("NAME");
   IElementType OPEN_NODE = new LMTokenType("OPEN_NODE");
   IElementType QUOTE = new LMTokenType("QUOTE");
   IElementType TYPE = new LMTokenType("TYPE");
@@ -30,20 +28,17 @@ public interface LMIntellijTokenTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == ELEMENT) {
-        return new LMFElementImpl(node);
+      if (type == GROUP) {
+        return new LMFGroupImpl(node);
       }
-      else if (type == LIST) {
-        return new LMFListImpl(node);
+      else if (type == LEAF) {
+        return new LMFLeafImpl(node);
       }
-      else if (type == NAMED) {
-        return new LMFNamedImpl(node);
+      else if (type == NODE) {
+        return new LMFNodeImpl(node);
       }
       else if (type == VAL) {
         return new LMFValImpl(node);
-      }
-      else if (type == WORD) {
-        return new LMFWordImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

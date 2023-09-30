@@ -11,14 +11,14 @@ import static org.logoce.lmf.editor.psi.LMIntellijTokenTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.logoce.lmf.editor.psi.*;
 
-public class LMFListImpl extends ASTWrapperPsiElement implements LMFList {
+public class LMFLeafImpl extends ASTWrapperPsiElement implements LMFLeaf {
 
-  public LMFListImpl(@NotNull ASTNode node) {
+  public LMFLeafImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull LMFVisitor visitor) {
-    visitor.visitList(this);
+    visitor.visitLeaf(this);
   }
 
   @Override
