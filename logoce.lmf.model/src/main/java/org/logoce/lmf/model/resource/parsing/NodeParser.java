@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.resource.transform.parsing;
+package org.logoce.lmf.model.resource.parsing;
 
 import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
@@ -22,7 +22,7 @@ public final class NodeParser
 		this.aliases = aliases;
 	}
 
-	public ParsedNode parse(final List<PToken> tokens)
+	public PNode parse(final List<PToken> tokens)
 	{
 		final var first = tokens.get(0);
 		final var isAlias = isAliasDefinition(first);
@@ -31,7 +31,7 @@ public final class NodeParser
 		final var typeToken = builder.createTypeToken();
 		final var valueTokens = builder.streamValues().toList();
 
-		return new ParsedNode(typeToken, List.copyOf(valueTokens));
+		return new PNode(typeToken, List.copyOf(valueTokens));
 	}
 
 	private Stream<PToken> mapAlias(final PToken word)

@@ -3,16 +3,14 @@ package org.logoce.lmf.model.resource.transform;
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Named;
-import org.logoce.lmf.model.resource.ptree.PToken;
-import org.logoce.lmf.model.resource.transform.node.*;
-import org.logoce.lmf.model.resource.transform.parsing.NodeParser;
+import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.resource.transform.node.ModelGroup;
+import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
+import org.logoce.lmf.model.resource.transform.node.TreeBuilderNodeBuilder;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
-import org.logoce.lmf.model.util.Tree;
 import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.model.util.Tree;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,15 +25,6 @@ public final class PTreeToJava
 
 	public PTreeToJava()
 	{
-		final var aliases = ModelRegistry.Instance.models()
-												  .map(IModelPackage::model)
-												  .map(Model::aliases)
-												  .flatMap(Collection::stream)
-												  .collect(Collectors.toUnmodifiableMap(Named::name,
-																						Function.identity()));
-
-		final var nodeParser = new NodeParser(aliases);
-
 		final var groups = ModelRegistry.Instance.models()
 												 .flatMap(PTreeToJava::modelGroups)
 												 .collect(Collectors.toUnmodifiableMap(ModelGroup::name,
@@ -47,39 +36,26 @@ public final class PTreeToJava
 						  .map(TreeToFeatureResolver::new)
 						  .collect(Collectors.toUnmodifiableMap(TreeToFeatureResolver::group, Function.identity()));
 
-		nodeMapper = new TreeBuilderNodeBuilder(nodeParser, groups, resolvers);
+		nodeMapper = new TreeBuilderNodeBuilder(groups, resolvers);
 	}
 
-	public List<? extends LMObject> transform(final Tree<List<PToken>> tree)
+	public List<? extends LMObject> transform(final List<Tree<PNode>> roots)
 	{
-		final var builderTrees = tree.children()
-									 .stream()
-									 .map(nodeMapper::mapTree)
-									 .toList();
+		final var builderTrees = roots.stream().map(nodeMapper::mapTree).toList();
 
-		builderTrees.stream()
-					.flatMap(TreeBuilderNode::stream)
-					.forEach(this::resolve);
+		builderTrees.stream().flatMap(TreeBuilderNode::stream).forEach(this::resolve);
 
-		return builderTrees.stream()
-						   .map(TreeBuilderNode::build)
-						   .toList();
+		return builderTrees.stream().map(TreeBuilderNode::build).toList();
 	}
 
 	private void resolve(TreeBuilderNode<?> node)
 	{
-		final var resolver = resolvers.get(node.data()
-											   .modelGroup()
-											   .group());
+		final var resolver = resolvers.get(node.data().modelGroup().group());
 		resolver.resolve(node);
 	}
 
 	private static Stream<ModelGroup<?>> modelGroups(final IModelPackage model)
 	{
-		return model.model()
-					.groups()
-					.stream()
-					.map(group -> new ModelGroup<>(model, group));
+		return model.model().groups().stream().map(group -> new ModelGroup<>(model, group));
 	}
-
 }

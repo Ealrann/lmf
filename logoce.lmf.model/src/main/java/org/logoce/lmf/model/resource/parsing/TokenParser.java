@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.resource.transform.parsing;
+package org.logoce.lmf.model.resource.parsing;
 
 import org.logoce.lmf.model.lexer.ELMTokenType;
 import org.logoce.lmf.model.resource.ptree.PToken;

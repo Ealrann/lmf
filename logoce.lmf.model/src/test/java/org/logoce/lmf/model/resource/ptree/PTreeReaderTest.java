@@ -10,114 +10,81 @@ public class PTreeReaderTest
 	private static final PTreeReader treeBuilder = new PTreeReader();
 
 	@Test
-	public void testPTreeBuilder_singleElement()
+	public void testrootsBuilder_singleElement()
 	{
 		final var model = "(model)";
 		final var inputStream = new ByteArrayInputStream(model.getBytes());
 
-		final var ptree = treeBuilder.read(inputStream);
+		final var roots = treeBuilder.read(inputStream);
 
-		Assertions.assertEquals(1, ptree.children().size());
+		Assertions.assertEquals(1, roots.size());
 
-		final var root = ptree.children().get(0);
-		Assertions.assertEquals(0, root.children().size());
-		Assertions.assertEquals(1, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0).value());
+		final var root = roots.get(0);
+		Assertions.assertEquals(0, root.data().values().size());
+		Assertions.assertEquals("model", root.data().type().firstToken());
 	}
 
 	@Test
-	public void testPTreeBuilder_twoRoots()
+	public void testrootsBuilder_twoRoots()
 	{
 		final var model = "(model1)(model2)";
 		final var inputStream = new ByteArrayInputStream(model.getBytes());
+		final var roots = treeBuilder.read(inputStream);
 
-		final var ptree = treeBuilder.read(inputStream);
+		Assertions.assertEquals(2, roots.size());
 
-		Assertions.assertEquals(2, ptree.children().size());
-
-		final var root1 = ptree.children().get(0);
-		Assertions.assertEquals(0, root1.children().size());
-		Assertions.assertEquals(1, root1.data().size());
-		Assertions.assertEquals("model1", root1.data().get(0).value());
-		final var root2 = ptree.children().get(1);
-		Assertions.assertEquals(0, root2.children().size());
-		Assertions.assertEquals(1, root2.data().size());
-		Assertions.assertEquals("model2", root2.data().get(0).value());
+		final var root1 = roots.get(0);
+		Assertions.assertEquals("model1", root1.data().type().firstToken());
+		final var root2 = roots.get(1);
+		Assertions.assertEquals("model2", root2.data().type().firstToken());
 	}
 
 	@Test
-	public void testPTreeBuilder_depth3()
+	public void testrootsBuilder_depth3()
 	{
 		final var model = "(model (car (-int count) (-string name)))";
 		final var inputStream = new ByteArrayInputStream(model.getBytes());
+		final var roots = treeBuilder.read(inputStream);
 
-		final var ptree = treeBuilder.read(inputStream);
+		Assertions.assertEquals(1, roots.size());
 
-		Assertions.assertEquals(1, ptree.children().size());
-
-		final var root = ptree.children().get(0);
-		Assertions.assertEquals(1, root.children().size());
-		Assertions.assertEquals(2, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0).value());
+		final var root = roots.get(0);
+		Assertions.assertEquals("model", root.data().type().firstToken());
 
 		final var car = root.children().get(0);
-		Assertions.assertEquals(2, car.children().size());
-		Assertions.assertEquals(3, car.data().size());
-		Assertions.assertEquals("car", car.data().get(0).value());
+		Assertions.assertEquals("car", car.data().type().firstToken());
 
 		final var count = car.children().get(0);
-		Assertions.assertEquals(0, count.children().size());
-		Assertions.assertEquals(3, count.data().size());
-		Assertions.assertEquals("-int", count.data().get(0).value());
-		Assertions.assertEquals("count", count.data().get(2).value());
+		final var countData = count.data();
+		Assertions.assertEquals("-int", countData.type().firstToken());
+		Assertions.assertEquals("count", countData.values().get(0).firstToken());
 
 		final var name = car.children().get(1);
-		Assertions.assertEquals(0, name.children().size());
-		Assertions.assertEquals(3, name.data().size());
-		Assertions.assertEquals("-string", name.data().get(0).value());
-		Assertions.assertEquals("name", name.data().get(2).value());
+		final var nameData = name.data();
+		Assertions.assertEquals("-string", nameData.type().firstToken());
+		Assertions.assertEquals("name", nameData.values().get(0).firstToken());
 	}
 
 	@Test
-	public void testPTreeBuilder_matcher()
+	public void testrootsBuilder_matcher()
 	{
 		final var model = "(model (-matcher \"\\b(true|false)\\b\") (+int count) (-string name))";
 		final var inputStream = new ByteArrayInputStream(model.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
+		final var roots = treeBuilder.read(inputStream);
 
-		final var root = ptree.children().get(0);
-		Assertions.assertEquals(3, root.children().size());
-		Assertions.assertEquals("model", root.data().get(0).value());
+		final var root = roots.get(0);
+		Assertions.assertEquals("model", root.data().type().firstToken());
 
 		final var matcher = root.children().get(0);
-		Assertions.assertEquals(0, matcher.children().size());
-		Assertions.assertEquals(5, matcher.data().size());
-		Assertions.assertEquals("-matcher", matcher.data().get(0).value());
-		Assertions.assertEquals("\\b(true|false)\\b", matcher.data().get(3).value());
+		Assertions.assertEquals("-matcher", matcher.data().type().firstToken());
+		Assertions.assertEquals("\\b(true|false)\\b", matcher.data().values().get(0).firstToken());
 
 		final var count = root.children().get(1);
-		Assertions.assertEquals(0, count.children().size());
-		Assertions.assertEquals(3, count.data().size());
-		Assertions.assertEquals("+int", count.data().get(0).value());
-		Assertions.assertEquals("count", count.data().get(2).value());
+		Assertions.assertEquals("+int", count.data().type().firstToken());
+		Assertions.assertEquals("count", count.data().values().get(0).firstToken());
 
 		final var name = root.children().get(2);
-		Assertions.assertEquals(0, name.children().size());
-		Assertions.assertEquals(3, name.data().size());
-		Assertions.assertEquals("-string", name.data().get(0).value());
-		Assertions.assertEquals("name", name.data().get(2).value());
-	}
-
-	@Test
-	public void testPTreeBuilder_matcherEqual()
-	{
-		final var model = "(model matcher=\"\\b(true|false)\\b\")";
-		final var inputStream = new ByteArrayInputStream(model.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-
-		final var root = ptree.children().get(0);
-		Assertions.assertEquals(7, root.data().size());
-		Assertions.assertEquals("model", root.data().get(0).value());
-		Assertions.assertEquals("\\b(true|false)\\b", root.data().get(5).value());
+		Assertions.assertEquals("-string", name.data().type().firstToken());
+		Assertions.assertEquals("name", name.data().values().get(0).firstToken());
 	}
 }

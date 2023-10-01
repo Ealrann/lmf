@@ -1,12 +1,13 @@
 package org.logoce.lmf.model.resource.transform.word.resolver;
 
-import org.logoce.lmf.model.resource.transform.parsing.ParsedToken;
+import org.logoce.lmf.model.resource.parsing.ParsedToken;
 import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class TokenResolver
 {
@@ -20,32 +21,21 @@ public class TokenResolver
 	public List<IFeatureResolution> resolve(final TreeBuilderNode<?> node)
 	{
 		final var runner = new TokenResolverRunner(availableResolvers, node);
-		final var tokenResolutions = resolveTokens(node.tokens());
 		final List<IFeatureResolution> resolutions = new ArrayList<>();
+		final List<ParsedToken> notFound = new ArrayList<>();
 
-		resolutions.addAll(runner.filterNameValueResolvers(tokenResolutions.nameValueTokens));
-		resolutions.addAll(runner.filterSimpleResolvers(tokenResolutions.simpleTokens));
+		for (final var token : node.tokens())
+		{
+			runner.nameResolution(token)
+				  .or(() -> runner.resolveBoolean(token))
+				  .ifPresentOrElse(resolutions::add, () -> notFound.add(token));
+		}
+		for (final var token : notFound)
+		{
+			resolutions.add(runner.valueResolution(token));
+		}
 
 		return resolutions;
-	}
-
-	private static TokenResolverRunner.TokensResolution resolveTokens(List<ParsedToken> tokens)
-	{
-		final List<ParsedToken> simpleTokens = new ArrayList<>();
-		final List<TokenResolverRunner.NameValues> nameValueTokens = new ArrayList<>();
-
-		for (final var token : tokens)
-		{
-			if (token.name().isPresent())
-			{
-				nameValueTokens.add(new TokenResolverRunner.NameValues(token.name().get(), token.values()));
-			}
-			else
-			{
-				simpleTokens.add(token);
-			}
-		}
-		return new TokenResolverRunner.TokensResolution(simpleTokens, nameValueTokens);
 	}
 
 	private static class TokenResolverRunner
@@ -53,47 +43,50 @@ public class TokenResolver
 		private final LinkedList<ITokenResolver<?>> availableResolvers;
 		private final TreeBuilderNode<?> node;
 
-		TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final TreeBuilderNode<?> node)
+		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final TreeBuilderNode<?> node)
 		{
 			this.availableResolvers = new LinkedList<>(tokenResolvers);
 			this.node = node;
 		}
 
-		public List<IFeatureResolution> filterNameValueResolvers(final List<NameValues> tokens)
+		public Optional<IFeatureResolution> nameResolution(final ParsedToken token)
 		{
-			final List<IFeatureResolution> resolutions = new ArrayList<>();
-			for (final var token : tokens)
-			{
-				resolutions.add(findMandatory(r -> r.match(token.name()),
-											  r -> r.resolve(node, token.values()),
-											  token.name()));
-			}
-			return resolutions;
+			return resolveFromName(token).or(() -> resolveBoolean(token));
 		}
 
-		public List<IFeatureResolution> filterSimpleResolvers(final List<ParsedToken> simpleTokens)
+		public IFeatureResolution valueResolution(final ParsedToken token)
 		{
-			final List<IFeatureResolution> resolutions = new ArrayList<>();
-			final List<ParsedToken> notFound = new ArrayList<>();
-			for (final var token : simpleTokens)
-			{
-				final var resolved = findOptional(r -> r.match(token.firstToken()),
-												  r -> r.resolve(node, List.of("true")));
-				resolved.ifPresentOrElse(resolutions::add, () -> notFound.add(token));
-			}
-			for (final var token : notFound)
-			{
-				resolutions.add(findMandatory(r -> true, r -> r.resolve(node, token.values()), token.firstToken()));
-			}
+			return findMandatory(r -> true,
+								 r -> r.resolve(node, token.values()),
+								 () -> new NoSuchElementException("Cannot resolve value Token " + token.firstToken()));
+		}
 
-			return resolutions;
+		private Optional<IFeatureResolution> resolveFromName(final ParsedToken token)
+		{
+			if (token.name().isPresent())
+			{
+				final var tokenName = token.name().get();
+				return Optional.of(findMandatory(r -> r.match(tokenName),
+												 r -> r.resolve(node, token.values()),
+												 () -> new NoSuchElementException("Cannot resolve named Token " +
+																				  tokenName)));
+			}
+			else
+			{
+				return Optional.empty();
+			}
+		}
+
+		private Optional<IFeatureResolution> resolveBoolean(final ParsedToken token)
+		{
+			return findOptional(r -> r.match(token.firstToken()), r -> r.resolve(node, List.of("true")));
 		}
 
 		private IFeatureResolution findMandatory(final Predicate<ITokenResolver<?>> filter,
 												 final Function<ITokenResolver<?>, Optional<? extends IFeatureResolution>> resolver,
-												 final String message)
+												 final Supplier<NoSuchElementException> message)
 		{
-			return findOptional(filter, resolver).orElseThrow(() -> new NoSuchElementException(message));
+			return findOptional(filter, resolver).orElseThrow(message);
 		}
 
 		private Optional<IFeatureResolution> findOptional(final Predicate<ITokenResolver<?>> filter,
@@ -115,10 +108,5 @@ public class TokenResolver
 			}
 			return Optional.empty();
 		}
-
-		record NameValues(String name, List<String> values)
-		{}
-
-		record TokensResolution(List<ParsedToken> simpleTokens, List<NameValues> nameValueTokens) {}
 	}
 }

@@ -1,5 +1,7 @@
 package org.logoce.lmf.model.resource.ptree;
 
+import org.logoce.lmf.model.resource.parsing.NodeParser;
+import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.Tree;
 
 import java.util.ArrayList;
@@ -9,17 +11,22 @@ public final class PTreeBuilder
 {
 	private final List<PToken> tokens = new ArrayList<>();
 	private final List<PTreeBuilder> children = new ArrayList<>();
+	private final NodeParser nodeParser;
 
-	public PTreeBuilder() {}
+	public PTreeBuilder(final NodeParser nodeParser)
+	{
+		this.nodeParser = nodeParser;
+	}
 
-	public Tree<List<PToken>> build()
+	public Tree<PNode> build()
 	{
 		return build(null);
 	}
 
-	private Tree<List<PToken>> build(final Tree<List<PToken>> parent)
+	private Tree<PNode> build(final Tree<PNode> parent)
 	{
-		return new Tree<>(parent, tokens, treeParent -> children.stream().map(c -> c.build(treeParent)).toList());
+		final var pnode = nodeParser.parse(tokens);
+		return new Tree<>(parent, pnode, treeParent -> children.stream().map(c -> c.build(treeParent)).toList());
 	}
 
 	public void addWord(final PToken token)
@@ -29,7 +36,7 @@ public final class PTreeBuilder
 
 	public PTreeBuilder newChild()
 	{
-		final var child = new PTreeBuilder();
+		final var child = new PTreeBuilder(nodeParser);
 		children.add(child);
 		return child;
 	}

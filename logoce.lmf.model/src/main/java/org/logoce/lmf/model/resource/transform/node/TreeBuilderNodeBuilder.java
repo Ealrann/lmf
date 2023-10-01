@@ -3,60 +3,51 @@ package org.logoce.lmf.model.resource.transform.node;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.ptree.PToken;
-import org.logoce.lmf.model.resource.transform.parsing.NodeParser;
-import org.logoce.lmf.model.resource.transform.parsing.ParsedNode;
+import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.Tree;
 
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class TreeBuilderNodeBuilder
 {
-	private final NodeParser nodeParser;
-
 	private final Map<String, ModelGroup<?>> groups;
 
 	private final Map<Group<?>, TreeToFeatureResolver> resolvers;
 
-	public TreeBuilderNodeBuilder(final NodeParser nodeParser,
-								  final Map<String, ModelGroup<?>> groups,
+	public TreeBuilderNodeBuilder(final Map<String, ModelGroup<?>> groups,
 								  final Map<Group<?>, TreeToFeatureResolver> resolvers)
 	{
-		this.nodeParser = nodeParser;
 		this.groups = groups;
 		this.resolvers = resolvers;
 	}
 
-	public <T extends LMObject> TreeBuilderNode<T> mapTree(final Tree<List<PToken>> node)
+	public <T extends LMObject> TreeBuilderNode<T> mapTree(final Tree<PNode> tree)
 	{
-		return node.map(this::buildNodeInfo, TreeBuilderNode<T>::new);
+		return tree.map(this::buildNodeInfo, TreeBuilderNode<T>::new);
 	}
 
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<List<PToken>> node)
+	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<PNode> node)
 	{
-		final var namedNode = nodeParser.parse(node.data());
-		final var modelGroup = this.<T>findModelGroup(namedNode, false);
+		final var pNode = node.data();
+		final var modelGroup = this.<T>findModelGroup(pNode, false);
 		final var parent = node.parent();
-		if (parent != null && parent.parent() != null)
+		if (parent != null)
 		{
-			final var parentNamedNode = nodeParser.parse(parent.data());
-			final var parentModelGroup = findModelGroup(parentNamedNode, true);
+			final var parentModelGroup = findModelGroup(parent.data(), true);
 			final var parentGroup = parentModelGroup.group();
-
-			return buildNodeInfoWithParent(namedNode, parentGroup, modelGroup);
+			return buildNodeInfoWithParent(pNode, parentGroup, modelGroup);
 		}
 		else
 		{
-			return new BuilderNodeInfo<>(null, namedNode.values(), modelGroup);
+			return new BuilderNodeInfo<>(null, pNode.values(), modelGroup);
 		}
 	}
 
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(final ParsedNode node,
+	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(final PNode node,
 																			final Group<?> parentGroup,
 																			final ModelGroup<T> modelGroup)
 	{
@@ -69,7 +60,7 @@ public class TreeBuilderNodeBuilder
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroup(final ParsedNode node, boolean mandatory)
+	private <T extends LMObject> ModelGroup<T> findModelGroup(final PNode node, boolean mandatory)
 	{
 		final var groupName = node.type().values().get(0);
 		final var modelGroup = groups.get(groupName);
@@ -81,8 +72,7 @@ public class TreeBuilderNodeBuilder
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final ParsedNode node,
-																		final Group<?> parentGroup)
+	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final PNode node, final Group<?> parentGroup)
 	{
 		final var containmentName = node.type().firstToken();
 		final var groupFromParent = parentGroup.features()
@@ -100,7 +90,7 @@ public class TreeBuilderNodeBuilder
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final ParsedNode node,
+	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final PNode node,
 																		   final Group<?> parentGroup,
 																		   final ModelGroup<T> modelGroup)
 	{

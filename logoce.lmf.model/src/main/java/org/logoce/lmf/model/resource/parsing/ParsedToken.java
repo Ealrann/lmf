@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.resource.transform.parsing;
+package org.logoce.lmf.model.resource.parsing;
 
 import java.util.List;
 import java.util.Optional;
