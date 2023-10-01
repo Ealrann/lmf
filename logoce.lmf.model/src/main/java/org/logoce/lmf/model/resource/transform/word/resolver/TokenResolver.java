@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.resource.transform.word.resolver;
 
-import org.logoce.lmf.model.resource.transform.node.ParsedToken;
+import org.logoce.lmf.model.resource.transform.parsing.ParsedToken;
 import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 

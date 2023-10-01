@@ -2,6 +2,7 @@ package org.logoce.lmf.model.resource.transform.node;
 
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.resource.transform.parsing.ParsedToken;
 
 import java.util.List;
 

@@ -12,18 +12,12 @@ public final class PTreeBuilder
 
 	public PTreeBuilder() {}
 
-	public PTreeBuilder(final Tree<List<PToken>> tree)
-	{
-		tokens.addAll(tree.data());
-		tree.children().stream().map(PTreeBuilder::new).forEach(children::add);
-	}
-
 	public Tree<List<PToken>> build()
 	{
 		return build(null);
 	}
 
-	public Tree<List<PToken>> build(final Tree<List<PToken>> parent)
+	private Tree<List<PToken>> build(final Tree<List<PToken>> parent)
 	{
 		return new Tree<>(parent, tokens, treeParent -> children.stream().map(c -> c.build(treeParent)).toList());
 	}

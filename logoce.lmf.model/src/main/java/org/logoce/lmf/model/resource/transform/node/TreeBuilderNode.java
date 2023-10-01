@@ -3,6 +3,7 @@ package org.logoce.lmf.model.resource.transform.node;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.resource.transform.parsing.ParsedToken;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 import org.logoce.lmf.model.util.AbstractTree;
 

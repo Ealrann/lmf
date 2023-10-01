@@ -12,6 +12,7 @@ public class Main
 {
 	public static void main(String[] args)
 	{
+		final var start = System.currentTimeMillis();
 		final var modelPath = args[0];
 		final var targetPath = args[1];
 
@@ -35,8 +36,10 @@ public class Main
 				if(root instanceof Model model)
 				{
 					final var generator = new ModelGenerator(model);
-					System.out.println("Generating = " + model.name() + "...");
+					System.out.printf("Generating = %1$s...%n", model.name());
 					generator.generateJava(targetDir);
+					final var end = System.currentTimeMillis();
+					System.out.printf("Generation done in %1$d ms%n", end-start);
 				}
 			}
 		}

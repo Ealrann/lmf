@@ -4,6 +4,8 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.ptree.PToken;
+import org.logoce.lmf.model.resource.transform.parsing.NodeParser;
+import org.logoce.lmf.model.resource.transform.parsing.ParsedNode;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.Tree;
@@ -15,17 +17,17 @@ import java.util.Optional;
 
 public class TreeBuilderNodeBuilder
 {
-	private final ParsedNode.Builder namedNodeBuilder;
+	private final NodeParser nodeParser;
 
 	private final Map<String, ModelGroup<?>> groups;
 
 	private final Map<Group<?>, TreeToFeatureResolver> resolvers;
 
-	public TreeBuilderNodeBuilder(final ParsedNode.Builder namedNodeBuilder,
+	public TreeBuilderNodeBuilder(final NodeParser nodeParser,
 								  final Map<String, ModelGroup<?>> groups,
 								  final Map<Group<?>, TreeToFeatureResolver> resolvers)
 	{
-		this.namedNodeBuilder = namedNodeBuilder;
+		this.nodeParser = nodeParser;
 		this.groups = groups;
 		this.resolvers = resolvers;
 	}
@@ -37,12 +39,12 @@ public class TreeBuilderNodeBuilder
 
 	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<List<PToken>> node)
 	{
-		final var namedNode = namedNodeBuilder.build(node.data());
+		final var namedNode = nodeParser.parse(node.data());
 		final var modelGroup = this.<T>findModelGroup(namedNode, false);
 		final var parent = node.parent();
 		if (parent != null && parent.parent() != null)
 		{
-			final var parentNamedNode = namedNodeBuilder.build(parent.data());
+			final var parentNamedNode = nodeParser.parse(parent.data());
 			final var parentModelGroup = findModelGroup(parentNamedNode, true);
 			final var parentGroup = parentModelGroup.group();
 
