@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 public abstract class AbstractTree<T, Y extends AbstractTree<T, Y>>
 {
-	private final T data;
+	protected final T data;
 	protected final Y parent;
 	protected final List<Y> children;
 

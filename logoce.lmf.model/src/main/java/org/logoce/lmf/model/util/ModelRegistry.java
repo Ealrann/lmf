@@ -1,10 +1,16 @@
 package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
+import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.Named;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ModelRegistry
@@ -17,6 +23,14 @@ public final class ModelRegistry
 	{
 		final var coreModelPackage = LMCorePackage.Instance;
 		modelMap.put(coreModelPackage.model().name(), coreModelPackage);
+	}
+
+	public Map<String, Alias> getAliasMap()
+	{
+		return models().map(IModelPackage::model)
+					   .map(Model::aliases)
+					   .flatMap(Collection::stream)
+					   .collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
 	}
 
 	public IModelPackage get(final String name)

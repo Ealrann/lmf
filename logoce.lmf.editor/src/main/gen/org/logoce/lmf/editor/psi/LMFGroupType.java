@@ -5,12 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LMFGroup extends PsiElement {
-
-  @NotNull
-  LMFGroupType getGroupType();
-
-  @NotNull
-  List<LMFNode> getNodeList();
+public interface LMFGroupType extends PsiElement {
 
 }

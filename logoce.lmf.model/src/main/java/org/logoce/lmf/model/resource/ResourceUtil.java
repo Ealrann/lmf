@@ -11,8 +11,8 @@ public final class ResourceUtil
 {
 	public static List<? extends LMObject> loadModel(final InputStream inputStream)
 	{
-		final var ptreeBuilder = new PTreeReader();
-		final var roots = ptreeBuilder.read(inputStream);
+		final var ptreeReader = new PTreeReader();
+		final var roots = ptreeReader.read(inputStream);
 
 		final var modelBuilder = new PTreeToJava();
 		return modelBuilder.transform(roots);

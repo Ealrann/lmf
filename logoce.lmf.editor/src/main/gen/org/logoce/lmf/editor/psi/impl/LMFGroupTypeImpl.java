@@ -11,32 +11,20 @@ import static org.logoce.lmf.editor.psi.LMIntellijTokenTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.logoce.lmf.editor.psi.*;
 
-public class LMFGroupImpl extends ASTWrapperPsiElement implements LMFGroup {
+public class LMFGroupTypeImpl extends ASTWrapperPsiElement implements LMFGroupType {
 
-  public LMFGroupImpl(@NotNull ASTNode node) {
+  public LMFGroupTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull LMFVisitor visitor) {
-    visitor.visitGroup(this);
+    visitor.visitGroupType(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof LMFVisitor) accept((LMFVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public LMFGroupType getGroupType() {
-    return findNotNullChildByClass(LMFGroupType.class);
-  }
-
-  @Override
-  @NotNull
-  public List<LMFNode> getNodeList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFNode.class);
   }
 
 }

@@ -31,15 +31,15 @@ public class Main
 		{
 			final var roots = ResourceUtil.loadModel(modelInputStream);
 
-			for(final var root : roots)
+			for (final var root : roots)
 			{
-				if(root instanceof Model model)
+				if (root instanceof Model model)
 				{
 					final var generator = new ModelGenerator(model);
 					System.out.printf("Generating = %1$s...%n", model.name());
 					generator.generateJava(targetDir);
 					final var end = System.currentTimeMillis();
-					System.out.printf("Generation done in %1$d ms%n", end-start);
+					System.out.printf("Generation done in %1$d ms%n", end - start);
 				}
 			}
 		}

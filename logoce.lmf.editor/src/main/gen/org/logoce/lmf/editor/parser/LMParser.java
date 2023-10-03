@@ -36,53 +36,35 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OPEN_NODE (TYPE_NAME ASSIGN)? TYPE (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+  // OPEN_NODE group_type (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
   public static boolean group(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group")) return false;
     if (!nextTokenIs(b, OPEN_NODE)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, OPEN_NODE);
-    r = r && group_1(b, l + 1);
-    r = r && consumeToken(b, TYPE);
-    r = r && group_3(b, l + 1);
+    r = r && group_type(b, l + 1);
+    r = r && group_2(b, l + 1);
     r = r && consumeToken(b, CLOSE_NODE);
-    r = r && group_5(b, l + 1);
+    r = r && group_4(b, l + 1);
     exit_section_(b, m, GROUP, r);
     return r;
   }
 
-  // (TYPE_NAME ASSIGN)?
-  private static boolean group_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "group_1")) return false;
-    group_1_0(b, l + 1);
-    return true;
-  }
-
-  // TYPE_NAME ASSIGN
-  private static boolean group_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "group_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, TYPE_NAME, ASSIGN);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
   // (node | WHITE_SPACE)*
-  private static boolean group_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "group_3")) return false;
+  private static boolean group_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "group_2")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!group_3_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "group_3", c)) break;
+      if (!group_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "group_2", c)) break;
     }
     return true;
   }
 
   // node | WHITE_SPACE
-  private static boolean group_3_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "group_3_0")) return false;
+  private static boolean group_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "group_2_0")) return false;
     boolean r;
     r = node(b, l + 1);
     if (!r) r = consumeToken(b, WHITE_SPACE);
@@ -90,10 +72,40 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   // WHITE_SPACE?
-  private static boolean group_5(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "group_5")) return false;
+  private static boolean group_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "group_4")) return false;
     consumeToken(b, WHITE_SPACE);
     return true;
+  }
+
+  /* ********************************************************** */
+  // (TYPE_NAME ASSIGN)? TYPE
+  public static boolean group_type(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "group_type")) return false;
+    if (!nextTokenIs(b, "<group type>", TYPE, TYPE_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, GROUP_TYPE, "<group type>");
+    r = group_type_0(b, l + 1);
+    r = r && consumeToken(b, TYPE);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (TYPE_NAME ASSIGN)?
+  private static boolean group_type_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "group_type_0")) return false;
+    group_type_0_0(b, l + 1);
+    return true;
+  }
+
+  // TYPE_NAME ASSIGN
+  private static boolean group_type_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "group_type_0_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, TYPE_NAME, ASSIGN);
+    exit_section_(b, m, null, r);
+    return r;
   }
 
   /* ********************************************************** */

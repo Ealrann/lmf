@@ -64,8 +64,7 @@ public final class BasicAdapterManager implements IAdapterManager
 	@Override
 	public Stream<IAdapterDescriptor<?>> availableDescriptors()
 	{
-		return handles.stream()
-					  .map(HandleWrapper::descriptor);
+		return handles.stream().map(HandleWrapper::descriptor);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,22 +84,19 @@ public final class BasicAdapterManager implements IAdapterManager
 	public <T extends IAdapterHandle<?>> Stream<T> adaptHandlesOfType(final Class<T> handleType)
 	{
 		return handles.stream()
-					  .filter(w -> handleType.isAssignableFrom(w.descriptorContext.handleBuilder()
-																				  .getHandleClass()))
+					  .filter(w -> handleType.isAssignableFrom(w.descriptorContext.handleBuilder().getHandleClass()))
 					  .map(handleWrapper -> handleWrapper.handle(target))
 					  .map(handle -> (T) handle);
 	}
 
 	private static Predicate<HandleWrapper<?>> filter(final Class<? extends IAdapter> type, final String identifier)
 	{
-		return wrapper -> wrapper.descriptorContext.descriptor()
-												   .match(type, identifier);
+		return wrapper -> wrapper.descriptorContext.descriptor().match(type, identifier);
 	}
 
 	private static Predicate<HandleWrapper<?>> filter(final Class<? extends IAdapter> type)
 	{
-		return wrapper -> wrapper.descriptorContext.descriptor()
-												   .match(type);
+		return wrapper -> wrapper.descriptorContext.descriptor().match(type);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -126,8 +122,7 @@ public final class BasicAdapterManager implements IAdapterManager
 		{
 			if (handle == null)
 			{
-				handle = descriptorContext.handleBuilder()
-										  .build(target);
+				handle = descriptorContext.handleBuilder().build(target);
 				handle.load(target);
 			}
 			return handle;

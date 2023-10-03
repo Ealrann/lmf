@@ -11,6 +11,10 @@ public class LMFVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitGroupType(@NotNull LMFGroupType o) {
+    visitPsiElement(o);
+  }
+
   public void visitLeaf(@NotNull LMFLeaf o) {
     visitPsiElement(o);
   }

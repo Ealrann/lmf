@@ -10,6 +10,8 @@
   tokenTypeClass="org.logoce.lmf.editor.psi.LMTokenType"
   elementTypeHolderClass="org.logoce.lmf.editor.psi.LMIntellijTokenTypes"
 
+  psiImplUtilClass="org.logoce.lmf.editor.psi.LMPsiImplUtil"
+
   tokens = [
     TYPE = 'TYPE'
     VALUE = 'VALUE'
@@ -27,7 +29,9 @@
 
 lmFile ::= group*
 
-group ::= OPEN_NODE (TYPE_NAME ASSIGN)? TYPE (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+group ::= OPEN_NODE group_type (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+
+group_type ::= (TYPE_NAME ASSIGN)? TYPE
 
 node ::= leaf | group
 

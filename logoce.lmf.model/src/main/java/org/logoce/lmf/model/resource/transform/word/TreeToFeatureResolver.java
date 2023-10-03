@@ -40,7 +40,6 @@ public class TreeToFeatureResolver
 	public void resolve(final TreeBuilderNode<?> node)
 	{
 		final var resolutions = tokenResolver.resolve(node);
-
 		node.setResolutions(resolutions);
 	}
 

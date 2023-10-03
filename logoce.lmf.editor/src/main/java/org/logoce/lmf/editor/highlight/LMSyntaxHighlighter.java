@@ -6,7 +6,8 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
-import org.logoce.lmf.editor.lexer.LMIntellijLexerAdapter;
+import org.logoce.lmf.editor.lexer.LMEditorLexer;
+import org.logoce.lmf.editor.lexer.LMEditorLexerAdapter;
 import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
@@ -25,11 +26,18 @@ public final class LMSyntaxHighlighter extends SyntaxHighlighterBase
 	private static final TextAttributesKey[] KEY_KEYS = new TextAttributesKey[]{KEY};
 	private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
+	private final LMEditorLexerAdapter lexerAdapter;
+
+	public LMSyntaxHighlighter(final LMEditorLexer lexer)
+	{
+		this.lexerAdapter = new LMEditorLexerAdapter(lexer);
+	}
+
 	@NotNull
 	@Override
 	public Lexer getHighlightingLexer()
 	{
-		return new LMIntellijLexerAdapter();
+		return lexerAdapter;
 	}
 
 	@Override

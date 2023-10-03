@@ -9,6 +9,7 @@ import org.logoce.lmf.editor.psi.impl.*;
 public interface LMIntellijTokenTypes {
 
   IElementType GROUP = new LMElementType("GROUP");
+  IElementType GROUP_TYPE = new LMElementType("GROUP_TYPE");
   IElementType LEAF = new LMElementType("LEAF");
   IElementType NODE = new LMElementType("NODE");
   IElementType VAL = new LMElementType("VAL");
@@ -30,6 +31,9 @@ public interface LMIntellijTokenTypes {
       IElementType type = node.getElementType();
       if (type == GROUP) {
         return new LMFGroupImpl(node);
+      }
+      else if (type == GROUP_TYPE) {
+        return new LMFGroupTypeImpl(node);
       }
       else if (type == LEAF) {
         return new LMFLeafImpl(node);

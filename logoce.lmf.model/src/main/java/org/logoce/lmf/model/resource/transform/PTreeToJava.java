@@ -25,6 +25,11 @@ public final class PTreeToJava
 
 	public PTreeToJava()
 	{
+		this(false);
+	}
+
+	public PTreeToJava(final boolean setTokenAdapter)
+	{
 		final var groups = ModelRegistry.Instance.models()
 												 .flatMap(PTreeToJava::modelGroups)
 												 .collect(Collectors.toUnmodifiableMap(ModelGroup::name,
@@ -36,7 +41,7 @@ public final class PTreeToJava
 						  .map(TreeToFeatureResolver::new)
 						  .collect(Collectors.toUnmodifiableMap(TreeToFeatureResolver::group, Function.identity()));
 
-		nodeMapper = new TreeBuilderNodeBuilder(groups, resolvers);
+		nodeMapper = new TreeBuilderNodeBuilder(groups, resolvers, setTokenAdapter);
 	}
 
 	public List<? extends LMObject> transform(final List<Tree<PNode>> roots)

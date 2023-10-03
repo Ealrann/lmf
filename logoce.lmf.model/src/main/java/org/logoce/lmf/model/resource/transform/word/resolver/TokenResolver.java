@@ -18,25 +18,42 @@ public class TokenResolver
 		this.availableResolvers = List.copyOf(tokenResolvers);
 	}
 
-	public List<IFeatureResolution> resolve(final TreeBuilderNode<?> node)
+	public List<ResolutionAptempt> resolve(final TreeBuilderNode<?> node)
 	{
 		final var runner = new TokenResolverRunner(availableResolvers, node);
-		final List<IFeatureResolution> resolutions = new ArrayList<>();
+		final List<ResolutionAptempt> resolutions = new ArrayList<>();
 		final List<ParsedToken> notFound = new ArrayList<>();
 
 		for (final var token : node.tokens())
 		{
-			runner.nameResolution(token)
-				  .or(() -> runner.resolveBoolean(token))
-				  .ifPresentOrElse(resolutions::add, () -> notFound.add(token));
+			try
+			{
+				runner.nameResolution(token)
+					  .or(() -> runner.resolveBoolean(token))
+					  .ifPresentOrElse(r -> resolutions.add(new ResolutionAptempt(r, null)), () -> notFound.add(token));
+			}
+			catch (NoSuchElementException exception)
+			{
+				resolutions.add(new ResolutionAptempt(null, exception));
+			}
 		}
 		for (final var token : notFound)
 		{
-			resolutions.add(runner.valueResolution(token));
+			try
+			{
+				final var res = runner.valueResolution(token);
+				resolutions.add(new ResolutionAptempt(res, null));
+			}
+			catch (NoSuchElementException exception)
+			{
+				resolutions.add(new ResolutionAptempt(null, exception));
+			}
 		}
 
 		return resolutions;
 	}
+
+	public record ResolutionAptempt(IFeatureResolution resolution, NoSuchElementException exception) {}
 
 	private static class TokenResolverRunner
 	{

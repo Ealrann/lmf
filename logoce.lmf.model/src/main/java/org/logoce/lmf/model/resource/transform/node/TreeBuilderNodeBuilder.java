@@ -5,6 +5,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
+import org.logoce.lmf.model.util.AbstractTree;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.Tree;
 
@@ -17,17 +18,25 @@ public class TreeBuilderNodeBuilder
 	private final Map<String, ModelGroup<?>> groups;
 
 	private final Map<Group<?>, TreeToFeatureResolver> resolvers;
+	private final boolean setTokenAdapter;
 
 	public TreeBuilderNodeBuilder(final Map<String, ModelGroup<?>> groups,
-								  final Map<Group<?>, TreeToFeatureResolver> resolvers)
+								  final Map<Group<?>, TreeToFeatureResolver> resolvers,
+								  final boolean setTokenAdapter)
 	{
 		this.groups = groups;
 		this.resolvers = resolvers;
+		this.setTokenAdapter = setTokenAdapter;
 	}
 
 	public <T extends LMObject> TreeBuilderNode<T> mapTree(final Tree<PNode> tree)
 	{
-		return tree.map(this::buildNodeInfo, TreeBuilderNode<T>::new);
+		return tree.map(this::buildNodeInfo, this::newNode);
+	}
+
+	private <T extends LMObject> TreeBuilderNode<T> newNode(final AbstractTree.BuildInfo<BuilderNodeInfo<T>, TreeBuilderNode<T>> info)
+	{
+		return new TreeBuilderNode<>(info, setTokenAdapter);
 	}
 
 	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<PNode> node)

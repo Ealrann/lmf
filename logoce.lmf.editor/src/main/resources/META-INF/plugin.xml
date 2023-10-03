@@ -19,6 +19,9 @@
         <lang.syntaxHighlighterFactory
                 language="LightModel"
                 implementationClass="org.logoce.lmf.editor.highlight.LMSyntaxHighlighterFactory"/>
+        <annotator
+                language="LightModel"
+                implementationClass="org.logoce.lmf.editor.highlight.LMAnnotator"/>
     </extensions>
 
 </idea-plugin>
