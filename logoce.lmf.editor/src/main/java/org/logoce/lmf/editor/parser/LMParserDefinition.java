@@ -25,7 +25,7 @@ public final class LMParserDefinition implements ParserDefinition
 	@Override
 	public Lexer createLexer(Project project)
 	{
-		return new LMEditorLexerAdapter(new LMEditorLexer(false));
+		return new LMEditorLexerAdapter(new LMEditorLexer());
 	}
 
 	@NotNull

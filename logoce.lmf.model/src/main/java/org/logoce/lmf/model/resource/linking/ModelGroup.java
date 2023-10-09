@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.resource.transform.node;
+package org.logoce.lmf.model.resource.linking;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;

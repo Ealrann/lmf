@@ -3,7 +3,7 @@ package org.logoce.lmf.model.resource.transform.word.resolver;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
+import org.logoce.lmf.model.resource.linking.LinkerNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
@@ -22,7 +22,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	protected Optional<IFeatureResolution> internalResolve(TreeBuilderNode<?> node, String value)
+	protected Optional<IFeatureResolution> internalResolve(LinkerNode<?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -39,9 +39,9 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@SuppressWarnings("unchecked")
-	private Optional<IFeatureResolution> resolveLocalDependency(final TreeBuilderNode<?> node, final String uri)
+	private Optional<IFeatureResolution> resolveLocalDependency(final LinkerNode<?> node, final String uri)
 	{
-		TreeBuilderNode<?> current = node;
+		LinkerNode<?> current = node;
 		if (uri.startsWith("/"))
 		{
 			current = current.root();
@@ -78,7 +78,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 		if (ModelUtils.isSubGroup(feature.reference().group(), current.modelGroup().group()))
 		{
-			return Optional.of(new DynamicReferenceResolution<>(feature, (TreeBuilderNode<T>) current));
+			return Optional.of(new DynamicReferenceResolution<>(feature, (LinkerNode<T>) current));
 		}
 		else
 		{
@@ -154,9 +154,9 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	public static final class DynamicReferenceResolution<T extends LMObject> implements IFeatureResolution
 	{
 		final Relation<T, ?> relation;
-		final TreeBuilderNode<T> value;
+		final LinkerNode<T> value;
 
-		private DynamicReferenceResolution(final Relation<T, ?> relation, final TreeBuilderNode<T> value)
+		private DynamicReferenceResolution(final Relation<T, ?> relation, final LinkerNode<T> value)
 		{
 			this.relation = relation;
 			this.value = value;

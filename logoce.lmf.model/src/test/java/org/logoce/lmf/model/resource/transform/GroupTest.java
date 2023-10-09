@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.ptree.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
 
@@ -24,8 +24,8 @@ public class GroupTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		assertTrue(roots.get(0) instanceof Group);
 		assertTrue(roots.get(1) instanceof Group);
@@ -52,8 +52,8 @@ public class GroupTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Model);
@@ -96,8 +96,8 @@ public class GroupTest
 
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Model);

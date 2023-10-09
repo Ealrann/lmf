@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform.word;
 
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
+import org.logoce.lmf.model.resource.linking.LinkerNode;
 import org.logoce.lmf.model.resource.transform.word.resolver.ITokenResolver;
 import org.logoce.lmf.model.resource.transform.word.resolver.TokenResolver;
 
@@ -37,10 +37,9 @@ public class TreeToFeatureResolver
 		tokenResolver = new TokenResolver(wordResolvers);
 	}
 
-	public void resolve(final TreeBuilderNode<?> node)
+	public void resolve(final LinkerNode<?> node)
 	{
-		final var resolutions = tokenResolver.resolve(node);
-		node.setResolutions(resolutions);
+		node.resolve(tokenResolver);
 	}
 
 	public Stream<Relation<?, ?>> streamContainmentRelations()

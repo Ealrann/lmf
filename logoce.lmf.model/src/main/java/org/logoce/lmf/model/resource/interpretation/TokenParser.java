@@ -1,14 +1,14 @@
-package org.logoce.lmf.model.resource.parsing;
+package org.logoce.lmf.model.resource.interpretation;
 
 import org.logoce.lmf.model.lexer.ELMTokenType;
-import org.logoce.lmf.model.resource.ptree.PToken;
+import org.logoce.lmf.model.resource.parsing.PToken;
 import org.logoce.lmf.model.resource.util.SoftIterator;
 
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class TokenParser
+final class TokenParser
 {
 	private final Iterator<PToken> iterator;
 
@@ -17,7 +17,7 @@ public final class TokenParser
 		this.iterator = iterator;
 	}
 
-	public ParsedToken createTypeToken()
+	public PType createTypeToken()
 	{
 		final var firstToken = iterator.next();
 		final var firstValue = firstToken.value();
@@ -28,25 +28,25 @@ public final class TokenParser
 			assert assign.type() == ELMTokenType.ASSIGN;
 			final var type = iterator.next();
 			assert type.type() == ELMTokenType.TYPE;
-			return new ParsedNamedToken(firstValue, type.value());
+			return new PType(Optional.of(firstValue), Optional.of(type.value()));
 		}
 		else
 		{
-			return new ParsedSimpleToken(firstValue);
+			return new PType(Optional.empty(), Optional.of(firstValue));
 		}
 	}
 
-	public Iterator<ParsedToken> valueIterator()
+	public Iterator<PFeature> valueIterator()
 	{
 		return new SoftIterator<>(this::createNextValueToken);
 	}
 
-	public Stream<ParsedToken> streamValues()
+	public Stream<PFeature> streamValues()
 	{
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(valueIterator(), 0), false);
 	}
 
-	public Optional<ParsedToken> createNextValueToken()
+	public Optional<PFeature> createNextValueToken()
 	{
 		final var nextNotEmpty = nextNotEmpty();
 		if (nextNotEmpty.isEmpty()) return Optional.empty();
@@ -57,16 +57,14 @@ public final class TokenParser
 			final var assign = iterator.next();
 			assert assign.type() == ELMTokenType.ASSIGN;
 			final var nextValues = nextContiguousValues(iterator);
-			if (nextValues.size() == 1) return Optional.of(new ParsedNamedToken(firstValue, nextValues.get(0)));
-			else return Optional.of(new ParsedNamedToken(firstValue, nextValues));
+			return Optional.of(new PFeature(Optional.of(firstValue), nextValues));
 		}
 		else
 		{
 			assert firstToken.type() == ELMTokenType.VALUE || firstToken.type() == ELMTokenType.QUOTE;
 			final var nextValues = nextContiguousValues(iterator);
 			final var values = Stream.concat(Stream.of(firstValue), nextValues.stream()).toList();
-			if (values.size() == 1) return Optional.of(new ParsedSimpleToken(values.get(0)));
-			else return Optional.of(new ParsedSimpleToken(values));
+			return Optional.of(new PFeature(Optional.empty(), values));
 		}
 	}
 
@@ -107,32 +105,5 @@ public final class TokenParser
 			}
 		}
 		return res;
-	}
-
-	private record ParsedSimpleToken(List<String> values) implements ParsedToken
-	{
-		public ParsedSimpleToken(String value)
-		{
-			this(List.of(value));
-		}
-
-		@Override
-		public Optional<String> name()
-		{
-			return Optional.empty();
-		}
-	}
-
-	private record ParsedNamedToken(Optional<String> name, List<String> values) implements ParsedToken
-	{
-		public ParsedNamedToken(String name, List<String> values)
-		{
-			this(Optional.of(name), values);
-		}
-
-		public ParsedNamedToken(String name, String value)
-		{
-			this(Optional.of(name), List.of(value));
-		}
 	}
 }

@@ -279,7 +279,7 @@ public class LMLexer {
   }
 
 
-  /** Returns the maximum size of the scanner buffer, which limits the size of tokens. */
+  /** Returns the maximum size of the scanner buffer, which limits the size of features. */
   private int zzMaxBufferLen() {
     return Integer.MAX_VALUE;
   }

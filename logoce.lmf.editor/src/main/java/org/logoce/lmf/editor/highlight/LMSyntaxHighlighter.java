@@ -14,12 +14,15 @@ import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAtt
 
 public final class LMSyntaxHighlighter extends SyntaxHighlighterBase
 {
-	public static final TextAttributesKey PARENTHESES = createTextAttributesKey("SIMPLE_SEPARATOR",
+	public static final TextAttributesKey PARENTHESES = createTextAttributesKey("LM_SEPARATOR",
 																				DefaultLanguageHighlighterColors.PARENTHESES);
-	public static final TextAttributesKey VALUE = createTextAttributesKey("SIMPLE_VALUE",
+	public static final TextAttributesKey VALUE = createTextAttributesKey("LM_VALUE",
 																		  DefaultLanguageHighlighterColors.STRING);
-	public static final TextAttributesKey KEY = createTextAttributesKey("SIMPLE_KEY",
+	public static final TextAttributesKey KEY = createTextAttributesKey("LM_KEY",
 																		DefaultLanguageHighlighterColors.KEYWORD);
+
+	public static final TextAttributesKey REFERENCE = createTextAttributesKey("LM_REFERENCE",
+																			  DefaultLanguageHighlighterColors.INSTANCE_FIELD);
 
 	private static final TextAttributesKey[] PARENTHESES_KEYS = new TextAttributesKey[]{PARENTHESES};
 	private static final TextAttributesKey[] VALUE_KEYS = new TextAttributesKey[]{VALUE};
@@ -28,9 +31,9 @@ public final class LMSyntaxHighlighter extends SyntaxHighlighterBase
 
 	private final LMEditorLexerAdapter lexerAdapter;
 
-	public LMSyntaxHighlighter(final LMEditorLexer lexer)
+	public LMSyntaxHighlighter()
 	{
-		this.lexerAdapter = new LMEditorLexerAdapter(lexer);
+		this.lexerAdapter = new LMEditorLexerAdapter(new LMEditorLexer());
 	}
 
 	@NotNull

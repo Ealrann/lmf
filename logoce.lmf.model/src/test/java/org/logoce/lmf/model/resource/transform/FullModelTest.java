@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.resource.ptree.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
 
@@ -18,8 +18,8 @@ public class FullModelTest
 	{
 		final var inputStream = new ByteArrayInputStream(fullModelText.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Model);

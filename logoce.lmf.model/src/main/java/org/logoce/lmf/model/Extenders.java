@@ -2,7 +2,6 @@ package org.logoce.lmf.model;
 
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.IAdapterProvider;
-import org.logoce.lmf.model.resource.adapter.LexerTokenAdapter;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -12,7 +11,7 @@ public class Extenders implements IAdapterProvider
 	@Override
 	public List<Class<? extends IAdapter>> classifiers()
 	{
-		return List.of(LexerTokenAdapter.class);
+		return List.of();
 	}
 
 	@Override

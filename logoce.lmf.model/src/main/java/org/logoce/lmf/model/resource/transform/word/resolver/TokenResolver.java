@@ -1,7 +1,8 @@
 package org.logoce.lmf.model.resource.transform.word.resolver;
 
-import org.logoce.lmf.model.resource.parsing.ParsedToken;
-import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
+import org.logoce.lmf.model.resource.interpretation.PFeature;
+import org.logoce.lmf.model.resource.interpretation.PNominalGroup;
+import org.logoce.lmf.model.resource.linking.LinkerNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
 import java.util.*;
@@ -18,23 +19,24 @@ public class TokenResolver
 		this.availableResolvers = List.copyOf(tokenResolvers);
 	}
 
-	public List<ResolutionAptempt> resolve(final TreeBuilderNode<?> node)
+	public List<ResolutionAptempt> resolve(final LinkerNode<?> node)
 	{
 		final var runner = new TokenResolverRunner(availableResolvers, node);
 		final List<ResolutionAptempt> resolutions = new ArrayList<>();
-		final List<ParsedToken> notFound = new ArrayList<>();
+		final List<PFeature> notFound = new ArrayList<>();
 
-		for (final var token : node.tokens())
+		for (final var token : node.features())
 		{
 			try
 			{
 				runner.nameResolution(token)
 					  .or(() -> runner.resolveBoolean(token))
-					  .ifPresentOrElse(r -> resolutions.add(new ResolutionAptempt(r, null)), () -> notFound.add(token));
+					  .ifPresentOrElse(r -> resolutions.add(new ResolutionAptempt(token, r, null)),
+									   () -> notFound.add(token));
 			}
 			catch (NoSuchElementException exception)
 			{
-				resolutions.add(new ResolutionAptempt(null, exception));
+				resolutions.add(new ResolutionAptempt(token, null, exception));
 			}
 		}
 		for (final var token : notFound)
@@ -42,43 +44,45 @@ public class TokenResolver
 			try
 			{
 				final var res = runner.valueResolution(token);
-				resolutions.add(new ResolutionAptempt(res, null));
+				resolutions.add(new ResolutionAptempt(token, res, null));
 			}
 			catch (NoSuchElementException exception)
 			{
-				resolutions.add(new ResolutionAptempt(null, exception));
+				resolutions.add(new ResolutionAptempt(token, null, exception));
 			}
 		}
 
 		return resolutions;
 	}
 
-	public record ResolutionAptempt(IFeatureResolution resolution, NoSuchElementException exception) {}
+	public record ResolutionAptempt(PFeature feature,
+									IFeatureResolution resolution,
+									NoSuchElementException exception) {}
 
 	private static class TokenResolverRunner
 	{
 		private final LinkedList<ITokenResolver<?>> availableResolvers;
-		private final TreeBuilderNode<?> node;
+		private final LinkerNode<?> node;
 
-		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final TreeBuilderNode<?> node)
+		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final LinkerNode<?> node)
 		{
 			this.availableResolvers = new LinkedList<>(tokenResolvers);
 			this.node = node;
 		}
 
-		public Optional<IFeatureResolution> nameResolution(final ParsedToken token)
+		public Optional<IFeatureResolution> nameResolution(final PFeature token)
 		{
 			return resolveFromName(token).or(() -> resolveBoolean(token));
 		}
 
-		public IFeatureResolution valueResolution(final ParsedToken token)
+		public IFeatureResolution valueResolution(final PFeature token)
 		{
 			return findMandatory(r -> true,
 								 r -> r.resolve(node, token.values()),
 								 () -> new NoSuchElementException("Cannot resolve value Token " + token.firstToken()));
 		}
 
-		private Optional<IFeatureResolution> resolveFromName(final ParsedToken token)
+		private Optional<IFeatureResolution> resolveFromName(final PFeature token)
 		{
 			if (token.name().isPresent())
 			{
@@ -94,7 +98,7 @@ public class TokenResolver
 			}
 		}
 
-		private Optional<IFeatureResolution> resolveBoolean(final ParsedToken token)
+		private Optional<IFeatureResolution> resolveBoolean(final PNominalGroup token)
 		{
 			return findOptional(r -> r.match(token.firstToken()), r -> r.resolve(node, List.of("true")));
 		}

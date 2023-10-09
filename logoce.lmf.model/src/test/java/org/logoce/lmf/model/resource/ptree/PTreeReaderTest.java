@@ -2,6 +2,8 @@ package org.logoce.lmf.model.resource.ptree;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.logoce.lmf.model.lexer.ELMTokenType;
+import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
 
@@ -20,8 +22,10 @@ public class PTreeReaderTest
 		Assertions.assertEquals(1, roots.size());
 
 		final var root = roots.get(0);
-		Assertions.assertEquals(0, root.data().values().size());
-		Assertions.assertEquals("model", root.data().type().firstToken());
+		Assertions.assertEquals(1, root.data().tokens().size());
+		final var firstToken = root.data().tokens().get(0);
+		Assertions.assertEquals("model", firstToken.value());
+		Assertions.assertEquals(ELMTokenType.TYPE, firstToken.type());
 	}
 
 	@Test
@@ -34,9 +38,9 @@ public class PTreeReaderTest
 		Assertions.assertEquals(2, roots.size());
 
 		final var root1 = roots.get(0);
-		Assertions.assertEquals("model1", root1.data().type().firstToken());
+		Assertions.assertEquals("model1", root1.data().tokens().get(0).value());
 		final var root2 = roots.get(1);
-		Assertions.assertEquals("model2", root2.data().type().firstToken());
+		Assertions.assertEquals("model2", root2.data().tokens().get(0).value());
 	}
 
 	@Test
@@ -49,20 +53,20 @@ public class PTreeReaderTest
 		Assertions.assertEquals(1, roots.size());
 
 		final var root = roots.get(0);
-		Assertions.assertEquals("model", root.data().type().firstToken());
+		Assertions.assertEquals("model", root.data().tokens().get(0).value());
 
 		final var car = root.children().get(0);
-		Assertions.assertEquals("car", car.data().type().firstToken());
+		Assertions.assertEquals("car", car.data().tokens().get(0).value());
 
 		final var count = car.children().get(0);
 		final var countData = count.data();
-		Assertions.assertEquals("-int", countData.type().firstToken());
-		Assertions.assertEquals("count", countData.values().get(0).firstToken());
+		Assertions.assertEquals("-int", countData.tokens().get(0).value());
+		Assertions.assertEquals("count", countData.tokens().get(2).value());
 
 		final var name = car.children().get(1);
 		final var nameData = name.data();
-		Assertions.assertEquals("-string", nameData.type().firstToken());
-		Assertions.assertEquals("name", nameData.values().get(0).firstToken());
+		Assertions.assertEquals("-string", nameData.tokens().get(0).value());
+		Assertions.assertEquals("name", nameData.tokens().get(2).value());
 	}
 
 	@Test
@@ -73,18 +77,18 @@ public class PTreeReaderTest
 		final var roots = treeBuilder.read(inputStream);
 
 		final var root = roots.get(0);
-		Assertions.assertEquals("model", root.data().type().firstToken());
+		Assertions.assertEquals("model", root.data().tokens().get(0).value());
 
 		final var matcher = root.children().get(0);
-		Assertions.assertEquals("-matcher", matcher.data().type().firstToken());
-		Assertions.assertEquals("\\b(true|false)\\b", matcher.data().values().get(0).firstToken());
+		Assertions.assertEquals("-matcher", matcher.data().tokens().get(0).value());
+		Assertions.assertEquals("\\b(true|false)\\b", matcher.data().tokens().get(3).value());
 
 		final var count = root.children().get(1);
-		Assertions.assertEquals("+int", count.data().type().firstToken());
-		Assertions.assertEquals("count", count.data().values().get(0).firstToken());
+		Assertions.assertEquals("+int", count.data().tokens().get(0).value());
+		Assertions.assertEquals("count", count.data().tokens().get(2).value());
 
 		final var name = root.children().get(2);
-		Assertions.assertEquals("-string", name.data().type().firstToken());
-		Assertions.assertEquals("name", name.data().values().get(0).firstToken());
+		Assertions.assertEquals("-string", name.data().tokens().get(0).value());
+		Assertions.assertEquals("name", name.data().tokens().get(2).value());
 	}
 }

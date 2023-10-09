@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.resource.ptree.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
 
@@ -20,8 +20,8 @@ public class ContainmentTest
 							  "(Group name=Toto))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var model = (Model) roots.get(0);
 		final var color = model.enums()

@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.resource.ptree.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
 
@@ -18,8 +18,8 @@ public class AliasTest
 		final var textModel = "(Alias name=Definition value=\"Group concrete\") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Alias);
@@ -35,8 +35,8 @@ public class AliasTest
 		final var textModel = "(Alias name=Definition \"Group concrete=false contains=true\")";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Alias);
@@ -52,8 +52,8 @@ public class AliasTest
 		final var textModel = "(-att [1..*] name=count datatype=#LMCore/units.3)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Attribute<?, ?>);
@@ -79,8 +79,8 @@ public class AliasTest
 							  ") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Model);

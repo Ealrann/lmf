@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.resource.ptree;
+package org.logoce.lmf.model.resource.parsing;
 
 public class LexerException extends Exception
 {

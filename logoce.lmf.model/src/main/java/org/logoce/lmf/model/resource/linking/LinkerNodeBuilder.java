@@ -1,11 +1,11 @@
-package org.logoce.lmf.model.resource.transform.node;
+package org.logoce.lmf.model.resource.linking;
 
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.resource.interpretation.PGroup;
+import org.logoce.lmf.model.resource.interpretation.PType;
 import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
-import org.logoce.lmf.model.util.AbstractTree;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.Tree;
 
@@ -13,75 +13,61 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class TreeBuilderNodeBuilder
+public class LinkerNodeBuilder
 {
 	private final Map<String, ModelGroup<?>> groups;
 
 	private final Map<Group<?>, TreeToFeatureResolver> resolvers;
-	private final boolean setTokenAdapter;
 
-	public TreeBuilderNodeBuilder(final Map<String, ModelGroup<?>> groups,
-								  final Map<Group<?>, TreeToFeatureResolver> resolvers,
-								  final boolean setTokenAdapter)
+	public LinkerNodeBuilder(final Map<String, ModelGroup<?>> groups,
+							 final Map<Group<?>, TreeToFeatureResolver> resolvers)
 	{
 		this.groups = groups;
 		this.resolvers = resolvers;
-		this.setTokenAdapter = setTokenAdapter;
 	}
 
-	public <T extends LMObject> TreeBuilderNode<T> mapTree(final Tree<PNode> tree)
+	public <T extends LMObject> LinkerNode<T> mapTree(final Tree<PGroup> tree)
 	{
-		return tree.map(this::buildNodeInfo, this::newNode);
+		return tree.map(this::buildNodeInfo, LinkerNode::new);
 	}
 
-	private <T extends LMObject> TreeBuilderNode<T> newNode(final AbstractTree.BuildInfo<BuilderNodeInfo<T>, TreeBuilderNode<T>> info)
-	{
-		return new TreeBuilderNode<>(info, setTokenAdapter);
-	}
-
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfo(final Tree<PNode> node)
+	private <T extends LMObject> LinkNodeInfo<T> buildNodeInfo(final Tree<PGroup> node)
 	{
 		final var pNode = node.data();
-		final var modelGroup = this.<T>findModelGroup(pNode, false);
 		final var parent = node.parent();
+		final var nodeType = pNode.type();
 		if (parent != null)
 		{
-			final var parentModelGroup = findModelGroup(parent.data(), true);
+			final var parentType = parent.data().type();
+			final var parentModelGroup = findModelGroupByValue(parentType).orElseThrow(() -> cannotFindGroup(parentType));
 			final var parentGroup = parentModelGroup.group();
+			final var modelGroup = this.<T>findModelGroupByValue(nodeType)
+									   .orElseGet(() -> findModelGroupFromParent(pNode, parentGroup));
 			return buildNodeInfoWithParent(pNode, parentGroup, modelGroup);
 		}
 		else
 		{
-			return new BuilderNodeInfo<>(null, pNode.values(), modelGroup);
+			final var modelGroup = this.<T>findModelGroupByValue(nodeType).orElseThrow(() -> cannotFindGroup(nodeType));
+			return new LinkNodeInfo<>(null, pNode.features(), modelGroup);
 		}
 	}
 
-	private <T extends LMObject> BuilderNodeInfo<T> buildNodeInfoWithParent(final PNode node,
-																			final Group<?> parentGroup,
-																			final ModelGroup<T> modelGroup)
+	private <T extends LMObject> LinkNodeInfo<T> buildNodeInfoWithParent(final PGroup node,
+																		 final Group<?> parentGroup,
+																		 final ModelGroup<T> effectiveGroup)
 	{
-		final var effectiveGroup = modelGroup != null
-								   ? modelGroup
-								   : this.<T>findModelGroupFromParent(node, parentGroup);
 		final var resolvedRelation = resolveContainmentRelation(node, parentGroup, effectiveGroup);
-
-		return new BuilderNodeInfo<>(resolvedRelation, node.values(), effectiveGroup);
+		return new LinkNodeInfo<>(resolvedRelation, node.features(), effectiveGroup);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroup(final PNode node, boolean mandatory)
+	private <T extends LMObject> Optional<ModelGroup<T>> findModelGroupByValue(final PType type)
 	{
-		final var groupName = node.type().values().get(0);
-		final var modelGroup = groups.get(groupName);
-		if (mandatory && modelGroup == null)
-		{
-			throw new NoSuchElementException("Cannot find Group: " + groupName);
-		}
-		return (ModelGroup<T>) modelGroup;
+		return type.value().map(s -> (ModelGroup<T>) groups.get(s));
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final PNode node, final Group<?> parentGroup)
+	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final PGroup node, final Group<?> parentGroup)
 	{
 		final var containmentName = node.type().firstToken();
 		final var groupFromParent = parentGroup.features()
@@ -99,7 +85,7 @@ public class TreeBuilderNodeBuilder
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final PNode node,
+	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final PGroup node,
 																		   final Group<?> parentGroup,
 																		   final ModelGroup<T> modelGroup)
 	{
@@ -139,5 +125,10 @@ public class TreeBuilderNodeBuilder
 										  containmentName +
 										  ") to child " +
 										  modelGroup.group().name());
+	}
+
+	private static NoSuchElementException cannotFindGroup(final PType nodeType)
+	{
+		return new NoSuchElementException("Cannot find Group: " + nodeType.value());
 	}
 }

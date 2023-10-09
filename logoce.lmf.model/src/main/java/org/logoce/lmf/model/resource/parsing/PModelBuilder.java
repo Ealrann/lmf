@@ -1,7 +1,5 @@
-package org.logoce.lmf.model.resource.ptree;
+package org.logoce.lmf.model.resource.parsing;
 
-import org.logoce.lmf.model.resource.parsing.NodeParser;
-import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.Tree;
 
 import java.util.ArrayDeque;
@@ -13,14 +11,12 @@ public final class PModelBuilder
 {
 	private final Deque<PTreeBuilder> stack = new ArrayDeque<>();
 	private final List<PTreeBuilder> roots = new ArrayList<>();
-	private final NodeParser nodeParser;
 
-	public PModelBuilder(final NodeParser nodeParser)
+	public PModelBuilder()
 	{
-		this.nodeParser = nodeParser;
 	}
 
-	public List<Tree<PNode>> buildTrees()
+	public List<Tree<PNode>> buildRoots()
 	{
 		return roots.stream().map(PTreeBuilder::build).toList();
 	}
@@ -44,7 +40,7 @@ public final class PModelBuilder
 
 	private PTreeBuilder newRoot()
 	{
-		final var root = new PTreeBuilder(nodeParser);
+		final var root = new PTreeBuilder();
 		roots.add(root);
 		return root;
 	}

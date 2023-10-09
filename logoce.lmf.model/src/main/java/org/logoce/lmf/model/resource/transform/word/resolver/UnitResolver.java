@@ -3,7 +3,7 @@ package org.logoce.lmf.model.resource.transform.word.resolver;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
+import org.logoce.lmf.model.resource.linking.LinkerNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
 import java.util.Optional;
@@ -40,7 +40,7 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	protected Optional<IFeatureResolution> internalResolve(final TreeBuilderNode<?> node, final String value)
+	protected Optional<IFeatureResolution> internalResolve(final LinkerNode<?> node, final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
 		if (pmatcher == null || pmatcher.matches())

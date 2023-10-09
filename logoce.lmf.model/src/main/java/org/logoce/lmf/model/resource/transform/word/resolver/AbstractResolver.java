@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform.word.resolver;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.resource.transform.node.TreeBuilderNode;
+import org.logoce.lmf.model.resource.linking.LinkerNode;
 import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 	}
 
 	@Override
-	public Optional<? extends IFeatureResolution> resolve(TreeBuilderNode<?> node, List<String> values)
+	public Optional<? extends IFeatureResolution> resolve(LinkerNode<?> node, List<String> values)
 	{
 		if (values.size() > 1 && !feature.many())
 		{
@@ -50,7 +50,7 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 		else return Optional.of(resolutions.get(0));
 	}
 
-	protected abstract Optional<? extends IFeatureResolution> internalResolve(TreeBuilderNode<?> node, String value);
+	protected abstract Optional<? extends IFeatureResolution> internalResolve(LinkerNode<?> node, String value);
 
 	public static final class MultipleResolution implements IFeatureResolution
 	{

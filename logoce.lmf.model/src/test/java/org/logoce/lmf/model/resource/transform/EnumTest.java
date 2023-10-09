@@ -3,7 +3,7 @@ package org.logoce.lmf.model.resource.transform;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.resource.ptree.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
 
@@ -20,8 +20,8 @@ public class EnumTest
 		final var textModel = "(Enum name=EColor literals=red,green,blue)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var color = roots.get(0);
 		assertTrue(color instanceof Enum<?>);
@@ -40,8 +40,8 @@ public class EnumTest
 		final var textModel = "(Model SimpleEnum (Enum name=EColor literals=red,green,blue))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PTreeToJava();
-		final var roots = ptreeToJava.transform(ptree);
+		final var ptreeToJava = new PModelBuilder();
+		final var roots = ptreeToJava.build(ptree);
 
 		final var model = roots.get(0);
 		assertTrue(model instanceof Model);

@@ -1,29 +1,32 @@
-package org.logoce.lmf.model.resource.parsing;
+package org.logoce.lmf.model.resource.interpretation;
 
 import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lexer.ELMTokenType;
 import org.logoce.lmf.model.lexer.LMLexer;
-import org.logoce.lmf.model.resource.ptree.LMIterableLexer;
-import org.logoce.lmf.model.resource.ptree.PToken;
+import org.logoce.lmf.model.resource.parsing.LMIterableLexer;
+import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.resource.parsing.PToken;
+import org.logoce.lmf.model.util.Tree;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class NodeParser
+public final class LMInterpreter
 {
 	private static final LMIterableLexer LEXER = new LMIterableLexer();
 
 	private final Map<String, Alias> aliases;
 
-	public NodeParser(Map<String, Alias> aliases)
+	public LMInterpreter(Map<String, Alias> aliases)
 	{
 		this.aliases = aliases;
 	}
 
-	public PNode parse(final List<PToken> tokens)
+	public PGroup parse(final PNode pnode)
 	{
+		final var tokens = pnode.tokens();
 		final var first = tokens.get(0);
 		final var isAlias = isAliasDefinition(first);
 		final var stream = isAlias ? tokens.stream() : tokens.stream().flatMap(this::mapAlias);
@@ -31,7 +34,12 @@ public final class NodeParser
 		final var typeToken = builder.createTypeToken();
 		final var valueTokens = builder.streamValues().toList();
 
-		return new PNode(typeToken, List.copyOf(valueTokens));
+		return new PGroup(typeToken, List.copyOf(valueTokens));
+	}
+
+	public PGroup parseTreeNode(final Tree<PNode> treeNode)
+	{
+		return parse(treeNode.data());
 	}
 
 	private Stream<PToken> mapAlias(final PToken word)
