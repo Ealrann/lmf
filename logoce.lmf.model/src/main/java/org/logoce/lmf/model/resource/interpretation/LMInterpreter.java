@@ -7,13 +7,13 @@ import org.logoce.lmf.model.lexer.LMLexer;
 import org.logoce.lmf.model.resource.parsing.LMIterableLexer;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
-import org.logoce.lmf.model.util.Tree;
+import org.logoce.lmf.model.util.tree.NavigableDataTree;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class LMInterpreter
+public final class LMInterpreter<I extends PNode>
 {
 	private static final LMIterableLexer LEXER = new LMIterableLexer();
 
@@ -24,7 +24,12 @@ public final class LMInterpreter
 		this.aliases = aliases;
 	}
 
-	public PGroup parse(final PNode pnode)
+	public PGroup<I> parseTreeNode(final NavigableDataTree<I, ?> treeNode)
+	{
+		return parse(treeNode.data());
+	}
+
+	private PGroup<I> parse(final I pnode)
 	{
 		final var tokens = pnode.tokens();
 		final var first = tokens.get(0);
@@ -34,12 +39,7 @@ public final class LMInterpreter
 		final var typeToken = builder.createTypeToken();
 		final var valueTokens = builder.streamValues().toList();
 
-		return new PGroup(typeToken, List.copyOf(valueTokens));
-	}
-
-	public PGroup parseTreeNode(final Tree<PNode> treeNode)
-	{
-		return parse(treeNode.data());
+		return new PGroup<>(pnode, typeToken, List.copyOf(valueTokens));
 	}
 
 	private Stream<PToken> mapAlias(final PToken word)

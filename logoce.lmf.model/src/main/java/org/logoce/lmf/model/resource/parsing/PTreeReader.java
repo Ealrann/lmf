@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.resource.parsing;
 
-import org.logoce.lmf.model.util.Tree;
+import org.logoce.lmf.model.util.tree.Tree;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

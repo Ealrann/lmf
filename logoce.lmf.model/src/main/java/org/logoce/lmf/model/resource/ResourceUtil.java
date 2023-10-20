@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.resource;
 
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 import org.logoce.lmf.model.resource.transform.PModelBuilder;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public final class ResourceUtil
 {
-	private static final PModelBuilder PMODEL_BUILDER = new PModelBuilder();
+	private static final PModelBuilder<PNode> PMODEL_BUILDER = new PModelBuilder<>();
 
 	public static List<? extends LMObject> loadModel(final InputStream inputStream)
 	{

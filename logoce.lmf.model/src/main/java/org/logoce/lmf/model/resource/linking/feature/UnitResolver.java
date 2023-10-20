@@ -1,10 +1,10 @@
-package org.logoce.lmf.model.resource.transform.word.resolver;
+package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.resource.linking.LinkerNode;
-import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
+import org.logoce.lmf.model.resource.linking.FeatureLink;
+import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -40,13 +40,13 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	protected Optional<IFeatureResolution> internalResolve(final LinkerNode<?> node, final String value)
+	protected Optional<FeatureLink> internalResolve(final ResolvedNode<?, ?> node, final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
 		if (pmatcher == null || pmatcher.matches())
 		{
 			final var extractedValue = extractValue(unit, value);
-			return Optional.of(new AttributeResolution<>(feature, extractedValue));
+			return Optional.of(new AttributeLink<>(feature, extractedValue));
 		}
 		else
 		{

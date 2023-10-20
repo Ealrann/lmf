@@ -1,9 +1,9 @@
-package org.logoce.lmf.model.resource.transform.word.resolver;
+package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.resource.linking.LinkerNode;
-import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
+import org.logoce.lmf.model.resource.linking.FeatureLink;
+import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ITokenResolver<T>
 {
 	boolean match(String featureName);
-	Optional<? extends IFeatureResolution> resolve(LinkerNode<?> node, List<String> value);
+	Optional<? extends FeatureLink> resolve(ResolvedNode<?, ?> node, List<String> value);
 
 	@SuppressWarnings("unchecked")
 	static Optional<ITokenResolver<?>> buildResolver(Feature<?, ?> feature)

@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.resource.parsing;
 
-import org.logoce.lmf.model.util.Tree;
+import org.logoce.lmf.model.util.tree.Tree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public final class PTreeBuilder
 
 	private Tree<PNode> build(final Tree<PNode> parent)
 	{
-		final var pnode = new PNode(tokens);
+		final var pnode = new PNode.SimplePNode(tokens);
 		return new Tree<>(parent, pnode, treeParent -> children.stream().map(c -> c.build(treeParent)).toList());
 	}
 

@@ -11,7 +11,6 @@ public interface LMIntellijTokenTypes {
   IElementType GROUP = new LMElementType("GROUP");
   IElementType GROUP_TYPE = new LMElementType("GROUP_TYPE");
   IElementType LEAF = new LMElementType("LEAF");
-  IElementType NODE = new LMElementType("NODE");
   IElementType VAL = new LMElementType("VAL");
 
   IElementType ASSIGN = new LMTokenType("ASSIGN");
@@ -37,9 +36,6 @@ public interface LMIntellijTokenTypes {
       }
       else if (type == LEAF) {
         return new LMFLeafImpl(node);
-      }
-      else if (type == NODE) {
-        return new LMFNodeImpl(node);
       }
       else if (type == VAL) {
         return new LMFValImpl(node);

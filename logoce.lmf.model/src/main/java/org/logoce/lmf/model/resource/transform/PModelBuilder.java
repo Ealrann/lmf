@@ -5,28 +5,37 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.resource.interpretation.LMInterpreter;
 import org.logoce.lmf.model.resource.interpretation.PGroup;
-import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.linking.ModelGroup;
-import org.logoce.lmf.model.resource.linking.LinkerNode;
-import org.logoce.lmf.model.resource.linking.LinkerNodeBuilder;
-import org.logoce.lmf.model.resource.transform.word.TreeToFeatureResolver;
+import org.logoce.lmf.model.resource.linking.TreeToFeatureLinker;
+import org.logoce.lmf.model.resource.linking.exception.LinkException;
+import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeBuilder;
+import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
+import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.Tree;
+import org.logoce.lmf.model.util.tree.NavigableDataTree;
+import org.logoce.lmf.model.util.tree.Tree;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class PModelBuilder
+public final class PModelBuilder<I extends PNode>
 {
-	private final Map<Group<?>, TreeToFeatureResolver> resolvers;
+	private final Map<Group<?>, TreeToFeatureLinker> resolvers;
 
-	private final LinkerNodeBuilder linker;
-	private final LMInterpreter interpreter;
+	private final LinkNodeBuilder<I> linker;
+	private final LMInterpreter<I> interpreter;
 
 	public PModelBuilder()
+	{
+		this((t, e) -> e.printStackTrace());
+	}
+
+	public PModelBuilder(final BiConsumer<I, LinkException> exceptionManager)
 	{
 		final var groups = ModelRegistry.Instance.models()
 												 .flatMap(PModelBuilder::modelGroups)
@@ -36,34 +45,38 @@ public final class PModelBuilder
 		resolvers = groups.values()
 						  .stream()
 						  .map(ModelGroup::group)
-						  .map(TreeToFeatureResolver::new)
-						  .collect(Collectors.toUnmodifiableMap(TreeToFeatureResolver::group, Function.identity()));
+						  .map(TreeToFeatureLinker::new)
+						  .collect(Collectors.toUnmodifiableMap(TreeToFeatureLinker::group, Function.identity()));
 
-		interpreter = new LMInterpreter(ModelRegistry.Instance.getAliasMap());
+		interpreter = new LMInterpreter<>(ModelRegistry.Instance.getAliasMap());
 
-		linker = new LinkerNodeBuilder(groups, resolvers);
+		linker = new LinkNodeBuilder<>(groups, resolvers, exceptionManager);
 	}
 
-	public PModel link(final List<Tree<PNode>> roots)
+	public PModel<I> link(final List<? extends NavigableDataTree<I, ?>> roots)
 	{
 		final var linkerTrees = roots.stream().map(this::interpretTree).map(linker::mapTree).toList();
-		linkerTrees.stream().flatMap(LinkerNode::stream).forEach(this::link);
-		return new PModel(linkerTrees);
+		linkerTrees.stream()
+				   .flatMap(LinkNode::streamTree)
+				   .filter(ResolvedNode.class::isInstance)
+				   .map(ResolvedNode.class::cast)
+				   .forEach(this::linkNode);
+		return new PModel<>(linkerTrees);
 	}
 
-	public List<? extends LMObject> build(final List<Tree<PNode>> roots)
+	public List<? extends LMObject> build(final List<? extends NavigableDataTree<I, ?>> roots)
 	{
 		return link(roots).build();
 	}
 
-	private Tree<PGroup> interpretTree(Tree<PNode> root)
+	private Tree<PGroup<I>> interpretTree(final NavigableDataTree<I, ?> root)
 	{
-		return root.map(interpreter::parseTreeNode);
+		return root.map(interpreter::parseTreeNode, Tree::new);
 	}
 
-	private void link(LinkerNode<?> node)
+	private void linkNode(final ResolvedNode<?, I> node)
 	{
-		final var resolver = resolvers.get(node.data().modelGroup().group());
+		final var resolver = resolvers.get(node.group());
 		resolver.resolve(node);
 	}
 

@@ -8,9 +8,12 @@ import com.intellij.psi.PsiElement;
 public interface LMFGroup extends PsiElement {
 
   @NotNull
+  List<LMFGroup> getGroupList();
+
+  @NotNull
   LMFGroupType getGroupType();
 
   @NotNull
-  List<LMFNode> getNodeList();
+  List<LMFLeaf> getLeafList();
 
 }

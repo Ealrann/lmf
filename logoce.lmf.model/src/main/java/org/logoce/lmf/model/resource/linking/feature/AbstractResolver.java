@@ -1,9 +1,9 @@
-package org.logoce.lmf.model.resource.transform.word.resolver;
+package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.resource.linking.LinkerNode;
-import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
+import org.logoce.lmf.model.resource.linking.FeatureLink;
+import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +25,14 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 	}
 
 	@Override
-	public Optional<? extends IFeatureResolution> resolve(LinkerNode<?> node, List<String> values)
+	public Optional<? extends FeatureLink> resolve(ResolvedNode<?, ?> node, List<String> values)
 	{
 		if (values.size() > 1 && !feature.many())
 		{
 			return Optional.empty();
 		}
 
-		final List<IFeatureResolution> resolutions = new ArrayList<>();
+		final List<FeatureLink> resolutions = new ArrayList<>();
 		for (var value : values)
 		{
 			final var resolution = internalResolve(node, value);
@@ -46,17 +46,17 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 			}
 		}
 
-		if (resolutions.size() > 1) return Optional.of(new MultipleResolution(resolutions));
+		if (resolutions.size() > 1) return Optional.of(new MultipleLink(resolutions));
 		else return Optional.of(resolutions.get(0));
 	}
 
-	protected abstract Optional<? extends IFeatureResolution> internalResolve(LinkerNode<?> node, String value);
+	protected abstract Optional<? extends FeatureLink> internalResolve(ResolvedNode<?, ?> node, String value);
 
-	public static final class MultipleResolution implements IFeatureResolution
+	public static final class MultipleLink implements FeatureLink
 	{
-		private final List<IFeatureResolution> resolutions;
+		private final List<FeatureLink> resolutions;
 
-		public MultipleResolution(final List<IFeatureResolution> resolutions)
+		public MultipleLink(final List<FeatureLink> resolutions)
 		{
 			this.resolutions = resolutions;
 		}

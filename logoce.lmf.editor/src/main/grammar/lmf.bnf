@@ -29,11 +29,9 @@
 
 lmFile ::= group*
 
-group ::= OPEN_NODE group_type (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+group ::= OPEN_NODE group_type (leaf | group | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
 
 group_type ::= (TYPE_NAME ASSIGN)? TYPE
-
-node ::= leaf | group
 
 leaf ::= (VALUE_NAME ASSIGN)? val (LIST_SEPARATOR val)*
 

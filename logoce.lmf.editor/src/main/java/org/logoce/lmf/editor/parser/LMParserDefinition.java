@@ -46,7 +46,7 @@ public final class LMParserDefinition implements ParserDefinition
 	@Override
 	public PsiParser createParser(final Project project)
 	{
-		return new LMParser();
+		return new LMParserProxy();
 	}
 
 	@NotNull

@@ -29,14 +29,20 @@ public class LMFGroupImpl extends ASTWrapperPsiElement implements LMFGroup {
 
   @Override
   @NotNull
+  public List<LMFGroup> getGroupList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFGroup.class);
+  }
+
+  @Override
+  @NotNull
   public LMFGroupType getGroupType() {
     return findNotNullChildByClass(LMFGroupType.class);
   }
 
   @Override
   @NotNull
-  public List<LMFNode> getNodeList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFNode.class);
+  public List<LMFLeaf> getLeafList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LMFLeaf.class);
   }
 
 }

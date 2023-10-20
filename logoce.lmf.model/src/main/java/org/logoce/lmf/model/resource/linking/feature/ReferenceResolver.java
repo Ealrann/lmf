@@ -1,10 +1,10 @@
-package org.logoce.lmf.model.resource.transform.word.resolver;
+package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.linking.LinkerNode;
-import org.logoce.lmf.model.resource.transform.word.IFeatureResolution;
+import org.logoce.lmf.model.resource.linking.FeatureLink;
+import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
 
@@ -22,7 +22,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	protected Optional<IFeatureResolution> internalResolve(LinkerNode<?> node, String value)
+	protected Optional<FeatureLink> internalResolve(ResolvedNode<?, ?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -39,12 +39,12 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@SuppressWarnings("unchecked")
-	private Optional<IFeatureResolution> resolveLocalDependency(final LinkerNode<?> node, final String uri)
+	private Optional<FeatureLink> resolveLocalDependency(final ResolvedNode<?, ?> node, final String uri)
 	{
-		LinkerNode<?> current = node;
+		ResolvedNode<?, ?> current = node;
 		if (uri.startsWith("/"))
 		{
-			current = current.root();
+			current = (ResolvedNode<?, ?>) current.root();
 		}
 
 		final var steps = uri.split("/");
@@ -56,7 +56,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 			if (step.equals(".."))
 			{
-				current = current.parent();
+				current = (ResolvedNode<?, ?>) current.parent();
 			}
 			else
 			{
@@ -66,6 +66,8 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 				final var children = current.children()
 											.stream()
+											.filter(ResolvedNode.class::isInstance)
+											.map(ResolvedNode.class::cast)
 											.filter(c -> c.containingRelation().name().equals(featureName))
 											.toList();
 				if (children.size() < index + 1)
@@ -76,9 +78,9 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 		}
 
-		if (ModelUtils.isSubGroup(feature.reference().group(), current.modelGroup().group()))
+		if (ModelUtils.isSubGroup(feature.reference().group(), current.group()))
 		{
-			return Optional.of(new DynamicReferenceResolution<>(feature, (LinkerNode<T>) current));
+			return Optional.of(new DynamicReferenceLink<>(feature, (ResolvedNode<T, ?>) current));
 		}
 		else
 		{
@@ -87,7 +89,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@SuppressWarnings("unchecked")
-	private Optional<IFeatureResolution> resolveExternalDependency(final String value)
+	private Optional<FeatureLink> resolveExternalDependency(final String value)
 	{
 		final var uri = value.substring(1);
 		final var firstSlashIndex = uri.indexOf('/');
@@ -125,7 +127,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 		if (ModelUtils.isSubGroup(feature.reference().group(), current.lmGroup()))
 		{
-			return Optional.of(new StaticReferenceResolution<>(feature, (T) current));
+			return Optional.of(new StaticReferenceLink<>(feature, (T) current));
 		}
 		else
 		{
@@ -133,17 +135,8 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	public static final class StaticReferenceResolution<T extends LMObject> implements IFeatureResolution
+	public record StaticReferenceLink<T extends LMObject>(Relation<T, ?> relation, T value) implements FeatureLink
 	{
-		final Relation<T, ?> relation;
-		final T value;
-
-		private StaticReferenceResolution(final Relation<T, ?> relation, final T value)
-		{
-			this.relation = relation;
-			this.value = value;
-		}
-
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
 		{
@@ -151,17 +144,9 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	public static final class DynamicReferenceResolution<T extends LMObject> implements IFeatureResolution
+	public record DynamicReferenceLink<T extends LMObject>(Relation<T, ?> relation, ResolvedNode<T, ?> value) implements
+																											  FeatureLink
 	{
-		final Relation<T, ?> relation;
-		final LinkerNode<T> value;
-
-		private DynamicReferenceResolution(final Relation<T, ?> relation, final LinkerNode<T> value)
-		{
-			this.relation = relation;
-			this.value = value;
-		}
-
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
 		{

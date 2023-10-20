@@ -101,7 +101,7 @@ final class TokenParser
 					res.add(token.value());
 					break;
 				default:
-					throw new IllegalStateException("Unmanaged case");
+					throw new IllegalStateException("Unmanaged case: " + type);
 			}
 		}
 		return res;

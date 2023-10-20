@@ -36,7 +36,7 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OPEN_NODE group_type (node | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+  // OPEN_NODE group_type (leaf | group | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
   public static boolean group(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group")) return false;
     if (!nextTokenIs(b, OPEN_NODE)) return false;
@@ -51,7 +51,7 @@ public class LMParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (node | WHITE_SPACE)*
+  // (leaf | group | WHITE_SPACE)*
   private static boolean group_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group_2")) return false;
     while (true) {
@@ -62,11 +62,12 @@ public class LMParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // node | WHITE_SPACE
+  // leaf | group | WHITE_SPACE
   private static boolean group_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group_2_0")) return false;
     boolean r;
-    r = node(b, l + 1);
+    r = leaf(b, l + 1);
+    if (!r) r = group(b, l + 1);
     if (!r) r = consumeToken(b, WHITE_SPACE);
     return r;
   }
@@ -170,18 +171,6 @@ public class LMParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(b, "lmFile", c)) break;
     }
     return true;
-  }
-
-  /* ********************************************************** */
-  // leaf | group
-  public static boolean node(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "node")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, NODE, "<node>");
-    r = leaf(b, l + 1);
-    if (!r) r = group(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
   }
 
   /* ********************************************************** */

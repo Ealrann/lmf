@@ -1,8 +1,8 @@
-package org.logoce.lmf.model.resource.transform.word;
+package org.logoce.lmf.model.resource.linking;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 
-public interface IFeatureResolution
+public interface FeatureLink
 {
 	void pushValue(IFeaturedObject.Builder<?> builder);
 }
