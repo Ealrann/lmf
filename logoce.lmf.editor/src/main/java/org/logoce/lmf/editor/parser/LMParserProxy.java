@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.lexer.LMEditorLexer;
 import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
-import org.logoce.lmf.model.resource.linking.tree.ErrorNode;
 import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
@@ -69,10 +68,10 @@ public final class LMParserProxy implements PsiParser, LightPsiParser
 	private static void pushResolutionList(final LinkNode<PNodeView> linkNode)
 	{
 		final var pNode = linkNode.pNode().astGroup();
-		if (linkNode instanceof ErrorNode<PNodeView> errorNode)
+		if (linkNode.exception() != null)
 		{
 			assert pNode.getElementType() == LMIntellijTokenTypes.GROUP;
-			pNode.putUserData(TOKEN_RESOLUTION, errorNode.getException());
+			pNode.putUserData(TOKEN_RESOLUTION, linkNode.exception());
 		}
 		else
 		{

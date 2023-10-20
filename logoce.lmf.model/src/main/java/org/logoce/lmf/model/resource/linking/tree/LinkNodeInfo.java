@@ -25,7 +25,7 @@ public sealed interface LinkNodeInfo<I extends PNode> permits LinkNodeInfo.Resol
 		public LinkNode<I> buildNode(final NavigableDataTree.BuildInfo<LinkNodeInfo<I>, LinkNode<I>> buildInfo)
 		{
 			final var data = (LinkNodeInfo.Resolved<?, I>) buildInfo.data();
-			return new ResolvedNode<>(buildInfo.parent(), data, buildInfo.childrenBuilder());
+			return new LinkNode<>(data, buildInfo.parent(), buildInfo.childrenBuilder());
 		}
 	}
 
@@ -35,7 +35,7 @@ public sealed interface LinkNodeInfo<I extends PNode> permits LinkNodeInfo.Resol
 		public LinkNode<I> buildNode(final NavigableDataTree.BuildInfo<LinkNodeInfo<I>, LinkNode<I>> buildInfo)
 		{
 			final var error = (LinkNodeInfo.Failed<I>) buildInfo.data();
-			return new ErrorNode<>(error.pNode(), buildInfo.parent(), error.exception());
+			return new LinkNode<>(error.exception(), error.pNode(), buildInfo.parent());
 		}
 	}
 }

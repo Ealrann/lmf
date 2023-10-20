@@ -3,7 +3,7 @@ package org.logoce.lmf.model.resource.linking.feature;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.interpretation.PNominalGroup;
 import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
+import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 
 import java.util.*;
 import java.util.function.Function;
@@ -19,7 +19,7 @@ public final class NodeLinker
 		this.availableResolvers = List.copyOf(tokenResolvers);
 	}
 
-	public List<ResolutionAptempt> link(final ResolvedNode<?, ?> node)
+	public List<ResolutionAptempt> link(final LinkNode.Structure<?> node)
 	{
 		final var runner = new TokenResolverRunner(availableResolvers, node);
 		final List<ResolutionAptempt> resolutions = new ArrayList<>();
@@ -60,9 +60,9 @@ public final class NodeLinker
 	private static final class TokenResolverRunner
 	{
 		private final LinkedList<ITokenResolver<?>> availableResolvers;
-		private final ResolvedNode<?, ?> node;
+		private final LinkNode.Structure<?> node;
 
-		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final ResolvedNode<?, ?> node)
+		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final LinkNode.Structure<?> node)
 		{
 			this.availableResolvers = new LinkedList<>(tokenResolvers);
 			this.node = node;

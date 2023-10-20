@@ -10,7 +10,6 @@ import org.logoce.lmf.model.resource.linking.TreeToFeatureLinker;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeBuilder;
-import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.tree.NavigableDataTree;
@@ -18,6 +17,7 @@ import org.logoce.lmf.model.util.tree.Tree;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,8 +58,8 @@ public final class PModelBuilder<I extends PNode>
 		final var linkerTrees = roots.stream().map(this::interpretTree).map(linker::mapTree).toList();
 		linkerTrees.stream()
 				   .flatMap(LinkNode::streamTree)
-				   .filter(ResolvedNode.class::isInstance)
-				   .map(ResolvedNode.class::cast)
+				   .map(LinkNode::linkStructure)
+				   .filter(Objects::nonNull)
 				   .forEach(this::linkNode);
 		return new PModel<>(linkerTrees);
 	}
@@ -74,7 +74,7 @@ public final class PModelBuilder<I extends PNode>
 		return root.map(interpreter::parseTreeNode, Tree::new);
 	}
 
-	private void linkNode(final ResolvedNode<?, I> node)
+	private void linkNode(final LinkNode.Structure<?> node)
 	{
 		final var resolver = resolvers.get(node.group());
 		resolver.resolve(node);

@@ -4,12 +4,13 @@ import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
+import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class ReferenceResolver<T extends LMObject> extends AbstractResolver<T, Relation<T, ?>> implements
@@ -22,7 +23,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(ResolvedNode<?, ?> node, String value)
+	protected Optional<FeatureLink> internalResolve(LinkNode.Structure<?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -38,13 +39,13 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private Optional<FeatureLink> resolveLocalDependency(final ResolvedNode<?, ?> node, final String uri)
+	@SuppressWarnings({"ReassignedVariable", "unchecked"})
+	private Optional<FeatureLink> resolveLocalDependency(final LinkNode.Structure<?> node, final String uri)
 	{
-		ResolvedNode<?, ?> current = node;
+		LinkNode<?> current = node.linkNode();
 		if (uri.startsWith("/"))
 		{
-			current = (ResolvedNode<?, ?>) current.root();
+			current = current.root();
 		}
 
 		final var steps = uri.split("/");
@@ -56,7 +57,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 			}
 			if (step.equals(".."))
 			{
-				current = (ResolvedNode<?, ?>) current.parent();
+				current = current.parent();
 			}
 			else
 			{
@@ -64,23 +65,23 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 				final var featureName = pointIndex == -1 ? step : step.substring(0, pointIndex);
 				final int index = pointIndex == -1 ? 0 : Integer.parseInt(step.substring(pointIndex + 1));
 
-				final var children = current.children()
-											.stream()
-											.filter(ResolvedNode.class::isInstance)
-											.map(ResolvedNode.class::cast)
+				final var children = current.streamChildren()
+											.map(LinkNode::linkStructure)
+											.filter(Objects::nonNull)
 											.filter(c -> c.containingRelation().name().equals(featureName))
 											.toList();
 				if (children.size() < index + 1)
 				{
 					throw new NoSuchElementException("Cannot resolve path " + uri);
 				}
-				current = children.get(index);
+				current = children.get(index).linkNode();
 			}
 		}
 
-		if (ModelUtils.isSubGroup(feature.reference().group(), current.group()))
+		if (ModelUtils.isSubGroup(feature.reference().group(), current.linkStructure().group()))
 		{
-			return Optional.of(new DynamicReferenceLink<>(feature, (ResolvedNode<T, ?>) current));
+			return Optional.of(new DynamicReferenceLink<>(feature,
+														  (LinkNode.Structure<T>) current.linkStructure()));
 		}
 		else
 		{
@@ -144,13 +145,13 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	public record DynamicReferenceLink<T extends LMObject>(Relation<T, ?> relation, ResolvedNode<T, ?> value) implements
-																											  FeatureLink
+	public record DynamicReferenceLink<T extends LMObject>(Relation<T, ?> relation,
+														   LinkNode.Structure<T> linkNode) implements FeatureLink
 	{
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
 		{
-			builder.push(relation, value::build);
+			builder.push(relation, linkNode::build);
 		}
 	}
 }

@@ -4,7 +4,7 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.ResolvedNode;
+import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -40,7 +40,7 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(final ResolvedNode<?, ?> node, final String value)
+	protected Optional<FeatureLink> internalResolve(final LinkNode.Structure<?> node, final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
 		if (pmatcher == null || pmatcher.matches())
