@@ -28,12 +28,12 @@ public abstract class AbstractTree<Y extends StructuredTree<Y>> implements Struc
 		return parent;
 	}
 
-	@Override
 	public final List<Y> children()
 	{
 		return children;
 	}
 
+	@Override
 	public final Stream<Y> streamChildren()
 	{
 		return children.stream();

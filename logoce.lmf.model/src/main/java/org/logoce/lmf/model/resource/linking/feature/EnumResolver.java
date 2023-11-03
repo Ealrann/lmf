@@ -19,7 +19,7 @@ public final class EnumResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(final LinkNode.Structure<?> node, final String value)
+	protected Optional<FeatureLink> internalResolve(final LinkNode<?, ?> node, final String value)
 	{
 		final var resolvedEnum = extractEnumLiteral(value, enumeration);
 		return resolvedEnum.map(enumVal -> new AttributeLink<>(feature, enumVal));

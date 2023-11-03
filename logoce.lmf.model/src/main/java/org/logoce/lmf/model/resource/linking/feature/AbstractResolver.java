@@ -25,7 +25,7 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 	}
 
 	@Override
-	public Optional<? extends FeatureLink> resolve(LinkNode.Structure<?> node, List<String> values)
+	public Optional<? extends FeatureLink> resolve(LinkNode<?, ?> node, List<String> values)
 	{
 		if (values.size() > 1 && !feature.many())
 		{
@@ -50,7 +50,7 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 		else return Optional.of(resolutions.get(0));
 	}
 
-	protected abstract Optional<? extends FeatureLink> internalResolve(LinkNode.Structure<?> node, String value);
+	protected abstract Optional<? extends FeatureLink> internalResolve(LinkNode<?, ?> node, String value);
 
 	public static final class MultipleLink implements FeatureLink
 	{

@@ -16,7 +16,7 @@ public class JavaWrapperResolver extends AttributeResolver<Object>
 	}
 
 	@Override
-	protected Optional<? extends FeatureLink> internalResolve(final LinkNode.Structure<?> node, final String value)
+	protected Optional<? extends FeatureLink> internalResolve(final LinkNode<?, ?> node, final String value)
 	{
 		return Optional.empty();
 	}

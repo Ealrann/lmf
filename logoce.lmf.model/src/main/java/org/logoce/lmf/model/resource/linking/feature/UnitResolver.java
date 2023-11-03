@@ -40,7 +40,7 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(final LinkNode.Structure<?> node, final String value)
+	protected Optional<FeatureLink> internalResolve(final LinkNode<?, ?> node, final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
 		if (pmatcher == null || pmatcher.matches())

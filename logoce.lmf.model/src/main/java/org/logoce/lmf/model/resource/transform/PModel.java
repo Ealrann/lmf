@@ -6,7 +6,7 @@ import org.logoce.lmf.model.resource.parsing.PNode;
 
 import java.util.List;
 
-public record PModel<I extends PNode>(List<LinkNode<I>> trees)
+public record PModel<I extends PNode>(List<? extends LinkNode<?, I>> trees)
 {
 	public List<? extends LMObject> build()
 	{

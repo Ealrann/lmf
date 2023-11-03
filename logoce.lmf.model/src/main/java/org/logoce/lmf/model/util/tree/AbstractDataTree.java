@@ -3,8 +3,7 @@ package org.logoce.lmf.model.util.tree;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class AbstractDataTree<T, Y extends AbstractDataTree<T, Y>> extends AbstractTree<Y> implements DataNode<T>,
-																											   StructuredTree<Y>
+public abstract class AbstractDataTree<T, Y extends AbstractDataTree<T, Y>> extends AbstractTree<Y> implements BasicTree<T, Y>
 {
 	protected final T data;
 
@@ -14,7 +13,7 @@ public abstract class AbstractDataTree<T, Y extends AbstractDataTree<T, Y>> exte
 		this.data = data;
 	}
 
-	public AbstractDataTree(final NavigableDataTree.BuildInfo<T, Y> info)
+	public AbstractDataTree(final BuildInfo<T, Y> info)
 	{
 		this(info.parent(), info.data(), info.childrenBuilder());
 	}

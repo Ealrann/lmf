@@ -10,7 +10,6 @@ import org.logoce.lmf.model.util.ModelUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class ReferenceResolver<T extends LMObject> extends AbstractResolver<T, Relation<T, ?>> implements
@@ -23,7 +22,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(LinkNode.Structure<?> node, String value)
+	protected Optional<FeatureLink> internalResolve(LinkNode<?, ?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -40,9 +39,9 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@SuppressWarnings({"ReassignedVariable", "unchecked"})
-	private Optional<FeatureLink> resolveLocalDependency(final LinkNode.Structure<?> node, final String uri)
+	private Optional<FeatureLink> resolveLocalDependency(final LinkNode<?, ?> node, final String uri)
 	{
-		LinkNode<?> current = node.linkNode();
+		LinkNode<?, ?> current = node;
 		if (uri.startsWith("/"))
 		{
 			current = current.root();
@@ -66,22 +65,19 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 				final int index = pointIndex == -1 ? 0 : Integer.parseInt(step.substring(pointIndex + 1));
 
 				final var children = current.streamChildren()
-											.map(LinkNode::linkStructure)
-											.filter(Objects::nonNull)
 											.filter(c -> c.containingRelation().name().equals(featureName))
 											.toList();
 				if (children.size() < index + 1)
 				{
 					throw new NoSuchElementException("Cannot resolve path " + uri);
 				}
-				current = children.get(index).linkNode();
+				current = children.get(index);
 			}
 		}
 
-		if (ModelUtils.isSubGroup(feature.reference().group(), current.linkStructure().group()))
+		if (ModelUtils.isSubGroup(feature.reference().group(), current.group()))
 		{
-			return Optional.of(new DynamicReferenceLink<>(feature,
-														  (LinkNode.Structure<T>) current.linkStructure()));
+			return Optional.of(new DynamicReferenceLink<>(feature, (LinkNode<T, ?>) current));
 		}
 		else
 		{
@@ -145,8 +141,8 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	public record DynamicReferenceLink<T extends LMObject>(Relation<T, ?> relation,
-														   LinkNode.Structure<T> linkNode) implements FeatureLink
+	public record DynamicReferenceLink<T extends LMObject>(Relation<T, ?> relation, LinkNode<T, ?> linkNode) implements
+																											 FeatureLink
 	{
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)

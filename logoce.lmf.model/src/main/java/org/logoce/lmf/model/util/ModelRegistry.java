@@ -1,10 +1,7 @@
 package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.Alias;
-import org.logoce.lmf.model.lang.LMCorePackage;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Named;
+import org.logoce.lmf.model.lang.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,5 +43,17 @@ public final class ModelRegistry
 	public void register(final IModelPackage modelPackage)
 	{
 		modelMap.put(modelPackage.model().name(), modelPackage);
+	}
+
+	public Stream<Group<?>> streamChildGroups(Group<?> parent)
+	{
+		return modelMap.values()
+					   .stream()
+					   .map(IModelPackage::model)
+					   .flatMap(m -> m.groups().stream())
+					   .flatMap(g -> g.includes().stream())
+					   .map(Reference::group)
+					   .filter(includes -> includes == parent)
+					   .map(g -> (Group<?>) g);
 	}
 }

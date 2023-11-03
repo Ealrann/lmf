@@ -7,7 +7,7 @@ import org.logoce.lmf.model.lexer.LMLexer;
 import org.logoce.lmf.model.resource.parsing.LMIterableLexer;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
-import org.logoce.lmf.model.util.tree.NavigableDataTree;
+import org.logoce.lmf.model.util.tree.BasicTree;
 
 import java.util.List;
 import java.util.Map;
@@ -24,12 +24,12 @@ public final class LMInterpreter<I extends PNode>
 		this.aliases = aliases;
 	}
 
-	public PGroup<I> parseTreeNode(final NavigableDataTree<I, ?> treeNode)
+	public PGroup<I> interpretTreeNode(final BasicTree<I, ?> treeNode)
 	{
-		return parse(treeNode.data());
+		return interpret(treeNode.data());
 	}
 
-	private PGroup<I> parse(final I pnode)
+	public PGroup<I> interpret(final I pnode)
 	{
 		final var tokens = pnode.tokens();
 		final var first = tokens.get(0);

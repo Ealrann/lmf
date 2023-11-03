@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ITokenResolver<T>
 {
 	boolean match(String featureName);
-	Optional<? extends FeatureLink> resolve(LinkNode.Structure<?> node, List<String> value);
+	Optional<? extends FeatureLink> resolve(LinkNode<?, ?> node, List<String> value);
 
 	@SuppressWarnings("unchecked")
 	static Optional<ITokenResolver<?>> buildResolver(Feature<?, ?> feature)

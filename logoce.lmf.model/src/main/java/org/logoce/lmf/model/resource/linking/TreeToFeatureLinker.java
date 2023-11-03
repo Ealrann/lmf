@@ -37,9 +37,9 @@ public class TreeToFeatureLinker
 		nodeLinker = new NodeLinker(wordResolvers);
 	}
 
-	public void resolve(final LinkNode.Structure<?> linkStructure)
+	public void resolve(final LinkNode<?, ?> linkNode)
 	{
-		linkStructure.linkTokens(nodeLinker);
+		linkNode.linkTokens(nodeLinker);
 	}
 
 	public Stream<Relation<?, ?>> streamContainmentRelations()

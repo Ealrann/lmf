@@ -10,78 +10,71 @@ import org.logoce.lmf.model.resource.linking.TreeToFeatureLinker;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelUtils;
-import org.logoce.lmf.model.util.tree.NavigableDataTree;
+import org.logoce.lmf.model.util.tree.BasicTree;
 import org.logoce.lmf.model.util.tree.Tree;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
-public class LinkNodeBuilder<I extends PNode>
+public final class LinkNodeBuilder<I extends PNode>
 {
 	private final Map<String, ModelGroup<?>> groups;
-
 	private final Map<Group<?>, TreeToFeatureLinker> resolvers;
-	private final BiConsumer<I, LinkException> exceptionManager;
 
-	public LinkNodeBuilder(final Map<String, ModelGroup<?>> groups,
-						   final Map<Group<?>, TreeToFeatureLinker> resolvers,
-						   final BiConsumer<I, LinkException> exceptionManager)
+	public LinkNodeBuilder(final Map<String, ModelGroup<?>> groups, final Map<Group<?>, TreeToFeatureLinker> resolvers)
 	{
 		this.groups = groups;
 		this.resolvers = resolvers;
-		this.exceptionManager = exceptionManager;
 	}
 
-	public LinkNode<I> mapTree(final Tree<PGroup<I>> tree)
+	public LinkNodeFull<?, I> mapTree(final Tree<PGroup<I>> tree)
 	{
 		return tree.map(this::buildNodeInfo, this::buildNode);
 	}
 
-	private LinkNode<I> buildNode(final NavigableDataTree.BuildInfo<LinkNodeInfo<I>, LinkNode<I>> buildInfo)
+	public <Y extends BasicTree<PGroup<I>, Y>> LinkNodePartial<?, I> mapPartial(final Y node)
 	{
-		final var info = buildInfo.data();
-		return info.buildNode(buildInfo);
+		final var linkInfo = buildNodeInfo(node);
+		return new LinkNodePartial<>(linkInfo, node, this::mapPartial);
 	}
 
-	private <T extends LMObject> LinkNodeInfo<I> buildNodeInfo(final Tree<PGroup<I>> node)
+	private LinkNodeFull<?, I> buildNode(final BasicTree.BuildInfo<LinkInfo<?, I>, LinkNodeFull<?, I>> buildInfo)
+	{
+		final var data = (LinkInfo<?, I>) buildInfo.data();
+		return new LinkNodeFull<>(data, buildInfo.parent(), buildInfo.childrenBuilder());
+	}
+
+	private <T extends LMObject> LinkInfo<?, I> buildNodeInfo(final BasicTree<PGroup<I>, ?> node)
 	{
 		final var pGroup = node.data();
 		final var parent = node.parent();
 		final var nodeType = pGroup.type();
 
-		try
+		if (parent != null)
 		{
-			if (parent != null)
-			{
-				final var parentType = parent.data().type();
-				final var parentModelGroup = findModelGroupByValue(parentType).orElseThrow(() -> cannotFindGroup(
-						parentType));
-				final var parentGroup = parentModelGroup.group();
-				final var modelGroup = this.<T>findModelGroupByValue(nodeType)
-										   .orElseGet(() -> findModelGroupFromParent(pGroup, parentGroup));
-				return buildNodeInfoWithParent(pGroup, parentGroup, modelGroup);
-			}
-			else
-			{
-				final var modelGroup = this.<T>findModelGroupByValue(nodeType)
-										   .orElseThrow(() -> cannotFindGroup(nodeType));
-				return new LinkNodeInfo.Resolved<>(pGroup.pnode(), null, pGroup.features(), modelGroup);
-			}
+			final var parentData = parent.data();
+			final var parentType = parentData.type();
+			final var parentModelGroup = findModelGroupByValue(parentType).orElseThrow(() -> buildException(parentData,
+																											parentType));
+			final var parentGroup = parentModelGroup.group();
+			final var modelGroup = this.<T>findModelGroupByValue(nodeType)
+									   .orElseGet(() -> findModelGroupFromParent(pGroup, parentGroup));
+			return buildNodeInfoWithParent(pGroup, parentGroup, modelGroup);
 		}
-		catch (LinkException e)
+		else
 		{
-			exceptionManager.accept(pGroup.pnode(), e);
-			return new LinkNodeInfo.Failed<>(pGroup.pnode(), e);
+			final var modelGroup = this.<T>findModelGroupByValue(nodeType)
+									   .orElseThrow(() -> buildException(pGroup, nodeType));
+			return new LinkInfo<>(pGroup.pnode(), null, pGroup.features(), modelGroup);
 		}
 	}
 
-	private <T extends LMObject> LinkNodeInfo<I> buildNodeInfoWithParent(final PGroup<I> pGroup,
-																		 final Group<?> parentGroup,
-																		 final ModelGroup<T> effectiveGroup)
+	private <T extends LMObject> LinkInfo<T, I> buildNodeInfoWithParent(final PGroup<I> pGroup,
+																		final Group<?> parentGroup,
+																		final ModelGroup<T> effectiveGroup)
 	{
-		final var resolvedRelation = resolveContainmentRelation(pGroup, parentGroup, effectiveGroup);
-		return new LinkNodeInfo.Resolved<>(pGroup.pnode(), resolvedRelation, pGroup.features(), effectiveGroup);
+		final var resolvedRelation = resolveContainmentRelation(pGroup, parentGroup, effectiveGroup.group());
+		return new LinkInfo<>(pGroup.pnode(), resolvedRelation, pGroup.features(), effectiveGroup);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -102,9 +95,7 @@ public class LinkNodeBuilder<I extends PNode>
 											   .filter(r -> r.name().equals(containmentName))
 											   .map(r -> r.reference().group())
 											   .findAny()
-											   .orElseThrow(() -> new LinkException("Cannot resolve " +
-																					"containance of " +
-																					containmentName));
+											   .orElseThrow(() -> buildException(node, containmentName, parentGroup));
 
 		return (ModelGroup<T>) groups.get(groupFromParent.name());
 	}
@@ -112,22 +103,23 @@ public class LinkNodeBuilder<I extends PNode>
 	@SuppressWarnings("unchecked")
 	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final PGroup<I> node,
 																		   final Group<?> parentGroup,
-																		   final ModelGroup<T> modelGroup)
+																		   final Group<T> childGroup)
 	{
 		final var containmentName = node.type().firstToken();
 		final var fromName = resolveFromName(parentGroup, containmentName);
-		return (Relation<T, ?>) fromName.or(() -> resolveFromGroup(parentGroup, modelGroup))
-										.orElseThrow(() -> buildLinkException(parentGroup,
-																			  modelGroup,
-																			  containmentName));
+		return (Relation<T, ?>) fromName.or(() -> resolveFromGroup(parentGroup, childGroup))
+										.orElseThrow(() -> buildException(node,
+																		  parentGroup,
+																		  childGroup.name(),
+																		  containmentName));
 	}
 
 	private <T extends LMObject> Optional<? extends Relation<?, ?>> resolveFromGroup(final Group<?> parentGroup,
-																					 final ModelGroup<T> modelGroup)
+																					 final Group<T> childGroup)
 	{
 		return resolvers.get(parentGroup)
 						.streamContainmentRelations()
-						.filter(r -> ModelUtils.isSubGroup(r.reference().group(), modelGroup.group()))
+						.filter(r -> ModelUtils.isSubGroup(r.reference().group(), childGroup))
 						.findAny();
 	}
 
@@ -139,21 +131,31 @@ public class LinkNodeBuilder<I extends PNode>
 						.findAny();
 	}
 
-	private static <T extends LMObject> LinkException buildLinkException(final Group<?> parentGroup,
-																		 final ModelGroup<T> modelGroup,
-																		 final String containmentName)
+	private static <I extends PNode> LinkException buildException(final PGroup<I> node,
+																  final String containmentName,
+																  final Group<?> parentGroup)
 	{
-		return new LinkException("Cannot find containment " +
-								 "relation from parent " +
+		return new LinkException("Parent group " +
+								 parentGroup.name() +
+								 " doesn't contain a feature named " +
+								 containmentName, node.pnode());
+	}
+
+	private static LinkException buildException(final PGroup<?> node,
+												final Group<?> parentGroup,
+												final String childGroupName,
+												final String containmentName)
+	{
+		return new LinkException("Cannot find containment relation from parent " +
 								 parentGroup.name() +
 								 " (" +
 								 containmentName +
 								 ") to child " +
-								 modelGroup.group().name());
+								 childGroupName, node.pnode());
 	}
 
-	private static LinkException cannotFindGroup(final PType nodeType)
+	private static LinkException buildException(final PGroup<?> node, final PType nodeType)
 	{
-		return new LinkException("Cannot find Group: " + nodeType.value());
+		return new LinkException("Cannot find Group: " + nodeType.value(), node.pnode());
 	}
 }

@@ -19,7 +19,7 @@ public final class NodeLinker
 		this.availableResolvers = List.copyOf(tokenResolvers);
 	}
 
-	public List<ResolutionAptempt> link(final LinkNode.Structure<?> node)
+	public List<ResolutionAptempt> link(final LinkNode<?, ?> node)
 	{
 		final var runner = new TokenResolverRunner(availableResolvers, node);
 		final List<ResolutionAptempt> resolutions = new ArrayList<>();
@@ -60,9 +60,9 @@ public final class NodeLinker
 	private static final class TokenResolverRunner
 	{
 		private final LinkedList<ITokenResolver<?>> availableResolvers;
-		private final LinkNode.Structure<?> node;
+		private final LinkNode<?, ?> node;
 
-		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final LinkNode.Structure<?> node)
+		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final LinkNode<?, ?> node)
 		{
 			this.availableResolvers = new LinkedList<>(tokenResolvers);
 			this.node = node;

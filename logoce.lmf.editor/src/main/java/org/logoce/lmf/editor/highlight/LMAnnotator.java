@@ -4,43 +4,45 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
-import org.logoce.lmf.editor.parser.LMParserProxy;
+import org.logoce.lmf.editor.parser.PNodeView;
 import org.logoce.lmf.editor.psi.LMFGroup;
 import org.logoce.lmf.editor.psi.LMFVal;
+import org.logoce.lmf.model.resource.linking.exception.LinkException;
+import org.logoce.lmf.model.resource.transform.PModelBuilder;
+import org.logoce.lmf.model.util.tree.TreeView;
 
 public class LMAnnotator implements Annotator
 {
+	private final static PModelBuilder<PNodeView> PMDEL_BUILDER = new PModelBuilder<>();
+
 	@Override
 	public void annotate(@NotNull final PsiElement element, final @NotNull AnnotationHolder holder)
 	{
-		/*final var root = element.getContainingFile().getChildren()[0];
-		final var textr = root.getText();
-		final var astNode = root.getNode();
-		final var children = astNode.getChildren(null);
-		final var elemType = astNode.getElementType();
-
-		final var containingFile = element.getContainingFile();
-		final var file = containingFile.getVirtualFile();
-		final var text = containingFile.getText();
-		final var project = element.getProject();
-		final var lexer = ModelLexerUtil.getOrCreateLexer(project, file);
-		lexer.reconciliate(text);
-		final var model = lexer.getModel();*/
-
-		/*if (element instanceof LMFVal val)
-		{
-			final var t = val.getText();
-			if (t.startsWith(".") || t.startsWith("/"))
-			{
-				annotateGroupType(val, holder);
-			}
-		}
-		else */
 		if (element instanceof LMFGroup group)
 		{
-			final var error = group.getNode().getUserData(LMParserProxy.TOKEN_RESOLUTION);
+			final var astGroup = group.getNode();
+			final var groupNode = PNodeView.of(astGroup);
+			final var treeView = new TreeView<>(groupNode, PNodeView::children, PNodeView::parent);
+
+			PMDEL_BUILDER.linkPartialUnresolved(treeView, (g, error) -> {
+				final var tokens = treeView.data().tokens();
+				if (g == groupNode && !tokens.isEmpty())
+				{
+					final var firstToken = tokens.get(0);
+					final var start = group.getTextRange().getStartOffset() + 1;
+					final var end = start + firstToken.value().length();
+					final var range = new TextRange(start, end);
+
+					holder.newAnnotation(HighlightSeverity.ERROR, error.getMessage())
+						  //.range(group.getTextRange())
+						  .range(range).highlightType(ProblemHighlightType.ERROR).create();
+				}
+			});
+
+			/*final var error = group.getNode().getUserData(LMParserProxy.TOKEN_RESOLUTION);
 			if (error != null)
 			{
 				System.out.println("found error");
@@ -50,12 +52,8 @@ public class LMAnnotator implements Annotator
 					  // ** Tutorial step 19. - Add a quick fix for the string containing possible properties
 					  //.withFix(new SimpleCreatePropertyQuickFix(key))
 					  .create();
-			}
+			}*/
 		}
-
-
-
-
 
 		/*// Get the list of properties for given key
 		String key = value.substring(SIMPLE_PREFIX_STR.length() + SIMPLE_SEPARATOR_STR.length());
