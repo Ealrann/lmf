@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
@@ -140,15 +141,28 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		{
 			builder.push(relation, () -> value);
 		}
+
+		@Override
+		public Feature<?, ?> feature()
+		{
+			return relation;
+		}
 	}
 
-	public record DynamicReferenceResolution<T extends LMObject>(Relation<T, ?> relation, LinkNodeInternal<T, ?> linkNode) implements
-																														   FeatureResolution
+	public record DynamicReferenceResolution<T extends LMObject>(Relation<T, ?> relation,
+																 LinkNodeInternal<T, ?> linkNode) implements
+																								  FeatureResolution
 	{
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
 		{
 			builder.push(relation, linkNode::build);
+		}
+
+		@Override
+		public Feature<?, ?> feature()
+		{
+			return relation;
 		}
 	}
 }

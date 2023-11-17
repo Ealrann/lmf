@@ -8,6 +8,4 @@ public interface FeatureResolution
 	void pushValue(IFeaturedObject.Builder<?> builder);
 
 	Feature<?, ?> feature();
-
-	String value();
 }

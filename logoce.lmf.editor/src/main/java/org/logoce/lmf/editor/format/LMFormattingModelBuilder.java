@@ -27,6 +27,6 @@ public class LMFormattingModelBuilder implements FormattingModelBuilder
 		return new SpacingBuilder(settings, LMLanguage.INSTANCE).before(LMIntellijTokenTypes.LEAF)
 																.spacing(1, 1, 0, false, 0)
 																.before(LMIntellijTokenTypes.GROUP)
-																.spacing(0, 0, 1, false, 1);
+																.spacing(1, 0, 0, false, 1);
 	}
 }

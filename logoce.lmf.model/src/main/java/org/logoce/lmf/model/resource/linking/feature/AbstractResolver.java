@@ -46,7 +46,7 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 			}
 		}
 
-		if (resolutions.size() > 1) return Optional.of(new MultipleResolution(resolutions));
+		if (resolutions.size() > 1) return Optional.of(new MultipleResolution(resolutions, feature));
 		else return Optional.of(resolutions.get(0));
 	}
 
@@ -55,16 +55,24 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 	public static final class MultipleResolution implements FeatureResolution
 	{
 		private final List<FeatureResolution> resolutions;
+		private final Feature<?, ?> feature;
 
-		public MultipleResolution(final List<FeatureResolution> resolutions)
+		public MultipleResolution(final List<FeatureResolution> resolutions, final Feature<?, ?> feature)
 		{
 			this.resolutions = resolutions;
+			this.feature = feature;
 		}
 
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
 		{
 			resolutions.forEach(r -> r.pushValue(builder));
+		}
+
+		@Override
+		public Feature<?, ?> feature()
+		{
+			return feature;
 		}
 	}
 }

@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.logoce.lmf.editor.parser.PNodeView;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.resource.linking.FeatureResolution;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
+import org.logoce.lmf.model.resource.linking.feature.AttributeResolver;
 import org.logoce.lmf.model.resource.transform.LinkNode;
 import org.logoce.lmf.model.resource.transform.PModelBuilder;
 import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
@@ -48,9 +48,10 @@ public class LMNamedElementImpl extends ASTWrapperPsiElement implements LMNamedE
 										   .stream()
 										   .map(ResolutionAttempt::resolution)
 										   .filter(f -> f.feature() == LMCoreDefinition.Features.NAMED.NAME)
+										   .map(r -> (AttributeResolver.AttributeResolution<?>) r)
 										   .findAny();
 
-			return nameResolution.map(FeatureResolution::value).orElse(null);
+			return nameResolution.map(AttributeResolver.AttributeResolution::value).orElse(null);
 		}
 		else
 		{
