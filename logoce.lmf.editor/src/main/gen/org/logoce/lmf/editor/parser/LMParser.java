@@ -36,7 +36,7 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OPEN_NODE group_type (leaf | group | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+  // OPEN_NODE group_type (leaf | group | WHITE_SPACE)* CLOSE_NODE
   public static boolean group(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group")) return false;
     if (!nextTokenIs(b, OPEN_NODE)) return false;
@@ -46,7 +46,6 @@ public class LMParser implements PsiParser, LightPsiParser {
     r = r && group_type(b, l + 1);
     r = r && group_2(b, l + 1);
     r = r && consumeToken(b, CLOSE_NODE);
-    r = r && group_4(b, l + 1);
     exit_section_(b, m, GROUP, r);
     return r;
   }
@@ -70,13 +69,6 @@ public class LMParser implements PsiParser, LightPsiParser {
     if (!r) r = group(b, l + 1);
     if (!r) r = consumeToken(b, WHITE_SPACE);
     return r;
-  }
-
-  // WHITE_SPACE?
-  private static boolean group_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "group_4")) return false;
-    consumeToken(b, WHITE_SPACE);
-    return true;
   }
 
   /* ********************************************************** */
@@ -162,14 +154,50 @@ public class LMParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // group*
+  // WHITE_SPACE? (group WHITE_SPACE?)*
   static boolean lmFile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "lmFile")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = lmFile_0(b, l + 1);
+    r = r && lmFile_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // WHITE_SPACE?
+  private static boolean lmFile_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "lmFile_0")) return false;
+    consumeToken(b, WHITE_SPACE);
+    return true;
+  }
+
+  // (group WHITE_SPACE?)*
+  private static boolean lmFile_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "lmFile_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!group(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "lmFile", c)) break;
+      if (!lmFile_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "lmFile_1", c)) break;
     }
+    return true;
+  }
+
+  // group WHITE_SPACE?
+  private static boolean lmFile_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "lmFile_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = group(b, l + 1);
+    r = r && lmFile_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // WHITE_SPACE?
+  private static boolean lmFile_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "lmFile_1_0_1")) return false;
+    consumeToken(b, WHITE_SPACE);
     return true;
   }
 

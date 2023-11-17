@@ -2,8 +2,8 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.Optional;
 
@@ -16,7 +16,7 @@ public class JavaWrapperResolver extends AttributeResolver<Object>
 	}
 
 	@Override
-	protected Optional<? extends FeatureLink> internalResolve(final LinkNode<?, ?> node, final String value)
+	protected Optional<? extends FeatureResolution> internalResolve(final LinkNodeInternal<?, ?> node, final String value)
 	{
 		return Optional.empty();
 	}

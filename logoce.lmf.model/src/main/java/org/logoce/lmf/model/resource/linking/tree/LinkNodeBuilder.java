@@ -38,6 +38,12 @@ public final class LinkNodeBuilder<I extends PNode>
 		return new LinkNodePartial<>(linkInfo, node, this::mapPartial);
 	}
 
+	public void resolve(final LinkNodeInternal<?, I> node)
+	{
+		final var resolver = resolvers.get(node.group());
+		resolver.resolve(node);
+	}
+
 	private LinkNodeFull<?, I> buildNode(final BasicTree.BuildInfo<LinkInfo<?, I>, LinkNodeFull<?, I>> buildInfo)
 	{
 		final var data = (LinkInfo<?, I>) buildInfo.data();

@@ -6,6 +6,7 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.linking.feature.NodeLinker;
 import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
 import org.logoce.lmf.model.util.tree.AbstractLazyMappedTree;
 import org.logoce.lmf.model.util.tree.StructuredTree;
 
@@ -13,9 +14,11 @@ import java.util.List;
 import java.util.function.Function;
 
 public final class LinkNodePartial<T extends LMObject, I extends PNode> extends AbstractLazyMappedTree<LinkNodePartial<?, I>> implements
-																															  LinkNode<T, I>
+																															  LinkNodeInternal<T, I>
 {
 	private final LinkInfo<T, I> info;
+
+	private List<ResolutionAttempt> tokenResolutions;
 
 	public <Y extends StructuredTree<Y>> LinkNodePartial(final LinkInfo<T, I> info,
 														 final Y inputNode,
@@ -27,9 +30,15 @@ public final class LinkNodePartial<T extends LMObject, I extends PNode> extends 
 	}
 
 	@Override
-	public void linkTokens(final NodeLinker nodeLinker)
+	public void resolveTokens(final NodeLinker nodeLinker)
 	{
-		nodeLinker.link(this);
+		tokenResolutions = nodeLinker.resolve(this, false);
+	}
+
+	@Override
+	public List<ResolutionAttempt> tokenResolutions()
+	{
+		return tokenResolutions;
 	}
 
 	@Override

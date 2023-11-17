@@ -11,10 +11,10 @@ import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
 
 public final class LMParserProxy implements PsiParser, LightPsiParser
 {
-	private static final TokenSet CHILDREN_SET = TokenSet.create(LMIntellijTokenTypes.GROUP);
+	public static final TokenSet GROUP = TokenSet.create(LMIntellijTokenTypes.GROUP);
 
-	private static final TokenSet GROUP_TYPE = TokenSet.create(LMIntellijTokenTypes.GROUP_TYPE);
-	private static final TokenSet LEAF = TokenSet.create(LMIntellijTokenTypes.LEAF);
+	public static final TokenSet GROUP_TYPE = TokenSet.create(LMIntellijTokenTypes.GROUP_TYPE);
+	public static final TokenSet LEAF = TokenSet.create(LMIntellijTokenTypes.LEAF);
 	private static final TokenSet VAL = TokenSet.create(LMIntellijTokenTypes.VAL);
 
 	private static final TokenSet OPEN_NODE = TokenSet.create(LMIntellijTokenTypes.OPEN_NODE);

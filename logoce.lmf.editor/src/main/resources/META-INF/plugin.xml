@@ -25,6 +25,9 @@
         <completion.contributor
                 language="LightModel"
                 implementationClass="org.logoce.lmf.editor.highlight.GroupCompletionContributor"/>
+        <lang.formatter
+                language="LightModel"
+                implementationClass="org.logoce.lmf.editor.format.LMFormattingModelBuilder"/>
     </extensions>
 
 </idea-plugin>

@@ -65,8 +65,8 @@ public class LMLexer {
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
     "\11\0\5\1\22\0\1\1\1\0\1\2\1\3\4\0"+
     "\1\4\1\5\1\3\1\6\1\7\1\6\2\3\12\10"+
-    "\3\0\1\11\3\0\32\6\1\3\1\0\1\3\1\0"+
-    "\1\6\1\0\32\6\u0185\0";
+    "\3\0\1\11\2\0\1\3\32\6\1\3\1\0\1\3"+
+    "\1\0\1\6\1\0\32\6\u0185\0";
 
   private static int [] zzUnpackcmap_blocks() {
     int [] result = new int[512];
@@ -279,7 +279,7 @@ public class LMLexer {
   }
 
 
-  /** Returns the maximum size of the scanner buffer, which limits the size of features. */
+  /** Returns the maximum size of the scanner buffer, which limits the size of tokens. */
   private int zzMaxBufferLen() {
     return Integer.MAX_VALUE;
   }

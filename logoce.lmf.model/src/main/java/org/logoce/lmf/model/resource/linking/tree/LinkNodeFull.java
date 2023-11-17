@@ -5,21 +5,22 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
 import org.logoce.lmf.model.resource.linking.feature.NodeLinker;
 import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
 import org.logoce.lmf.model.util.tree.AbstractTree;
 
 import java.util.List;
 import java.util.function.Function;
 
 public final class LinkNodeFull<T extends LMObject, I extends PNode> extends AbstractTree<LinkNodeFull<?, I>> implements
-																											  LinkNode<T, I>
+																											  LinkNodeInternal<T, I>
 {
 	private final LinkInfo<T, I> info;
 	private final IFeaturedObject.Builder<T> builder;
 
-	private List<NodeLinker.ResolutionAptempt> tokenLinks;
+	private List<ResolutionAttempt> tokenResolutions;
 	private T builtObject = null;
 
 	public LinkNodeFull(final LinkInfo<T, I> info,
@@ -33,9 +34,15 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	}
 
 	@Override
-	public void linkTokens(final NodeLinker nodeLinker)
+	public void resolveTokens(final NodeLinker nodeLinker)
 	{
-		this.tokenLinks = nodeLinker.link(this);
+		this.tokenResolutions = nodeLinker.resolve(this, true);
+	}
+
+	@Override
+	public List<ResolutionAttempt> tokenResolutions()
+	{
+		return tokenResolutions;
 	}
 
 	@Override
@@ -57,7 +64,7 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 		{
 			streamChildren().forEach(this::injectContainment);
 
-			for (final var tokenResolution : tokenLinks)
+			for (final var tokenResolution : tokenResolutions)
 			{
 				if (tokenResolution.resolution() != null)
 				{
@@ -84,7 +91,7 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 		otherBuilder.push(containingRelation(), this::build);
 	}
 
-	private void pushValue(final FeatureLink resolution)
+	private void pushValue(final FeatureResolution resolution)
 	{
 		resolution.pushValue(builder);
 	}

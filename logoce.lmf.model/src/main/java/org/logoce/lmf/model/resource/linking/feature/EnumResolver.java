@@ -3,8 +3,8 @@ package org.logoce.lmf.model.resource.linking.feature;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.Optional;
 
@@ -19,10 +19,10 @@ public final class EnumResolver<T> extends AttributeResolver<T>
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(final LinkNode<?, ?> node, final String value)
+	protected Optional<FeatureResolution> internalResolve(final LinkNodeInternal<?, ?> node, final String value)
 	{
 		final var resolvedEnum = extractEnumLiteral(value, enumeration);
-		return resolvedEnum.map(enumVal -> new AttributeLink<>(feature, enumVal));
+		return resolvedEnum.map(enumVal -> new AttributeResolution<>(feature, enumVal));
 	}
 
 	private static <T> Optional<T> extractEnumLiteral(final String value, final Enum<T> _enum)

@@ -8,7 +8,6 @@ import org.logoce.lmf.model.resource.interpretation.PGroup;
 import org.logoce.lmf.model.resource.linking.ModelGroup;
 import org.logoce.lmf.model.resource.linking.TreeToFeatureLinker;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeBuilder;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeFull;
 import org.logoce.lmf.model.resource.parsing.PNode;
@@ -25,23 +24,26 @@ import java.util.stream.Stream;
 
 public final class PModelBuilder<I extends PNode>
 {
-	private final Map<String, ModelGroup<?>> groups;
-	private final Map<Group<?>, TreeToFeatureLinker> resolvers;
 	private final LMInterpreter<I> interpreter;
+	private final LinkNodeBuilder<I> linker;
 
 	public PModelBuilder()
 	{
-		groups = ModelRegistry.Instance.models()
-									   .flatMap(PModelBuilder::modelGroups)
-									   .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
+		final var groups = ModelRegistry.Instance.models()
+												 .flatMap(PModelBuilder::modelGroups)
+												 .collect(Collectors.toUnmodifiableMap(ModelGroup::name,
+																					   Function.identity()));
 
-		resolvers = groups.values()
-						  .stream()
-						  .map(ModelGroup::group)
-						  .map(TreeToFeatureLinker::new)
-						  .collect(Collectors.toUnmodifiableMap(TreeToFeatureLinker::group, Function.identity()));
+		final Map<Group<?>, TreeToFeatureLinker> resolvers = groups.values()
+																   .stream()
+																   .map(ModelGroup::group)
+																   .map(TreeToFeatureLinker::new)
+																   .collect(Collectors.toUnmodifiableMap(
+																		   TreeToFeatureLinker::group,
+																		   Function.identity()));
 
-		interpreter = new LMInterpreter<>(ModelRegistry.Instance.getAliasMap());
+		this.interpreter = new LMInterpreter<>(ModelRegistry.Instance.getAliasMap());
+		this.linker = new LinkNodeBuilder<>(groups, resolvers);
 	}
 
 	public PModel<I> link(final List<? extends BasicTree<I, ?>> roots)
@@ -53,11 +55,10 @@ public final class PModelBuilder<I extends PNode>
 	public PModel<I> link(final List<? extends BasicTree<I, ?>> roots,
 						  final BiConsumer<I, LinkException> exceptionConsumer)
 	{
-		final var linker = new LinkNodeBuilder<I>(groups, resolvers);
 		try
 		{
 			final var linkerTrees = roots.stream().map(this::interpretTree).map(linker::mapTree).toList();
-			linkerTrees.stream().flatMap(LinkNodeFull::streamTree).forEach(this::linkNode);
+			linkerTrees.stream().flatMap(LinkNodeFull::streamTree).forEach(linker::resolve);
 			return new PModel<>(linkerTrees);
 		}
 		catch (LinkException e)
@@ -69,30 +70,26 @@ public final class PModelBuilder<I extends PNode>
 
 	@SuppressWarnings("unchecked")
 	public <NodeType extends BasicTree<I, NodeType>> LinkNode<?, I> linkPartial(final NodeType node,
-																				final BiConsumer<I, LinkException> exceptionConsumer)
+																				final BiConsumer<LinkException, I> exceptionConsumer)
 	{
-		final var linker = new LinkNodeBuilder<I>(groups, resolvers);
-
 		try
 		{
 			final var interpretedNode = node.mapLazy(interpreter::interpret);
 			final var linkedNode = linker.mapPartial(interpretedNode);
-			linkNode(linkedNode);
+			linker.resolve(linkedNode);
 			return linkedNode;
 		}
 		catch (LinkException e)
 		{
-			exceptionConsumer.accept((I) e.pNode, e);
+			exceptionConsumer.accept(e, (I) e.pNode);
 			return null;
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public <NodeType extends BasicTree<I, NodeType>> LinkNode<?, I> linkPartialUnresolved(final NodeType node,
-																						  final BiConsumer<I, LinkException> exceptionConsumer)
+																						  final BiConsumer<LinkException, I> exceptionConsumer)
 	{
-		final var linker = new LinkNodeBuilder<I>(groups, resolvers);
-
 		try
 		{
 			final var interpretedNode = node.mapLazy(interpreter::interpret);
@@ -101,7 +98,7 @@ public final class PModelBuilder<I extends PNode>
 		}
 		catch (LinkException e)
 		{
-			exceptionConsumer.accept((I) e.pNode, e);
+			exceptionConsumer.accept(e, (I) e.pNode);
 			return null;
 		}
 	}
@@ -114,12 +111,6 @@ public final class PModelBuilder<I extends PNode>
 	private Tree<PGroup<I>> interpretTree(final BasicTree<I, ?> root)
 	{
 		return root.mapTree(interpreter::interpretTreeNode);
-	}
-
-	private void linkNode(final LinkNode<?, I> node)
-	{
-		final var resolver = resolvers.get(node.group());
-		resolver.resolve(node);
 	}
 
 	private static Stream<ModelGroup<?>> modelGroups(final IModelPackage model)

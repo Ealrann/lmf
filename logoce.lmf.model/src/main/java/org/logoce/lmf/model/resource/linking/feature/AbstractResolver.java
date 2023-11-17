@@ -2,8 +2,8 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +25,14 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 	}
 
 	@Override
-	public Optional<? extends FeatureLink> resolve(LinkNode<?, ?> node, List<String> values)
+	public Optional<? extends FeatureResolution> resolve(LinkNodeInternal<?, ?> node, List<String> values)
 	{
 		if (values.size() > 1 && !feature.many())
 		{
 			return Optional.empty();
 		}
 
-		final List<FeatureLink> resolutions = new ArrayList<>();
+		final List<FeatureResolution> resolutions = new ArrayList<>();
 		for (var value : values)
 		{
 			final var resolution = internalResolve(node, value);
@@ -46,17 +46,17 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 			}
 		}
 
-		if (resolutions.size() > 1) return Optional.of(new MultipleLink(resolutions));
+		if (resolutions.size() > 1) return Optional.of(new MultipleResolution(resolutions));
 		else return Optional.of(resolutions.get(0));
 	}
 
-	protected abstract Optional<? extends FeatureLink> internalResolve(LinkNode<?, ?> node, String value);
+	protected abstract Optional<? extends FeatureResolution> internalResolve(LinkNodeInternal<?, ?> node, String value);
 
-	public static final class MultipleLink implements FeatureLink
+	public static final class MultipleResolution implements FeatureResolution
 	{
-		private final List<FeatureLink> resolutions;
+		private final List<FeatureResolution> resolutions;
 
-		public MultipleLink(final List<FeatureLink> resolutions)
+		public MultipleResolution(final List<FeatureResolution> resolutions)
 		{
 			this.resolutions = resolutions;
 		}

@@ -1,7 +1,6 @@
 package org.logoce.lmf.model.resource.transform;
 
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
 import org.logoce.lmf.model.resource.parsing.PNode;
 
 import java.util.List;

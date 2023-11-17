@@ -19,6 +19,6 @@ public final class LMFile extends PsiFileBase
 
   @Override
   public String toString() {
-    return "Simple File";
+    return "LightModel File";
   }
 }

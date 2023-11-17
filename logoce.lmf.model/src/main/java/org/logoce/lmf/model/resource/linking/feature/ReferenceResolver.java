@@ -3,8 +3,8 @@ package org.logoce.lmf.model.resource.linking.feature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
 
@@ -22,7 +22,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@Override
-	protected Optional<FeatureLink> internalResolve(LinkNode<?, ?> node, String value)
+	protected Optional<FeatureResolution> internalResolve(LinkNodeInternal<?, ?> node, String value)
 	{
 		if (value.startsWith("#"))
 		{
@@ -39,9 +39,9 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@SuppressWarnings({"ReassignedVariable", "unchecked"})
-	private Optional<FeatureLink> resolveLocalDependency(final LinkNode<?, ?> node, final String uri)
+	private Optional<FeatureResolution> resolveLocalDependency(final LinkNodeInternal<?, ?> node, final String uri)
 	{
-		LinkNode<?, ?> current = node;
+		LinkNodeInternal<?, ?> current = node;
 		if (uri.startsWith("/"))
 		{
 			current = current.root();
@@ -77,7 +77,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 		if (ModelUtils.isSubGroup(feature.reference().group(), current.group()))
 		{
-			return Optional.of(new DynamicReferenceLink<>(feature, (LinkNode<T, ?>) current));
+			return Optional.of(new DynamicReferenceResolution<>(feature, (LinkNodeInternal<T, ?>) current));
 		}
 		else
 		{
@@ -86,7 +86,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 	}
 
 	@SuppressWarnings("unchecked")
-	private Optional<FeatureLink> resolveExternalDependency(final String value)
+	private Optional<FeatureResolution> resolveExternalDependency(final String value)
 	{
 		final var uri = value.substring(1);
 		final var firstSlashIndex = uri.indexOf('/');
@@ -124,7 +124,7 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 
 		if (ModelUtils.isSubGroup(feature.reference().group(), current.lmGroup()))
 		{
-			return Optional.of(new StaticReferenceLink<>(feature, (T) current));
+			return Optional.of(new StaticReferenceResolution<>(feature, (T) current));
 		}
 		else
 		{
@@ -132,7 +132,8 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	public record StaticReferenceLink<T extends LMObject>(Relation<T, ?> relation, T value) implements FeatureLink
+	public record StaticReferenceResolution<T extends LMObject>(Relation<T, ?> relation, T value) implements
+																								  FeatureResolution
 	{
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
@@ -141,8 +142,8 @@ public final class ReferenceResolver<T extends LMObject> extends AbstractResolve
 		}
 	}
 
-	public record DynamicReferenceLink<T extends LMObject>(Relation<T, ?> relation, LinkNode<T, ?> linkNode) implements
-																											 FeatureLink
+	public record DynamicReferenceResolution<T extends LMObject>(Relation<T, ?> relation, LinkNodeInternal<T, ?> linkNode) implements
+																														   FeatureResolution
 	{
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)

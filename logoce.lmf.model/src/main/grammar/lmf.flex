@@ -12,7 +12,7 @@ package org.logoce.lmf.model.lexer;
 LIST_SEPARATOR=[,]
 TYPE=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*
 TYPE_NAME=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*[=]
-VALUE=[a-zA-Z0-9_+\-./\[\]*#]+
+VALUE=[a-zA-Z0-9_+\-./\[\]*#@]+
 VALUE_NAME=[a-zA-Z_+\-][a-zA-Z0-9_+\-]*[=]
 WHITE_SPACE=[ \t\n\x0B\f\r]+
 QUOTE=[\"]

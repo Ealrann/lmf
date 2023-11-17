@@ -27,9 +27,13 @@
   ]
 }
 
-lmFile ::= group*
+lmFile ::= WHITE_SPACE? (group WHITE_SPACE?)*
 
-group ::= OPEN_NODE group_type (leaf | group | WHITE_SPACE)* CLOSE_NODE WHITE_SPACE?
+group ::= OPEN_NODE group_type (leaf | group | WHITE_SPACE)* CLOSE_NODE {
+	mixin="org.logoce.lmf.editor.ref.LMNamedElementImpl"
+	implements="org.logoce.lmf.editor.ref.LMNamedElement"
+	methods=[getKey getValue getName setName getNameIdentifier]
+}
 
 group_type ::= (TYPE_NAME ASSIGN)? TYPE
 

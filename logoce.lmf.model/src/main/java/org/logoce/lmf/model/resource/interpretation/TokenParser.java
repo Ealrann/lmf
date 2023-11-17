@@ -57,14 +57,14 @@ final class TokenParser
 			final var assign = iterator.next();
 			assert assign.type() == ELMTokenType.ASSIGN;
 			final var nextValues = nextContiguousValues(iterator);
-			return Optional.of(new PFeature(Optional.of(firstValue), nextValues));
+			return Optional.of(PFeature.of(Optional.of(firstValue), nextValues));
 		}
 		else
 		{
 			assert firstToken.type() == ELMTokenType.VALUE || firstToken.type() == ELMTokenType.QUOTE;
 			final var nextValues = nextContiguousValues(iterator);
 			final var values = Stream.concat(Stream.of(firstValue), nextValues.stream()).toList();
-			return Optional.of(new PFeature(Optional.empty(), values));
+			return Optional.of(PFeature.of(Optional.empty(), values));
 		}
 	}
 

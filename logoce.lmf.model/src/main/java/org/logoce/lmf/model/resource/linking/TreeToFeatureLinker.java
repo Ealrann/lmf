@@ -4,7 +4,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.linking.feature.ITokenResolver;
 import org.logoce.lmf.model.resource.linking.feature.NodeLinker;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,9 +37,9 @@ public class TreeToFeatureLinker
 		nodeLinker = new NodeLinker(wordResolvers);
 	}
 
-	public void resolve(final LinkNode<?, ?> linkNode)
+	public void resolve(final LinkNodeInternal<?, ?> linkNode)
 	{
-		linkNode.linkTokens(nodeLinker);
+		linkNode.resolveTokens(nodeLinker);
 	}
 
 	public Stream<Relation<?, ?>> streamContainmentRelations()

@@ -2,41 +2,57 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.interpretation.PNominalGroup;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
-import org.logoce.lmf.model.resource.linking.tree.LinkNode;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
+import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
+import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public final class NodeLinker
 {
-	private final List<ITokenResolver<?>> availableResolvers;
+	private final List<AttributeResolver<?>> attributeResolvers;
+	private final List<ReferenceResolver<?>> referenceResolvers;
 
 	public NodeLinker(final List<? extends ITokenResolver<?>> tokenResolvers)
 	{
-		this.availableResolvers = List.copyOf(tokenResolvers);
+		attributeResolvers = tokenResolvers.stream()
+										   .filter(AttributeResolver.class::isInstance)
+										   .map(r -> (AttributeResolver<?>) r)
+										   .collect(Collectors.toUnmodifiableList());
+
+		referenceResolvers = tokenResolvers.stream()
+										   .filter(ReferenceResolver.class::isInstance)
+										   .map(r -> (ReferenceResolver<?>) r)
+										   .collect(Collectors.toUnmodifiableList());
 	}
 
-	public List<ResolutionAptempt> link(final LinkNode<?, ?> node)
+	public List<ResolutionAttempt> resolve(final LinkNodeInternal<?, ?> node, final boolean resolveRelations)
 	{
-		final var runner = new TokenResolverRunner(availableResolvers, node);
-		final List<ResolutionAptempt> resolutions = new ArrayList<>();
+		final var runner = new TokenResolverRunner(attributeResolvers, referenceResolvers, node);
+		final List<ResolutionAttempt> resolutions = new ArrayList<>();
 		final List<PFeature> notFound = new ArrayList<>();
 
 		for (final var token : node.features())
 		{
+			if (token.isRelation() && !resolveRelations)
+			{
+				continue;
+			}
+
 			try
 			{
 				runner.nameResolution(token)
 					  .or(() -> runner.resolveBoolean(token))
-					  .ifPresentOrElse(r -> resolutions.add(new ResolutionAptempt(token, r, null)),
+					  .ifPresentOrElse(r -> resolutions.add(new ResolutionAttempt(token, r, null)),
 									   () -> notFound.add(token));
 			}
 			catch (NoSuchElementException exception)
 			{
-				resolutions.add(new ResolutionAptempt(token, null, exception));
+				resolutions.add(new ResolutionAttempt(token, null, exception));
 			}
 		}
 		for (final var token : notFound)
@@ -44,43 +60,46 @@ public final class NodeLinker
 			try
 			{
 				final var res = runner.valueResolution(token);
-				resolutions.add(new ResolutionAptempt(token, res, null));
+				resolutions.add(new ResolutionAttempt(token, res, null));
 			}
 			catch (NoSuchElementException exception)
 			{
-				resolutions.add(new ResolutionAptempt(token, null, exception));
+				resolutions.add(new ResolutionAttempt(token, null, exception));
 			}
 		}
 
 		return List.copyOf(resolutions);
 	}
 
-	public record ResolutionAptempt(PFeature feature, FeatureLink resolution, NoSuchElementException exception) {}
-
 	private static final class TokenResolverRunner
 	{
-		private final LinkedList<ITokenResolver<?>> availableResolvers;
-		private final LinkNode<?, ?> node;
+		private final LinkedList<AttributeResolver<?>> availableAttributesResolvers;
+		private final LinkedList<ReferenceResolver<?>> availableReferenceResolvers;
+		private final LinkNodeInternal<?, ?> node;
 
-		public TokenResolverRunner(final List<ITokenResolver<?>> tokenResolvers, final LinkNode<?, ?> node)
+		public TokenResolverRunner(final List<AttributeResolver<?>> attributeResolvers,
+								   final List<ReferenceResolver<?>> referenceResolvers,
+								   final LinkNodeInternal<?, ?> node)
 		{
-			this.availableResolvers = new LinkedList<>(tokenResolvers);
+			this.availableAttributesResolvers = new LinkedList<>(attributeResolvers);
+			this.availableReferenceResolvers = new LinkedList<>(referenceResolvers);
 			this.node = node;
 		}
 
-		public Optional<FeatureLink> nameResolution(final PFeature token)
+		public Optional<FeatureResolution> nameResolution(final PFeature token)
 		{
 			return resolveFromName(token).or(() -> resolveBoolean(token));
 		}
 
-		public FeatureLink valueResolution(final PFeature token)
+		public FeatureResolution valueResolution(final PFeature token)
 		{
 			return findMandatory(r -> true,
 								 r -> r.resolve(node, token.values()),
-								 () -> new NoSuchElementException("Cannot resolve value Token " + token.firstToken()));
+								 () -> new NoSuchElementException("Cannot resolve value Token " + token.firstToken()),
+								 token.isRelation());
 		}
 
-		private Optional<FeatureLink> resolveFromName(final PFeature token)
+		private Optional<FeatureResolution> resolveFromName(final PFeature token)
 		{
 			if (token.name().isPresent())
 			{
@@ -88,7 +107,8 @@ public final class NodeLinker
 				return Optional.of(findMandatory(r -> r.match(tokenName),
 												 r -> r.resolve(node, token.values()),
 												 () -> new NoSuchElementException("Cannot resolve named Token " +
-																				  tokenName)));
+																				  tokenName),
+												 token.isRelation()));
 			}
 			else
 			{
@@ -96,22 +116,27 @@ public final class NodeLinker
 			}
 		}
 
-		private Optional<FeatureLink> resolveBoolean(final PNominalGroup token)
+		private Optional<FeatureResolution> resolveBoolean(final PNominalGroup token)
 		{
-			return findOptional(r -> r.match(token.firstToken()), r -> r.resolve(node, List.of("true")));
+			return findOptional(r -> r.match(token.firstToken()), r -> r.resolve(node, List.of("true")), false);
 		}
 
-		private FeatureLink findMandatory(final Predicate<ITokenResolver<?>> filter,
-										  final Function<ITokenResolver<?>, Optional<? extends FeatureLink>> resolver,
-										  final Supplier<NoSuchElementException> message)
+		private FeatureResolution findMandatory(final Predicate<ITokenResolver<?>> filter,
+												final Function<ITokenResolver<?>, Optional<? extends FeatureResolution>> resolver,
+												final Supplier<NoSuchElementException> message,
+												final boolean isRelation)
 		{
-			return findOptional(filter, resolver).orElseThrow(message);
+			return findOptional(filter, resolver, isRelation).orElseThrow(message);
 		}
 
-		private Optional<FeatureLink> findOptional(final Predicate<ITokenResolver<?>> filter,
-												   final Function<ITokenResolver<?>, Optional<? extends FeatureLink>> resolver)
+		private Optional<FeatureResolution> findOptional(final Predicate<ITokenResolver<?>> filter,
+														 final Function<ITokenResolver<?>, Optional<? extends FeatureResolution>> resolver,
+														 final boolean isRelation)
 		{
-			final var it = availableResolvers.iterator();
+			final var it = isRelation
+						   ? availableReferenceResolvers.iterator()
+						   : availableAttributesResolvers.iterator();
+
 			while (it.hasNext())
 			{
 				final var currentResolver = it.next();

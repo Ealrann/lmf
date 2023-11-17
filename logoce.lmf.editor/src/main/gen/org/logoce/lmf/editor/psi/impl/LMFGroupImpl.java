@@ -8,10 +8,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.logoce.lmf.editor.psi.LMIntellijTokenTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import org.logoce.lmf.editor.ref.LMNamedElementImpl;
 import org.logoce.lmf.editor.psi.*;
+import com.intellij.util.IncorrectOperationException;
 
-public class LMFGroupImpl extends ASTWrapperPsiElement implements LMFGroup {
+public class LMFGroupImpl extends LMNamedElementImpl implements LMFGroup {
 
   public LMFGroupImpl(@NotNull ASTNode node) {
     super(node);

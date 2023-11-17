@@ -15,7 +15,7 @@ import java.util.List;
 
 public final class LMUtil
 {
-	public static List<LMFGroup> findGroup(Project project, String key)
+	public static List<LMFGroup> findGroups(final Project project,final String key)
 	{
 		final List<LMFGroup> result = new ArrayList<>();
 		final var virtualFiles = FileTypeIndex.getFiles(LMFileType.INSTANCE, GlobalSearchScope.allScope(project));

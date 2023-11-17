@@ -9,8 +9,6 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.parser.PNodeView;
 import org.logoce.lmf.editor.psi.LMFGroup;
-import org.logoce.lmf.editor.psi.LMFVal;
-import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.transform.PModelBuilder;
 import org.logoce.lmf.model.util.tree.TreeView;
 
@@ -27,7 +25,7 @@ public class LMAnnotator implements Annotator
 			final var groupNode = PNodeView.of(astGroup);
 			final var treeView = new TreeView<>(groupNode, PNodeView::children, PNodeView::parent);
 
-			PMDEL_BUILDER.linkPartialUnresolved(treeView, (g, error) -> {
+			PMDEL_BUILDER.linkPartialUnresolved(treeView, (error, g) -> {
 				final var tokens = treeView.data().tokens();
 				if (g == groupNode && !tokens.isEmpty())
 				{
@@ -77,11 +75,11 @@ public class LMAnnotator implements Annotator
 		}*/
 	}
 
-	private void annotateGroupType(final LMFVal groupType, final @NotNull AnnotationHolder holder)
+/*	private void annotateGroupType(final LMFVal groupType, final @NotNull AnnotationHolder holder)
 	{
 		holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
 			  .range(groupType.getTextRange())
 			  .textAttributes(LMSyntaxHighlighter.REFERENCE)
 			  .create();
-	}
+	}*/
 }

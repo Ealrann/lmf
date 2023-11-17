@@ -6,18 +6,20 @@ import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
+import org.logoce.lmf.editor.highlight.proposition.AttributeComputer;
+import org.logoce.lmf.editor.highlight.proposition.GroupComputer;
 import org.logoce.lmf.editor.parser.PNodeView;
 import org.logoce.lmf.editor.psi.LMFGroup;
 import org.logoce.lmf.editor.psi.LMIntellijTokenTypes;
-import org.logoce.lmf.model.lang.*;
+import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.transform.PModelBuilder;
-import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.tree.TreeView;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class GroupCompletionContributor extends CompletionContributor
 {
@@ -28,121 +30,90 @@ public final class GroupCompletionContributor extends CompletionContributor
 		extend(CompletionType.BASIC,
 			   PlatformPatterns.or(PlatformPatterns.psiElement(LMIntellijTokenTypes.TYPE),
 								   PlatformPatterns.psiElement(LMIntellijTokenTypes.TYPE_NAME)),
-			   new GroupCompletionProvider((elem) -> (LMFGroup) elem.getParent().getParent(), false));
+			   new GroupCompletionProvider(GroupCompletionContributor::exploreParentParentGroup, false, false));
+		extend(CompletionType.BASIC,
+			   PlatformPatterns.or(PlatformPatterns.psiElement(LMIntellijTokenTypes.VALUE),
+								   PlatformPatterns.psiElement(LMIntellijTokenTypes.VALUE_NAME)),
+			   new GroupCompletionProvider(GroupCompletionContributor::exploreParentGroup, true, true));
+	}
+
+	private static LMFGroup exploreParentParentGroup(final PsiElement element)
+	{
+		return exploreParentGroup(exploreParentGroup(element).getParent());
+	}
+
+	private static LMFGroup exploreParentGroup(final PsiElement element)
+	{
+		if (element instanceof LMFGroup group) return group;
+		else return exploreParentGroup(element.getParent());
 	}
 
 	private static final class GroupCompletionProvider extends CompletionProvider<CompletionParameters>
 	{
 		private final Function<PsiElement, LMFGroup> groupRetriever;
 		private final boolean fullGroup;
+		private final boolean listAttributes;
 
-		public GroupCompletionProvider(final Function<PsiElement, LMFGroup> groupSupplier, final boolean fullGroup)
+		public GroupCompletionProvider(final Function<PsiElement, LMFGroup> groupSupplier,
+									   final boolean fullGroup,
+									   final boolean listAttributes)
 		{
 			this.groupRetriever = groupSupplier;
 			this.fullGroup = fullGroup;
+			this.listAttributes = listAttributes;
 		}
 
 		@Override
-		public void addCompletions(@NotNull CompletionParameters parameters,
-								   @NotNull ProcessingContext context,
-								   @NotNull CompletionResultSet resultSet)
+		public void addCompletions(final @NotNull CompletionParameters parameters,
+								   final @NotNull ProcessingContext context,
+								   final @NotNull CompletionResultSet resultSet)
 		{
 			final var elem = parameters.getPosition();
-			final var group = groupRetriever.apply(elem);
+			final var group = groupRetriever.apply(elem.getParent());
 			computeFromGroup(resultSet, group);
 		}
 
 		private void computeFromGroup(final @NotNull CompletionResultSet resultSet, final LMFGroup lmGroup)
 		{
-			final var astGroup = lmGroup.getParent().getNode();
+			final var astGroup = lmGroup.getNode();
 			final var groupNode = PNodeView.of(astGroup);
 			final var treeView = new TreeView<>(groupNode, PNodeView::children, PNodeView::parent);
 
-			final var link = PMDEL_BUILDER.linkPartialUnresolved(treeView, (a, b) -> {b.printStackTrace();});
+			final var link = PMDEL_BUILDER.linkPartialUnresolved(treeView, (a, b) -> a.printStackTrace());
 
 			if (link != null)
 			{
 				final var group = link.group();
-				final var computer = PropositionComputer.of(group);
-				final var entries = computer.computeEntries().map(this::bake).toList();
 
+				if (listAttributes)
+				{
+					final var computer = new AttributeComputer(listAttributes(group), true);
+					final var entries = computer.computeEntries().map(LookupElementBuilder::create).toList();
+					resultSet.addAllElements(entries);
+				}
+
+				final var computer = new GroupComputer(listRelations(group), fullGroup);
+				final var entries = computer.computeEntries().map(LookupElementBuilder::create).toList();
 				resultSet.addAllElements(entries);
 			}
 		}
 
-		private LookupElementBuilder bake(final String value)
+		public static List<Relation<?, ?>> listRelations(final Group<?> parentGroup)
 		{
-			if (fullGroup)
-			{
-				return LookupElementBuilder.create("(" + value + ")");
-			}
-			else
-			{
-				return LookupElementBuilder.create(value);
-			}
-		}
-	}
-
-	private record PropositionComputer(List<Relation<?, ?>> relations, List<Concept<?>> concepts)
-	{
-		public static PropositionComputer of(Group<?> parentGroup)
-		{
-			final List<Relation<?, ?>> relations = parentGroup.features()
-															  .stream()
-															  .filter(Relation.class::isInstance)
-															  .map(r -> (Relation<?, ?>) r)
-															  .collect(Collectors.toUnmodifiableList());
-
-			final List<Concept<?>> concepts = relations.stream()
-													   .map(Relation::reference)
-													   .map(Reference::group)
-													   .map(g -> (Group<?>) g)
-													   .collect(Collectors.toUnmodifiableList());
-
-			return new PropositionComputer(relations, concepts);
+			return parentGroup.features()
+							  .stream()
+							  .filter(Relation.class::isInstance)
+							  .map(r -> (Relation<?, ?>) r)
+							  .collect(Collectors.toUnmodifiableList());
 		}
 
-		public Stream<String> computeEntries()
+		public static List<Attribute<?, ?>> listAttributes(final Group<?> parentGroup)
 		{
-			return relations.stream().flatMap(this::streamProposals);
-		}
-
-		@NotNull
-		private Stream<String> streamProposals(final Relation<?, ?> relation)
-		{
-			final var concept = relation.reference().group();
-			if (concept instanceof Group<?> g)
-			{
-				final var relationName = relation.name();
-				if (g.concrete())
-				{
-					final var isUnique = 1 == concepts.stream().filter(g::equals).count();
-
-					final var groupName = g.name();
-					if (isUnique)
-					{
-						final var aliases = ModelRegistry.Instance.models()
-																  .flatMap(m -> m.model().aliases().stream())
-																  .filter(alias -> alias.value().startsWith(groupName))
-																  .map(Named::name);
-
-						return Stream.concat(Stream.of(groupName), aliases);
-					}
-					else
-					{
-						return Stream.of(relationName + "=" + groupName);
-					}
-				}
-				else
-				{
-					return ModelRegistry.Instance.streamChildGroups(g)
-												 .map(childGroup -> relationName + "=" + childGroup.name());
-				}
-			}
-			else
-			{
-				return Stream.empty();
-			}
+			return parentGroup.features()
+							  .stream()
+							  .filter(Attribute.class::isInstance)
+							  .map(r -> (Attribute<?, ?>) r)
+							  .collect(Collectors.toUnmodifiableList());
 		}
 	}
 }

@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.resource.linking.FeatureLink;
+import org.logoce.lmf.model.resource.linking.FeatureResolution;
 
 public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements ITokenResolver<T>
 {
@@ -11,12 +11,12 @@ public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute
 		super(attribute);
 	}
 
-	public static final class AttributeLink<T> implements FeatureLink
+	public static final class AttributeResolution<T> implements FeatureResolution
 	{
 		final Attribute<T, ?> attribute;
 		final T value;
 
-		AttributeLink(final Attribute<T, ?> attribute, final T value)
+		AttributeResolution(final Attribute<T, ?> attribute, final T value)
 		{
 			this.attribute = attribute;
 			this.value = value;

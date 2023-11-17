@@ -40,6 +40,6 @@ public final class LMFileType extends LanguageFileType
 	@Override
 	public Icon getIcon()
 	{
-		return LMIcon.ICON;
+		return LMIcons.ICON;
 	}
 }
