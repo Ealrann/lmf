@@ -44,7 +44,7 @@ public class LMNamedElementImpl extends ASTWrapperPsiElement implements LMNamedE
 		final var node = linkPartial((a, e) -> {});
 		if (ModelUtils.isSubGroup(node.group(), LMCoreDefinition.Groups.NAMED))
 		{
-			final var nameResolution = node.tokenResolutions()
+			final var nameResolution = node.attributeResolutions()
 										   .stream()
 										   .map(ResolutionAttempt::resolution)
 										   .filter(f -> f.feature() == LMCoreDefinition.Features.NAMED.NAME)

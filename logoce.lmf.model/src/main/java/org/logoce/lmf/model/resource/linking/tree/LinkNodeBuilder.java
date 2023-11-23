@@ -35,10 +35,13 @@ public final class LinkNodeBuilder<I extends PNode>
 	public <Y extends BasicTree<PGroup<I>, Y>> LinkNodePartial<?, I> mapPartial(final Y node)
 	{
 		final var linkInfo = buildNodeInfo(node);
-		return new LinkNodePartial<>(linkInfo, node, this::mapPartial);
+		final var data = node.data();
+		final var resolver = resolvers.get(linkInfo.modelGroup().group());
+		final var attributeResolutions = resolver.nodeLinker.resolveAttributes(data.features());
+		return new LinkNodePartial<>(linkInfo, node, attributeResolutions, this::mapPartial);
 	}
 
-	public void resolve(final LinkNodeInternal<?, I> node)
+	public void resolve(final LinkNodeInternal<?, I, ?> node)
 	{
 		final var resolver = resolvers.get(node.group());
 		resolver.resolve(node);
@@ -47,7 +50,10 @@ public final class LinkNodeBuilder<I extends PNode>
 	private LinkNodeFull<?, I> buildNode(final BasicTree.BuildInfo<LinkInfo<?, I>, LinkNodeFull<?, I>> buildInfo)
 	{
 		final var data = (LinkInfo<?, I>) buildInfo.data();
-		return new LinkNodeFull<>(data, buildInfo.parent(), buildInfo.childrenBuilder());
+		final var resolver = resolvers.get(data.modelGroup().group());
+		final var attributeResolutions = resolver.nodeLinker.resolveAttributes(data.features());
+
+		return new LinkNodeFull<>(data, buildInfo.parent(), attributeResolutions, buildInfo.childrenBuilder());
 	}
 
 	private <T extends LMObject> LinkInfo<?, I> buildNodeInfo(final BasicTree<PGroup<I>, ?> node)

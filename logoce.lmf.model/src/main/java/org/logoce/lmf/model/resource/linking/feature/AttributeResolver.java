@@ -2,22 +2,31 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
 
-public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute<T, ?>> implements ITokenResolver<T>
+import java.util.List;
+import java.util.Optional;
+
+public abstract class AttributeResolver extends AbstractResolver<Attribute<?, ?>>
 {
-	public AttributeResolver(final Attribute<T, ?> attribute)
+	public AttributeResolver(final Attribute<?, ?> attribute)
 	{
 		super(attribute);
 	}
 
-	public static final class AttributeResolution<T> implements FeatureResolution
+	public final Optional<FeatureResolution<Attribute<?, ?>>> resolve(List<String> values)
 	{
-		final Attribute<T, ?> attribute;
-		final T value;
+		return super.resolve(values, this::internalResolve);
+	}
 
-		AttributeResolution(final Attribute<T, ?> attribute, final T value)
+	protected abstract Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(final String value);
+
+	public static final class AttributeResolution<Y> implements FeatureResolution<Attribute<?, ?>>
+	{
+		final Attribute<Y, ?> attribute;
+		final Y value;
+
+		AttributeResolution(final Attribute<Y, ?> attribute, final Y value)
 		{
 			this.attribute = attribute;
 			this.value = value;
@@ -30,7 +39,7 @@ public abstract class AttributeResolver<T> extends AbstractResolver<T, Attribute
 		}
 
 		@Override
-		public Feature<?, ?> feature()
+		public Attribute<Y, ?> feature()
 		{
 			return attribute;
 		}

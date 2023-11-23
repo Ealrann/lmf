@@ -24,7 +24,7 @@ public class UnitTest
 							  "      primitive=boolean )";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -44,7 +44,7 @@ public class UnitTest
 		final var textModel = "(Unit matcher=\"rgx_match:<(true|false)>\") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -73,7 +73,7 @@ public class UnitTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);

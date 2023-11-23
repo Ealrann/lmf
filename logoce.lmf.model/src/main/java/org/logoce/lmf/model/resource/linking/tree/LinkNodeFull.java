@@ -1,12 +1,13 @@
 package org.logoce.lmf.model.resource.linking.tree;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
-import org.logoce.lmf.model.resource.linking.feature.NodeLinker;
+import org.logoce.lmf.model.resource.linking.linker.NodeLinker;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
 import org.logoce.lmf.model.util.tree.AbstractTree;
@@ -15,34 +16,43 @@ import java.util.List;
 import java.util.function.Function;
 
 public final class LinkNodeFull<T extends LMObject, I extends PNode> extends AbstractTree<LinkNodeFull<?, I>> implements
-																											  LinkNodeInternal<T, I>
+																											  LinkNodeInternal<T, I, LinkNodeFull<?,I>>
 {
 	private final LinkInfo<T, I> info;
 	private final IFeaturedObject.Builder<T> builder;
 
-	private List<ResolutionAttempt> tokenResolutions;
+	private final List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions;
+	private List<ResolutionAttempt<Relation<?, ?>>> relationResolutions;
 	private T builtObject = null;
 
 	public LinkNodeFull(final LinkInfo<T, I> info,
 						final LinkNodeFull<?, I> parent,
+						final List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions,
 						final Function<LinkNodeFull<?, I>, List<LinkNodeFull<?, I>>> childrenBuilder)
 	{
 		super(parent, childrenBuilder);
 
 		this.info = info;
 		this.builder = info.modelGroup().builder();
+		this.attributeResolutions = List.copyOf(attributeResolutions);
 	}
 
 	@Override
-	public void resolveTokens(final NodeLinker nodeLinker)
+	public void resolveReferences(final NodeLinker nodeLinker)
 	{
-		this.tokenResolutions = nodeLinker.resolve(this, true);
+		this.relationResolutions = nodeLinker.resolveRelations(this);
 	}
 
 	@Override
-	public List<ResolutionAttempt> tokenResolutions()
+	public List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions()
 	{
-		return tokenResolutions;
+		return attributeResolutions;
+	}
+
+	@Override
+	public List<ResolutionAttempt<Relation<?, ?>>> relationResolutions()
+	{
+		return relationResolutions;
 	}
 
 	@Override
@@ -64,21 +74,24 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 		{
 			streamChildren().forEach(this::injectContainment);
 
-			for (final var tokenResolution : tokenResolutions)
-			{
-				if (tokenResolution.resolution() != null)
-				{
-					pushValue(tokenResolution.resolution());
-				}
-				if (tokenResolution.exception() != null)
-				{
-					tokenResolution.exception().printStackTrace();
-				}
-			}
+			attributeResolutions.forEach(this::install);
+			relationResolutions.forEach(this::install);
 
 			builtObject = builder.build();
 		}
 		return builtObject;
+	}
+
+	private void install(final ResolutionAttempt<?> tokenResolution)
+	{
+		if (tokenResolution.resolution() != null)
+		{
+			pushValue(tokenResolution.resolution());
+		}
+		if (tokenResolution.exception() != null)
+		{
+			tokenResolution.exception().printStackTrace();
+		}
 	}
 
 	private void injectContainment(final LinkNodeFull<?, I> child)
@@ -91,7 +104,7 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 		otherBuilder.push(containingRelation(), this::build);
 	}
 
-	private void pushValue(final FeatureResolution resolution)
+	private void pushValue(final FeatureResolution<?> resolution)
 	{
 		resolution.pushValue(builder);
 	}

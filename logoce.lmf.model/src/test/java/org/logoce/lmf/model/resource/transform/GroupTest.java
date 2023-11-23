@@ -24,7 +24,7 @@ public class GroupTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		assertTrue(roots.get(0) instanceof Group);
@@ -52,7 +52,7 @@ public class GroupTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -96,7 +96,7 @@ public class GroupTest
 
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);

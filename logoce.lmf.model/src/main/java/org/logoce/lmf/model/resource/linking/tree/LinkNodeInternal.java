@@ -4,24 +4,24 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
-import org.logoce.lmf.model.resource.linking.feature.NodeLinker;
+import org.logoce.lmf.model.resource.linking.linker.NodeLinker;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.transform.LinkNode;
+import org.logoce.lmf.model.util.tree.StructuredTree;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-public interface LinkNodeInternal<T extends LMObject, I extends PNode> extends LinkNode<T, I>
+public interface LinkNodeInternal<T extends LMObject, I extends PNode, S extends LinkNodeInternal<?, I, S>> extends
+																											LinkNode<T, I>,
+																											StructuredTree<S>
 {
 	List<PFeature> features();
-	void resolveTokens(final NodeLinker nodeLinker);
+	void resolveReferences(final NodeLinker nodeLinker);
 
 	@Override
-	LinkNodeInternal<?, I> parent();
+	S parent();
 	@Override
-	Stream<? extends LinkNodeInternal<?, I>> streamChildren();
-	@Override
-	LinkNodeInternal<?, I> root();
+	S root();
 
 	@Override
 	Relation<T, ?> containingRelation();

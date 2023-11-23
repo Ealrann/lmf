@@ -4,28 +4,28 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
-import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.Optional;
 
-public final class EnumResolver<T> extends AttributeResolver<T>
+public final class EnumResolver<Y> extends AttributeResolver
 {
-	private final Enum<T> enumeration;
+	private final Enum<Y> enumeration;
 
-	public EnumResolver(final Attribute<T, ?> attribute)
+	public EnumResolver(final Attribute<Y, ?> attribute)
 	{
 		super(attribute);
-		enumeration = (Enum<T>) attribute.datatype();
+		enumeration = (Enum<Y>) attribute.datatype();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Optional<FeatureResolution> internalResolve(final LinkNodeInternal<?, ?> node, final String value)
+	protected Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(final String value)
 	{
 		final var resolvedEnum = extractEnumLiteral(value, enumeration);
-		return resolvedEnum.map(enumVal -> new AttributeResolution<>(feature, enumVal));
+		return resolvedEnum.map(enumVal -> new AttributeResolution<>((Attribute<Y, ?>) feature, enumVal));
 	}
 
-	private static <T> Optional<T> extractEnumLiteral(final String value, final Enum<T> _enum)
+	private Optional<Y> extractEnumLiteral(final String value, final Enum<Y> _enum)
 	{
 		final var lPackage = ((Model) _enum.lmContainer()).lPackage();
 		final var resolvedEnum = lPackage.resolveEnumLiteral(_enum, capitalizeFirstLetter(value));

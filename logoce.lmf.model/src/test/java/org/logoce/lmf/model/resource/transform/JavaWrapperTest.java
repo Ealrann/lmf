@@ -26,7 +26,7 @@ public class JavaWrapperTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var model = (Model) roots.get(0);

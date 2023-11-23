@@ -2,50 +2,38 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.resource.linking.FeatureResolution;
-import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface ITokenResolver<T>
+public interface ITokenResolver
 {
 	boolean match(String featureName);
-	Optional<? extends FeatureResolution> resolve(LinkNodeInternal<?, ?> node, List<String> value);
 
-	@SuppressWarnings("unchecked")
-	static Optional<ITokenResolver<?>> buildResolver(Feature<?, ?> feature)
-	{
-		if (feature instanceof Attribute<?, ?> attribute)
-		{
-			if (attribute.datatype() instanceof Enum<?>)
-			{
-				return Optional.of(new EnumResolver<>((Attribute<?, ?>) feature));
-			}
-			else if (attribute.datatype() instanceof Unit<?>)
-			{
-				return Optional.of(new UnitResolver<>((Attribute<?, ?>) feature));
-			}
-			else
-			{
-				return Optional.of(new JavaWrapperResolver((Attribute<Object, ?>) feature));
-			}
-		}
-		else
-		{
-			return buildRelationResolver((Relation<?, ?>) feature);
-		}
-	}
-
-	static Optional<ITokenResolver<?>> buildRelationResolver(Relation<?, ?> relation)
+	static Optional<RelationResolver> buildRelationResolver(final Relation<?, ?> relation)
 	{
 		if (!relation.contains())
 		{
-			return Optional.of(new ReferenceResolver<>(relation));
+			return Optional.of(new RelationResolver(relation));
 		}
 		else
 		{
 			return Optional.empty();
+		}
+	}
+
+	static Optional<AttributeResolver> buildAttributeResolver(final Attribute<?, ?> attribute)
+	{
+		if (attribute.datatype() instanceof Enum<?>)
+		{
+			return Optional.of(new EnumResolver<>(attribute));
+		}
+		else if (attribute.datatype() instanceof Unit<?>)
+		{
+			return Optional.of(new UnitResolver<>(attribute));
+		}
+		else
+		{
+			return Optional.of(new JavaWrapperResolver(attribute));
 		}
 	}
 }

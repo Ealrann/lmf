@@ -2,14 +2,14 @@
 
 	(Group LMObject)
 	(Group Named
-		(includes /groups.0)
+		(includes @LMObject)
 		(-att name=name /units.7 mandatory))
 	(Group Type
-		(includes /groups.1)
+		(includes @Named)
 		(generics name=T))
 
 	(Definition Model
-		(includes group=/groups.1)
+		(includes group=@Named)
 		(-att name=domain /units.7 [1..1])
 		(-contains groups [0..*] (reference group=/groups.4))
 		(-contains enums [0..*] (reference group=/groups.10))
@@ -28,7 +28,7 @@
 		(-contains generics [0..*] (reference /groups.12)))
 
 	(Group Feature
-		(includes /groups.1)
+		(includes @Named)
 		(Generic UnaryType)
 		(Generic EffectiveType)
 		(-att name=immutable datatype=/units.2)
@@ -56,7 +56,7 @@
 		(includes /groups.2 parameters=../generics.0)
 		(Generic T))
 	(Definition Alias
-		(includes /groups.1)
+		(includes @Named)
 		(-att value /units.7 [1..1]))
 	(Definition Enum
 		(includes /groups.8 parameters=../generics.0)
@@ -77,13 +77,13 @@
 		(-att boundType datatype=/enums.0))
 
 	(Definition Reference
-		(includes group=/groups.0)
+		(includes @LMObject)
 		(Generic name=T boundType=Extends type=/groups.0)
 		(-refers group lazy [1..1] (reference /groups.14 parameters=../../generics.0))
 		(-refers parameters lazy [0..*] (reference /groups.14)))
 
 	(Group Concept
-		(includes /groups.1)
+		(includes @Named)
 		(Generic name=T))
 
 	(Definition JavaWrapper

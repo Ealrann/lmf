@@ -3,17 +3,17 @@ package org.logoce.lmf.model.resource.linking.feature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
-import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
-public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements ITokenResolver<T>
+public abstract class AbstractResolver<T extends Feature<?, ?>> implements ITokenResolver
 {
-	protected final F feature;
+	protected final T feature;
 
-	protected AbstractResolver(final F feature)
+	protected AbstractResolver(final T feature)
 	{
 		this.feature = feature;
 	}
@@ -24,18 +24,18 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 		return feature.name().equals(featureName);
 	}
 
-	@Override
-	public Optional<? extends FeatureResolution> resolve(LinkNodeInternal<?, ?> node, List<String> values)
+	protected final Optional<FeatureResolution<T>> resolve(final List<String> values,
+														   final Function<String, Optional<FeatureResolution<T>>> valueResolver)
 	{
 		if (values.size() > 1 && !feature.many())
 		{
 			return Optional.empty();
 		}
 
-		final List<FeatureResolution> resolutions = new ArrayList<>();
+		final List<FeatureResolution<T>> resolutions = new ArrayList<>();
 		for (var value : values)
 		{
-			final var resolution = internalResolve(node, value);
+			final var resolution = valueResolver.apply(value);
 			if (resolution.isEmpty())
 			{
 				return Optional.empty();
@@ -46,18 +46,16 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 			}
 		}
 
-		if (resolutions.size() > 1) return Optional.of(new MultipleResolution(resolutions, feature));
+		if (resolutions.size() > 1) return Optional.of(new MultipleResolution<>(resolutions, feature));
 		else return Optional.of(resolutions.get(0));
 	}
 
-	protected abstract Optional<? extends FeatureResolution> internalResolve(LinkNodeInternal<?, ?> node, String value);
-
-	public static final class MultipleResolution implements FeatureResolution
+	public static final class MultipleResolution<T extends Feature<?, ?>> implements FeatureResolution<T>
 	{
-		private final List<FeatureResolution> resolutions;
-		private final Feature<?, ?> feature;
+		private final List<FeatureResolution<T>> resolutions;
+		private final T feature;
 
-		public MultipleResolution(final List<FeatureResolution> resolutions, final Feature<?, ?> feature)
+		public MultipleResolution(final List<FeatureResolution<T>> resolutions, final T feature)
 		{
 			this.resolutions = resolutions;
 			this.feature = feature;
@@ -70,7 +68,7 @@ public abstract class AbstractResolver<T, F extends Feature<T, ?>> implements IT
 		}
 
 		@Override
-		public Feature<?, ?> feature()
+		public T feature()
 		{
 			return feature;
 		}

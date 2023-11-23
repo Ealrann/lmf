@@ -4,13 +4,12 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
-import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-public final class UnitResolver<T> extends AttributeResolver<T>
+public final class UnitResolver<T> extends AttributeResolver
 {
 	private static final Pattern ROOT_MATCHER = Pattern.compile(LMCoreDefinition.Units.MATCHER.matcher());
 	private final Pattern matcherPattern;
@@ -39,14 +38,15 @@ public final class UnitResolver<T> extends AttributeResolver<T>
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Optional<FeatureResolution> internalResolve(final LinkNodeInternal<?, ?> node, final String value)
+	protected Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
 		if (pmatcher == null || pmatcher.matches())
 		{
 			final var extractedValue = extractValue(unit, value);
-			return Optional.of(new AttributeResolution<>(feature, extractedValue));
+			return Optional.of(new AttributeResolution<>((Attribute<T, ?>) feature, extractedValue));
 		}
 		else
 		{

@@ -21,7 +21,7 @@ public class BasicTest
 		final var textModel = "(Model domain=test.model name=World)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -38,7 +38,7 @@ public class BasicTest
 		final var textModel = "(Group Car) (Group Chair)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var car = roots.get(0);
@@ -56,7 +56,7 @@ public class BasicTest
 		final var textModel = "(Group Car concrete)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var car = roots.get(0);
@@ -71,7 +71,7 @@ public class BasicTest
 		final var textModel = "(Enum EColor) (Enum ESize)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder();
+		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var color = roots.get(0);
