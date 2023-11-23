@@ -45,15 +45,25 @@ public final class ModelRegistry
 		modelMap.put(modelPackage.model().name(), modelPackage);
 	}
 
-	public Stream<Group<?>> streamChildGroups(Group<?> parent)
+	public Stream<Group<?>> streamChildGroups(Group<?> group)
 	{
-		return modelMap.values()
-					   .stream()
-					   .map(IModelPackage::model)
-					   .flatMap(m -> m.groups().stream())
-					   .flatMap(g -> g.includes().stream())
-					   .map(Reference::group)
-					   .filter(includes -> includes == parent)
-					   .map(g -> (Group<?>) g);
+		if (group.concrete())
+		{
+			return Stream.of(group);
+		}
+		else
+		{
+			return modelMap.values()
+						   .stream()
+						   .map(IModelPackage::model)
+						   .flatMap(m -> m.groups().stream())
+						   .filter(p -> ModelRegistry.isChildOf(p, group))
+						   .flatMap(this::streamChildGroups);
+		}
+	}
+
+	private static boolean isChildOf(final Group<?> child, final Group<?> parent)
+	{
+		return child.includes().stream().map(Reference::group).anyMatch(parent::equals);
 	}
 }

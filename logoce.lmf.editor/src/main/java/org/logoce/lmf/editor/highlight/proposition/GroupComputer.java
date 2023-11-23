@@ -5,6 +5,7 @@ import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,24 +62,21 @@ public final class GroupComputer
 	@NotNull
 	private Stream<String> streamContainsProposal(final Group<?> group, final String relationName)
 	{
-		if (group.concrete())
-		{
-			final var isUnique = 1 == concepts.stream().filter(group::equals).count();
+		final var isUnique = 1 == concepts.stream().filter(group::equals).count();
 
-			final var groupName = group.name();
-			if (isUnique)
+		final var groupName = group.name();
+		if (isUnique)
+		{
+			if (group.concrete())
 			{
 				final var value = nameMatches(relationName, groupName) ? groupName : relationName;
-				final var aliases = ModelRegistry.Instance.models()
-														  .flatMap(m -> m.model().aliases().stream())
-														  .filter(alias -> alias.value().startsWith(value))
-														  .map(Named::name);
-
-				return Stream.concat(Stream.of(value), aliases);
+				return Stream.of(value).mapMulti(GroupComputer::collectAliases);
 			}
 			else
 			{
-				return Stream.of(relationName + "=" + groupName);
+				return ModelRegistry.Instance.streamChildGroups(group)
+											 .map(Named::name)
+											 .mapMulti(GroupComputer::collectAliases);
 			}
 		}
 		else
@@ -86,6 +84,16 @@ public final class GroupComputer
 			return ModelRegistry.Instance.streamChildGroups(group)
 										 .map(childGroup -> relationName + "=" + childGroup.name());
 		}
+	}
+
+	private static void collectAliases(final String value, Consumer<String> collector)
+	{
+		collector.accept(value);
+		ModelRegistry.Instance.models()
+							  .flatMap(m -> m.model().aliases().stream())
+							  .filter(alias -> alias.value().startsWith(value))
+							  .map(Named::name)
+							  .forEach(collector);
 	}
 
 	private static boolean nameMatches(final String relationName, final String groupName)
