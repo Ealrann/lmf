@@ -16,13 +16,15 @@ import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class ModelImpl extends FeaturedObject implements Model {
-  private static final FeatureGetter<Model> GET_MAP = new FeatureGetter.Builder<Model>().add(org.logoce.lmf.model.lang.Model.Features.name, org.logoce.lmf.model.lang.Model::name).add(org.logoce.lmf.model.lang.Model.Features.domain, org.logoce.lmf.model.lang.Model::domain).add(org.logoce.lmf.model.lang.Model.Features.groups, org.logoce.lmf.model.lang.Model::groups).add(org.logoce.lmf.model.lang.Model.Features.enums, org.logoce.lmf.model.lang.Model::enums).add(org.logoce.lmf.model.lang.Model.Features.units, org.logoce.lmf.model.lang.Model::units).add(org.logoce.lmf.model.lang.Model.Features.aliases, org.logoce.lmf.model.lang.Model::aliases).add(org.logoce.lmf.model.lang.Model.Features.javaWrappers, org.logoce.lmf.model.lang.Model::javaWrappers).add(org.logoce.lmf.model.lang.Model.Features.lPackage, org.logoce.lmf.model.lang.Model::lPackage).build();
+  private static final FeatureGetter<Model> GET_MAP = new FeatureGetter.Builder<Model>().add(org.logoce.lmf.model.lang.Model.Features.name, org.logoce.lmf.model.lang.Model::name).add(org.logoce.lmf.model.lang.Model.Features.domain, org.logoce.lmf.model.lang.Model::domain).add(org.logoce.lmf.model.lang.Model.Features.imports, org.logoce.lmf.model.lang.Model::imports).add(org.logoce.lmf.model.lang.Model.Features.groups, org.logoce.lmf.model.lang.Model::groups).add(org.logoce.lmf.model.lang.Model.Features.enums, org.logoce.lmf.model.lang.Model::enums).add(org.logoce.lmf.model.lang.Model.Features.units, org.logoce.lmf.model.lang.Model::units).add(org.logoce.lmf.model.lang.Model.Features.aliases, org.logoce.lmf.model.lang.Model::aliases).add(org.logoce.lmf.model.lang.Model.Features.javaWrappers, org.logoce.lmf.model.lang.Model::javaWrappers).add(org.logoce.lmf.model.lang.Model.Features.lPackage, org.logoce.lmf.model.lang.Model::lPackage).build();
 
   private static final FeatureSetter<Model> SET_MAP = new FeatureSetter.Builder<Model>().build();
 
   private final String name;
 
   private final String domain;
+
+  private final List<String> imports;
 
   private final List<Group<?>> groups;
 
@@ -36,11 +38,13 @@ public final class ModelImpl extends FeaturedObject implements Model {
 
   private final IModelPackage lPackage;
 
-  public ModelImpl(final String name, final String domain, final List<Group<?>> groups,
-      final List<Enum<?>> enums, final List<Unit<?>> units, final List<Alias> aliases,
-      final List<JavaWrapper<?>> javaWrappers, final IModelPackage lPackage) {
+  public ModelImpl(final String name, final String domain, final List<String> imports,
+      final List<Group<?>> groups, final List<Enum<?>> enums, final List<Unit<?>> units,
+      final List<Alias> aliases, final List<JavaWrapper<?>> javaWrappers,
+      final IModelPackage lPackage) {
     this.name = name;
     this.domain = domain;
+    this.imports = List.copyOf(imports);
     this.groups = List.copyOf(groups);
     this.enums = List.copyOf(enums);
     this.units = List.copyOf(units);
@@ -62,6 +66,11 @@ public final class ModelImpl extends FeaturedObject implements Model {
   @Override
   public String domain() {
     return domain;
+  }
+
+  @Override
+  public List<String> imports() {
+    return imports;
   }
 
   @Override

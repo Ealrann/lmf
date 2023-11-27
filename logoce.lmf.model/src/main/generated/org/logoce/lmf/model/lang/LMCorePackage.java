@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.List;
 import java.util.Optional;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;
@@ -11,7 +12,7 @@ import org.logoce.lmf.model.lang.impl.ModelImpl;
 public final class LMCorePackage implements IModelPackage {
   public static final LMCorePackage Instance = new LMCorePackage();
 
-  public static final Model MODEL = new ModelImpl("LMCore", "org.logoce.lmf.model.lang", LMCoreDefinition.Groups.ALL, LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL, LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
+  public static final Model MODEL = new ModelImpl("LMCore", "org.logoce.lmf.model.lang", List.of(), LMCoreDefinition.Groups.ALL, LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL, LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
 
   private LMCorePackage() {
   }

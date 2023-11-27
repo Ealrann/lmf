@@ -16,7 +16,9 @@ public class ModelPackage
 	public static final TypeVariableName T = TypeVariableName.get("T");
 	private static final TypeVariableName T_EXTENDS_LMOBJECT = TypeVariableName.get("T", ConstantTypes.LM_OBJECT);
 	private static final ClassName ROOT_BUILDER = ClassName.get(IFeaturedObject.Builder.class);
-	private static final TypeName ROOT_BUILDER_OF_T = TypeParameter.of(ROOT_BUILDER, T_EXTENDS_LMOBJECT).nestIn(ConstantTypes.OPTIONAL).parametrized();
+	private static final TypeName ROOT_BUILDER_OF_T = TypeParameter.of(ROOT_BUILDER, T_EXTENDS_LMOBJECT)
+																   .nestIn(ConstantTypes.OPTIONAL)
+																   .parametrized();
 
 	private final Model model;
 
@@ -34,6 +36,16 @@ public class ModelPackage
 										 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
 										 .addSuperinterface(ConstantTypes.IMODEL_PACKAGE);
 
+		final var imports = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST);
+		boolean first = true;
+		for (final var value : model.imports())
+		{
+			if (first) first = false;
+			else imports.add(", ");
+			imports.add(value);
+		}
+		imports.add(")");
+
 		packageClass.addField(FieldSpec.builder(currentClass,
 												"Instance",
 												Modifier.PUBLIC,
@@ -45,11 +57,12 @@ public class ModelPackage
 												Modifier.PUBLIC,
 												Modifier.STATIC,
 												Modifier.FINAL)
-									   .initializer("new $T($S, $S, $N.Groups.ALL, $N.Enums.ALL, $N.Units" +
+									   .initializer("new $T($S, $S, $L, $N.Groups.ALL, $N.Enums.ALL, $N.Units" +
 													".ALL, $N.Aliases.ALL, $N.JavaWrappers.ALL, Instance)",
 													ConstantTypes.MODEL_IMPL,
 													model.name(),
 													model.domain(),
+													imports.build(),
 													definitionName,
 													definitionName,
 													definitionName,
@@ -88,7 +101,8 @@ public class ModelPackage
 											.addAnnotation(ConstantTypes.SUPPRESS_UNCHECKED)
 											.returns(ROOT_BUILDER_OF_T)
 											.addTypeVariable(T_EXTENDS_LMOBJECT)
-											.addParameter(ConstantTypes.GROUP.nest(T_EXTENDS_LMOBJECT).parametrized(), "group");
+											.addParameter(ConstantTypes.GROUP.nest(T_EXTENDS_LMOBJECT).parametrized(),
+														  "group");
 
 		installBuilderResolutionStatements(definitionName, methodBuilder);
 		return methodBuilder.build();

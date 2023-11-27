@@ -13,6 +13,7 @@
 	(Definition Model
 		(includes group=@Named)
 		(-att name=domain /units.7 [1..1])
+		(-att name=imports /units.7 [0..*])
 		(-contains groups [0..*] (reference group=/groups.4))
 		(-contains enums [0..*] (reference group=/groups.10))
 		(-contains units [0..*] (reference group=/groups.11))

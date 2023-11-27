@@ -15,6 +15,8 @@ public interface Model extends Named {
 
   String domain();
 
+  List<String> imports();
+
   List<Group<?>> groups();
 
   List<Enum<?>> enums();
@@ -31,6 +33,8 @@ public interface Model extends Named {
     RawFeature<String, String> name = Named.Features.name;
 
     RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.MODEL.DOMAIN);
+
+    RawFeature<String, List<String>> imports = new RawFeature<>(true,false,() -> LMCoreDefinition.Features.MODEL.IMPORTS);
 
     RawFeature<Group<?>, List<Group<?>>> groups = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.MODEL.GROUPS);
 
@@ -49,6 +53,8 @@ public interface Model extends Named {
     Builder name(String name);
 
     Builder domain(String domain);
+
+    Builder addImport(String _import);
 
     Builder addGroup(Supplier<Group<?>> group);
 

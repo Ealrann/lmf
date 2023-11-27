@@ -22,13 +22,15 @@ import org.logoce.lmf.model.lang.impl.ModelImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class ModelBuilder implements Builder {
-  private static final FeatureInserter<ModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<ModelBuilder>().add(Model.Features.name, ModelBuilder::name).add(Model.Features.domain, ModelBuilder::domain).add(Model.Features.lPackage, ModelBuilder::lPackage).build();
+  private static final FeatureInserter<ModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<ModelBuilder>().add(Model.Features.name, ModelBuilder::name).add(Model.Features.domain, ModelBuilder::domain).add(Model.Features.imports, ModelBuilder::addImport).add(Model.Features.lPackage, ModelBuilder::lPackage).build();
 
   private static final RelationLazyInserter<ModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>().add(Model.Features.groups, ModelBuilder::addGroup).add(Model.Features.enums, ModelBuilder::addEnum).add(Model.Features.units, ModelBuilder::addUnit).add(Model.Features.aliases, ModelBuilder::addAliase).add(Model.Features.javaWrappers, ModelBuilder::addJavaWrapper).build();
 
   private String name;
 
   private String domain;
+
+  private final List<String> imports = new ArrayList<>();
 
   private final List<Supplier<Group<?>>> groups = new ArrayList<>();
 
@@ -51,6 +53,12 @@ public final class ModelBuilder implements Builder {
   @Override
   public ModelBuilder domain(String domain) {
     this.domain = domain;
+    return this;
+  }
+
+  @Override
+  public ModelBuilder addImport(String _import) {
+    this.imports.add(_import);
     return this;
   }
 
@@ -97,7 +105,7 @@ public final class ModelBuilder implements Builder {
     final var builtUnits = BuildUtils.collectSuppliers(units);
     final var builtAliases = BuildUtils.collectSuppliers(aliases);
     final var builtJavaWrappers = BuildUtils.collectSuppliers(javaWrappers);
-    return new ModelImpl(name, domain, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lPackage);
+    return new ModelImpl(name, domain, imports, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lPackage);
   }
 
   @Override

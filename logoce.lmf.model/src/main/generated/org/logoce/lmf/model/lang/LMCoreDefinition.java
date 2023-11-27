@@ -43,6 +43,8 @@ public interface LMCoreDefinition {
 
       Attribute<String, String> DOMAIN = new AttributeImpl<>("domain", true, false, true, Model.Features.domain, Units.STRING, null, List.of());
 
+      Attribute<String, List<String>> IMPORTS = new AttributeImpl<>("imports", true, true, false, Model.Features.imports, Units.STRING, null, List.of());
+
       Relation<Group<?>, List<Group<?>>> GROUPS = new RelationImpl<>("groups", true, true, false, Model.Features.groups, new ReferenceImpl<>(() -> Groups.GROUP, List.of()), false, true);
 
       Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationImpl<>("enums", true, true, false, Model.Features.enums, new ReferenceImpl<>(() -> Groups.ENUM, List.of()), false, true);
@@ -55,7 +57,7 @@ public interface LMCoreDefinition {
 
       Attribute<IModelPackage, IModelPackage> L_PACKAGE = new AttributeImpl<>("lPackage", true, false, true, Model.Features.lPackage, JavaWrappers.I_MODEL_PACKAGE, null, List.of());
 
-      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, L_PACKAGE);
+      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, L_PACKAGE);
     }
 
     interface CONCEPT {
