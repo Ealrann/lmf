@@ -45,17 +45,27 @@ public interface LMCoreDefinition {
 
       Attribute<String, List<String>> IMPORTS = new AttributeImpl<>("imports", true, true, false, Model.Features.imports, Units.STRING, null, List.of());
 
-      Relation<Group<?>, List<Group<?>>> GROUPS = new RelationImpl<>("groups", true, true, false, Model.Features.groups, new ReferenceImpl<>(() -> Groups.GROUP, List.of()), false, true);
+      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS);
+    }
 
-      Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationImpl<>("enums", true, true, false, Model.Features.enums, new ReferenceImpl<>(() -> Groups.ENUM, List.of()), false, true);
+    interface META_MODEL {
+      Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
 
-      Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationImpl<>("units", true, true, false, Model.Features.units, new ReferenceImpl<>(() -> Groups.UNIT, List.of()), false, true);
+      Attribute<String, String> DOMAIN = LMCoreDefinition.Features.MODEL.DOMAIN;
 
-      Relation<Alias, List<Alias>> ALIASES = new RelationImpl<>("aliases", true, true, false, Model.Features.aliases, new ReferenceImpl<>(() -> Groups.ALIAS, List.of()), false, true);
+      Attribute<String, List<String>> IMPORTS = LMCoreDefinition.Features.MODEL.IMPORTS;
 
-      Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationImpl<>("javaWrappers", true, true, false, Model.Features.javaWrappers, new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER, List.of()), false, true);
+      Relation<Group<?>, List<Group<?>>> GROUPS = new RelationImpl<>("groups", true, true, false, MetaModel.Features.groups, new ReferenceImpl<>(() -> Groups.GROUP, List.of()), false, true);
 
-      Attribute<IModelPackage, IModelPackage> L_PACKAGE = new AttributeImpl<>("lPackage", true, false, true, Model.Features.lPackage, JavaWrappers.I_MODEL_PACKAGE, null, List.of());
+      Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationImpl<>("enums", true, true, false, MetaModel.Features.enums, new ReferenceImpl<>(() -> Groups.ENUM, List.of()), false, true);
+
+      Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationImpl<>("units", true, true, false, MetaModel.Features.units, new ReferenceImpl<>(() -> Groups.UNIT, List.of()), false, true);
+
+      Relation<Alias, List<Alias>> ALIASES = new RelationImpl<>("aliases", true, true, false, MetaModel.Features.aliases, new ReferenceImpl<>(() -> Groups.ALIAS, List.of()), false, true);
+
+      Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationImpl<>("javaWrappers", true, true, false, MetaModel.Features.javaWrappers, new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER, List.of()), false, true);
+
+      Attribute<IModelPackage, IModelPackage> L_PACKAGE = new AttributeImpl<>("lPackage", true, false, true, MetaModel.Features.lPackage, JavaWrappers.I_MODEL_PACKAGE, null, List.of());
 
       List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, L_PACKAGE);
     }
@@ -230,7 +240,9 @@ public interface LMCoreDefinition {
 
     Group<Type<?>> TYPE = new GroupImpl<>("Type", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.TYPE.ALL,Generics.TYPE);
 
-    Group<Model> MODEL = new GroupImpl<>("Model", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.MODEL.ALL,List.of());
+    Group<Model> MODEL = new GroupImpl<>("Model", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.MODEL.ALL,List.of());
+
+    Group<MetaModel> META_MODEL = new GroupImpl<>("MetaModel", true, List.of(new ReferenceImpl<>(() -> MODEL, List.of())), Features.META_MODEL.ALL,List.of());
 
     Group<Concept<?>> CONCEPT = new GroupImpl<>("Concept", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.CONCEPT.ALL,Generics.CONCEPT);
 
@@ -256,7 +268,7 @@ public interface LMCoreDefinition {
 
     Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupImpl<>("JavaWrapper", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))), Features.JAVA_WRAPPER.ALL,Generics.JAVA_WRAPPER);
 
-    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, CONCEPT, GROUP, FEATURE, ATTRIBUTE, RELATION, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, REFERENCE, JAVA_WRAPPER);
+    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, CONCEPT, GROUP, FEATURE, ATTRIBUTE, RELATION, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, REFERENCE, JAVA_WRAPPER);
   }
 
   interface Units {

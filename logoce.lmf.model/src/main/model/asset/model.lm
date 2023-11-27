@@ -1,37 +1,40 @@
-(Model domain=org.logoce.lmf.model.lang name=LMCore
+(MetaModel domain=org.logoce.lmf.model.lang name=LMCore
 
 	(Group LMObject)
 
 	(Group Named
-		(includes @LMObject)
+		(includes group=@LMObject)
 		(-att name=name /units.7 mandatory))
 
 	(Group Type
-		(includes @Named)
+		(includes group=@Named)
 		(generics name=T))
 
-	(Definition Model
+	(Group Model
 		(includes group=@Named)
 		(-att name=domain /units.7 [1..1])
-		(-att name=imports /units.7 [0..*])
-		(-contains groups [0..*] (reference group=/groups.4))
-		(-contains enums [0..*] (reference group=/groups.10))
-		(-contains units [0..*] (reference group=/groups.11))
-		(-contains aliases [0..*] (reference group=/groups.9))
-		(-contains javaWrappers [0..*] (reference /groups.15))
+		(-att name=imports /units.7 [0..*]))
+
+	(Definition MetaModel
+		(includes group=@Model)
+		(-contains groups [0..*] (reference group=@Group))
+		(-contains enums [0..*] (reference group=@Enum))
+		(-contains units [0..*] (reference group=@Unit))
+		(-contains aliases [0..*] (reference group=@Alias))
+		(-contains javaWrappers [0..*] (reference @JavaWrapper))
 		(-att lPackage /javaWrappers.1 [1..1]))
 
 	(Definition Group
-		(includes group=/groups.2 parameters=../generics.0)
-		(includes group=/groups.14 parameters=../generics.0)
-		(Generic T extends /groups.0)
+		(includes group=@Type parameters=../generics.0)
+		(includes group=@Concept parameters=../generics.0)
+		(Generic T extends @LMObject)
 		(-att concrete /units.2)
-		(-contains includes [0..*] (reference /groups.13))
-		(-contains features [0..*] (reference /groups.5))
-		(-contains generics [0..*] (reference /groups.12)))
+		(-contains includes [0..*] (reference group=@Reference))
+		(-contains features [0..*] (reference group=@Feature))
+		(-contains generics [0..*] (reference group=@Generic)))
 
 	(Group Feature
-		(includes @Named)
+		(includes group=@Named)
 		(Generic UnaryType)
 		(Generic EffectiveType)
 		(-att name=immutable datatype=/units.2)
@@ -40,33 +43,33 @@
 		(-att name=rawFeature datatype=/javaWrappers.0 parameters=../generics.0,../generics.1))
 
 	(Definition Attribute
-		(includes /groups.5 parameters=../generics.0,../generics.1)
+		(includes group=@Feature parameters=../generics.0,../generics.1)
 		(Generic UnaryType)
 		(Generic EffectiveType)
-		(-refers datatype [1..1] (reference /groups.8 parameters=/groups.6/generics.0))
+		(-refers datatype [1..1] (reference @Datatype parameters=../../generics.0))
 		(-att name=defaultValue /units.7)
-		(-refers parameters [0..*] (reference /groups.12)))
+		(-refers parameters [0..*] (reference group=@Generic)))
 
 	(Definition Relation
-		(includes /groups.5 parameters=../generics.0,../generics.1)
-		(Generic UnaryType boundType=Extends type=/groups.0)
+		(includes group=@Feature parameters=../generics.0,../generics.1)
+		(Generic UnaryType boundType=Extends type=@LMObject)
 		(Generic EffectiveType)
-		(-contains reference [1..1] (reference group=/groups.13 parameters=../../generics.0))
+		(-contains reference [1..1] (reference group=@Reference parameters=../../generics.0))
 		(-att lazy datatype=/units.2)
 		(-att contains datatype=/units.2))
 
 	(Group Datatype
-		(includes /groups.2 parameters=../generics.0)
+		(includes group=@Type parameters=../generics.0)
 		(Generic T))
 	(Definition Alias
-		(includes @Named)
+		(includes group=@Named)
 		(-att value /units.7 [1..1]))
 	(Definition Enum
-		(includes /groups.8 parameters=../generics.0)
+		(includes group=@Datatype parameters=../generics.0)
 		(Generic T)
 		(-att literals /units.7 [0..*]))
 	(Definition Unit
-		(includes /groups.8 parameters=../generics.0)
+		(includes group=@Datatype parameters=../generics.0)
 		(Generic T)
 		(-att matcher /units.0 [0..1])
 		(-att name=defaultValue /units.7 [0..1])
@@ -74,16 +77,16 @@
 		(-att extractor /units.1 [0..1]))
 
 	(Definition Generic
-		(includes /groups.14 parameters=../generics.0)
-		(Generic T boundType=extends type=/groups.0)
-		(-refers type [0..1] (reference group=/groups.2 parameters=../../generics.0))
+		(includes group=@Concept parameters=../generics.0)
+		(Generic T boundType=extends type=@LMObject)
+		(-refers type [0..1] (reference group=@Type parameters=../../generics.0))
 		(-att boundType datatype=/enums.0))
 
 	(Definition Reference
 		(includes @LMObject)
-		(Generic name=T boundType=Extends type=/groups.0)
-		(-refers group lazy [1..1] (reference /groups.14 parameters=../../generics.0))
-		(-refers parameters lazy [0..*] (reference /groups.14)))
+		(Generic name=T boundType=Extends type=@LMObject)
+		(-refers group lazy [1..1] (reference group=@Concept parameters=../../generics.0))
+		(-refers parameters lazy [0..*] (reference group=@Concept)))
 
 	(Group Concept
 		(includes @Named)
@@ -91,7 +94,7 @@
 
 	(Definition JavaWrapper
 		(Generic name=T)
-		(includes group=/groups.8 parameters=../generics.0)
+		(includes group=@Datatype parameters=../generics.0)
 		(-att name=domain /units.7 mandatory))
 
 	(Unit name=matcher matcher="rgx_match:<(.+?)>")

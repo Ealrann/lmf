@@ -3,7 +3,7 @@ package org.logoce.lmf.generator.util;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.model.lang.Generic;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Type;
 import org.logoce.lmf.model.util.ModelUtils;
 
@@ -22,7 +22,7 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 
 	private static ClassName resolveType(final Type<?> type)
 	{
-		final var model = (Model) ModelUtils.root(type);
+		final var model = (MetaModel) ModelUtils.root(type);
 		return ClassName.get(model.domain(), type.name());
 	}
 }

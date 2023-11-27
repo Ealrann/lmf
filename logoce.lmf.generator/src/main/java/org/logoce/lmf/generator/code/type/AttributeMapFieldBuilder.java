@@ -14,7 +14,7 @@ import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
@@ -80,7 +80,7 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 		}
 		else
 		{
-			final var model = (Model) ModelUtils.root(resolution.feature());
+			final var model = (MetaModel) ModelUtils.root(resolution.feature());
 			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
 			final var constantGroupName = GenUtils.toConstantCase(group.name());
 			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",

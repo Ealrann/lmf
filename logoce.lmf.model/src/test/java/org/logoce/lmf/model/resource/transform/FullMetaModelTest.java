@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
 import java.io.ByteArrayInputStream;
@@ -9,7 +9,7 @@ import java.io.ByteArrayInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FullModelTest
+public class FullMetaModelTest
 {
 	private static final PTreeReader treeBuilder = new PTreeReader();
 
@@ -22,9 +22,9 @@ public class FullModelTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
+		assertTrue(root instanceof MetaModel);
 
-		final var model = (Model) root;
+		final var model = (MetaModel) root;
 		assertEquals(model.name(), "LMCore");
 		assertEquals(model.domain(), "isotrpoy.lmf.core.lang");
 
@@ -43,7 +43,7 @@ public class FullModelTest
 	}
 
 	private static final String fullModelText = """
-			(Model name=LMCore domain=isotrpoy.lmf.core.lang
+			(MetaModel name=LMCore domain=isotrpoy.lmf.core.lang
 			   
 				(Group LMObject)
 				(Group Named (includes /groups.0) (-att name=name datatype=/units.7 mandatory))

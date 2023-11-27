@@ -53,7 +53,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 	{
 		if (type != null)
 		{
-			final var model = (Model) ModelUtils.root(type);
+			final var model = (MetaModel) ModelUtils.root(type);
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var typeConstantName = GenUtils.toConstantCase(type.name());
 			final var typeHolder = TypeResolutionUtil.resolveTypeHolder(type);

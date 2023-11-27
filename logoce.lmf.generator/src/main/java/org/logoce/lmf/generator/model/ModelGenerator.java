@@ -1,14 +1,14 @@
 package org.logoce.lmf.generator.model;
 
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 
 import java.io.File;
 
 public class ModelGenerator
 {
-	private final Model model;
+	private final MetaModel model;
 
-	public ModelGenerator(Model model)
+	public ModelGenerator(MetaModel model)
 	{
 		this.model = model;
 	}

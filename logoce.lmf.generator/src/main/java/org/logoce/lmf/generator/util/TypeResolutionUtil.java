@@ -18,7 +18,7 @@ public class TypeResolutionUtil
 	{
 		final var params = toParameters(refInclude.parameters());
 		final var refIncludeGroup = refInclude.group();
-		final var model = (Model) refIncludeGroup.lmContainer();
+		final var model = (MetaModel) refIncludeGroup.lmContainer();
 		final var className = ClassName.get(model.domain(), refIncludeGroup.name());
 		return TypeParameter.of(className, params);
 	}
@@ -38,7 +38,7 @@ public class TypeResolutionUtil
 
 	public static TypeParameter parametrizedType(Group<?> group, List<? extends Concept<?>> parameters)
 	{
-		final var model = (Model) group.lmContainer();
+		final var model = (MetaModel) group.lmContainer();
 		final var className = ClassName.get(model.domain(), group.name());
 		if (!parameters.isEmpty())
 		{

@@ -88,7 +88,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	private static CodeBlock parentInitializer(final Feature<?, ?> feature)
 	{
 		final var group = (Group<?>) feature.lmContainer();
-		final var model = (Model) group.lmContainer();
+		final var model = (MetaModel) group.lmContainer();
 		final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 		final var constantGroupName = GenUtils.toConstantCase(group.name());
 		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
@@ -117,7 +117,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		if (concept instanceof Generic<?> generic)
 		{
 			final var group = (Group<?>) generic.lmContainer();
-			final var model = (Model) ModelUtils.root(group);
+			final var model = (MetaModel) ModelUtils.root(group);
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var constantName = GenUtils.toConstantCase(group.name());
 			final var index = group.generics().indexOf(generic);
@@ -129,7 +129,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		else
 		{
 			final var group = (Group<?>) concept;
-			final var model = (Model) ModelUtils.root(group);
+			final var model = (MetaModel) ModelUtils.root(group);
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var constantName = GenUtils.toConstantCase(group.name());
 

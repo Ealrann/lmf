@@ -12,13 +12,13 @@ import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
-public final class ModelImpl extends FeaturedObject implements Model {
-  private static final FeatureGetter<Model> GET_MAP = new FeatureGetter.Builder<Model>().add(org.logoce.lmf.model.lang.Model.Features.name, org.logoce.lmf.model.lang.Model::name).add(org.logoce.lmf.model.lang.Model.Features.domain, org.logoce.lmf.model.lang.Model::domain).add(org.logoce.lmf.model.lang.Model.Features.imports, org.logoce.lmf.model.lang.Model::imports).add(org.logoce.lmf.model.lang.Model.Features.groups, org.logoce.lmf.model.lang.Model::groups).add(org.logoce.lmf.model.lang.Model.Features.enums, org.logoce.lmf.model.lang.Model::enums).add(org.logoce.lmf.model.lang.Model.Features.units, org.logoce.lmf.model.lang.Model::units).add(org.logoce.lmf.model.lang.Model.Features.aliases, org.logoce.lmf.model.lang.Model::aliases).add(org.logoce.lmf.model.lang.Model.Features.javaWrappers, org.logoce.lmf.model.lang.Model::javaWrappers).add(org.logoce.lmf.model.lang.Model.Features.lPackage, org.logoce.lmf.model.lang.Model::lPackage).build();
+public final class MetaModelImpl extends FeaturedObject implements MetaModel {
+  private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>().add(org.logoce.lmf.model.lang.MetaModel.Features.name, org.logoce.lmf.model.lang.MetaModel::name).add(org.logoce.lmf.model.lang.MetaModel.Features.domain, org.logoce.lmf.model.lang.MetaModel::domain).add(org.logoce.lmf.model.lang.MetaModel.Features.imports, org.logoce.lmf.model.lang.MetaModel::imports).add(org.logoce.lmf.model.lang.MetaModel.Features.groups, org.logoce.lmf.model.lang.MetaModel::groups).add(org.logoce.lmf.model.lang.MetaModel.Features.enums, org.logoce.lmf.model.lang.MetaModel::enums).add(org.logoce.lmf.model.lang.MetaModel.Features.units, org.logoce.lmf.model.lang.MetaModel::units).add(org.logoce.lmf.model.lang.MetaModel.Features.aliases, org.logoce.lmf.model.lang.MetaModel::aliases).add(org.logoce.lmf.model.lang.MetaModel.Features.javaWrappers, org.logoce.lmf.model.lang.MetaModel::javaWrappers).add(org.logoce.lmf.model.lang.MetaModel.Features.lPackage, org.logoce.lmf.model.lang.MetaModel::lPackage).build();
 
-  private static final FeatureSetter<Model> SET_MAP = new FeatureSetter.Builder<Model>().build();
+  private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>().build();
 
   private final String name;
 
@@ -38,7 +38,7 @@ public final class ModelImpl extends FeaturedObject implements Model {
 
   private final IModelPackage lPackage;
 
-  public ModelImpl(final String name, final String domain, final List<String> imports,
+  public MetaModelImpl(final String name, final String domain, final List<String> imports,
       final List<Group<?>> groups, final List<Enum<?>> enums, final List<Unit<?>> units,
       final List<Alias> aliases, final List<JavaWrapper<?>> javaWrappers,
       final IModelPackage lPackage) {
@@ -104,17 +104,17 @@ public final class ModelImpl extends FeaturedObject implements Model {
   }
 
   @Override
-  public Group<Model> lmGroup() {
-    return LMCoreDefinition.Groups.MODEL;
+  public Group<MetaModel> lmGroup() {
+    return LMCoreDefinition.Groups.META_MODEL;
   }
 
   @Override
-  protected FeatureSetter<Model> setterMap() {
+  protected FeatureSetter<MetaModel> setterMap() {
     return SET_MAP;
   }
 
   @Override
-  protected FeatureGetter<Model> getterMap() {
+  protected FeatureGetter<MetaModel> getterMap() {
     return GET_MAP;
   }
 }

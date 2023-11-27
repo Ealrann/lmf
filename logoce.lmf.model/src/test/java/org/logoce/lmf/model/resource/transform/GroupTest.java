@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
@@ -41,7 +41,7 @@ public class GroupTest
 	public void group()
 	{
 		final var textModel = """
-				(Model Test
+				(MetaModel Test
 				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				        (-contains cargo [1..1] (reference group=/groups.2 parameters=/groups.0/generics.0))
@@ -56,8 +56,8 @@ public class GroupTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var container = model.groups()
 								   .get(0);
@@ -85,7 +85,7 @@ public class GroupTest
 	public void multipleRef()
 	{
 		final var textModel = """
-				(Model LMCore
+				(MetaModel LMCore
 					(Group Feature
 					    (Generic UnaryType)
 					    (Generic EffectiveType))
@@ -100,8 +100,8 @@ public class GroupTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var featureGroup = model.groups()
 									  .get(0);

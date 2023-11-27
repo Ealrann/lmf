@@ -10,7 +10,7 @@ import org.logoce.lmf.generator.util.GenericParameter;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Reference;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public final class GroupInterfaceType extends AbstractGroupType implements IAdap
 
 	private static Values bakeValues(final Group<?> group)
 	{
-		final var model = (Model) group.lmContainer();
+		final var model = (MetaModel) group.lmContainer();
 		final var interfaceName = ClassName.get(model.domain(), group.name());
 		final var genericParameters = group.generics().stream().map(GenericParameter::fromGeneric).toList();
 		final var rawStream = genericParameters.stream().map(GenericParameter::raw);

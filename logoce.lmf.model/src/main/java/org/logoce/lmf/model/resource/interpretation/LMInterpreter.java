@@ -62,6 +62,6 @@ public final class LMInterpreter<I extends PNode>
 	{
 		final var value = first.value();
 		return value.equals(Alias.class.getSimpleName()) ||
-			   value.equals(LMCoreDefinition.Features.MODEL.ALIASES.name());
+			   value.equals(LMCoreDefinition.Features.META_MODEL.ALIASES.name());
 	}
 }

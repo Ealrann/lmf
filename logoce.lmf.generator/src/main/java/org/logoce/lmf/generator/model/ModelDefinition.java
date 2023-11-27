@@ -9,7 +9,7 @@ import org.logoce.lmf.generator.code.util.SubInterfaceBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
@@ -22,53 +22,53 @@ import java.util.stream.Stream;
 
 public class ModelDefinition
 {
-	private final InterfaceBuilder<Model> javaWrapperBuilder = new FieldBuilder<>("JavaWrappers",
-																				  new JavaWrapperFieldBuilder(),
+	private final InterfaceBuilder<MetaModel> javaWrapperBuilder = new FieldBuilder<>("JavaWrappers",
+																					  new JavaWrapperFieldBuilder(),
 																				  m -> m.javaWrappers().stream(),
-																				  ConstantTypes.JAVA_WRAPPER_ALL_BUILDER);
-	private final InterfaceBuilder<Model> aliasBuilder = new FieldBuilder<>("Aliases",
-																			new AliasFieldBuilder(),
+																					  ConstantTypes.JAVA_WRAPPER_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> aliasBuilder = new FieldBuilder<>("Aliases",
+																				new AliasFieldBuilder(),
 																			m -> m.aliases().stream(),
-																			ConstantTypes.ALIAS_ALL_BUILDER);
-	private final InterfaceBuilder<Model> enumBuilder = new FieldBuilder<>("Enums",
-																		   new EnumFieldBuilder(),
+																				ConstantTypes.ALIAS_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> enumBuilder = new FieldBuilder<>("Enums",
+																			   new EnumFieldBuilder(),
 																		   m -> m.enums().stream(),
-																		   ConstantTypes.ENUM_ALL_BUILDER);
-	private final InterfaceBuilder<Model> unitBuilder = new FieldBuilder<>("Units",
-																		   new UnitFieldBuilder(),
+																			   ConstantTypes.ENUM_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> unitBuilder = new FieldBuilder<>("Units",
+																			   new UnitFieldBuilder(),
 																		   m -> m.units().stream(),
-																		   ConstantTypes.UNIT_ALL_BUILDER);
-	private final InterfaceBuilder<Model> groupBuilder = new FieldBuilder<>("Groups",
-																			new GroupFieldBuilder(),
-																			this::streamOrderedGroup,
-																			ConstantTypes.GROUP_ALL_BUILDER);
-	private final InterfaceBuilder<Model> genericBuilder = new FieldBuilder<>("Generics",
-																			  new GenericFieldBuilder(),
+																			   ConstantTypes.UNIT_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> groupBuilder = new FieldBuilder<>("Groups",
+																				new GroupFieldBuilder(),
+																				this::streamOrderedGroup,
+																				ConstantTypes.GROUP_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> genericBuilder = new FieldBuilder<>("Generics",
+																				  new GenericFieldBuilder(),
 																			  m -> this.streamOrderedGroup(m)
 																					   .filter(g -> !g.generics()
 																									  .isEmpty()),
-																			  null);
+																				  null);
 
 	private final InterfaceBuilder<Group<?>> groupInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
 																						FeaturesFieldBuilder::new,
 																						ModelUtils::streamAllFeatures,
 																						ConstantTypes.FEATURE_ALL_BUILDER);
 
-	private final InterfaceBuilder<Model> featureInterfacesBuilder = new SubInterfaceBuilder<>("Features",
-																							   groupInterfaceBuilder,
-																							   this::streamOrderedGroup);
+	private final InterfaceBuilder<MetaModel> featureInterfacesBuilder = new SubInterfaceBuilder<>("Features",
+																								   groupInterfaceBuilder,
+																								   this::streamOrderedGroup);
 
-	private final Model model;
+	private final MetaModel model;
 
 	private final GroupTopologyBuilder topology;
 
-	public ModelDefinition(Model model)
+	public ModelDefinition(MetaModel model)
 	{
 		this.model = model;
 		this.topology = new GroupTopologyBuilder(model);
 	}
 
-	private Stream<Group<?>> streamOrderedGroup(Model model)
+	private Stream<Group<?>> streamOrderedGroup(MetaModel model)
 	{
 		return topology.stream();
 	}
@@ -101,7 +101,7 @@ public class ModelDefinition
 	{
 		private final List<Group<?>> topology;
 
-		public GroupTopologyBuilder(Model model)
+		public GroupTopologyBuilder(MetaModel model)
 		{
 			final Set<Group<?>> topology = new LinkedHashSet<>();
 			model.groups().forEach(g -> push(g, topology));

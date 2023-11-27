@@ -9,7 +9,7 @@ import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.impl.ModelImpl;
+import org.logoce.lmf.model.lang.impl.MetaModelImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 import java.util.ArrayList;
@@ -42,8 +42,8 @@ public class ConstantTypes
 	public static final ClassName SUPPLIER = ClassName.get(Supplier.class);
 	public static final ClassName OPTIONAL = ClassName.get(Optional.class);
 	public static final ClassName IMODEL_PACKAGE = ClassName.get(IModelPackage.class);
-	public static final ClassName MODEL = ClassName.get(Model.class);
-	public static final ClassName MODEL_IMPL = ClassName.get(ModelImpl.class);
+	public static final ClassName MODEL = ClassName.get(MetaModel.class);
+	public static final ClassName MODEL_IMPL = ClassName.get(MetaModelImpl.class);
 	public static final ClassName STRING = ClassName.get(String.class);
 	public static final ClassName LM_OBJECT = ClassName.get(LMObject.class);
 	public static final AnnotationSpec SUPPRESS_UNCHECKED = AnnotationSpec.builder(SuppressWarnings.class)

@@ -34,7 +34,7 @@ public class GenericTest
 	@Test
 	public void genericWithLocalGroup()
 	{
-		final var textModel = "(Model Test " +
+		final var textModel = "(MetaModel Test " +
 							  "  (Group name=GenericGroup" +
 							  "    (Generic name=T boundType=Super type=/groups.1))" +
 							  "  (Group name=ICategory))";
@@ -43,9 +43,9 @@ public class GenericTest
 		final var ptreeToJava = new PModelBuilder<>();
 		final var roots = ptreeToJava.build(ptree);
 
-		assertTrue(roots.get(0) instanceof Model);
+		assertTrue(roots.get(0) instanceof MetaModel);
 
-		final var model = (Model) roots.get(0);
+		final var model = (MetaModel) roots.get(0);
 
 		final var group0 = model.groups().get(0);
 		final var group1 = model.groups().get(1);
@@ -60,7 +60,7 @@ public class GenericTest
 	public void genericHalfUsage()
 	{
 		final var textModel = """
-				(Model Test
+				(MetaModel Test
 				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				    )
@@ -74,8 +74,8 @@ public class GenericTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var container = model.groups().get(0);
 		final var car = model.groups().get(1);
@@ -94,7 +94,7 @@ public class GenericTest
 	public void genericFullUsage()
 	{
 		final var textModel = """
-				(Model Test
+				(MetaModel Test
 				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
 				        (-contains cargo [1..1] (reference group=/groups.2 parameters=/groups.0/generics.0))
@@ -109,8 +109,8 @@ public class GenericTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var container = model.groups().get(0);
 		final var car = model.groups().get(1);

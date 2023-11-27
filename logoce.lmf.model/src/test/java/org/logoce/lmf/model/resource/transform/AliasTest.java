@@ -68,7 +68,7 @@ public class AliasTest
 	@Test
 	public void alias()
 	{
-		final var textModel = "(Model Test " +
+		final var textModel = "(MetaModel Test " +
 							  "    (Alias name=Definition value=\"Group concrete\")" +
 							  "    (Definition name=Oui)" +
 							  "    (Alias name=[1..*]     value=\"mandatory many\")" +
@@ -83,8 +83,8 @@ public class AliasTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var alias = model.aliases().get(0);
 		assertEquals("Definition", alias.name());

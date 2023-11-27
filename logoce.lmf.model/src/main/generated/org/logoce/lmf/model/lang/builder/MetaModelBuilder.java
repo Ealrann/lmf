@@ -21,15 +21,10 @@ import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.lang.impl.MetaModelImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
-public final class ModelBuilder implements Builder {
-  private static final FeatureInserter<ModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<ModelBuilder>().add(
-		  MetaModel.Features.name, ModelBuilder::name).add(MetaModel.Features.domain, ModelBuilder::domain).add(
-		  MetaModel.Features.imports, ModelBuilder::addImport).add(MetaModel.Features.lPackage, ModelBuilder::lPackage).build();
+public final class MetaModelBuilder implements Builder {
+  private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.name, MetaModelBuilder::name).add(MetaModel.Features.domain, MetaModelBuilder::domain).add(MetaModel.Features.imports, MetaModelBuilder::addImport).add(MetaModel.Features.lPackage, MetaModelBuilder::lPackage).build();
 
-  private static final RelationLazyInserter<ModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<ModelBuilder>().add(
-		  MetaModel.Features.groups, ModelBuilder::addGroup).add(MetaModel.Features.enums, ModelBuilder::addEnum).add(
-		  MetaModel.Features.units, ModelBuilder::addUnit).add(MetaModel.Features.aliases, ModelBuilder::addAliase).add(
-		  MetaModel.Features.javaWrappers, ModelBuilder::addJavaWrapper).build();
+  private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.groups, MetaModelBuilder::addGroup).add(MetaModel.Features.enums, MetaModelBuilder::addEnum).add(MetaModel.Features.units, MetaModelBuilder::addUnit).add(MetaModel.Features.aliases, MetaModelBuilder::addAliase).add(MetaModel.Features.javaWrappers, MetaModelBuilder::addJavaWrapper).build();
 
   private String name;
 
@@ -50,55 +45,55 @@ public final class ModelBuilder implements Builder {
   private IModelPackage lPackage;
 
   @Override
-  public ModelBuilder name(String name) {
+  public MetaModelBuilder name(String name) {
     this.name = name;
     return this;
   }
 
   @Override
-  public ModelBuilder domain(String domain) {
+  public MetaModelBuilder domain(String domain) {
     this.domain = domain;
     return this;
   }
 
   @Override
-  public ModelBuilder addImport(String _import) {
+  public MetaModelBuilder addImport(String _import) {
     this.imports.add(_import);
     return this;
   }
 
   @Override
-  public ModelBuilder addGroup(Supplier<Group<?>> group) {
+  public MetaModelBuilder addGroup(Supplier<Group<?>> group) {
     this.groups.add(group);
     return this;
   }
 
   @Override
-  public ModelBuilder addEnum(Supplier<Enum<?>> _enum) {
+  public MetaModelBuilder addEnum(Supplier<Enum<?>> _enum) {
     this.enums.add(_enum);
     return this;
   }
 
   @Override
-  public ModelBuilder addUnit(Supplier<Unit<?>> unit) {
+  public MetaModelBuilder addUnit(Supplier<Unit<?>> unit) {
     this.units.add(unit);
     return this;
   }
 
   @Override
-  public ModelBuilder addAliase(Supplier<Alias> aliase) {
+  public MetaModelBuilder addAliase(Supplier<Alias> aliase) {
     this.aliases.add(aliase);
     return this;
   }
 
   @Override
-  public ModelBuilder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper) {
+  public MetaModelBuilder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper) {
     this.javaWrappers.add(javaWrapper);
     return this;
   }
 
   @Override
-  public ModelBuilder lPackage(IModelPackage lPackage) {
+  public MetaModelBuilder lPackage(IModelPackage lPackage) {
     this.lPackage = lPackage;
     return this;
   }

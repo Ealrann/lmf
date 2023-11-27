@@ -16,7 +16,7 @@ public class NamedReferenceTest
 	@Test
 	public void attributes()
 	{
-		final var textModel = "(Model Test " +
+		final var textModel = "(MetaModel Test " +
 							  "  (Definition name=Info" +
 							  "    (-att [1..1] name=age datatype=#LMCore@int)" +
 							  "    (-att [1..1] name=isNice datatype=#LMCore@boolean)" +
@@ -31,8 +31,8 @@ public class NamedReferenceTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var group0 = model.groups().get(0);
 		assertEquals("Info", group0.name());

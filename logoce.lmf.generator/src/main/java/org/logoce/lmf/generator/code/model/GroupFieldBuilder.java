@@ -66,7 +66,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		if (concept instanceof Generic<?> generic)
 		{
 			final var group = (Group<?>) generic.lmContainer();
-			final var model = (Model) ModelUtils.root(group);
+			final var model = (MetaModel) ModelUtils.root(group);
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var constantName = GenUtils.toConstantCase(group.name());
 			final var index = group.generics().indexOf(generic);
@@ -78,7 +78,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		else
 		{
 			final var group = (Group<?>) concept;
-			final var model = (Model) ModelUtils.root(group);
+			final var model = (MetaModel) ModelUtils.root(group);
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var constantName = GenUtils.toConstantCase(group.name());
 

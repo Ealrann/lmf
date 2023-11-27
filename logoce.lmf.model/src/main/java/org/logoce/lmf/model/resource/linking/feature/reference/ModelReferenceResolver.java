@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class ModelReferenceResolver implements ReferenceResolver
 {
-	public final Model model;
+	public final MetaModel model;
 	private final Relation<?, ?> relation;
 
 	public ModelReferenceResolver(final String modelName, final Relation<?, ?> relation)

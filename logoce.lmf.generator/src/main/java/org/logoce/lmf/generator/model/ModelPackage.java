@@ -5,7 +5,7 @@ import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -20,9 +20,9 @@ public class ModelPackage
 																   .nestIn(ConstantTypes.OPTIONAL)
 																   .parametrized();
 
-	private final Model model;
+	private final MetaModel model;
 
-	public ModelPackage(Model model)
+	public ModelPackage(MetaModel model)
 	{
 		this.model = model;
 	}

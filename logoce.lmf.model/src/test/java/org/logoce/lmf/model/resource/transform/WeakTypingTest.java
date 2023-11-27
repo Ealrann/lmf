@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
@@ -18,7 +18,7 @@ public class WeakTypingTest
 	@Test
 	public void alias()
 	{
-		final var textModel = "(Model Test " +
+		final var textModel = "(MetaModel Test " +
 							  "    (Alias Definition \"Group concrete\")" +
 							  "    (Definition Oui)" +
 							  "    (Alias [1..*]     \"mandatory many\")" +
@@ -34,8 +34,8 @@ public class WeakTypingTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var alias = model.aliases()
 							   .get(0);
@@ -76,7 +76,7 @@ public class WeakTypingTest
 	public void group()
 	{
 		final var textModel = """
-				(Model Test
+				(MetaModel Test
 				    (Group Container
 				        (Generic T Extends #LMCore/groups.0)
 				        (-contains cargo [1..1] (reference /groups.2 /groups.0/generics.0))
@@ -91,8 +91,8 @@ public class WeakTypingTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 		final var groups = model.groups();
 		final var container = groups.get(0);

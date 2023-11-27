@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.resource.ResourceUtil;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 
@@ -14,13 +14,13 @@ public class FunctionalTest
 	@Test
 	public void inheritanceTest()
 	{
-		final var model1 = "(Model Test domain=test1" +
+		final var model1 = "(MetaModel Test domain=test1" +
 						   "  (Group name=Vehicule" +
 						   "    (-att [1..1] name=name datatype=#LMCore@string)" +
 						   "    (-att [1..1] name=color datatype=@Color))" +
 						   "  (Enum name=Color reg,green,blue)" +
 						   ") ";
-		final var model2 = "(Model Impl domain=test1 imports=test1.Test" +
+		final var model2 = "(MetaModel Impl domain=test1 imports=test1.Test" +
 						   "  (Definition name=Car" +
 						   "    (includes #Test@Vehicule)" +
 						   "    (-att [1..1] name=speed datatype=#LMCore@float))" +
@@ -29,7 +29,7 @@ public class FunctionalTest
 		final var inputStream = new ByteArrayInputStream(model1.getBytes());
 		final var roots = ResourceUtil.loadModel(inputStream);
 
-		final var m1 = (Model) roots.get(0);
+		final var m1 = (MetaModel) roots.get(0);
 
 		final var vehicule = m1.groups().get(0);
 

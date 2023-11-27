@@ -166,7 +166,7 @@ public final class FeatureResolution implements IAdapter
 			}
 			else if (datatype instanceof Enum<?> enumeration)
 			{
-				final var model = (Model) enumeration.lmContainer();
+				final var model = (MetaModel) enumeration.lmContainer();
 				final var className = ClassName.get(model.domain(), enumeration.name());
 				return new PartialFeatureResolution(TypeParameter.of(className), false);
 			}

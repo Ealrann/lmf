@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
@@ -58,7 +58,7 @@ public class UnitTest
 	public void allBaseUnits()
 	{
 		final var textModel = """
-				 (Model Test
+				 (MetaModel Test
 					(Unit name=matcher   matcher="rgx_match:<(.+?)>")
 					(Unit name=extractor matcher="rgx_match:<(.+?)>")
 					(Enum name=BoundType extends,super)
@@ -77,9 +77,9 @@ public class UnitTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
+		assertTrue(root instanceof MetaModel);
 
-		final var model = (Model) root;
+		final var model = (MetaModel) root;
 		assertEquals(2,
 					 model.enums()
 						  .size());

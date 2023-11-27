@@ -1,7 +1,7 @@
 package org.logoce.lmf.generator;
 
 import org.logoce.lmf.generator.model.ModelGenerator;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.resource.ResourceUtil;
 
 import java.io.File;
@@ -33,7 +33,7 @@ public class Main
 
 			for (final var root : roots)
 			{
-				if (root instanceof Model model)
+				if (root instanceof MetaModel model)
 				{
 					final var generator = new ModelGenerator(model);
 					System.out.printf("Generating = %1$s...%n", model.name());

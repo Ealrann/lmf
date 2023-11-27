@@ -7,7 +7,7 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
@@ -17,7 +17,7 @@ public class LMGroupMethodBuilder implements CodeBuilder<Group<?>, MethodSpec>
 	@Override
 	public MethodSpec build(final Group<?> group)
 	{
-		final var model = (Model) ModelUtils.root(group);
+		final var model = (MetaModel) ModelUtils.root(group);
 		final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
 		final var typedInterface = group.adapt(GroupInterfaceType.class);
 		final var groupType = ConstantTypes.GROUP.nest(typedInterface.parametrizedWildcard());

@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
@@ -18,7 +18,7 @@ public class AttributeTest
 	@Test
 	public void attributes()
 	{
-		final var textModel = "(Model Test " +
+		final var textModel = "(MetaModel Test " +
 							  "  (Definition name=Atts" +
 							  "    (Attribute mandatory immutable many name=count datatype=#LMCore/units.3)" +
 							  "    (Attribute mandatory=false immutable=false many=false name=exists " +
@@ -31,8 +31,8 @@ public class AttributeTest
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Model);
-		final var model = (Model) root;
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
 
 
 		final var group0 = model.groups()

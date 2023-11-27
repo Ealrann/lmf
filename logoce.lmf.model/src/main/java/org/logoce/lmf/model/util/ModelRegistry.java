@@ -25,7 +25,7 @@ public final class ModelRegistry
 	public Map<String, Alias> getAliasMap()
 	{
 		return models().map(IModelPackage::model)
-					   .map(Model::aliases)
+					   .map(MetaModel::aliases)
 					   .flatMap(Collection::stream)
 					   .collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
 	}

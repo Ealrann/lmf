@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.linking.feature;
 
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Enum;
-import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
 
 import java.util.Optional;
@@ -27,7 +27,7 @@ public final class EnumResolver<Y> extends AttributeResolver
 
 	private Optional<Y> extractEnumLiteral(final String value, final Enum<Y> _enum)
 	{
-		final var lPackage = ((Model) _enum.lmContainer()).lPackage();
+		final var lPackage = ((MetaModel) _enum.lmContainer()).lPackage();
 		final var resolvedEnum = lPackage.resolveEnumLiteral(_enum, capitalizeFirstLetter(value));
 		return resolvedEnum;
 	}

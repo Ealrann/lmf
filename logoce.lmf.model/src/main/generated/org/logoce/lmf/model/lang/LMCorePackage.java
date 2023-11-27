@@ -7,25 +7,25 @@ import java.util.List;
 import java.util.Optional;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.impl.ModelImpl;
+import org.logoce.lmf.model.lang.impl.MetaModelImpl;
 
 public final class LMCorePackage implements IModelPackage {
   public static final LMCorePackage Instance = new LMCorePackage();
 
-  public static final Model MODEL = new ModelImpl("LMCore", "org.logoce.lmf.model.lang", List.of(), LMCoreDefinition.Groups.ALL, LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL, LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
+  public static final MetaModel MODEL = new MetaModelImpl("LMCore", "org.logoce.lmf.model.lang", List.of(), LMCoreDefinition.Groups.ALL, LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL, LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
 
   private LMCorePackage() {
   }
 
   @Override
-  public Model model() {
+  public MetaModel model() {
     return MODEL;
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public <T extends LMObject> Optional<IFeaturedObject.Builder<T>> builder(Group<T> group) {
-    if (group == LMCoreDefinition.Groups.MODEL) return Optional.of((IFeaturedObject.Builder<T>) Model.builder());
+    if (group == LMCoreDefinition.Groups.META_MODEL) return Optional.of((IFeaturedObject.Builder<T>) MetaModel.builder());
     else if (group == LMCoreDefinition.Groups.GROUP) return Optional.of((IFeaturedObject.Builder<T>) Group.builder());
     else if (group == LMCoreDefinition.Groups.ATTRIBUTE) return Optional.of((IFeaturedObject.Builder<T>) Attribute.builder());
     else if (group == LMCoreDefinition.Groups.RELATION) return Optional.of((IFeaturedObject.Builder<T>) Relation.builder());
