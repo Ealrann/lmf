@@ -18,13 +18,14 @@ import java.util.Optional;
 
 public final class LinkNodeBuilder<I extends PNode>
 {
-	private final Map<String, ModelGroup<?>> groups;
-	private final Map<Group<?>, TreeToFeatureLinker> resolvers;
+	private final Map<String, ModelGroup<?>> metaGroups;
+	private final Map<Group<?>, TreeToFeatureLinker> metaResolvers;
 
-	public LinkNodeBuilder(final Map<String, ModelGroup<?>> groups, final Map<Group<?>, TreeToFeatureLinker> resolvers)
+	public LinkNodeBuilder(final Map<String, ModelGroup<?>> metaGroups,
+						   final Map<Group<?>, TreeToFeatureLinker> metaResolvers)
 	{
-		this.groups = groups;
-		this.resolvers = resolvers;
+		this.metaGroups = metaGroups;
+		this.metaResolvers = metaResolvers;
 	}
 
 	public LinkNodeFull<?, I> mapTree(final Tree<PGroup<I>> tree)
@@ -36,21 +37,21 @@ public final class LinkNodeBuilder<I extends PNode>
 	{
 		final var linkInfo = buildNodeInfo(node);
 		final var data = node.data();
-		final var resolver = resolvers.get(linkInfo.modelGroup().group());
+		final var resolver = metaResolvers.get(linkInfo.modelGroup().group());
 		final var attributeResolutions = resolver.nodeLinker.resolveAttributes(data.features());
 		return new LinkNodePartial<>(linkInfo, node, attributeResolutions, this::mapPartial);
 	}
 
 	public void resolve(final LinkNodeInternal<?, I, ?> node)
 	{
-		final var resolver = resolvers.get(node.group());
+		final var resolver = metaResolvers.get(node.group());
 		resolver.resolve(node);
 	}
 
 	private LinkNodeFull<?, I> buildNode(final BasicTree.BuildInfo<LinkInfo<?, I>, LinkNodeFull<?, I>> buildInfo)
 	{
 		final var data = (LinkInfo<?, I>) buildInfo.data();
-		final var resolver = resolvers.get(data.modelGroup().group());
+		final var resolver = metaResolvers.get(data.modelGroup().group());
 		final var attributeResolutions = resolver.nodeLinker.resolveAttributes(data.features());
 
 		return new LinkNodeFull<>(data, buildInfo.parent(), attributeResolutions, buildInfo.childrenBuilder());
@@ -92,7 +93,7 @@ public final class LinkNodeBuilder<I extends PNode>
 	@SuppressWarnings("unchecked")
 	private <T extends LMObject> Optional<ModelGroup<T>> findModelGroupByValue(final PType type)
 	{
-		return type.value().map(s -> (ModelGroup<T>) groups.get(s));
+		return type.value().map(s -> (ModelGroup<T>) metaGroups.get(s));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,7 +110,7 @@ public final class LinkNodeBuilder<I extends PNode>
 											   .findAny()
 											   .orElseThrow(() -> buildException(node, containmentName, parentGroup));
 
-		return (ModelGroup<T>) groups.get(groupFromParent.name());
+		return (ModelGroup<T>) metaGroups.get(groupFromParent.name());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -129,18 +130,18 @@ public final class LinkNodeBuilder<I extends PNode>
 	private <T extends LMObject> Optional<? extends Relation<?, ?>> resolveFromGroup(final Group<?> parentGroup,
 																					 final Group<T> childGroup)
 	{
-		return resolvers.get(parentGroup)
-						.streamContainmentRelations()
-						.filter(r -> ModelUtils.isSubGroup(r.reference().group(), childGroup))
-						.findAny();
+		return metaResolvers.get(parentGroup)
+							.streamContainmentRelations()
+							.filter(r -> ModelUtils.isSubGroup(r.reference().group(), childGroup))
+							.findAny();
 	}
 
 	private Optional<Relation<?, ?>> resolveFromName(final Group<?> parentGroup, final String containmentName)
 	{
-		return resolvers.get(parentGroup)
-						.streamContainmentRelations()
-						.filter(f -> f.name().equals(containmentName))
-						.findAny();
+		return metaResolvers.get(parentGroup)
+							.streamContainmentRelations()
+							.filter(f -> f.name().equals(containmentName))
+							.findAny();
 	}
 
 	private static <I extends PNode> LinkException buildException(final PGroup<I> node,

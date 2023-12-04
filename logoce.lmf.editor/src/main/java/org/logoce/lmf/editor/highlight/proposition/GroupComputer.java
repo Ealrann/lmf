@@ -89,7 +89,7 @@ public final class GroupComputer
 	private static void collectAliases(final String value, Consumer<String> collector)
 	{
 		collector.accept(value);
-		ModelRegistry.Instance.models()
+		ModelRegistry.Instance.metamodels()
 							  .flatMap(m -> m.model().aliases().stream())
 							  .filter(alias -> alias.value().startsWith(value))
 							  .map(Named::name)

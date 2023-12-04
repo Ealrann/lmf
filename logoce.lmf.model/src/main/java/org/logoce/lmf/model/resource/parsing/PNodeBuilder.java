@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-public final class PModelBuilder
+public final class PNodeBuilder
 {
 	private final Deque<PTreeBuilder> stack = new ArrayDeque<>();
 	private final List<PTreeBuilder> roots = new ArrayList<>();
 
-	public PModelBuilder()
+	public PNodeBuilder()
 	{
 	}
 

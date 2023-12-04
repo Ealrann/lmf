@@ -29,7 +29,7 @@ public final class AttributeComputer
 	{
 		final var attributeName = attribute.name();
 
-		final var aliases = ModelRegistry.Instance.models()
+		final var aliases = ModelRegistry.Instance.metamodels()
 												  .flatMap(m -> m.model().aliases().stream())
 												  .filter(alias -> alias.value().startsWith(attributeName))
 												  .map(Named::name);

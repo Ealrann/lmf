@@ -3,6 +3,7 @@ package org.logoce.lmf.editor.lexer;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lexer.LMLexer;
 import org.logoce.lmf.model.resource.parsing.LexerException;
+import org.logoce.lmf.model.resource.parsing.PNodeBuilder;
 import org.logoce.lmf.model.resource.parsing.PToken;
 import org.logoce.lmf.model.resource.transform.PModelBuilder;
 
@@ -23,7 +24,7 @@ public final class ModelLexer
 			lexer.reset(text, 0, text.length(), 0);
 			model = null;
 
-			final var pmodelBuilder = new org.logoce.lmf.model.resource.parsing.PModelBuilder();
+			final var pmodelBuilder = new PNodeBuilder();
 			try
 			{
 				while (true)
@@ -52,7 +53,7 @@ public final class ModelLexer
 		return model;
 	}
 
-	private MetaModel buildModel(final org.logoce.lmf.model.resource.parsing.PModelBuilder pmodelBuilder)
+	private MetaModel buildModel(final PNodeBuilder pmodelBuilder)
 	{
 		final long start = System.currentTimeMillis();
 		System.out.println("Start model reconciliation");

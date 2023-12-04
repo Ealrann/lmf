@@ -25,7 +25,7 @@ public final class PTreeReader
 		try
 		{
 			lexer.reset(charSequence, 0);
-			final var modelBuilder = new PModelBuilder();
+			final var modelBuilder = new PNodeBuilder();
 			for (PToken token : lexer)
 			{
 				modelBuilder.readToken(token);

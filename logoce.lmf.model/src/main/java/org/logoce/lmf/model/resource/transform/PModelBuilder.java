@@ -2,6 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.resource.interpretation.LMInterpreter;
 import org.logoce.lmf.model.resource.interpretation.PGroup;
@@ -29,21 +30,17 @@ public final class PModelBuilder<I extends PNode>
 
 	public PModelBuilder()
 	{
-		final var groups = ModelRegistry.Instance.models()
-												 .flatMap(PModelBuilder::modelGroups)
-												 .collect(Collectors.toUnmodifiableMap(ModelGroup::name,
-																					   Function.identity()));
-
-		final Map<Group<?>, TreeToFeatureLinker> resolvers = groups.values()
-																   .stream()
-																   .map(ModelGroup::group)
-																   .map(TreeToFeatureLinker::new)
-																   .collect(Collectors.toUnmodifiableMap(
-																		   TreeToFeatureLinker::group,
-																		   Function.identity()));
+		final var metaModels = List.of(LMCorePackage.Instance);
+		final var metaGroups = collectGroups(metaModels);
+		final var metaResolvers = buildResolvers(metaGroups);
 
 		this.interpreter = new LMInterpreter<>(ModelRegistry.Instance.getAliasMap());
-		this.linker = new LinkNodeBuilder<>(groups, resolvers);
+		this.linker = new LinkNodeBuilder<>(metaGroups, metaResolvers);
+	}
+
+	public List<? extends LMObject> build(final List<? extends BasicTree<I, ?>> roots)
+	{
+		return link(roots).build();
 	}
 
 	public PModel<I> link(final List<? extends BasicTree<I, ?>> roots)
@@ -103,11 +100,6 @@ public final class PModelBuilder<I extends PNode>
 		}
 	}
 
-	public List<? extends LMObject> build(final List<? extends BasicTree<I, ?>> roots)
-	{
-		return link(roots).build();
-	}
-
 	private Tree<PGroup<I>> interpretTree(final BasicTree<I, ?> root)
 	{
 		return root.mapTree(interpreter::interpretTreeNode);
@@ -116,5 +108,21 @@ public final class PModelBuilder<I extends PNode>
 	private static Stream<ModelGroup<?>> modelGroups(final IModelPackage model)
 	{
 		return model.model().groups().stream().map(group -> new ModelGroup<>(model, group));
+	}
+
+	private static Map<String, ModelGroup<?>> collectGroups(final List<LMCorePackage> metaModels)
+	{
+		return metaModels.stream()
+						 .flatMap(PModelBuilder::modelGroups)
+						 .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
+	}
+
+	private static Map<Group<?>, TreeToFeatureLinker> buildResolvers(final Map<String, ModelGroup<?>> metaGroups)
+	{
+		return metaGroups.values()
+						 .stream()
+						 .map(ModelGroup::group)
+						 .map(TreeToFeatureLinker::new)
+						 .collect(Collectors.toUnmodifiableMap(TreeToFeatureLinker::group, Function.identity()));
 	}
 }

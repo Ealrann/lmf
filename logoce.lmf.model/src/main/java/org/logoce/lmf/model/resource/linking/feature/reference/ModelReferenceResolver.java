@@ -11,12 +11,12 @@ import java.util.Optional;
 
 public class ModelReferenceResolver implements ReferenceResolver
 {
-	public final MetaModel model;
+	public final Model model;
 	private final Relation<?, ?> relation;
 
 	public ModelReferenceResolver(final String modelName, final Relation<?, ?> relation)
 	{
-		this.model = ModelRegistry.Instance.get(modelName).model();
+		this.model = ModelRegistry.Instance.getModel(modelName);
 		this.relation = relation;
 	}
 

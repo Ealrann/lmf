@@ -14,35 +14,52 @@ public final class ModelRegistry
 {
 	public static final ModelRegistry Instance = new ModelRegistry();
 
-	private final Map<String, IModelPackage> modelMap = new HashMap<>();
+	private final Map<String, IModelPackage> metamodelMap = new HashMap<>();
+
+	private final Map<String, Model> modelMap = new HashMap<>();
 
 	private ModelRegistry()
 	{
-		final var coreModelPackage = LMCorePackage.Instance;
-		modelMap.put(coreModelPackage.model().name(), coreModelPackage);
+		register(LMCorePackage.Instance);
 	}
 
 	public Map<String, Alias> getAliasMap()
 	{
-		return models().map(IModelPackage::model)
-					   .map(MetaModel::aliases)
-					   .flatMap(Collection::stream)
-					   .collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
+		return metamodels().map(IModelPackage::model)
+						   .map(MetaModel::aliases)
+						   .flatMap(Collection::stream)
+						   .collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
 	}
 
-	public IModelPackage get(final String name)
+	public IModelPackage getMetaModel(final String name)
+	{
+		return metamodelMap.get(name);
+	}
+
+	public Model getModel(final String name)
 	{
 		return modelMap.get(name);
 	}
 
-	public Stream<IModelPackage> models()
+	public Stream<IModelPackage> metamodels()
+	{
+		return metamodelMap.values().stream();
+	}
+
+	public Stream<Model> models()
 	{
 		return modelMap.values().stream();
 	}
 
 	public void register(final IModelPackage modelPackage)
 	{
-		modelMap.put(modelPackage.model().name(), modelPackage);
+		metamodelMap.put(modelPackage.model().name(), modelPackage);
+		register(modelPackage.model());
+	}
+
+	public void register(final Model model)
+	{
+		modelMap.put(model.name(), model);
 	}
 
 	public Stream<Group<?>> streamChildGroups(Group<?> group)
@@ -53,12 +70,12 @@ public final class ModelRegistry
 		}
 		else
 		{
-			return modelMap.values()
-						   .stream()
-						   .map(IModelPackage::model)
-						   .flatMap(m -> m.groups().stream())
-						   .filter(p -> ModelRegistry.isChildOf(p, group))
-						   .flatMap(this::streamChildGroups);
+			return metamodelMap.values()
+							   .stream()
+							   .map(IModelPackage::model)
+							   .flatMap(m -> m.groups().stream())
+							   .filter(p -> ModelRegistry.isChildOf(p, group))
+							   .flatMap(this::streamChildGroups);
 		}
 	}
 
