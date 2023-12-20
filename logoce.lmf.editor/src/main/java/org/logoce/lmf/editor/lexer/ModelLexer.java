@@ -5,7 +5,7 @@ import org.logoce.lmf.model.lexer.LMLexer;
 import org.logoce.lmf.model.resource.parsing.LexerException;
 import org.logoce.lmf.model.resource.parsing.PNodeBuilder;
 import org.logoce.lmf.model.resource.parsing.PToken;
-import org.logoce.lmf.model.resource.transform.PModelBuilder;
+import org.logoce.lmf.model.resource.transform.PModelLinker;
 
 import java.io.IOException;
 
@@ -58,7 +58,7 @@ public final class ModelLexer
 		final long start = System.currentTimeMillis();
 		System.out.println("Start model reconciliation");
 		final var trees = pmodelBuilder.buildRoots();
-		final var modelBuilder = new PModelBuilder();
+		final var modelBuilder = new PModelLinker();
 
 		// Fix for intellij ServiceLoader...
 		// https://intellij-support.jetbrains.com/hc/en-us/community/posts/206761975-How-to-load-classes-in-a-plugin-with-ServiceLoader-

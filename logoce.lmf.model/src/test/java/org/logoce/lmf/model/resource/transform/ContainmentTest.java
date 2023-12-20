@@ -20,7 +20,7 @@ public class ContainmentTest
 							  "(Group name=Toto))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var model = (MetaModel) roots.get(0);

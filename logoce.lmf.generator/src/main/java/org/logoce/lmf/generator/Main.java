@@ -29,7 +29,7 @@ public class Main
 
 		try (final var modelInputStream = new FileInputStream(modelFile))
 		{
-			final var roots = ResourceUtil.loadModel(modelInputStream);
+			final var roots = ResourceUtil.loadObject(modelInputStream);
 
 			for (final var root : roots)
 			{

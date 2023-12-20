@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.linking.feature.AttributeResolver;
 import org.logoce.lmf.model.resource.transform.LinkNode;
-import org.logoce.lmf.model.resource.transform.PModelBuilder;
+import org.logoce.lmf.model.resource.transform.PModelLinker;
 import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.tree.TreeView;
@@ -20,7 +20,7 @@ import java.util.function.BiConsumer;
 
 public class LMNamedElementImpl extends ASTWrapperPsiElement implements LMNamedElement
 {
-	private final static PModelBuilder<PNodeView> PMDEL_BUILDER = new PModelBuilder<>();
+	private final static PModelLinker<PNodeView> PMDEL_BUILDER = new PModelLinker<>();
 
 	public LMNamedElementImpl(@NotNull ASTNode node)
 	{

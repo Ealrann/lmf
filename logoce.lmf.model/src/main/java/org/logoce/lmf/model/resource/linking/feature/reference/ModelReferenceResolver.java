@@ -17,6 +17,7 @@ public class ModelReferenceResolver implements ReferenceResolver
 	public ModelReferenceResolver(final String modelName, final Relation<?, ?> relation)
 	{
 		this.model = ModelRegistry.Instance.getModel(modelName);
+		assert model != null;
 		this.relation = relation;
 	}
 

@@ -20,7 +20,7 @@ public class EnumTest
 		final var textModel = "(Enum name=EColor literals=red,green,blue)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var color = roots.get(0);
@@ -40,7 +40,7 @@ public class EnumTest
 		final var textModel = "(MetaModel SimpleEnum (Enum name=EColor literals=red,green,blue))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var model = roots.get(0);

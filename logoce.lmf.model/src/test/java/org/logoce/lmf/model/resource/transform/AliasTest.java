@@ -18,7 +18,7 @@ public class AliasTest
 		final var textModel = "(Alias name=Definition value=\"Group concrete\") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -35,7 +35,7 @@ public class AliasTest
 		final var textModel = "(Alias name=Definition \"Group concrete=false contains=true\")";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -52,7 +52,7 @@ public class AliasTest
 		final var textModel = "(-att [1..*] name=count datatype=#LMCore/units.3)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -79,7 +79,7 @@ public class AliasTest
 							  ") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);

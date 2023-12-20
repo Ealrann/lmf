@@ -19,7 +19,7 @@ public class GenericTest
 		final var textModel = "(Generic name=UnaryType boundType=Extends type=#LMCore/groups.0)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -40,7 +40,7 @@ public class GenericTest
 							  "  (Group name=ICategory))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		assertTrue(roots.get(0) instanceof MetaModel);
@@ -70,7 +70,7 @@ public class GenericTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -105,7 +105,7 @@ public class GenericTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelBuilder<>();
+		final var ptreeToJava = new PModelLinker<>();
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);

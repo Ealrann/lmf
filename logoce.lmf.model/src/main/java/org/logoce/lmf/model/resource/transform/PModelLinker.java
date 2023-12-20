@@ -23,12 +23,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class PModelBuilder<I extends PNode>
+public final class PModelLinker<I extends PNode>
 {
 	private final LMInterpreter<I> interpreter;
 	private final LinkNodeBuilder<I> linker;
 
-	public PModelBuilder()
+	public PModelLinker()
 	{
 		final var metaModels = List.of(LMCorePackage.Instance);
 		final var metaGroups = collectGroups(metaModels);
@@ -113,7 +113,7 @@ public final class PModelBuilder<I extends PNode>
 	private static Map<String, ModelGroup<?>> collectGroups(final List<LMCorePackage> metaModels)
 	{
 		return metaModels.stream()
-						 .flatMap(PModelBuilder::modelGroups)
+						 .flatMap(PModelLinker::modelGroups)
 						 .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
 	}
 

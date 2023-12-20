@@ -9,12 +9,12 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.editor.parser.PNodeView;
 import org.logoce.lmf.editor.psi.LMFGroup;
-import org.logoce.lmf.model.resource.transform.PModelBuilder;
+import org.logoce.lmf.model.resource.transform.PModelLinker;
 import org.logoce.lmf.model.util.tree.TreeView;
 
 public class LMAnnotator implements Annotator
 {
-	private final static PModelBuilder<PNodeView> PMDEL_BUILDER = new PModelBuilder<>();
+	private final static PModelLinker<PNodeView> PMDEL_BUILDER = new PModelLinker<>();
 
 	@Override
 	public void annotate(@NotNull final PsiElement element, final @NotNull AnnotationHolder holder)

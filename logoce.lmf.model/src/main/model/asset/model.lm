@@ -4,7 +4,7 @@
 
 	(Group Named
 		(includes group=@LMObject)
-		(-att name=name /units.7 mandatory))
+		(-att name=name datatype=@string mandatory))
 
 	(Group Type
 		(includes group=@Named)
@@ -12,8 +12,8 @@
 
 	(Group Model
 		(includes group=@Named)
-		(-att name=domain /units.7 [1..1])
-		(-att name=imports /units.7 [0..*]))
+		(-att name=domain datatype=@string [1..1])
+		(-att name=imports datatype=@string [0..*]))
 
 	(Definition MetaModel
 		(includes group=@Model)
@@ -28,7 +28,7 @@
 		(includes group=@Type parameters=../generics.0)
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T extends @LMObject)
-		(-att concrete /units.2)
+		(-att concrete datatype=@boolean)
 		(-contains includes [0..*] (reference group=@Reference))
 		(-contains features [0..*] (reference group=@Feature))
 		(-contains generics [0..*] (reference group=@Generic)))
@@ -37,9 +37,9 @@
 		(includes group=@Named)
 		(Generic UnaryType)
 		(Generic EffectiveType)
-		(-att name=immutable datatype=/units.2)
-		(-att name=many datatype=/units.2)
-		(-att name=mandatory datatype=/units.2)
+		(-att name=immutable datatype=@boolean)
+		(-att name=many datatype=@boolean)
+		(-att name=mandatory datatype=@boolean)
 		(-att name=rawFeature datatype=/javaWrappers.0 parameters=../generics.0,../generics.1))
 
 	(Definition Attribute
@@ -63,16 +63,16 @@
 		(Generic T))
 	(Definition Alias
 		(includes group=@Named)
-		(-att value /units.7 [1..1]))
+		(-att value datatype=@string [1..1]))
 	(Definition Enum
 		(includes group=@Datatype parameters=../generics.0)
 		(Generic T)
-		(-att literals /units.7 [0..*]))
+		(-att literals datatype=@string [0..*]))
 	(Definition Unit
 		(includes group=@Datatype parameters=../generics.0)
 		(Generic T)
 		(-att matcher /units.0 [0..1])
-		(-att name=defaultValue /units.7 [0..1])
+		(-att name=defaultValue datatype=@string [0..1])
 		(-att primitive /enums.1 [0..1] defaultValue=String)
 		(-att extractor /units.1 [0..1]))
 
