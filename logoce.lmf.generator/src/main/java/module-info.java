@@ -2,7 +2,7 @@ import org.logoce.lmf.generator.Extenders;
 import org.logoce.lmf.extender.api.IAdapterProvider;
 
 module logoce.lmf.generator {
-	requires logoce.lmf.model;
+	requires transitive logoce.lmf.model;
 	requires com.squareup.javapoet;
 	requires java.compiler;
 

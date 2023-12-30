@@ -1,3 +1,10 @@
+pluginManagement {
+	repositories {
+		mavenLocal()
+		gradlePluginPortal()
+	}
+}
+
 rootProject.name = "LMF"
 
 include ':logoce.lmf.adapter'
@@ -5,5 +12,8 @@ include ':logoce.lmf.model'
 include ':logoce.lmf.extender'
 include ':logoce.lmf.generator'
 include ':logoce.lmf.notification'
+
+include ':logoce.lmf.gradle'
+include ':logoce.lmf.gradle.test'
 
 include ':logoce.lmf.editor'

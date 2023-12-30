@@ -1,0 +1,36 @@
+plugins {
+	id 'java-gradle-plugin'
+	id 'maven-publish'
+}
+
+dependencies {
+	implementation project(':logoce.lmf.generator')
+
+	implementation gradleApi()
+	//implementation "dev.gradleplugins:gradle-api:8.3"
+}
+
+description = "A Gradle plugin"
+group = 'org.logoce.lmf'
+version = "$logoceVersion"
+
+gradlePlugin {
+	plugins {
+		simplePlugin {
+			id = 'org.logoce.lmf.gradle-plugin'
+			implementationClass = 'org.logoce.lmf.gradle.LMFPlugin'
+		}
+	}
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'gradle-plugin'
+			version = "$logoceVersion"
+
+			from components.java
+		}
+	}
+}

@@ -1,3 +1,7 @@
+plugins {
+	id 'maven-publish'
+}
+
 dependencies {
 
 	api project(":logoce.lmf.extender")
@@ -11,4 +15,16 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'adapter'
+			version = "$logoceVersion"
+
+			from components.java
+		}
+	}
 }

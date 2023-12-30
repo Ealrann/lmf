@@ -1,3 +1,7 @@
+plugins {
+	id 'maven-publish'
+}
+
 dependencies {
 	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
 	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
@@ -8,4 +12,16 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'notification'
+			version = "$logoceVersion"
+
+			from components.java
+		}
+	}
 }

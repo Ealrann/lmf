@@ -1,3 +1,7 @@
+plugins {
+	id 'maven-publish'
+}
+
 dependencies {
 
 	api project(":logoce.lmf.adapter")
@@ -19,5 +23,17 @@ sourceSets {
 	main {
 		java.srcDirs += ['src/main/model'
 						 ,'src/main/generated']
+	}
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'model'
+			version = "$logoceVersion"
+
+			from components.java
+		}
 	}
 }

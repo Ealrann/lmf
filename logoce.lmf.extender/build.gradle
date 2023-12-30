@@ -1,0 +1,15 @@
+plugins {
+	id 'maven-publish'
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'extender'
+			version = "$logoceVersion"
+
+			from components.java
+		}
+	}
+}

@@ -1,0 +1,14 @@
+plugins {
+	id 'org.logoce.lmf.gradle-plugin' version '0.0.1'
+}
+
+dependencies {
+	api project(':logoce.lmf.model')
+}
+
+sourceSets {
+	main {
+		java.srcDirs += ['src/main/model'
+						 ,'src/main/generated']
+	}
+}

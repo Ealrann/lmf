@@ -1,6 +1,7 @@
 plugins {
 	id 'application'
 	id 'distribution'
+	id 'maven-publish'
 }
 
 application {
@@ -27,4 +28,16 @@ run {
 
 test {
 	useJUnitPlatform()
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'generator'
+			version = "$logoceVersion"
+
+			from components.java
+		}
+	}
 }

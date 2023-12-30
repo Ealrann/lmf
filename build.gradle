@@ -1,5 +1,6 @@
 buildscript {
 	repositories {
+		mavenLocal()
 		mavenCentral()
 	}
 }
@@ -13,9 +14,17 @@ subprojects {
 		targetCompatibility = JavaVersion.VERSION_17
 	}
 
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
 	afterEvaluate {
 		repositories {
+			mavenLocal()
 			mavenCentral()
 		}
 	}
+
+
 }
