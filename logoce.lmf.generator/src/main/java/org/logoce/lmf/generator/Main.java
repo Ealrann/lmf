@@ -3,6 +3,7 @@ package org.logoce.lmf.generator;
 import org.logoce.lmf.generator.model.ModelGenerator;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.resource.ResourceUtil;
+import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +30,7 @@ public class Main
 
 		try (final var modelInputStream = new FileInputStream(modelFile))
 		{
-			final var roots = ResourceUtil.loadObject(modelInputStream);
+			final var roots = ResourceUtil.loadObject(modelInputStream, ModelRegistry.empty());
 
 			for (final var root : roots)
 			{

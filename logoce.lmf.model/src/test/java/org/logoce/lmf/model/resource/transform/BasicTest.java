@@ -5,6 +5,7 @@ import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 
@@ -21,7 +22,7 @@ public class BasicTest
 		final var textModel = "(MetaModel domain=test.model name=World)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -38,7 +39,7 @@ public class BasicTest
 		final var textModel = "(Group Car) (Group Chair)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var car = roots.get(0);
@@ -56,7 +57,7 @@ public class BasicTest
 		final var textModel = "(Group Car concrete)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var car = roots.get(0);
@@ -71,7 +72,7 @@ public class BasicTest
 		final var textModel = "(Enum EColor) (Enum ESize)";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var color = roots.get(0);

@@ -1,0 +1,3 @@
+pluginManagement {
+	includeBuild '../logoce.lmf.gradle'
+}

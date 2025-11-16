@@ -2,7 +2,7 @@ package org.logoce.lmf.editor.highlight.proposition;
 
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -74,26 +74,26 @@ public final class GroupComputer
 			}
 			else
 			{
-				return ModelRegistry.Instance.streamChildGroups(group)
-											 .map(Named::name)
-											 .mapMulti(GroupComputer::collectAliases);
+				return MetaModelRegistry.Instance.streamChildGroups(group)
+												 .map(Named::name)
+												 .mapMulti(GroupComputer::collectAliases);
 			}
 		}
 		else
 		{
-			return ModelRegistry.Instance.streamChildGroups(group)
-										 .map(childGroup -> relationName + "=" + childGroup.name());
+			return MetaModelRegistry.Instance.streamChildGroups(group)
+											 .map(childGroup -> relationName + "=" + childGroup.name());
 		}
 	}
 
 	private static void collectAliases(final String value, Consumer<String> collector)
 	{
 		collector.accept(value);
-		ModelRegistry.Instance.metamodels()
-							  .flatMap(m -> m.model().aliases().stream())
-							  .filter(alias -> alias.value().startsWith(value))
-							  .map(Named::name)
-							  .forEach(collector);
+		MetaModelRegistry.Instance.metamodels()
+								  .flatMap(m -> m.model().aliases().stream())
+								  .filter(alias -> alias.value().startsWith(value))
+								  .map(Named::name)
+								  .forEach(collector);
 	}
 
 	private static boolean nameMatches(final String relationName, final String groupName)

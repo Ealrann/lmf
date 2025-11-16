@@ -1,39 +1,33 @@
 package org.logoce.lmf.model.util;
 
-import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.*;
+import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.Named;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class ModelRegistry
+public final class ModelRegistry implements IModelRegistry
 {
-	public static final ModelRegistry Instance = new ModelRegistry();
+	private final Map<String, Model> modelMap;
 
-	private final Map<String, IModelPackage> metamodelMap = new HashMap<>();
-
-	private final Map<String, Model> modelMap = new HashMap<>();
-
-	private ModelRegistry()
+	public static ModelRegistry empty()
 	{
-		register(LMCorePackage.Instance);
+		return new Builder(List.of(LMCorePackage.MODEL)).build();
 	}
 
-	public Map<String, Alias> getAliasMap()
+	public ModelRegistry(Map<String, Model> map)
 	{
-		return metamodels().map(IModelPackage::model)
-						   .map(MetaModel::aliases)
-						   .flatMap(Collection::stream)
-						   .collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
+		this.modelMap = Map.copyOf(map);
 	}
 
-	public IModelPackage getMetaModel(final String name)
+	public ModelRegistry(final List<Model> models)
 	{
-		return metamodelMap.get(name);
+		modelMap = models.stream().collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
 	}
 
 	public Model getModel(final String name)
@@ -41,46 +35,53 @@ public final class ModelRegistry
 		return modelMap.get(name);
 	}
 
-	public Stream<IModelPackage> metamodels()
-	{
-		return metamodelMap.values().stream();
-	}
-
+	@Override
 	public Stream<Model> models()
 	{
 		return modelMap.values().stream();
 	}
 
-	public void register(final IModelPackage modelPackage)
+	public static final class Builder implements IModelRegistry
 	{
-		metamodelMap.put(modelPackage.model().name(), modelPackage);
-		register(modelPackage.model());
-	}
+		private final Map<String, Model> modelMap = new HashMap<>();
 
-	public void register(final Model model)
-	{
-		modelMap.put(model.name(), model);
-	}
-
-	public Stream<Group<?>> streamChildGroups(Group<?> group)
-	{
-		if (group.concrete())
+		public Builder()
 		{
-			return Stream.of(group);
 		}
-		else
-		{
-			return metamodelMap.values()
-							   .stream()
-							   .map(IModelPackage::model)
-							   .flatMap(m -> m.groups().stream())
-							   .filter(p -> ModelRegistry.isChildOf(p, group))
-							   .flatMap(this::streamChildGroups);
-		}
-	}
 
-	private static boolean isChildOf(final Group<?> child, final Group<?> parent)
-	{
-		return child.includes().stream().map(Reference::group).anyMatch(parent::equals);
+		public Builder(final ModelRegistry modelRegistry)
+		{
+			modelMap.putAll(modelRegistry.modelMap);
+		}
+
+		public Builder(final List<Model> models)
+		{
+			for (final var model : models)
+			{
+				modelMap.put(model.name(), model);
+			}
+		}
+
+		public void register(final Model model)
+		{
+			modelMap.put(model.name(), model);
+		}
+
+		@Override
+		public Model getModel(final String name)
+		{
+			return modelMap.get(name);
+		}
+
+		public ModelRegistry build()
+		{
+			return new ModelRegistry(modelMap);
+		}
+
+		@Override
+		public Stream<Model> models()
+		{
+			return modelMap.values().stream();
+		}
 	}
 }

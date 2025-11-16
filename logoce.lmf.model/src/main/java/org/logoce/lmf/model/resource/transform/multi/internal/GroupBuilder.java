@@ -1,13 +1,11 @@
 package org.logoce.lmf.model.resource.transform.multi.internal;
 
-import org.logoce.lmf.model.resource.transform.multi.MultiModelLoader;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public final class GroupBuilder
 {
-	public static List<LoadGroup> from(final List<BuildingModel> models)
+	public static List<LoadGroup> prepare(final List<BuildingModel> models)
 	{
 		final var builder = new GroupBuilder();
 		builder.sortGroups(models);

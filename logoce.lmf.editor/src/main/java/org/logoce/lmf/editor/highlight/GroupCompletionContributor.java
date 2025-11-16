@@ -15,6 +15,7 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.transform.PModelLinker;
+import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.tree.TreeView;
 
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 public final class GroupCompletionContributor extends CompletionContributor
 {
-	private final static PModelLinker<PNodeView> PMDEL_BUILDER = new PModelLinker<>();
+	private final static PModelLinker<PNodeView> PMDEL_BUILDER = new PModelLinker<>(ModelRegistry.empty());
 
 	public GroupCompletionContributor()
 	{

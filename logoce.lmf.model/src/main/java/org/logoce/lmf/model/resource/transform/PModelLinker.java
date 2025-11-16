@@ -12,6 +12,8 @@ import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeBuilder;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeFull;
 import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.util.Functional;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.tree.BasicTree;
 import org.logoce.lmf.model.util.tree.Tree;
@@ -28,13 +30,13 @@ public final class PModelLinker<I extends PNode>
 	private final LMInterpreter<I> interpreter;
 	private final LinkNodeBuilder<I> linker;
 
-	public PModelLinker()
+	public PModelLinker(final ModelRegistry modelRegistry)
 	{
 		final var metaModels = List.of(LMCorePackage.Instance);
 		final var metaGroups = collectGroups(metaModels);
-		final var metaResolvers = buildResolvers(metaGroups);
+		final var metaResolvers = buildResolvers(metaGroups, modelRegistry);
 
-		this.interpreter = new LMInterpreter<>(ModelRegistry.Instance.getAliasMap());
+		this.interpreter = new LMInterpreter<>(MetaModelRegistry.Instance.getAliasMap());
 		this.linker = new LinkNodeBuilder<>(metaGroups, metaResolvers);
 	}
 
@@ -105,6 +107,18 @@ public final class PModelLinker<I extends PNode>
 		return root.mapTree(interpreter::interpretTreeNode);
 	}
 
+	private static Map<Group<?>, TreeToFeatureLinker> buildResolvers(final Map<String, ModelGroup<?>> metaGroups,
+																	 final ModelRegistry modelRegistry)
+	{
+		final var linkerBuilder = Functional.inject(modelRegistry, TreeToFeatureLinker::new);
+
+		return metaGroups.values()
+						 .stream()
+						 .map(ModelGroup::group)
+						 .map(linkerBuilder)
+						 .collect(Collectors.toUnmodifiableMap(TreeToFeatureLinker::group, Function.identity()));
+	}
+
 	private static Stream<ModelGroup<?>> modelGroups(final IModelPackage model)
 	{
 		return model.model().groups().stream().map(group -> new ModelGroup<>(model, group));
@@ -115,14 +129,5 @@ public final class PModelLinker<I extends PNode>
 		return metaModels.stream()
 						 .flatMap(PModelLinker::modelGroups)
 						 .collect(Collectors.toUnmodifiableMap(ModelGroup::name, Function.identity()));
-	}
-
-	private static Map<Group<?>, TreeToFeatureLinker> buildResolvers(final Map<String, ModelGroup<?>> metaGroups)
-	{
-		return metaGroups.values()
-						 .stream()
-						 .map(ModelGroup::group)
-						 .map(TreeToFeatureLinker::new)
-						 .collect(Collectors.toUnmodifiableMap(TreeToFeatureLinker::group, Function.identity()));
 	}
 }

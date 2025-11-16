@@ -10,15 +10,19 @@ import org.logoce.lmf.model.resource.linking.feature.reference.PathParser;
 import org.logoce.lmf.model.resource.linking.feature.reference.ReferenceResolver;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 import org.logoce.lmf.model.resource.transform.LinkNode;
+import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.util.List;
 import java.util.Optional;
 
 public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 {
-	public RelationResolver(final Relation<?, ?> relation)
+	private final ModelRegistry modelRegistry;
+
+	public RelationResolver(final Relation<?, ?> relation, final ModelRegistry modelRegistry)
 	{
 		super(relation);
+		this.modelRegistry = modelRegistry;
 		assert !relation.contains();
 	}
 
@@ -40,7 +44,8 @@ public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 		if (firstStep.type() == PathParser.Type.MODEL)
 		{
 			final var modelName = firstStep.text();
-			return new ModelReferenceResolver(modelName, feature);
+			final var model = modelRegistry.getModel(modelName);
+			return new ModelReferenceResolver(model, feature);
 		}
 		else
 		{

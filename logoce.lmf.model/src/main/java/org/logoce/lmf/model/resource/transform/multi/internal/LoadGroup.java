@@ -36,7 +36,7 @@ public final class LoadGroup
 		return imports.size() == otherImports.size() && imports.containsAll(otherImports);
 	}
 
-	public void build(final PModelLinker<PNode> pmodelLinker)
+	public void build(final PModelLinker<PNode> pmodelLinker, final ModelRegistry.Builder registry)
 	{
 		final var trees = models.stream().map(BuildingModel::LoadModel).map(LoadModel::tree).toList();
 		final var builtTrees = pmodelLinker.build(trees);
@@ -49,7 +49,7 @@ public final class LoadGroup
 			if (built instanceof Model model)
 			{
 				building.setBuiltModel(model);
-				ModelRegistry.Instance.register(model);
+				registry.register(model);
 			}
 			else
 			{

@@ -3,7 +3,7 @@ package org.logoce.lmf.editor.highlight.proposition;
 import org.jetbrains.annotations.NotNull;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Named;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,10 +29,10 @@ public final class AttributeComputer
 	{
 		final var attributeName = attribute.name();
 
-		final var aliases = ModelRegistry.Instance.metamodels()
-												  .flatMap(m -> m.model().aliases().stream())
-												  .filter(alias -> alias.value().startsWith(attributeName))
-												  .map(Named::name);
+		final var aliases = MetaModelRegistry.Instance.metamodels()
+													  .flatMap(m -> m.model().aliases().stream())
+													  .filter(alias -> alias.value().startsWith(attributeName))
+													  .map(Named::name);
 
 		final var value = withDefaultValue ? attributeName + "=" + attribute.defaultValue() : attributeName;
 		return Stream.concat(Stream.of(value), aliases);

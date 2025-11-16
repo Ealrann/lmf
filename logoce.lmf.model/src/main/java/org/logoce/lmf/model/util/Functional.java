@@ -1,0 +1,12 @@
+package org.logoce.lmf.model.util;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+public final class Functional
+{
+	public static <T, U, R> Function<T, R> inject(U injected, BiFunction<T, U, R> function)
+	{
+		return t -> function.apply(t, injected);
+	}
+}

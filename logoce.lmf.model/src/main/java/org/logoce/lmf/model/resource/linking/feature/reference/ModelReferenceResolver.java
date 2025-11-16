@@ -3,7 +3,6 @@ package org.logoce.lmf.model.resource.linking.feature.reference;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
-import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import java.util.List;
@@ -14,10 +13,10 @@ public class ModelReferenceResolver implements ReferenceResolver
 	public final Model model;
 	private final Relation<?, ?> relation;
 
-	public ModelReferenceResolver(final String modelName, final Relation<?, ?> relation)
+	public ModelReferenceResolver(final Model model, final Relation<?, ?> relation)
 	{
-		this.model = ModelRegistry.Instance.getModel(modelName);
 		assert model != null;
+		this.model = model;
 		this.relation = relation;
 	}
 

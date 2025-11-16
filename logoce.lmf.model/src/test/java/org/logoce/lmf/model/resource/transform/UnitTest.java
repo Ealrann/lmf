@@ -5,6 +5,7 @@ import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 
@@ -24,7 +25,7 @@ public class UnitTest
 							  "      primitive=boolean )";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -44,7 +45,7 @@ public class UnitTest
 		final var textModel = "(Unit matcher=\"rgx_match:<(true|false)>\") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);
@@ -73,7 +74,7 @@ public class UnitTest
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>();
+		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);
 
 		final var root = roots.get(0);

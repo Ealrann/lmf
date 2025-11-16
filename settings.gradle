@@ -16,4 +16,4 @@ include ':logoce.lmf.notification'
 include ':logoce.lmf.gradle'
 include ':logoce.lmf.gradle.test'
 
-include ':logoce.lmf.editor'
+// include ':logoce.lmf.editor'

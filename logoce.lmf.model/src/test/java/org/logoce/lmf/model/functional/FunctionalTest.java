@@ -42,12 +42,13 @@ public class FunctionalTest
 		final var inputStream3 = new ByteArrayInputStream(TEXTMODEL_3.getBytes());
 		final var inputStream4 = new ByteArrayInputStream(TEXTMODEL_4.getBytes());
 
-		final var model1 = (MetaModel) ResourceUtil.loadModel(inputStream1);
-		ModelRegistry.Instance.register(model1);
-		final var model2 = (MetaModel) ResourceUtil.loadModel(inputStream2);
-		ModelRegistry.Instance.register(model2);
-		final var model3 = (MetaModel) ResourceUtil.loadModel(inputStream3);
-		final var model4 = (MetaModel) ResourceUtil.loadModel(inputStream4);
+		final var registry = new ModelRegistry.Builder(ModelRegistry.empty());
+		final var model1 = (MetaModel) ResourceUtil.loadModel(inputStream1, registry.build());
+		registry.register(model1);
+		final var model2 = (MetaModel) ResourceUtil.loadModel(inputStream2, registry.build());
+		registry.register(model2);
+		final var model3 = (MetaModel) ResourceUtil.loadModel(inputStream3, registry.build());
+		final var model4 = (MetaModel) ResourceUtil.loadModel(inputStream4, registry.build());
 
 		check(model1, model2, model3, model4);
 	}
@@ -59,7 +60,9 @@ public class FunctionalTest
 		final var inputStream2 = new ByteArrayInputStream(TEXTMODEL_2.getBytes());
 		final var inputStream3 = new ByteArrayInputStream(TEXTMODEL_3.getBytes());
 		final var inputStream4 = new ByteArrayInputStream(TEXTMODEL_4.getBytes());
-		final var models = ResourceUtil.loadModels(List.of(inputStream1, inputStream2, inputStream3, inputStream4));
+		final var models = ResourceUtil.loadModels(List.of(inputStream1, inputStream2, inputStream3, inputStream4),
+												   ModelRegistry.empty());
+
 		final var model1 = (MetaModel) models.get(0);
 		final var model2 = (MetaModel) models.get(1);
 		final var model3 = (MetaModel) models.get(2);
@@ -75,7 +78,9 @@ public class FunctionalTest
 		final var inputStream2 = new ByteArrayInputStream(TEXTMODEL_2.getBytes());
 		final var inputStream3 = new ByteArrayInputStream(TEXTMODEL_3.getBytes());
 		final var inputStream4 = new ByteArrayInputStream(TEXTMODEL_4.getBytes());
-		final var models = ResourceUtil.loadModels(List.of(inputStream4, inputStream2, inputStream3, inputStream1));
+		final var models = ResourceUtil.loadModels(List.of(inputStream4, inputStream2, inputStream3, inputStream1),
+												   ModelRegistry.empty());
+
 		final var model1 = (MetaModel) models.get(3);
 		final var model2 = (MetaModel) models.get(1);
 		final var model3 = (MetaModel) models.get(2);
