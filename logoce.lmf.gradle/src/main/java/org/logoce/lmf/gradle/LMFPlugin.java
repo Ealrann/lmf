@@ -2,58 +2,45 @@ package org.logoce.lmf.gradle;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.file.FileVisitDetails;
-import org.gradle.api.file.FileVisitor;
+import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.tasks.SourceSet;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.List;
 
 public final class LMFPlugin implements Plugin<Project>
 {
 	@Override
-	public void apply(Project project)
+	public void apply(final Project project)
 	{
-		final var javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
-		final var sourceSets = javaPlugin.getSourceSets();
-		final var javaSourceSet = sourceSets.getByName("main").getJava();
+		final var extension = project.getExtensions().create("lmf", LMFExtension.class);
 
-		javaSourceSet.srcDir(new File("src/main/model"));
-		javaSourceSet.srcDir(new File("src/main/generated"));
+		extension.getModelDir().convention(project.getLayout()
+			.getProjectDirectory().dir("src/main/model"));
+		extension.getOutputDir().convention(project.getLayout()
+			.getProjectDirectory().dir("src/main/generated"));
+		extension.getIncludes().convention(List.of("**/*.lm"));
 
-		project.task("hello").doLast("Hello", task -> {
+		project.getPlugins().withType(JavaPlugin.class, javaPlugin -> {
+			final var javaExtension = project.getExtensions().getByType(JavaPluginExtension.class);
+			final var mainSourceSet = javaExtension.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 
-			final var visitor = new ModelFileVisitor();
-			final var models = javaSourceSet.getSourceDirectories().getAsFileTree();
-			models.visit(visitor);
+			final var generateTask = project.getTasks().register("generateLmf", GenerateLmfSources.class, task -> {
+				task.setGroup("LMF");
+				task.setDescription("Generates Java sources from LMF model files");
 
-			visitor.streamModels().forEach(m -> System.out.println("m = " + m));
+				task.getOutputDir().set(extension.getOutputDir());
+
+				task.getModelFiles().from(project.fileTree(extension.getModelDir().get().getAsFile(), spec -> {
+					final var includes = extension.getIncludes().get();
+					spec.include(includes);
+				}));
+			});
+
+			mainSourceSet.getJava().srcDir(extension.getOutputDir());
+
+			project.getTasks().named(mainSourceSet.getCompileJavaTaskName())
+				.configure(task -> task.dependsOn(generateTask));
 		});
-	}
-
-	private static final class ModelFileVisitor implements FileVisitor
-	{
-		private final Set<File> models = new HashSet<>();
-
-		public Stream<File> streamModels()
-		{
-			return models.stream();
-		}
-
-		@Override
-		public void visitDir(final FileVisitDetails dirDetails)
-		{
-		}
-
-		@Override
-		public void visitFile(final FileVisitDetails fileDetails)
-		{
-			if (fileDetails.getName().endsWith(".lm"))
-			{
-				models.add(fileDetails.getFile());
-			}
-		}
 	}
 }

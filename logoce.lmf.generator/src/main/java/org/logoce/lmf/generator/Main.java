@@ -9,23 +9,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class Main
+public final class Main
 {
 	public static void main(String[] args)
 	{
-		final var start = System.currentTimeMillis();
-		final var modelPath = args[0];
-		final var targetPath = args[1];
-
-		System.out.println("modelPath = " + modelPath);
-		System.out.println("targetDir = " + targetPath);
-
-		final var modelFile = new File(modelPath);
-		final var targetDir = new File(targetPath);
-
-		if (targetDir.exists() == false)
+		if (args.length < 2)
 		{
-			targetDir.mkdir();
+			System.err.println("Usage: Main <modelPath> <targetPath>");
+			System.exit(1);
+		}
+
+		final var modelFile = new File(args[0]);
+		final var targetDir = new File(args[1]);
+		generate(modelFile, targetDir);
+	}
+
+	public static void generate(final File modelFile, final File targetDir)
+	{
+		final var start = System.currentTimeMillis();
+
+		System.out.println("modelPath = " + modelFile.getAbsolutePath());
+		System.out.println("targetDir = " + targetDir.getAbsolutePath());
+
+		if (targetDir.exists() == false && targetDir.mkdirs() == false)
+		{
+			throw new IllegalStateException("Cannot create output directory " + targetDir);
 		}
 
 		try (final var modelInputStream = new FileInputStream(modelFile))
@@ -47,6 +55,7 @@ public class Main
 		catch (IOException e)
 		{
 			e.printStackTrace();
+			throw new RuntimeException("Failed to generate Java sources from " + modelFile, e);
 		}
 	}
 }

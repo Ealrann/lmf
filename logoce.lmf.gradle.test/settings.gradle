@@ -1,3 +1,5 @@
 pluginManagement {
-	includeBuild '../logoce.lmf.gradle'
+	includeBuild '..'
 }
+
+rootProject.name = "lmf-gradle-plugin-test"

@@ -3,8 +3,20 @@ plugins {
 	id 'maven-publish'
 }
 
+def lmfVersion = findProperty('logoceVersion') ?: '0.0.1'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
 dependencies {
-	implementation project(':logoce.lmf.generator')
+	if (findProject(':logoce.lmf.generator') != null) {
+		implementation project(':logoce.lmf.generator')
+	}
+	else {
+		implementation "org.logoce.lmf:generator:${lmfVersion}"
+	}
 
 	implementation gradleApi()
 	//implementation "dev.gradleplugins:gradle-api:8.3"
@@ -12,7 +24,7 @@ dependencies {
 
 description = "A Gradle plugin"
 group = 'org.logoce.lmf'
-version = "$logoceVersion"
+version = lmfVersion
 
 gradlePlugin {
 	plugins {
@@ -28,7 +40,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId = 'org.logoce.lmf'
 			artifactId = 'gradle-plugin'
-			version = "$logoceVersion"
+			version = lmfVersion
 
 			from components.java
 		}

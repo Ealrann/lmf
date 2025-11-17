@@ -1,7 +1,18 @@
 plugins {
-	//id 'org.logoce.lmf.gradle-plugin' version '0.0.1'
+	id 'java'
+	id 'org.logoce.lmf.gradle-plugin'
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
 }
 
 dependencies {
-	api project(':logoce.lmf.model')
+	def lmfVersion = findProperty('logoceVersion') ?: '0.0.1'
+
+	implementation "org.logoce.lmf:model:${lmfVersion}"
+	implementation "org.logoce.lmf:adapter:${lmfVersion}"
+	implementation "org.logoce.lmf:extender:${lmfVersion}"
+	implementation "org.logoce.lmf:notification:${lmfVersion}"
 }
