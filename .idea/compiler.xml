@@ -3,4 +3,11 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="25" />
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="LMF.logoce.lmf.model" options="-Xlint:-module" />
+      <module name="LMF.logoce.lmf.model.main" options="-Xlint:-module" />
+      <module name="LMF.logoce.lmf.model.test" options="-Xlint:-module" />
+    </option>
+  </component>
 </project>

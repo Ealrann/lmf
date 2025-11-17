@@ -19,6 +19,10 @@ test {
 	useJUnitPlatform()
 }
 
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs += ['-Xlint:-module']
+}
+
 sourceSets {
 	main {
 		java.srcDirs += ['src/main/model'
