@@ -15,6 +15,7 @@ public final class AdapterDescriptorRegistry implements IAdapterDescriptorRegist
 	public AdapterDescriptorRegistry()
 	{
 		final var mapBuilder = new ExtenderMapBuilder();
+		final var seenProviders = new HashSet<String>();
 
 		ServiceLoader.load(IAdapterProvider.class)
 					 .stream()
@@ -61,13 +62,12 @@ public final class AdapterDescriptorRegistry implements IAdapterDescriptorRegist
 	private static final class ExtenderMapBuilder
 	{
 		private final Map<Module, MethodHandles.Lookup> lookupMap = new HashMap<>();
-		private final List<Class<? extends IAdapter>> extenderClasses = new ArrayList<>();
+		private final Set<Class<? extends IAdapter>> extenderClasses = new HashSet<>();
 
 		public void append(IAdapterProvider provider)
 		{
 			final var module = provider.getClass().getModule();
-			assert !lookupMap.containsKey(module);
-			lookupMap.put(module, provider.lookup());
+			lookupMap.computeIfAbsent(module, _ -> provider.lookup());
 			extenderClasses.addAll(provider.classifiers());
 		}
 

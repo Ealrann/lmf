@@ -65,8 +65,8 @@ public class TestAdapter
 		final var adapter1 = src1.adapt(INamedAdapter.class);
 		final var adapter2 = src2.adapt(INamedAdapter.class);
 
-		assertTrue(adapter1 instanceof TestNamedAdapter1);
-		assertTrue(adapter2 instanceof TestNamedAdapter2);
+		assertInstanceOf(TestNamedAdapter1.class, adapter1);
+		assertInstanceOf(TestNamedAdapter2.class, adapter2);
 	}
 
 	@Test
@@ -74,11 +74,11 @@ public class TestAdapter
 	{
 		final var src = new TestAdaptable("");
 
-		final var adapter1 = src.adapt(INamedAdapter.class, "1");
-		final var adapter2 = src.adapt(INamedAdapter.class, "2");
+		final var adapter1 = src.adapt(IIdAdapter.class, "1");
+		final var adapter2 = src.adapt(IIdAdapter.class, "2");
 
-		assertTrue(adapter1 instanceof TestIdAdapter1);
-		assertTrue(adapter2 instanceof TestIdAdapter2);
+		assertInstanceOf(TestIdAdapter1.class, adapter1);
+		assertInstanceOf(TestIdAdapter2.class, adapter2);
 	}
 
 	public static final class TestAdaptable extends BasicAdaptable
@@ -124,14 +124,16 @@ public class TestAdapter
 	public static final class TestNamedAdapter2 implements INamedAdapter
 	{}
 
+	public interface IIdAdapter extends IAdapter {}
+
 	@ModelExtender(scope = TestAdaptable.class, identifier = "1")
 	@Adapter
-	public static final class TestIdAdapter1 implements INamedAdapter
+	public static final class TestIdAdapter1 implements IIdAdapter
 	{}
 
 	@ModelExtender(scope = TestAdaptable.class, identifier = "2")
 	@Adapter
-	public static final class TestIdAdapter2 implements INamedAdapter
+	public static final class TestIdAdapter2 implements IIdAdapter
 	{}
 
 	@ModelExtender(scope = TestAdaptable.class)
