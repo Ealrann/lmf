@@ -41,3 +41,10 @@ publishing {
 		}
 	}
 }
+
+sourceSets {
+	main {
+		java.srcDirs += ['src/main/model'
+						 ,'src/main/generated']
+	}
+}

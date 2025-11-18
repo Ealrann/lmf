@@ -39,6 +39,7 @@ When modifying or adding code:
   - Prefer `final var` for local variables where the type is obvious and immutability is intended.  
   - Use clear, descriptive names (no single‑letter identifiers except for short‑lived loop indices or obvious lambdas).  
   - Keep methods small and focused; push complex logic into well‑named helpers.
+  - Prefer the **Builder pattern** for constructing complex objects; when you introduce a builder for a type, place it as an inner builder class (static nested type) directly inside the built class.
 
 - **APIs and data structures**
   - Prefer immutable collections or unmodifiable views for externally visible state.  
@@ -59,4 +60,3 @@ When modifying or adding code:
 - There is good coverage in `logoce.lmf.model` (parsing, transformation, linking, and functional multi‑model behavior).  
 - When changing core model or generator semantics, extend or adapt these tests rather than adding ad‑hoc ones elsewhere.  
 - Prefer fast, focused tests over broad integration tests inside this repo.
-

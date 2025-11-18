@@ -1,0 +1,18 @@
+(MetaModel domain=test.model name=CarCompany
+	(Group Entity
+		(-att name=name datatype=#LMCore@string [1..1]))
+
+	(Enum Brand Renault,Peugeot)
+
+	(Definition Car
+		(includes group=@Entity)
+		(-att name=brand datatype=@Brand [1..1] defaultValue="Peugeot")
+		(+contains name=persons (reference @Person) [0..*])
+	)
+
+	(Definition CarParc
+		(+contains cars [0..*] (reference @Car))
+	)
+
+	(Definition Person (includes group=@Entity))
+)

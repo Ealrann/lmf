@@ -10,6 +10,7 @@ module logoce.lmf.model
 	exports org.logoce.lmf.model.lang;
 	exports org.logoce.lmf.model.lang.impl;
 	exports org.logoce.lmf.model.lexer;
+	exports org.logoce.lmf.model.notification.list;
 	exports org.logoce.lmf.model.resource;
 	exports org.logoce.lmf.model.resource.interpretation;
 	exports org.logoce.lmf.model.resource.parsing;

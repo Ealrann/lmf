@@ -10,6 +10,7 @@ import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.impl.MetaModelImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class ConstantTypes
 			JAVA_WRAPPER);
 	public static final ClassName FEATURE_INSERTER_CLASS = ClassName.get(FeatureInserter.class);
 	public static final TypeName ARRAYLIST = ClassName.get(ArrayList.class);
+	public static final ClassName OBSERVABLE_LIST = ClassName.get(ObservableList.class);
 	public static final ClassName FEATURED_OBJECT_BUILDER = ClassName.get(IFeaturedObject.Builder.class);
 	public static final ClassName SUPPLIER = ClassName.get(Supplier.class);
 	public static final ClassName OPTIONAL = ClassName.get(Optional.class);

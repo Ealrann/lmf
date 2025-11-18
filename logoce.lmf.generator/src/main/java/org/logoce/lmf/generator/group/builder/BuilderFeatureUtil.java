@@ -75,7 +75,7 @@ public final class BuilderFeatureUtil
 
 		if (many)
 		{
-			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
+			return Optional.of(CodeBlock.of("new $T<>((type, elements) -> {})", ConstantTypes.OBSERVABLE_LIST));
 		}
 		else if (immutable && !mandatory)
 		{

@@ -1,5 +1,5 @@
-import org.logoce.lmf.generator.Extenders;
 import org.logoce.lmf.extender.api.IAdapterProvider;
+import org.logoce.lmf.generator.Extenders;
 
 module logoce.lmf.generator {
 	requires transitive logoce.lmf.model;

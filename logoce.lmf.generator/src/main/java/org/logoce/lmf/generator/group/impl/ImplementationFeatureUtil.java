@@ -77,7 +77,7 @@ public final class ImplementationFeatureUtil
 
 		if (many && !immutable)
 		{
-			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
+			return Optional.of(CodeBlock.of("new $T<>((type, elements) -> {})", ConstantTypes.OBSERVABLE_LIST));
 		}
 		else
 		{
