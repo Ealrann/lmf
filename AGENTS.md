@@ -40,6 +40,11 @@ When modifying or adding code:
   - Use clear, descriptive names (no single‑letter identifiers except for short‑lived loop indices or obvious lambdas).  
   - Keep methods small and focused; push complex logic into well‑named helpers.
   - Prefer the **Builder pattern** for constructing complex objects; when you introduce a builder for a type, place it as an inner builder class (static nested type) directly inside the built class.
+  - Push decisions into small helper types or value objects (e.g. records) so that higher‑level code can stay declarative and stream/filter over those helpers.
+  - Avoid parallel lists and index‑based coordination; prefer a single list of richer objects exposing the operations and predicates you need.
+  - Construct domain objects with the minimum required state (e.g. immutable/mandatory parts) and then enrich them explicitly with optional or derived state.
+  - Prefer local variables over mutable instance fields for temporary state needed only within a single method.
+  - Keep lambdas and `forEach` blocks short and focused on a single side effect; move complex logic into named methods.
 
 - **APIs and data structures**
   - Prefer immutable collections or unmodifiable views for externally visible state.  

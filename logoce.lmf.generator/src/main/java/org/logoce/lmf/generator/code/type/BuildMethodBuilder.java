@@ -34,32 +34,49 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 								   .addModifiers(Modifier.PUBLIC)
 								   .returns(interfaceType.parametrized())
 								   .addAnnotation(Override.class);
-		final var arguments = context.stream().map(BuildArgument::of).toList();
+
+		final var arguments = context.stream()
+									 .map(BuildArgument::of)
+									 .toList();
 
 		arguments.stream()
 				 .map(BuildArgument::preOperation)
 				 .filter(Optional::isPresent)
 				 .map(Optional::get)
 				 .forEach(spec::addStatement);
+		final var constructorArguments = arguments.stream()
+												 .filter(BuildArgument::isConstructorArgument)
+												 .map(BuildArgument::argumentCodeBlock)
+												 .collect(CodeBlock.joining(", "));
 
-		final var buildBlock = CodeBlock.builder().add("return new $T", buildType);
-		if (!interfaceType.parameters().isEmpty()) buildBlock.add("<>");
-		buildBlock.add("(");
-		boolean first = true;
-		for (final var arg : arguments)
-		{
-			if (first) first = false;
-			else buildBlock.add(", ");
-			buildBlock.add(arg.argumentCodeBlock);
-		}
+		final var constructorBlock = CodeBlock.builder().add("final var built = new $T", buildType);
+		if (!interfaceType.parameters().isEmpty()) constructorBlock.add("<>");
+		constructorBlock.add("($L)", constructorArguments);
+		spec.addStatement(constructorBlock.build());
 
-		buildBlock.add(")");
-		spec.addStatement(buildBlock.build());
+		arguments.stream()
+				 .filter(arg -> !arg.isConstructorArgument())
+				 .forEach(argument ->
+				 {
+					 final var name = argument.featureName();
+					 if (argument.isMany())
+					 {
+						 spec.addStatement("built.$N().addAll($L)", name, argument.argumentCodeBlock());
+					 }
+					 else
+					 {
+						 spec.addStatement("built.$N($L)", name, argument.argumentCodeBlock());
+					 }
+				 });
+
+		spec.addStatement("return built");
 
 		return spec.build();
 	}
 
-	private record BuildArgument(CodeBlock argumentCodeBlock, Optional<CodeBlock> preOperation)
+	private record BuildArgument(FeatureResolution resolution,
+								 CodeBlock argumentCodeBlock,
+								 Optional<CodeBlock> preOperation)
 	{
 		public static BuildArgument of(final FeatureResolution resolution)
 		{
@@ -73,17 +90,33 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 													ConstantTypes.BUILD_UTILS,
 													name);
 				final var arg = CodeBlock.of("$N", newName);
-				return new BuildArgument(arg, Optional.of(buildBlock));
+				return new BuildArgument(resolution, arg, Optional.of(buildBlock));
 			}
 			else if (feature instanceof Relation<?, ?> relation && !relation.lazy())
 			{
-				return new BuildArgument(CodeBlock.of("$N.get()", name), Optional.empty());
+				return new BuildArgument(resolution, CodeBlock.of("$N.get()", name), Optional.empty());
 
 			}
 			else
 			{
-				return new BuildArgument(CodeBlock.of("$N", name), Optional.empty());
+				return new BuildArgument(resolution, CodeBlock.of("$N", name), Optional.empty());
 			}
+		}
+
+		public boolean isConstructorArgument()
+		{
+			final var feature = resolution.feature();
+			return feature.immutable() || feature.mandatory();
+		}
+
+		public boolean isMany()
+		{
+			return resolution.feature().many();
+		}
+
+		public String featureName()
+		{
+			return resolution.feature().name();
 		}
 
 		private static boolean isSuppliedList(FeatureResolution resolution)

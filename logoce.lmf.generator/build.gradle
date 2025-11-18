@@ -47,4 +47,7 @@ sourceSets {
 		java.srcDirs += ['src/main/model'
 						 ,'src/main/generated']
 	}
+	test {
+		java.srcDirs += ['src/test/generated']
+	}
 }
