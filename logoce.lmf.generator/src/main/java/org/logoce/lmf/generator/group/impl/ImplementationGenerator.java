@@ -5,13 +5,13 @@ import com.squareup.javapoet.JavaFile;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
+import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
-import java.io.IOException;
 
 public final class ImplementationGenerator
 {
@@ -40,14 +40,7 @@ public final class ImplementationGenerator
 				  .forEach(featureInstallers::install);
 		typeInstallers.install(group);
 
-		try
-		{
-			final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build()).build();
-			javaFile.writeTo(targetDirectory);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build()).build();
+		FormattedJavaWriter.write(javaFile, targetDirectory);
 	}
 }

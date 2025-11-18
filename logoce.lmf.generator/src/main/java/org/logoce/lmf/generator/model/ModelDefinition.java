@@ -7,6 +7,7 @@ import org.logoce.lmf.generator.code.util.FieldBuilder;
 import org.logoce.lmf.generator.code.util.InterfaceBuilder;
 import org.logoce.lmf.generator.code.util.SubInterfaceBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
@@ -87,14 +88,7 @@ public class ModelDefinition
 		definitionInterface.addType(javaWrapperBuilder.build(model));
 
 		final var javaFile = JavaFile.builder(model.domain(), definitionInterface.build()).build();
-		try
-		{
-			javaFile.writeTo(target);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		FormattedJavaWriter.write(javaFile, target);
 	}
 
 	private final class GroupTopologyBuilder

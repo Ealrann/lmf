@@ -4,9 +4,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
+import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
+import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.util.ModelUtils;
 
@@ -55,8 +58,24 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		return new ParameterCode(paramSpec,
 								 assignCode,
 								 isContainment
-								 ? Optional.of(ImplementationCodeUtil.containmentSetStatement(paramSpec.name))
+								 ? Optional.of(containmentSetStatement(resolution, paramSpec.name))
 								 : Optional.empty());
+	}
+
+	private static CodeBlock containmentSetStatement(final FeatureResolution resolution, final String paramName)
+	{
+		final var feature = resolution.feature();
+		final var group = (Group<?>) feature.lmContainer();
+		final var model = (MetaModel) ModelUtils.root(group);
+		final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
+		final var constantGroupName = GenUtils.toConstantCase(group.name());
+		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
+
+		return CodeBlock.of("setContainer($N, $T.Features.$N.$N)",
+							paramName,
+							modelDefinition,
+							constantGroupName,
+							constantFeatureName);
 	}
 
 	private record ParameterCode(ParameterSpec parameterSpec, CodeBlock assign, Optional<CodeBlock> notif)

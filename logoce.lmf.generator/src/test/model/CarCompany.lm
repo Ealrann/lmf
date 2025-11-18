@@ -1,6 +1,6 @@
 (MetaModel domain=test.model name=CarCompany
 	(Group Entity
-		(-att name=name datatype=#LMCore@string [1..1]))
+		(+att name=name datatype=#LMCore@string [1..1]))
 
 	(Enum Brand Renault,Peugeot)
 

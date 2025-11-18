@@ -7,12 +7,12 @@ import org.logoce.lmf.generator.adapter.GroupBuilderInterfaceType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.type.InterfaceBuildMethodBuilder;
+import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public final class InterfaceGenerator
@@ -62,15 +62,8 @@ public final class InterfaceGenerator
 						  .map(METHOD_BUILDER::build)
 						  .forEach(interfaceBuilder::addMethod);
 
-		try
-		{
-			final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build()).build();
-			javaFile.writeTo(targetDirectory);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build()).build();
+		FormattedJavaWriter.write(javaFile, targetDirectory);
 	}
 
 	private boolean matchGroup(final FeatureResolution f)

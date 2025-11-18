@@ -3,6 +3,7 @@ package org.logoce.lmf.generator.group.builder;
 import com.squareup.javapoet.JavaFile;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupBuilderClassType;
+import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.util.ModelUtils;
 
@@ -39,14 +40,7 @@ public final class BuilderGenerator
 
 		typeInstallers.install(featureResolutions);
 
-		try
-		{
-			final var javaFile = JavaFile.builder(packageName, classBuilder.build()).build();
-			javaFile.writeTo(targetDirectory);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		final var javaFile = JavaFile.builder(packageName, classBuilder.build()).build();
+		FormattedJavaWriter.write(javaFile, targetDirectory);
 	}
 }

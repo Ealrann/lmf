@@ -45,6 +45,8 @@ When modifying or adding code:
   - Construct domain objects with the minimum required state (e.g. immutable/mandatory parts) and then enrich them explicitly with optional or derived state.
   - Prefer local variables over mutable instance fields for temporary state needed only within a single method.
   - Keep lambdas and `forEach` blocks short and focused on a single side effect; move complex logic into named methods.
+  - Prefer explicit two‑way branching (`if` / `else`) over multiple early returns when expressing core decision logic.
+  - When both branches produce short expressions of the same shape, consider using the ternary operator for compactness and readability.
 
 - **APIs and data structures**
   - Prefer immutable collections or unmodifiable views for externally visible state.  

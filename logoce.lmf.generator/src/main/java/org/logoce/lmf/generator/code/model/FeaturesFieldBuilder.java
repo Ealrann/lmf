@@ -64,8 +64,25 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
 				final var typeName = GenUtils.toConstantCase(datatype.name());
 
-				initBuilder.add("$N.$N, ", typeHolder, typeName)
-						   .add("$S, ", attribute.defaultValue())
+				if (datatype != null && typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
+				{
+					final var parentModel = (MetaModel) parentGroup.lmContainer();
+					if (typeModel != parentModel)
+					{
+						final var modelDefinition = ClassName.get(typeModel.domain(), typeModel.name() + "Definition");
+						initBuilder.add("$T.$N.$N, ", modelDefinition, typeHolder, typeName);
+					}
+					else
+					{
+						initBuilder.add("$N.$N, ", typeHolder, typeName);
+					}
+				}
+				else
+				{
+					initBuilder.add("$N.$N, ", typeHolder, typeName);
+				}
+
+				initBuilder.add("$S, ", attribute.defaultValue())
 						   .add("$T.of()", ConstantTypes.LIST);
 			}
 			else

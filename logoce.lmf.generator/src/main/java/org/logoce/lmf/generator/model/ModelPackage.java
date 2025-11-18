@@ -2,6 +2,7 @@ package org.logoce.lmf.generator.model;
 
 import com.squareup.javapoet.*;
 import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
@@ -83,14 +84,7 @@ public class ModelPackage
 		packageClass.addMethod(buildEnumResolver(definitionName));
 
 		final var javaFile = JavaFile.builder(model.domain(), packageClass.build()).build();
-		try
-		{
-			javaFile.writeTo(target);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		FormattedJavaWriter.write(javaFile, target);
 	}
 
 	private MethodSpec buildBuilderResolver(final String definitionName)

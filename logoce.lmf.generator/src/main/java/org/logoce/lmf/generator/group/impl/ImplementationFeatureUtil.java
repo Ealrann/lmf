@@ -5,6 +5,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
+import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.feature.FeatureFieldBuilder;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.feature.FeatureParameter;
@@ -12,8 +13,11 @@ import org.logoce.lmf.generator.code.type.*;
 import org.logoce.lmf.generator.code.util.CodeInstaller;
 import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -107,20 +111,36 @@ public final class ImplementationFeatureUtil
 										f -> TypeName.VOID,
 										Optional.of(FeatureResolution::parameterSpec),
 										Optional.of(ImplementationFeatureUtil::featureChangeStatement),
-										List.of(ConstantTypes.OVERRIDE));
+										List.of());
 	}
 
 	private static List<CodeBlock> featureChangeStatement(FeatureParameter parameter)
 	{
 		final var paramName = parameter.parameterName();
-		final var feature = parameter.feature().feature;
+		final var resolution = parameter.feature();
+		final var feature = resolution.feature;
 		final var assignment = ImplementationCodeUtil.assignationStatement(feature, paramName);
-		final var notification = ImplementationCodeUtil.notificationStatement(paramName);
 		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();
 
-		return containment ? List.of(assignment,
-									 ImplementationCodeUtil.containmentSetStatement(paramName),
-									 notification) : List.of(assignment, notification);
+		return containment
+			   ? List.of(assignment, containmentSetStatement(resolution, paramName))
+			   : List.of(assignment);
+	}
+
+	private static CodeBlock containmentSetStatement(final FeatureResolution resolution, final String paramName)
+	{
+		final var feature = resolution.feature();
+		final var group = (Group<?>) feature.lmContainer();
+		final var model = (MetaModel) ModelUtils.root(group);
+		final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
+		final var constantGroupName = GenUtils.toConstantCase(group.name());
+		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
+
+		return CodeBlock.of("setContainer($N, $T.Features.$N.$N)",
+							paramName,
+							modelDefinition,
+							constantGroupName,
+							constantFeatureName);
 	}
 
 	private static TypeName fieldFeatureType(FeatureResolution resolution)

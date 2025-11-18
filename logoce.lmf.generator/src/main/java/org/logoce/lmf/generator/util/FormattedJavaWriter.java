@@ -1,0 +1,154 @@
+package org.logoce.lmf.generator.util;
+
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
+
+import java.io.File;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public final class FormattedJavaWriter
+{
+	private FormattedJavaWriter()
+	{
+	}
+
+	public static void write(final JavaFile javaFile, final File targetDirectory)
+	{
+		final var formattedSource = format(javaFile);
+		final var outputPath = resolvePath(javaFile, targetDirectory.toPath());
+
+		try
+		{
+			final var parent = outputPath.getParent();
+			if (parent != null)
+			{
+				Files.createDirectories(parent);
+			}
+
+			Files.writeString(outputPath, formattedSource, StandardCharsets.UTF_8);
+		}
+		catch (java.io.IOException e)
+		{
+			throw new UncheckedIOException("Failed to write Java file " + outputPath, e);
+		}
+	}
+
+	private static String format(final JavaFile javaFile)
+	{
+		final var rawSource = javaFile.toString();
+		final var typeSpec = javaFile.typeSpec;
+
+		String result = rawSource;
+
+		if (typeSpec.kind == TypeSpec.Kind.CLASS && isImplOrBuilder(typeSpec.name))
+		{
+			result = removeBlankLinesBetweenFields(result);
+		}
+
+		if (typeSpec.kind == TypeSpec.Kind.INTERFACE)
+		{
+			result = removeBlankLinesBetweenInterfaceMethods(result);
+		}
+
+		return result;
+	}
+
+	private static boolean isImplOrBuilder(final String typeName)
+	{
+		return typeName.endsWith("Impl") || typeName.endsWith("Builder");
+	}
+
+	private static String removeBlankLinesBetweenFields(final String source)
+	{
+		final var lines = source.split("\\R", -1);
+		final var builder = new StringBuilder(source.length());
+
+		for (int i = 0; i < lines.length; i++)
+		{
+			final var line = lines[i];
+			if (line.trim().isEmpty() && i > 0 && i < lines.length - 1)
+			{
+				final var previous = lines[i - 1];
+				final var next = lines[i + 1];
+				if (isFieldLine(previous) && isFieldLine(next)) continue;
+			}
+
+			builder.append(line);
+			if (i < lines.length - 1) builder.append(System.lineSeparator());
+		}
+
+		return builder.toString();
+	}
+
+	private static boolean isFieldLine(final String line)
+	{
+		final var trimmed = line.trim();
+		if (trimmed.isEmpty()) return false;
+		if (!trimmed.endsWith(";")) return false;
+		return trimmed.startsWith("private ") || trimmed.startsWith("public ") || trimmed.startsWith("protected ");
+	}
+
+	private static String removeBlankLinesBetweenInterfaceMethods(final String source)
+	{
+		final var lines = source.split("\\R", -1);
+		final var builder = new StringBuilder(source.length());
+
+		for (int i = 0; i < lines.length; i++)
+		{
+			final var line = lines[i];
+			if (line.trim().isEmpty() && i > 0 && i < lines.length - 1)
+			{
+				final var previous = lines[i - 1];
+				final var next = lines[i + 1];
+				if (isInterfaceMemberLine(previous) && isInterfaceMemberLine(next)) continue;
+			}
+
+			builder.append(line);
+			if (i < lines.length - 1) builder.append(System.lineSeparator());
+		}
+
+		return builder.toString();
+	}
+
+	private static boolean isInterfaceMemberLine(final String line)
+	{
+		return isInterfaceMethodLine(line) || isInterfaceFieldLine(line);
+	}
+
+	private static boolean isInterfaceMethodLine(final String line)
+	{
+		final var trimmed = line.trim();
+		if (trimmed.isEmpty()) return false;
+		if (!trimmed.endsWith(");")) return false;
+		if (!trimmed.contains("(")) return false;
+		if (trimmed.contains("=")) return false;
+		return true;
+	}
+
+	private static boolean isInterfaceFieldLine(final String line)
+	{
+		final var trimmed = line.trim();
+		if (trimmed.isEmpty()) return false;
+		if (!trimmed.endsWith(";")) return false;
+		if (!trimmed.contains("=")) return false;
+		if (trimmed.startsWith("package ") || trimmed.startsWith("import ")) return false;
+		if (trimmed.startsWith("public interface ") || trimmed.startsWith("interface ")) return false;
+		if (trimmed.endsWith("{") || trimmed.equals("}")) return false;
+		return true;
+	}
+
+	private static Path resolvePath(final JavaFile javaFile, final Path targetDirectory)
+	{
+		final var packageName = javaFile.packageName;
+		final var typeName = javaFile.typeSpec.name + ".java";
+
+		final var directory = packageName == null || packageName.isEmpty()
+							  ? targetDirectory
+							  : targetDirectory.resolve(packageName.replace('.', File.separatorChar));
+
+		return directory.resolve(typeName);
+	}
+}

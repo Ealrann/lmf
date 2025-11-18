@@ -2,6 +2,7 @@ package org.logoce.lmf.generator.model;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.MetaModel;
@@ -33,16 +34,7 @@ public class EnumGenerator
 			enumBuilder.addEnumConstant(GenUtils.capitalizeFirstLetter(litteral));
 		}
 
-		final var javaFile = JavaFile.builder(packageName, enumBuilder.build())
-									 .build();
-
-		try
-		{
-			javaFile.writeTo(target);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		final var javaFile = JavaFile.builder(packageName, enumBuilder.build()).build();
+		FormattedJavaWriter.write(javaFile, target);
 	}
 }

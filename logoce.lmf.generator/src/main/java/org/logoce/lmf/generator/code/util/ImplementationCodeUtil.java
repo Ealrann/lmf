@@ -16,18 +16,6 @@ public class ImplementationCodeUtil
 		return CodeBlock.of(assignPattern, paramName, paramName);
 	}
 
-	public static CodeBlock notificationStatement(final String name)
-	{
-		final var statement = "lNotify(RelationNotificationBuilder.insert(this, Features.$N, $N))";
-		return CodeBlock.of(statement, name, name);
-	}
-
-	public static CodeBlock containmentSetStatement(final String name)
-	{
-		final var statement = "setContainer($N, Features.$N)";
-		return CodeBlock.of(statement, name, name);
-	}
-
 	public static List<CodeBlock> featureReturnStatement(FeatureParameter parameter)
 	{
 		final var name = parameter.parameterName();
