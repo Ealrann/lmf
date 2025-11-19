@@ -43,7 +43,7 @@ public class ModelPackage
 		{
 			if (first) first = false;
 			else imports.add(", ");
-			imports.add(value);
+			imports.add("$S", value);
 		}
 		imports.add(")");
 

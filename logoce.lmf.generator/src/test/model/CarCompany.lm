@@ -20,6 +20,6 @@
 
 	(Definition CarCompany
 	    (includes group=@Entity)
-	    (+contains ceo (reference @Person) [1..1])
+	    (+contains ceo (reference group=@Entity) [1..1])
 	    (+contains name=parcs (reference @Car) [0..*]))
 )

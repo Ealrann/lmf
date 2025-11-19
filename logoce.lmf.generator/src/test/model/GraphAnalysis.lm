@@ -1,0 +1,6 @@
+(MetaModel domain=test.multi name=GraphAnalysis imports=test.multi.GraphCore,test.multi.GraphExtensions
+	(Definition GraphView
+		(includes #GraphExtensions@Graph)
+		(+contains name=focus (reference #GraphCore@ColoredNode) [0..1]))
+)
+

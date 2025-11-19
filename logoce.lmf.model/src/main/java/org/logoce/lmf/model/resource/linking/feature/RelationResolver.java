@@ -45,6 +45,12 @@ public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 		{
 			final var modelName = firstStep.text();
 			final var model = modelRegistry.getModel(modelName);
+			if (model == null)
+			{
+				final var available = modelRegistry.models().map(m -> m.name()).toList();
+				throw new AssertionError("Cannot resolve model '" + modelName + "' in registry. Available models: " +
+										 available);
+			}
 			return new ModelReferenceResolver(model, feature);
 		}
 		else

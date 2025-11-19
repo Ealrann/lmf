@@ -34,14 +34,15 @@ test {
 
 tasks.register('generateTestCarCompanyModel', JavaExec) {
 	group = 'verification'
-	description = 'Generates test CarCompany model sources from CarCompany.lm'
+	description = 'Generates test models (CarCompany, FrenchCarCompany) sources from .lm files'
 
-	inputs.file('src/test/model/CarCompany.lm')
+	inputs.files('src/test/model/CarCompany.lm', 'src/test/model/FrenchCarCompany.lm')
 	outputs.dir('src/test/generated')
 
 	classpath = sourceSets.main.runtimeClasspath
 	mainClass = 'org.logoce.lmf.generator.Main'
-	args 'src/test/model/CarCompany.lm', 'src/test/generated'
+	args '--targetDir', 'src/test/generated',
+		 '--genModels', 'src/test/model/CarCompany.lm', 'src/test/model/FrenchCarCompany.lm'
 
 	doFirst {
 		def targetDir = file('src/test/generated')

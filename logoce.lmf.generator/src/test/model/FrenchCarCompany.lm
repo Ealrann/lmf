@@ -1,0 +1,7 @@
+(MetaModel domain=test.model name=FrenchCarCompany imports=test.model.CarCompany
+	(Definition French
+		(includes #CarCompany@Entity)
+		(+refers favoriteCar [0..1] (reference #CarCompany@Car))
+	)
+)
+

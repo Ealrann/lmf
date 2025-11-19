@@ -60,14 +60,26 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var genericsBlockBuilder = new CodeblockBuilder<>(", ", GroupFieldBuilder::generateGenericsCodeblock);
 		final var group = reference.group();
 		final var groupConstantName = GenUtils.toConstantCase(group.name());
+		final var targetModel = (MetaModel) ModelUtils.root(group);
+		final var sourceModel = (MetaModel) ModelUtils.root(reference);
 		reference.parameters().forEach(genericsBlockBuilder::feed);
 
-		return CodeBlock.builder()
-						.add("new $T<>(() -> $N, ", REFERENCE_IMPL_TYPE, groupConstantName)
-						.add("$T.of(", ConstantTypes.LIST)
-						.add(genericsBlockBuilder.build())
-						.add("))")
-						.build();
+		final var builder = CodeBlock.builder().add("new $T<>(", REFERENCE_IMPL_TYPE);
+
+		if (targetModel == sourceModel)
+		{
+			builder.add("() -> $N, ", groupConstantName);
+		}
+		else
+		{
+			final var modelDefinition = ClassName.get(targetModel.domain(), targetModel.name() + "Definition");
+			builder.add("() -> $T.Groups.$N, ", modelDefinition, groupConstantName);
+		}
+
+		return builder.add("$T.of(", ConstantTypes.LIST)
+					  .add(genericsBlockBuilder.build())
+					  .add("))")
+					  .build();
 	}
 
 	private static CodeBlock generateGenericsCodeblock(final Concept<?> concept)

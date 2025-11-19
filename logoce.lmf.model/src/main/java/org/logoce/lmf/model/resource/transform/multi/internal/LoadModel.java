@@ -23,7 +23,34 @@ public record LoadModel(Tree<PNode> tree, String qualifiedName, List<String> imp
 
 	public static List<String> resolveImports(final PNode node)
 	{
-		return extractValue(node, "imports").map(res -> Arrays.asList(res.split(","))).orElse(List.of());
+		final var it = node.tokens().iterator();
+		while (it.hasNext())
+		{
+			final var token = it.next();
+			if (token.type() == ELMTokenType.VALUE_NAME && token.value().equals("imports"))
+			{
+				if (it.hasNext()) it.next(); // skip ASSIGN
+
+				final var values = new java.util.ArrayList<String>();
+				while (it.hasNext())
+				{
+					final var next = it.next();
+					if (next.type() == ELMTokenType.VALUE)
+					{
+						Arrays.stream(next.value().split(","))
+							  .map(String::trim)
+							  .filter(s -> !s.isEmpty())
+							  .forEach(values::add);
+					}
+					else if (next.type() != ELMTokenType.LIST_SEPARATOR && next.type() != ELMTokenType.WHITE_SPACE)
+					{
+						break;
+					}
+				}
+				return values;
+			}
+		}
+		return List.of();
 	}
 
 	public static Optional<String> resolveDomain(final PNode node)
