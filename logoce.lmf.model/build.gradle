@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.JavaExec
+
 plugins {
 	id 'maven-publish'
 }
@@ -28,6 +30,32 @@ sourceSets {
 		java.srcDirs += ['src/main/model'
 						 ,'src/main/generated']
 	}
+	test {
+		java.srcDirs += ['src/test/generated']
+	}
+}
+
+tasks.register('generateTestCarCompanyModel', JavaExec) {
+	group = 'verification'
+	description = 'Generates test CarCompany model sources from CarCompany.lm'
+
+	inputs.file('src/test/model/CarCompany.lm')
+	outputs.dir('src/test/generated')
+
+	classpath = project(':logoce.lmf.generator').sourceSets.main.runtimeClasspath
+	mainClass = 'org.logoce.lmf.generator.Main'
+	args 'src/test/model/CarCompany.lm', 'src/test/generated'
+
+	doFirst {
+		def targetDir = file('src/test/generated')
+		if (targetDir.exists()) {
+			delete(targetDir)
+		}
+	}
+}
+
+tasks.named('compileTestJava') {
+	dependsOn tasks.named('generateTestCarCompanyModel')
 }
 
 publishing {

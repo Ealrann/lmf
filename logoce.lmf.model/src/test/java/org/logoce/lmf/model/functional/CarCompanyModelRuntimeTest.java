@@ -1,4 +1,4 @@
-package org.logoce.lmf.generator;
+package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.api.model.LilyBasicNotifier;

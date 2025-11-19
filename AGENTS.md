@@ -2,6 +2,8 @@
 
 This repo is a multi‑module Gradle workspace for a textual meta‑modeling stack called **LMF** (Light Model Framework). It targets **Java 25**, uses the Java module system, and is built with Gradle 9.x.
 
+If you plan to touch `.lm` meta‑models or generator behaviour, read `LMCORE_HOWTO.md` at the repo root first; it explains the LMCore language, how to structure M2 `.lm` files, and how generics map to the generated Java API.
+
 ## Modules Overview
 
 - `logoce.lmf.model`  
