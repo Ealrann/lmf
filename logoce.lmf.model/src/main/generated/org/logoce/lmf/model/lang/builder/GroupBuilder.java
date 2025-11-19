@@ -80,8 +80,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
     final var builtIncludes = BuildUtils.collectSuppliers(includes);
     final var builtFeatures = BuildUtils.collectSuppliers(features);
     final var builtGenerics = BuildUtils.collectSuppliers(generics);
-    final var built = new GroupImpl<T>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
-    built.lmBuilder(lmBuilder);
+    final var built = new GroupImpl<T>(name, concrete, builtIncludes, builtFeatures, builtGenerics, lmBuilder);
     return built;
   }
 

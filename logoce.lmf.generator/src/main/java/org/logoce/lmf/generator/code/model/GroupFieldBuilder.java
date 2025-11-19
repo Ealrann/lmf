@@ -3,10 +3,12 @@ package org.logoce.lmf.generator.code.model;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
+import org.logoce.lmf.generator.adapter.GroupBuilderClassType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.CodeblockBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
 import org.logoce.lmf.model.lang.impl.ReferenceImpl;
@@ -22,6 +24,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 	{
 		final var name = group.name();
 		final var interfaceType = group.adapt(GroupInterfaceType.class);
+		final var builderType = group.concrete() ? group.adapt(GroupBuilderClassType.class) : null;
 		final var typedGroup = ConstantTypes.GROUP.nest(interfaceType.parametrizedWildcard());
 		final var constantName = GenUtils.toConstantCase(name);
 		final var initializerBuilder = CodeBlock.builder();
@@ -33,13 +36,19 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST)
 								 : CodeBlock.of("Generics.$N", constantName);
 
+		final var builderSupplierType = ClassName.get(BuilderSupplier.class);
+
 		initializerBuilder.add("new $T<>(", GROUP_IMPL_TYPE)
 						  .add("$S, $L, ", name, group.concrete())
 						  .add("$T.of(", ConstantTypes.LIST)
 						  .add(referenceBlockBuilder.build())
 						  .add("), Features.$N.ALL,", constantName)
-						  .add(genericBlock)
-						  .add(")");
+						  .add(genericBlock);
+
+		if (builderType != null) initializerBuilder.add(", new $T($T::new)", builderSupplierType, builderType.raw());
+		else initializerBuilder.add(", null");
+
+		initializerBuilder.add(")");
 
 		return FieldSpec.builder(typedGroup.parametrized(), constantName, modifiers)
 						.initializer(initializerBuilder.build())

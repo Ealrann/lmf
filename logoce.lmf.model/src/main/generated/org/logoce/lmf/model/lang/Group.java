@@ -19,7 +19,6 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   List<Feature<?, ?>> features();
   List<Generic<?>> generics();
   BuilderSupplier<T> lmBuilder();
-  void lmBuilder(final BuilderSupplier<T> lmBuilder);
 
   interface Features extends Type.Features<Features>, Concept.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;

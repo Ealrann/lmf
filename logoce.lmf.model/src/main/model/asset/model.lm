@@ -32,7 +32,7 @@
 		(-contains includes [0..*] (reference group=@Reference))
 		(-contains features [0..*] (reference group=@Feature))
 		(-contains generics [0..*] (reference group=@Generic))
-		(+att lmBuilder /javaWrappers.2 [0..1] parameters=../generics.0))
+		(-att lmBuilder /javaWrappers.2 [1..1] parameters=../generics.0))
 
 	(Group Feature
 		(includes group=@Named)
