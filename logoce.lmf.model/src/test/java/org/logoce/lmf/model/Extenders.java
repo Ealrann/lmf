@@ -1,0 +1,25 @@
+package org.logoce.lmf.model;
+
+import org.logoce.lmf.extender.api.IAdapter;
+import org.logoce.lmf.extender.api.IAdapterProvider;
+import org.logoce.lmf.model.functional.ModelExplorerAdapters;
+
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+
+public class Extenders implements IAdapterProvider
+{
+	@Override
+	public List<Class<? extends IAdapter>> classifiers()
+	{
+		return List.of(ModelExplorerAdapters.CarInfoAdapter.class,
+					   ModelExplorerAdapters.PersonInfoAdapter.class);
+	}
+
+	@Override
+	public MethodHandles.Lookup lookup()
+	{
+		return MethodHandles.lookup();
+	}
+}
+

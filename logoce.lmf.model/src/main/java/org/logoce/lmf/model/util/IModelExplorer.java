@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.util.oldlogoce;
+package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.model.lang.LMObject;

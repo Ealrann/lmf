@@ -3,6 +3,7 @@ package org.logoce.lmf.model.util.oldlogoce;
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.util.ModelExplorer;
 
 import java.util.ArrayList;
 import java.util.List;

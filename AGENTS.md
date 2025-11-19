@@ -41,6 +41,7 @@ When modifying or adding code:
   - Prefer `final var` for local variables where the type is obvious and immutability is intended.  
   - Use clear, descriptive names (no single‑letter identifiers except for short‑lived loop indices or obvious lambdas).  
   - Keep methods small and focused; push complex logic into well‑named helpers.
+  - Minimize empty lines inside methods; keep related statements (for example consecutive `final var` declarations) together and only separate clearly distinct phases (setup, act, assert, etc.) with a single blank line.
   - Prefer the **Builder pattern** for constructing complex objects; when you introduce a builder for a type, place it as an inner builder class (static nested type) directly inside the built class.
   - Push decisions into small helper types or value objects (e.g. records) so that higher‑level code can stay declarative and stream/filter over those helpers.
   - Avoid parallel lists and index‑based coordination; prefer a single list of richer objects exposing the operations and predicates you need.
