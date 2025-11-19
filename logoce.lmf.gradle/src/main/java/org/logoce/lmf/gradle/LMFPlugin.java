@@ -15,32 +15,46 @@ public final class LMFPlugin implements Plugin<Project>
 	{
 		final var extension = project.getExtensions().create("lmf", LMFExtension.class);
 
-		extension.getModelDir().convention(project.getLayout()
-			.getProjectDirectory().dir("src/main/model"));
-		extension.getOutputDir().convention(project.getLayout()
-			.getProjectDirectory().dir("src/main/generated"));
 		extension.getIncludes().convention(List.of("**/*.lm"));
 
 		project.getPlugins().withType(JavaPlugin.class, javaPlugin -> {
 			final var javaExtension = project.getExtensions().getByType(JavaPluginExtension.class);
-			final var mainSourceSet = javaExtension.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+			javaExtension.getSourceSets().all(sourceSet -> {
+				final var sourceSetName = sourceSet.getName();
+				final var capitalized = Character.toUpperCase(sourceSetName.charAt(0)) + sourceSetName.substring(1);
+				final var taskName = "generateLmf" + capitalized;
 
-			final var generateTask = project.getTasks().register("generateLmf", GenerateLmfSources.class, task -> {
-				task.setGroup("LMF");
-				task.setDescription("Generates Java sources from LMF model files");
+				final var baseDir = project.getLayout()
+										   .getProjectDirectory()
+										   .dir("src/" + sourceSetName)
+										   .getAsFile();
 
-				task.getOutputDir().set(extension.getOutputDir());
+				final var outputDir = project.getLayout()
+											 .getProjectDirectory()
+											 .dir("src/" + sourceSetName + "/generated");
 
-				task.getModelFiles().from(project.fileTree(extension.getModelDir().get().getAsFile(), spec -> {
-					final var includes = extension.getIncludes().get();
-					spec.include(includes);
-				}));
+				final var generateTask = project.getTasks()
+												.register(taskName, GenerateLmfSources.class, task -> {
+													task.setGroup("LMF");
+													task.setDescription(
+															"Generates Java sources from LMF model files for source set "
+															+ sourceSetName);
+
+													task.getOutputDir().set(outputDir);
+
+													task.getModelFiles()
+														.from(project.fileTree(baseDir, spec -> {
+															final var includes = extension.getIncludes().get();
+															spec.include(includes);
+														}));
+												});
+
+				sourceSet.getJava().srcDir(outputDir);
+
+				project.getTasks()
+					   .named(sourceSet.getCompileJavaTaskName())
+					   .configure(task -> task.dependsOn(generateTask));
 			});
-
-			mainSourceSet.getJava().srcDir(extension.getOutputDir());
-
-			project.getTasks().named(mainSourceSet.getCompileJavaTaskName())
-				.configure(task -> task.dependsOn(generateTask));
 		});
 	}
 }
