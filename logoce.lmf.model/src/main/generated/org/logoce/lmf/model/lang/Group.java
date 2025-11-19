@@ -5,6 +5,7 @@ import java.lang.String;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
+import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.GroupBuilder;
 
@@ -17,6 +18,8 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   List<Reference<?>> includes();
   List<Feature<?, ?>> features();
   List<Generic<?>> generics();
+  BuilderSupplier<T> lmBuilder();
+  void lmBuilder(final BuilderSupplier<T> lmBuilder);
 
   interface Features extends Type.Features<Features>, Concept.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
@@ -24,6 +27,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     RawFeature<Reference<?>, List<Reference<?>>> includes = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.INCLUDES);
     RawFeature<Feature<?, ?>, List<Feature<?, ?>>> features = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.FEATURES);
     RawFeature<Generic<?>, List<Generic<?>>> generics = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.GENERICS);
+    RawFeature<BuilderSupplier<?>, BuilderSupplier<?>> lmBuilder = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.LM_BUILDER);
   }
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Group<T>> {
@@ -32,5 +36,6 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     Builder<T> addInclude(Supplier<Reference<?>> include);
     Builder<T> addFeature(Supplier<Feature<?, ?>> feature);
     Builder<T> addGeneric(Supplier<Generic<?>> generic);
+    Builder<T> lmBuilder(BuilderSupplier<T> lmBuilder);
   }
 }

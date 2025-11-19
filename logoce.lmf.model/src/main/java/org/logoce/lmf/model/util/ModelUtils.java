@@ -121,4 +121,56 @@ public class ModelUtils
 			return Stream.of((T) element.get(relation));
 		}
 	}
+	public static Optional<ContainmentPath> containmentPath(final LMObject parent, LMObject child)
+	{
+		final Deque<ChildReference> res = new ArrayDeque<>();
+		while (child != null && child != parent && child.lmContainer() != null)
+		{
+			res.addFirst(ChildReference.referenceFromParent(child));
+			child = child.lmContainer();
+		}
+		if (child == parent) return Optional.of(new ContainmentPath(res));
+		else return Optional.empty();
+	}
+
+	public record ChildReference(Feature<?, ?> reference, int index)
+	{
+		public static ChildReference referenceFromParent(LMObject child)
+		{
+			final var containmentFeature = child.lmContainingFeature();
+			final var container = child.lmContainer();
+			final var many = containmentFeature.many();
+			final int index = many ? ((List<?>) container.get(containmentFeature)).indexOf(child) : 0;
+			return new ChildReference(containmentFeature, index);
+		}
+
+		@SuppressWarnings("unchecked")
+		public LMObject eGet(LMObject source)
+		{
+			if (source == null)
+			{
+				return null;
+			}
+			else if (reference.many())
+			{
+				return ((List<LMObject>) source.get(reference)).get(index);
+			}
+			else
+			{
+				return (LMObject) source.get(reference);
+			}
+		}
+	}
+
+	public record ContainmentPath(Collection<ChildReference> path)
+	{
+		public LMObject eGet(LMObject source)
+		{
+			for (final var childReference : path)
+			{
+				source = childReference.eGet(source);
+			}
+			return source;
+		}
+	}
 }

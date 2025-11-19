@@ -18,7 +18,7 @@ public interface MetaModel extends Model {
   List<Unit<?>> units();
   List<Alias> aliases();
   List<JavaWrapper<?>> javaWrappers();
-  IModelPackage lPackage();
+  IModelPackage lmPackage();
 
   interface Features extends Model.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
@@ -29,7 +29,7 @@ public interface MetaModel extends Model {
     RawFeature<Unit<?>, List<Unit<?>>> units = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.UNITS);
     RawFeature<Alias, List<Alias>> aliases = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.ALIASES);
     RawFeature<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.JAVA_WRAPPERS);
-    RawFeature<IModelPackage, IModelPackage> lPackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.L_PACKAGE);
+    RawFeature<IModelPackage, IModelPackage> lmPackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.LM_PACKAGE);
   }
 
   interface Builder extends IFeaturedObject.Builder<MetaModel> {
@@ -41,6 +41,6 @@ public interface MetaModel extends Model {
     Builder addUnit(Supplier<Unit<?>> unit);
     Builder addAliase(Supplier<Alias> aliase);
     Builder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper);
-    Builder lPackage(IModelPackage lPackage);
+    Builder lmPackage(IModelPackage lmPackage);
   }
 }

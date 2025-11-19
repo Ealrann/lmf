@@ -27,7 +27,7 @@ public final class EnumResolver<Y> extends AttributeResolver
 
 	private Optional<Y> extractEnumLiteral(final String value, final Enum<Y> _enum)
 	{
-		final var lPackage = ((MetaModel) _enum.lmContainer()).lPackage();
+		final var lPackage = ((MetaModel) _enum.lmContainer()).lmPackage();
 		final var resolvedEnum = lPackage.resolveEnumLiteral(_enum, capitalizeFirstLetter(value));
 		return resolvedEnum;
 	}

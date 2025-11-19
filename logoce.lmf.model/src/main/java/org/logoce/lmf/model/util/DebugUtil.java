@@ -1,4 +1,4 @@
-package org.logoce.lmf.model.util.oldlogoce;
+package org.logoce.lmf.model.util;
 
 public final class DebugUtil
 {

@@ -22,7 +22,7 @@
 		(-contains units [0..*] (reference group=@Unit))
 		(-contains aliases [0..*] (reference group=@Alias))
 		(-contains javaWrappers [0..*] (reference @JavaWrapper))
-		(-att lPackage /javaWrappers.1 [1..1]))
+		(-att lmPackage /javaWrappers.1 [1..1]))
 
 	(Definition Group
 		(includes group=@Type parameters=../generics.0)
@@ -31,7 +31,8 @@
 		(-att concrete datatype=@boolean)
 		(-contains includes [0..*] (reference group=@Reference))
 		(-contains features [0..*] (reference group=@Feature))
-		(-contains generics [0..*] (reference group=@Generic)))
+		(-contains generics [0..*] (reference group=@Generic))
+		(+att lmBuilder /javaWrappers.2 [0..1] parameters=../generics.0))
 
 	(Group Feature
 		(includes group=@Named)
@@ -123,4 +124,5 @@
 
 	(JavaWrapper name=RawFeature domain=org.logoce.lmf.model.api.feature)
 	(JavaWrapper name=IModelPackage domain=org.logoce.lmf.model.api.model)
+	(JavaWrapper name=BuilderSupplier domain=org.logoce.lmf.model.api.model)
 )

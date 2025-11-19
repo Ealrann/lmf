@@ -2,6 +2,8 @@ package org.logoce.lmf.model.util.oldlogoce;
 
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.util.ModelUtils;
 
 import java.util.List;
 
@@ -18,12 +20,11 @@ public final class FeatureCopier
 	{
 		this.resolve = resolve;
 	}
-
+/*
 	@SuppressWarnings("unchecked")
 	public void copyFeatures(final LMObject src, final LMObject trg, final List<RawFeature<?, ?>> features)
 	{
-		// TODO
-		/*for (final var feature : features)
+		for (final var feature : features)
 		{
 			if (feature.featureSupplier().get() instanceof Relation<?, ?> reference &&
 				reference.contains())
@@ -32,13 +33,13 @@ public final class FeatureCopier
 				{
 					final var srcValue = (LMObject) src.get(reference);
 					final var trgValue = EcoreUtil.copy(srcValue);
-					trg.eSet(feature, trgValue);
+					trg.set(feature, trgValue);
 				}
 				else
 				{
-					final var srcList = (EList<EObject>) src.eGet(feature);
-					final var trgList = (EList<EObject>) trg.eGet(feature);
-					for (final EObject srcValue : srcList)
+					final var srcList = (List<LMObject>) src.get(feature);
+					final var trgList = (List<LMObject>) trg.get(feature);
+					for (final LMObject srcValue : srcList)
 					{
 						final var trgValue = EcoreUtil.copy(srcValue);
 						trgList.add(trgValue);
@@ -48,19 +49,19 @@ public final class FeatureCopier
 		}
 		for (final var feature : features)
 		{
-			final boolean isContainment = feature instanceof EReference reference && reference.isContainment();
+			final boolean isContainment = feature.featureSupplier().get() instanceof Relation<?,?> reference && reference.contains();
 			if (isContainment == false)
 			{
-				if (feature.isMany() == false)
+				if (feature.many() == false)
 				{
-					final var srcValue = src.eGet(feature);
+					final var srcValue = src.get(feature);
 					final var trgValue = resolve(src, trg, srcValue);
-					trg.eSet(feature, trgValue);
+					trg.set(feature, trgValue);
 				}
 				else
 				{
-					final var listSrc = (EList<Object>) src.eGet(feature);
-					final var listTrg = (EList<Object>) trg.eGet(feature);
+					final var listSrc = (List<Object>) src.get(feature);
+					final var listTrg = (List<Object>) trg.get(feature);
 
 					for (final var srcValue : listSrc)
 					{
@@ -69,15 +70,14 @@ public final class FeatureCopier
 					}
 				}
 			}
-		}*/
+		}
 	}
 
-/*
-	private Object resolve(final EObject src, final EObject trg, final Object srcValue)
+	private Object resolve(final LMObject src, final LMObject trg, final Object srcValue)
 	{
-		if (resolve && srcValue instanceof EObject srcEOValue)
+		if (resolve && srcValue instanceof LMObject srcEOValue)
 		{
-			return ModelUtil.containmentPath(src, srcEOValue).map(path -> path.eGet(trg)).orElse(srcEOValue);
+			return ModelUtils.containmentPath(src, srcEOValue).map(path -> path.eGet(trg)).orElse(srcEOValue);
 		}
 		else
 		{

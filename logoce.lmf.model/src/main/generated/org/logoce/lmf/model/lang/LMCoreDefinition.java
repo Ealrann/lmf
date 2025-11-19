@@ -9,6 +9,7 @@ import java.lang.String;
 import java.util.Arrays;
 import java.util.List;
 import org.logoce.lmf.model.api.feature.RawFeature;
+import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.impl.AliasImpl;
 import org.logoce.lmf.model.lang.impl.AttributeImpl;
@@ -52,8 +53,8 @@ public interface LMCoreDefinition {
       Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationImpl<>("units", true, true, false, MetaModel.Features.units, new ReferenceImpl<>(() -> Groups.UNIT, List.of()), false, true);
       Relation<Alias, List<Alias>> ALIASES = new RelationImpl<>("aliases", true, true, false, MetaModel.Features.aliases, new ReferenceImpl<>(() -> Groups.ALIAS, List.of()), false, true);
       Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationImpl<>("javaWrappers", true, true, false, MetaModel.Features.javaWrappers, new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER, List.of()), false, true);
-      Attribute<IModelPackage, IModelPackage> L_PACKAGE = new AttributeImpl<>("lPackage", true, false, true, MetaModel.Features.lPackage, JavaWrappers.I_MODEL_PACKAGE, null, List.of());
-      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, L_PACKAGE);
+      Attribute<IModelPackage, IModelPackage> LM_PACKAGE = new AttributeImpl<>("lmPackage", true, false, true, MetaModel.Features.lmPackage, JavaWrappers.I_MODEL_PACKAGE, null, List.of());
+      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE);
     }
 
     interface CONCEPT {
@@ -67,7 +68,8 @@ public interface LMCoreDefinition {
       Relation<Reference<?>, List<Reference<?>>> INCLUDES = new RelationImpl<>("includes", true, true, false, Group.Features.includes, new ReferenceImpl<>(() -> Groups.REFERENCE, List.of()), false, true);
       Relation<Feature<?, ?>, List<Feature<?, ?>>> FEATURES = new RelationImpl<>("features", true, true, false, Group.Features.features, new ReferenceImpl<>(() -> Groups.FEATURE, List.of()), false, true);
       Relation<Generic<?>, List<Generic<?>>> GENERICS = new RelationImpl<>("generics", true, true, false, Group.Features.generics, new ReferenceImpl<>(() -> Groups.GENERIC, List.of()), false, true);
-      List<Feature<?, ?>> ALL = List.of(NAME, CONCRETE, INCLUDES, FEATURES, GENERICS);
+      Attribute<BuilderSupplier<?>, BuilderSupplier<?>> LM_BUILDER = new AttributeImpl<>("lmBuilder", false, false, false, Group.Features.lmBuilder, JavaWrappers.BUILDER_SUPPLIER, null, List.of());
+      List<Feature<?, ?>> ALL = List.of(NAME, CONCRETE, INCLUDES, FEATURES, GENERICS, LM_BUILDER);
     }
 
     interface FEATURE {
@@ -228,6 +230,7 @@ public interface LMCoreDefinition {
   interface JavaWrappers {
     JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "org.logoce.lmf.model.api.feature");
     JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "org.logoce.lmf.model.api.model");
-    List<JavaWrapper<?>> ALL = List.of(RAW_FEATURE, I_MODEL_PACKAGE);
+    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperImpl<>("BuilderSupplier", "org.logoce.lmf.model.api.model");
+    List<JavaWrapper<?>> ALL = List.of(RAW_FEATURE, I_MODEL_PACKAGE, BUILDER_SUPPLIER);
   }
 }
