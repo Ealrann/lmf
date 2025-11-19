@@ -15,23 +15,14 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
   private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(org.logoce.lmf.model.lang.Attribute.Features.name, org.logoce.lmf.model.lang.Attribute::name).add(org.logoce.lmf.model.lang.Attribute.Features.immutable, org.logoce.lmf.model.lang.Attribute::immutable).add(org.logoce.lmf.model.lang.Attribute.Features.many, org.logoce.lmf.model.lang.Attribute::many).add(org.logoce.lmf.model.lang.Attribute.Features.mandatory, org.logoce.lmf.model.lang.Attribute::mandatory).add(org.logoce.lmf.model.lang.Attribute.Features.rawFeature, org.logoce.lmf.model.lang.Attribute::rawFeature).add(org.logoce.lmf.model.lang.Attribute.Features.datatype, org.logoce.lmf.model.lang.Attribute::datatype).add(org.logoce.lmf.model.lang.Attribute.Features.defaultValue, org.logoce.lmf.model.lang.Attribute::defaultValue).add(org.logoce.lmf.model.lang.Attribute.Features.parameters, org.logoce.lmf.model.lang.Attribute::parameters).build();
-
   private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>().build();
-
   private final String name;
-
   private final boolean immutable;
-
   private final boolean many;
-
   private final boolean mandatory;
-
   private final RawFeature<UnaryType, EffectiveType> rawFeature;
-
   private final Datatype<UnaryType> datatype;
-
   private final String defaultValue;
-
   private final List<Generic<?>> parameters;
 
   public AttributeImpl(final String name, final boolean immutable, final boolean many,

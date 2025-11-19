@@ -17,13 +17,9 @@ import org.logoce.lmf.model.lang.impl.GenericImpl;
 
 public final class GenericBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<GenericBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder<?>>().add(Generic.Features.name, GenericBuilder::name).add(Generic.Features.boundType, GenericBuilder::boundType).build();
-
   private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder<?>>().add(Generic.Features.type, GenericBuilder::_type).build();
-
   private String name;
-
   private Supplier<Type<T>> type = () -> null;
-
   private BoundType boundType;
 
   @Override
@@ -55,7 +51,8 @@ public final class GenericBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public Generic<T> build() {
-    return new GenericImpl<>(name, type.get(), boundType);
+    final var built = new GenericImpl<T>(name, type.get(), boundType);
+    return built;
   }
 
   @Override

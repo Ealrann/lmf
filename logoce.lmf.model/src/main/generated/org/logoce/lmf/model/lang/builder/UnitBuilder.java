@@ -15,17 +15,11 @@ import org.logoce.lmf.model.lang.impl.UnitImpl;
 
 public final class UnitBuilder<T> implements Builder<T> {
   private static final FeatureInserter<UnitBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<UnitBuilder<?>>().add(Unit.Features.name, UnitBuilder::name).add(Unit.Features.matcher, UnitBuilder::matcher).add(Unit.Features.defaultValue, UnitBuilder::defaultValue).add(Unit.Features.primitive, UnitBuilder::primitive).add(Unit.Features.extractor, UnitBuilder::extractor).build();
-
   private static final RelationLazyInserter<UnitBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<UnitBuilder<?>>().build();
-
   private String name;
-
   private String matcher;
-
   private String defaultValue;
-
   private Primitive primitive = Primitive.String;
-
   private String extractor;
 
   @Override
@@ -60,7 +54,8 @@ public final class UnitBuilder<T> implements Builder<T> {
 
   @Override
   public Unit<T> build() {
-    return new UnitImpl<>(name, matcher, defaultValue, primitive, extractor);
+    final var built = new UnitImpl<T>(name, matcher, defaultValue, primitive, extractor);
+    return built;
   }
 
   @Override

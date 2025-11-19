@@ -15,11 +15,8 @@ import org.logoce.lmf.model.util.BuildUtils;
 
 public final class ReferenceImpl<T extends LMObject> extends FeaturedObject implements Reference<T> {
   private static final FeatureGetter<Reference<?>> GET_MAP = new FeatureGetter.Builder<Reference<?>>().add(org.logoce.lmf.model.lang.Reference.Features.group, org.logoce.lmf.model.lang.Reference::group).add(org.logoce.lmf.model.lang.Reference.Features.parameters, org.logoce.lmf.model.lang.Reference::parameters).build();
-
   private static final FeatureSetter<Reference<?>> SET_MAP = new FeatureSetter.Builder<Reference<?>>().build();
-
   private final Supplier<Concept<T>> group;
-
   private final List<Supplier<Concept<?>>> parameters;
 
   public ReferenceImpl(final Supplier<Concept<T>> group,

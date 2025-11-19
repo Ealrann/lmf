@@ -2,7 +2,6 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -16,22 +15,17 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Reference;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<GroupBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>().add(Group.Features.name, GroupBuilder::name).add(Group.Features.concrete, GroupBuilder::concrete).build();
-
   private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.Features.includes, GroupBuilder::addInclude).add(Group.Features.features, GroupBuilder::addFeature).add(Group.Features.generics, GroupBuilder::addGeneric).build();
-
   private String name;
-
   private boolean concrete;
-
-  private final List<Supplier<Reference<?>>> includes = new ArrayList<>();
-
-  private final List<Supplier<Feature<?, ?>>> features = new ArrayList<>();
-
-  private final List<Supplier<Generic<?>>> generics = new ArrayList<>();
+  private final List<Supplier<Reference<?>>> includes = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Feature<?, ?>>> features = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Generic<?>>> generics = new ObservableList<>((type, elements) -> {});
 
   @Override
   public GroupBuilder<T> name(String name) {
@@ -68,7 +62,8 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
     final var builtIncludes = BuildUtils.collectSuppliers(includes);
     final var builtFeatures = BuildUtils.collectSuppliers(features);
     final var builtGenerics = BuildUtils.collectSuppliers(generics);
-    return new GroupImpl<>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
+    final var built = new GroupImpl<T>(name, concrete, builtIncludes, builtFeatures, builtGenerics);
+    return built;
   }
 
   @Override

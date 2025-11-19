@@ -14,13 +14,11 @@ public interface JavaWrapper<T> extends Datatype<T> {
 
   interface Features extends Datatype.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
-
     RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.JAVA_WRAPPER.DOMAIN);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<JavaWrapper<T>> {
     Builder<T> name(String name);
-
     Builder<T> domain(String domain);
   }
 }

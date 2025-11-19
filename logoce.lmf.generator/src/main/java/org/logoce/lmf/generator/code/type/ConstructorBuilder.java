@@ -1,5 +1,6 @@
 package org.logoce.lmf.generator.code.type;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -67,15 +68,12 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		final var feature = resolution.feature();
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtils.root(group);
-		final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
-		final var constantGroupName = GenUtils.toConstantCase(group.name());
-		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
+		final var domainType = ClassName.get(model.domain(), group.name());
 
-		return CodeBlock.of("setContainer($N, $T.Features.$N.$N)",
+		return CodeBlock.of("setContainer($N, $T.Features.$N)",
 							paramName,
-							modelDefinition,
-							constantGroupName,
-							constantFeatureName);
+							domainType,
+							feature.name());
 	}
 
 	private record ParameterCode(ParameterSpec parameterSpec, CodeBlock assign, Optional<CodeBlock> notif)

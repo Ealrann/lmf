@@ -24,7 +24,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 	public BuildMethodBuilder(final Group<?> group)
 	{
 		this.interfaceType = group.adapt(GroupInterfaceType.class);
-		this.buildType = group.adapt(GroupImplementationType.class).raw();
+		this.buildType = group.adapt(GroupImplementationType.class).parametrized();
 	}
 
 	@Override
@@ -49,9 +49,8 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 												 .map(BuildArgument::argumentCodeBlock)
 												 .collect(CodeBlock.joining(", "));
 
-		final var constructorBlock = CodeBlock.builder().add("final var built = new $T", buildType);
-		if (!interfaceType.parameters().isEmpty()) constructorBlock.add("<>");
-		constructorBlock.add("($L)", constructorArguments);
+		final var constructorBlock = CodeBlock.builder()
+											  .add("final var built = new $T($L)", buildType, constructorArguments);
 		spec.addStatement(constructorBlock.build());
 
 		arguments.stream()

@@ -12,11 +12,8 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
   private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>().add(org.logoce.lmf.model.lang.Enum.Features.name, org.logoce.lmf.model.lang.Enum::name).add(org.logoce.lmf.model.lang.Enum.Features.literals, org.logoce.lmf.model.lang.Enum::literals).build();
-
   private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>().build();
-
   private final String name;
-
   private final List<String> literals;
 
   public EnumImpl(final String name, final List<String> literals) {

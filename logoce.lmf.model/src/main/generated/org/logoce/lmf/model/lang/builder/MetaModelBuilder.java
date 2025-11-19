@@ -2,7 +2,6 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IModelPackage;
@@ -19,29 +18,20 @@ import org.logoce.lmf.model.lang.MetaModel.Builder;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.lang.impl.MetaModelImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class MetaModelBuilder implements Builder {
   private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.name, MetaModelBuilder::name).add(MetaModel.Features.domain, MetaModelBuilder::domain).add(MetaModel.Features.imports, MetaModelBuilder::addImport).add(MetaModel.Features.lPackage, MetaModelBuilder::lPackage).build();
-
   private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.groups, MetaModelBuilder::addGroup).add(MetaModel.Features.enums, MetaModelBuilder::addEnum).add(MetaModel.Features.units, MetaModelBuilder::addUnit).add(MetaModel.Features.aliases, MetaModelBuilder::addAliase).add(MetaModel.Features.javaWrappers, MetaModelBuilder::addJavaWrapper).build();
-
   private String name;
-
   private String domain;
-
-  private final List<String> imports = new ArrayList<>();
-
-  private final List<Supplier<Group<?>>> groups = new ArrayList<>();
-
-  private final List<Supplier<Enum<?>>> enums = new ArrayList<>();
-
-  private final List<Supplier<Unit<?>>> units = new ArrayList<>();
-
-  private final List<Supplier<Alias>> aliases = new ArrayList<>();
-
-  private final List<Supplier<JavaWrapper<?>>> javaWrappers = new ArrayList<>();
-
+  private final List<String> imports = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Group<?>>> groups = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Enum<?>>> enums = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Unit<?>>> units = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Alias>> aliases = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<JavaWrapper<?>>> javaWrappers = new ObservableList<>((type, elements) -> {});
   private IModelPackage lPackage;
 
   @Override
@@ -105,7 +95,8 @@ public final class MetaModelBuilder implements Builder {
     final var builtUnits = BuildUtils.collectSuppliers(units);
     final var builtAliases = BuildUtils.collectSuppliers(aliases);
     final var builtJavaWrappers = BuildUtils.collectSuppliers(javaWrappers);
-    return new MetaModelImpl(name, domain, imports, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lPackage);
+    final var built = new MetaModelImpl(name, domain, imports, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lPackage);
+    return built;
   }
 
   @Override

@@ -4,6 +4,7 @@ import com.squareup.javapoet.TypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
+import org.logoce.lmf.model.lang.Feature;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -21,6 +22,16 @@ public final class InterfaceMethodUtil
 										InterfaceMethodUtil::interfaceReturnType);
 	}
 
+	public static FeatureMethodBuilder setterMethodBuilder()
+	{
+		return new FeatureMethodBuilder(METHOD_MODIFIERS,
+										FeatureResolution::name,
+										f -> TypeName.VOID,
+										Optional.of(FeatureResolution::parameterSpec),
+										Optional.empty(),
+										List.of());
+	}
+
 	public static FeatureMethodBuilder builderMethodBuilder(TypeName typedBuilder)
 	{
 		return new FeatureMethodBuilder(BUILDER_METHOD_MODIFIERS,
@@ -29,6 +40,12 @@ public final class InterfaceMethodUtil
 										Optional.of(FeatureResolution::builderParameterSpec),
 										Optional.empty(),
 										List.of());
+	}
+
+	public static boolean isMutableSingle(final FeatureResolution resolution)
+	{
+		final Feature<?, ?> feature = resolution.feature();
+		return !feature.many() && !feature.immutable();
 	}
 
 	private static TypeName interfaceReturnType(FeatureResolution resolution)

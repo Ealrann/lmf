@@ -14,13 +14,11 @@ public interface Alias extends Named {
 
   interface Features extends Named.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
-
     RawFeature<String, String> value = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.ALIAS.VALUE);
   }
 
   interface Builder extends IFeaturedObject.Builder<Alias> {
     Builder name(String name);
-
     Builder value(String value);
   }
 }

@@ -14,23 +14,14 @@ import org.logoce.lmf.model.lang.Relation;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> extends FeaturedObject implements Relation<UnaryType, EffectiveType> {
   private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(org.logoce.lmf.model.lang.Relation.Features.name, org.logoce.lmf.model.lang.Relation::name).add(org.logoce.lmf.model.lang.Relation.Features.immutable, org.logoce.lmf.model.lang.Relation::immutable).add(org.logoce.lmf.model.lang.Relation.Features.many, org.logoce.lmf.model.lang.Relation::many).add(org.logoce.lmf.model.lang.Relation.Features.mandatory, org.logoce.lmf.model.lang.Relation::mandatory).add(org.logoce.lmf.model.lang.Relation.Features.rawFeature, org.logoce.lmf.model.lang.Relation::rawFeature).add(org.logoce.lmf.model.lang.Relation.Features.reference, org.logoce.lmf.model.lang.Relation::reference).add(org.logoce.lmf.model.lang.Relation.Features.lazy, org.logoce.lmf.model.lang.Relation::lazy).add(org.logoce.lmf.model.lang.Relation.Features.contains, org.logoce.lmf.model.lang.Relation::contains).build();
-
   private static final FeatureSetter<Relation<?, ?>> SET_MAP = new FeatureSetter.Builder<Relation<?, ?>>().build();
-
   private final String name;
-
   private final boolean immutable;
-
   private final boolean many;
-
   private final boolean mandatory;
-
   private final RawFeature<UnaryType, EffectiveType> rawFeature;
-
   private final Reference<UnaryType> reference;
-
   private final boolean lazy;
-
   private final boolean contains;
 
   public RelationImpl(final String name, final boolean immutable, final boolean many,
@@ -44,7 +35,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
     this.reference = reference;
     this.lazy = lazy;
     this.contains = contains;
-    setContainer(reference, Features.reference);
+    setContainer(reference, Relation.Features.reference);
   }
 
   @Override

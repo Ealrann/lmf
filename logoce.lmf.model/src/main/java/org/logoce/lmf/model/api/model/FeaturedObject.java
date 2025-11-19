@@ -4,15 +4,18 @@ import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
+import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.impl.ContainerChange;
 import org.logoce.lmf.model.notification.impl.RelationNotificationBuilder;
 import org.logoce.lmf.model.notification.impl.SetNotifiation;
+import org.logoce.lmf.model.notification.list.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public abstract class FeaturedObject extends AdaptableStructureObject implements IFeaturedObject
@@ -83,6 +86,13 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 	protected FeatureSetter<?> setterMap() {return null;}
 
+	protected final <E> List<E> newObservableList(final Feature<E, ?> feature)
+	{
+		final var isRelation = feature instanceof Relation;
+		final var isContainment = feature instanceof Relation<?, ?> rel && rel.contains();
+		return new ObservableList<>(new ObservableListHandler<>(this, feature.rawFeature(), isRelation, isContainment));
+	}
+
 	protected final void setContainer(final LMObject child, final RawFeature<?, ?> feature)
 	{
 		if (child != null)
@@ -109,6 +119,76 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	public final void sulkStructure(final Consumer<Notification> listener)
 	{
 		structureListeners.remove(listener);
+	}
+
+	private record ObservableListHandler<E>(FeaturedObject owner,
+										   RawFeature<E, ?> rawFeature,
+										   boolean relation,
+										   boolean containment)
+			implements BiConsumer<Notification.EventType, List<E>>
+	{
+		@Override
+		public void accept(final Notification.EventType eventType, final List<E> elements)
+		{
+			if (elements.isEmpty()) return;
+
+			final Notification notification;
+
+			if (!relation)
+			{
+				Object newValue = null;
+				Object oldValue = null;
+
+				switch (eventType)
+				{
+					case ADD, ADD_MANY ->
+							newValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
+					case REMOVE, REMOVE_MANY ->
+							oldValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
+					default -> {
+						return;
+					}
+				}
+
+				notification = new SetNotifiation((LMObject) owner, rawFeature, newValue, oldValue);
+			}
+			else
+			{
+				@SuppressWarnings("unchecked")
+				final var children = (List<? extends LMObject>) elements;
+
+				if (containment && (eventType == Notification.EventType.ADD ||
+									eventType == Notification.EventType.ADD_MANY))
+				{
+					if (eventType == Notification.EventType.ADD)
+					{
+						owner.setContainer(children.getFirst(), rawFeature);
+					}
+					else
+					{
+						owner.setContainer(children, rawFeature);
+					}
+				}
+
+				notification = switch (eventType)
+				{
+					case ADD -> RelationNotificationBuilder.insert((LMObject) owner, rawFeature, children.getFirst());
+					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, rawFeature, children);
+					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner, rawFeature, children.getFirst());
+					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, rawFeature, children);
+					default -> null;
+				};
+
+				if (notification == null) return;
+
+				if (containment)
+				{
+					owner.structureNotify(notification);
+				}
+			}
+
+			owner.eNotify(notification);
+		}
 	}
 
 	protected static final class ContainmentUtils

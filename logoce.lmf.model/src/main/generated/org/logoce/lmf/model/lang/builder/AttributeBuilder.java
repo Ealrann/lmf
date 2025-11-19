@@ -3,7 +3,6 @@ package org.logoce.lmf.model.lang.builder;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
@@ -16,28 +15,20 @@ import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.AttributeImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder<UnaryType, EffectiveType> {
   private static final FeatureInserter<AttributeBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.name, AttributeBuilder::name).add(Attribute.Features.immutable, AttributeBuilder::immutable).add(Attribute.Features.many, AttributeBuilder::many).add(Attribute.Features.mandatory, AttributeBuilder::mandatory).add(Attribute.Features.rawFeature, AttributeBuilder::_rawFeature).add(Attribute.Features.defaultValue, AttributeBuilder::defaultValue).build();
-
   private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.datatype, AttributeBuilder::_datatype).add(Attribute.Features.parameters, AttributeBuilder::addParameter).build();
-
   private String name;
-
   private boolean immutable;
-
   private boolean many;
-
   private boolean mandatory;
-
   private RawFeature<UnaryType, EffectiveType> rawFeature;
-
   private Supplier<Datatype<UnaryType>> datatype;
-
   private String defaultValue;
-
-  private final List<Supplier<Generic<?>>> parameters = new ArrayList<>();
+  private final List<Supplier<Generic<?>>> parameters = new ObservableList<>((type, elements) -> {});
 
   @Override
   public AttributeBuilder<UnaryType, EffectiveType> name(String name) {
@@ -110,7 +101,8 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   @Override
   public Attribute<UnaryType, EffectiveType> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    return new AttributeImpl<>(name, immutable, many, mandatory, rawFeature, datatype.get(), defaultValue, builtParameters);
+    final var built = new AttributeImpl<UnaryType, EffectiveType>(name, immutable, many, mandatory, rawFeature, datatype.get(), defaultValue, builtParameters);
+    return built;
   }
 
   @Override

@@ -18,7 +18,8 @@ import java.util.List;
 public final class InterfaceGenerator
 {
 	private static final boolean ENUM_NOTIFICATION_FEATURES = false;
-	private static final FeatureMethodBuilder METHOD_BUILDER = InterfaceMethodUtil.methodBuilder();
+	private static final FeatureMethodBuilder GETTER_METHOD_BUILDER = InterfaceMethodUtil.methodBuilder();
+	private static final FeatureMethodBuilder SETTER_METHOD_BUILDER = InterfaceMethodUtil.setterMethodBuilder();
 	private static final InterfaceBuildMethodBuilder buildMethod = new InterfaceBuildMethodBuilder();
 
 	private final File targetDirectory;
@@ -59,7 +60,13 @@ public final class InterfaceGenerator
 
 		featureResolutions.stream()
 						  .filter(this::matchGroup)
-						  .map(METHOD_BUILDER::build)
+						  .map(GETTER_METHOD_BUILDER::build)
+						  .forEach(interfaceBuilder::addMethod);
+
+		featureResolutions.stream()
+						  .filter(this::matchGroup)
+						  .filter(InterfaceMethodUtil::isMutableSingle)
+						  .map(SETTER_METHOD_BUILDER::build)
 						  .forEach(interfaceBuilder::addMethod);
 
 		final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build()).build();

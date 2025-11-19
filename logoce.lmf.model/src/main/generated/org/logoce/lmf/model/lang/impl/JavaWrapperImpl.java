@@ -11,11 +11,8 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrapper<T> {
   private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(org.logoce.lmf.model.lang.JavaWrapper.Features.name, org.logoce.lmf.model.lang.JavaWrapper::name).add(org.logoce.lmf.model.lang.JavaWrapper.Features.domain, org.logoce.lmf.model.lang.JavaWrapper::domain).build();
-
   private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>().build();
-
   private final String name;
-
   private final String domain;
 
   public JavaWrapperImpl(final String name, final String domain) {

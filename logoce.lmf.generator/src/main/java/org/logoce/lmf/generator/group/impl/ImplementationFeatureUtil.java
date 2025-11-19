@@ -1,5 +1,6 @@
 package org.logoce.lmf.generator.group.impl;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -26,6 +27,8 @@ import java.util.Optional;
 public final class ImplementationFeatureUtil
 {
 	private static final Modifier[] MODIFIERS = {Modifier.PUBLIC};
+	private static final ClassName SET_NOTIFICATION_TYPE = ClassName.get(
+			"org.logoce.lmf.model.notification.impl", "SetNotifiation");
 	private static final FeatureMethodBuilder GETTER_BUILDER = ImplementationFeatureUtil.getterBuilder();
 	private static final FeatureMethodBuilder SETTER_BUILDER = ImplementationFeatureUtil.setterBuilder();
 	private static final FeatureFieldBuilder FIELD_BUILDER = ImplementationFeatureUtil.fieldBuilder();
@@ -79,14 +82,18 @@ public final class ImplementationFeatureUtil
 		final var many = feature.many();
 		final var immutable = feature.immutable();
 
-		if (many && !immutable)
-		{
-			return Optional.of(CodeBlock.of("new $T<>((type, elements) -> {})", ConstantTypes.OBSERVABLE_LIST));
-		}
-		else
-		{
-			return Optional.empty();
-		}
+		if (!many || immutable) return Optional.empty();
+
+		final var group = (Group<?>) feature.lmContainer();
+		final var model = (MetaModel) ModelUtils.root(group);
+		final var modelResolution = model.adapt(ModelResolution.class);
+		final var groupConstantName = GenUtils.toConstantCase(group.name());
+		final var featureConstantName = GenUtils.toConstantCase(feature.name());
+
+		return Optional.of(CodeBlock.of("newObservableList($T.Features.$N.$N)",
+										modelResolution.modelDefinition,
+										groupConstantName,
+										featureConstantName));
 	}
 
 	private static ConstructorBuilder parameterBuilder()
@@ -111,7 +118,7 @@ public final class ImplementationFeatureUtil
 										f -> TypeName.VOID,
 										Optional.of(FeatureResolution::parameterSpec),
 										Optional.of(ImplementationFeatureUtil::featureChangeStatement),
-										List.of());
+										List.of(ConstantTypes.OVERRIDE));
 	}
 
 	private static List<CodeBlock> featureChangeStatement(FeatureParameter parameter)
@@ -120,27 +127,39 @@ public final class ImplementationFeatureUtil
 		final var resolution = parameter.feature();
 		final var feature = resolution.feature;
 		final var assignment = ImplementationCodeUtil.assignationStatement(feature, paramName);
-		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();
 
-		return containment
-			   ? List.of(assignment, containmentSetStatement(resolution, paramName))
-			   : List.of(assignment);
-	}
-
-	private static CodeBlock containmentSetStatement(final FeatureResolution resolution, final String paramName)
-	{
-		final var feature = resolution.feature();
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtils.root(group);
-		final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
-		final var constantGroupName = GenUtils.toConstantCase(group.name());
-		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
+		final var domainType = ClassName.get(model.domain(), group.name());
+		final var rawFeatureExpr = CodeBlock.of("$T.Features.$N", domainType, feature.name());
 
-		return CodeBlock.of("setContainer($N, $T.Features.$N.$N)",
-							paramName,
-							modelDefinition,
-							constantGroupName,
-							constantFeatureName);
+		final var oldValue = CodeBlock.of("final var oldValue = this.$N", feature.name());
+		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();
+		if (containment)
+		{
+			final var setContainer = containmentSetStatement(rawFeatureExpr, paramName);
+			return List.of(oldValue,
+						   assignment,
+						   setContainer,
+						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
+										SET_NOTIFICATION_TYPE,
+										rawFeatureExpr,
+										paramName));
+		}
+		else
+		{
+			return List.of(oldValue,
+						   assignment,
+						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
+										SET_NOTIFICATION_TYPE,
+										rawFeatureExpr,
+										paramName));
+		}
+	}
+
+	private static CodeBlock containmentSetStatement(final CodeBlock rawFeatureExpr, final String paramName)
+	{
+		return CodeBlock.of("setContainer($N, $L)", paramName, rawFeatureExpr);
 	}
 
 	private static TypeName fieldFeatureType(FeatureResolution resolution)

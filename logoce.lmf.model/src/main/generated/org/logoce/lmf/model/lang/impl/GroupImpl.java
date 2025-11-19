@@ -15,17 +15,11 @@ import org.logoce.lmf.model.lang.Reference;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T> {
   private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(org.logoce.lmf.model.lang.Group.Features.name, org.logoce.lmf.model.lang.Group::name).add(org.logoce.lmf.model.lang.Group.Features.concrete, org.logoce.lmf.model.lang.Group::concrete).add(org.logoce.lmf.model.lang.Group.Features.includes, org.logoce.lmf.model.lang.Group::includes).add(org.logoce.lmf.model.lang.Group.Features.features, org.logoce.lmf.model.lang.Group::features).add(org.logoce.lmf.model.lang.Group.Features.generics, org.logoce.lmf.model.lang.Group::generics).build();
-
   private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>().build();
-
   private final String name;
-
   private final boolean concrete;
-
   private final List<Reference<?>> includes;
-
   private final List<Feature<?, ?>> features;
-
   private final List<Generic<?>> generics;
 
   public GroupImpl(final String name, final boolean concrete, final List<Reference<?>> includes,
@@ -35,9 +29,9 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
     this.includes = List.copyOf(includes);
     this.features = List.copyOf(features);
     this.generics = List.copyOf(generics);
-    setContainer(includes, Features.includes);
-    setContainer(features, Features.features);
-    setContainer(generics, Features.generics);
+    setContainer(includes, Group.Features.includes);
+    setContainer(features, Group.Features.features);
+    setContainer(generics, Group.Features.generics);
   }
 
   @Override

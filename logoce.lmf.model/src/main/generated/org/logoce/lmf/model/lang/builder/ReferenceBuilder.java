@@ -2,7 +2,6 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.SuppressWarnings;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -14,15 +13,13 @@ import org.logoce.lmf.model.lang.Reference;
 import org.logoce.lmf.model.lang.Reference.Builder;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.ReferenceImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
 
 public final class ReferenceBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<ReferenceBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<ReferenceBuilder<?>>().build();
-
   private static final RelationLazyInserter<ReferenceBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<ReferenceBuilder<?>>().add(Reference.Features.group, ReferenceBuilder::_group).add(Reference.Features.parameters, ReferenceBuilder::addParameter).build();
-
   private Supplier<Concept<T>> group;
-
-  private final List<Supplier<Concept<?>>> parameters = new ArrayList<>();
+  private final List<Supplier<Concept<?>>> parameters = new ObservableList<>((type, elements) -> {});
 
   @Override
   public ReferenceBuilder<T> group(Supplier<Concept<T>> group) {
@@ -47,7 +44,8 @@ public final class ReferenceBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public Reference<T> build() {
-    return new ReferenceImpl<>(group, parameters);
+    final var built = new ReferenceImpl<T>(group, parameters);
+    return built;
   }
 
   @Override

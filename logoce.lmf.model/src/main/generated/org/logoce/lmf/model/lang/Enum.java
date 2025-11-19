@@ -15,13 +15,11 @@ public interface Enum<T> extends Datatype<T> {
 
   interface Features extends Datatype.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
-
     RawFeature<String, List<String>> literals = new RawFeature<>(true,false,() -> LMCoreDefinition.Features.ENUM.LITERALS);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<Enum<T>> {
     Builder<T> name(String name);
-
     Builder<T> addLiteral(String literal);
   }
 }
