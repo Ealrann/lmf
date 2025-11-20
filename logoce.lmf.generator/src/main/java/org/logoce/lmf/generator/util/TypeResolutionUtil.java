@@ -86,10 +86,9 @@ public class TypeResolutionUtil
 		}
 		else if (type instanceof JavaWrapper<?> wrapper)
 		{
-			final var domain = wrapper.domain();
-			final var name = wrapper.name();
-			final var className = ClassName.get(domain, name);
-			final var genericCount = GenUtils.genericCount(domain + "." + name);
+			final var qualifiedName = wrapper.qualifiedClassName();
+			final var className = ClassName.bestGuess(qualifiedName);
+			final var genericCount = GenUtils.genericCount(qualifiedName);
 			if (genericCount != 0)
 			{
 				return TypeParameter.of(className, genericCount);

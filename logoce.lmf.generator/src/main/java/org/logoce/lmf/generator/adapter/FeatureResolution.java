@@ -174,10 +174,9 @@ public final class FeatureResolution implements IAdapter
 			{
 				final var javaWrapper = (JavaWrapper<?>) datatype;
 				final var parameters = attribute.parameters();
-				final var domain = javaWrapper.domain();
-				final var name = javaWrapper.name();
-				final var className = ClassName.get(domain, name);
-				final var genericCount = GenUtils.genericCount(domain + "." + name);
+				final var qualifiedName = javaWrapper.qualifiedClassName();
+				final var className = ClassName.bestGuess(qualifiedName);
+				final var genericCount = GenUtils.genericCount(qualifiedName);
 				if (genericCount != 0)
 				{
 					if (parameters.isEmpty())

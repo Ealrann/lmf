@@ -15,17 +15,17 @@ public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<Jav
 	@Override
 	public FieldSpec build(JavaWrapper<?> input)
 	{
-		final var domain = input.domain();
 		final var name = input.name();
-		final var type = ClassName.get(domain, name);
-		final var genericCount = GenUtils.genericCount(domain + "." + name);
+		final var qualifiedName = input.qualifiedClassName();
+		final var type = ClassName.bestGuess(qualifiedName);
+		final var genericCount = GenUtils.genericCount(qualifiedName);
 		final var typed = TypeParameter.of(type, genericCount);
 
 		final var fullType = TypeParameter.of(JAVA_WRAPPER_TYPE, typed.parametrized());
 		final var constantName = GenUtils.toConstantCase(name);
 
 		return FieldSpec.builder(fullType.parametrized(), constantName, modifiers)
-						.initializer("new $T<>($S, $S)", JAVA_WRAPPER_IMPL_TYPE, name, domain)
+						.initializer("new $T<>($S, $S)", JAVA_WRAPPER_IMPL_TYPE, name, qualifiedName)
 						.build();
 	}
 }

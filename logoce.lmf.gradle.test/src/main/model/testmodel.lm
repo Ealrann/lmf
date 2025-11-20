@@ -88,14 +88,14 @@
 		(-refers group lazy [1..1] (reference group=@Concept parameters=../../generics.0))
 		(-refers parameters lazy [0..*] (reference group=@Concept)))
 
-	(Group Concept
+	(Group Concept 
 		(includes @Named)
 		(Generic name=T))
 
 	(Definition JavaWrapper
 		(Generic name=T)
 		(includes group=@Datatype parameters=../generics.0)
-		(-att name=domain /units.7 mandatory))
+		(-att name=qualifiedClassName /units.7 mandatory))
 
 	(Unit name=matcher matcher="rgx_match:<(.+?)>")
 	(Unit name=extractor matcher="rgx_match:<(.+?)>")

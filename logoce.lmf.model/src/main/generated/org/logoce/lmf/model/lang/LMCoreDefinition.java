@@ -173,8 +173,8 @@ public interface LMCoreDefinition {
 
     interface JAVA_WRAPPER {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, String> DOMAIN = new AttributeImpl<>("domain", true, false, true, JavaWrapper.Features.domain, Units.STRING, null, List.of());
-      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN);
+      Attribute<String, String> QUALIFIED_CLASS_NAME = new AttributeImpl<>("qualifiedClassName", true, false, true, JavaWrapper.Features.qualifiedClassName, Units.STRING, null, List.of());
+      List<Feature<?, ?>> ALL = List.of(NAME, QUALIFIED_CLASS_NAME);
     }
   }
 
@@ -257,9 +257,9 @@ public interface LMCoreDefinition {
   }
 
   interface JavaWrappers {
-    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "org.logoce.lmf.model.api.feature");
-    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "org.logoce.lmf.model.api.model");
-    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperImpl<>("BuilderSupplier", "org.logoce.lmf.model.api.model");
+    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "org.logoce.lmf.model.api.feature.RawFeature");
+    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "org.logoce.lmf.model.api.model.IModelPackage");
+    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperImpl<>("BuilderSupplier", "org.logoce.lmf.model.api.model.BuilderSupplier");
     List<JavaWrapper<?>> ALL = List.of(RAW_FEATURE, I_MODEL_PACKAGE, BUILDER_SUPPLIER);
   }
 }

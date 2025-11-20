@@ -10,14 +10,14 @@ import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrapper<T> {
-  private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(org.logoce.lmf.model.lang.JavaWrapper.Features.name, org.logoce.lmf.model.lang.JavaWrapper::name).add(org.logoce.lmf.model.lang.JavaWrapper.Features.domain, org.logoce.lmf.model.lang.JavaWrapper::domain).build();
+  private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(org.logoce.lmf.model.lang.JavaWrapper.Features.name, org.logoce.lmf.model.lang.JavaWrapper::name).add(org.logoce.lmf.model.lang.JavaWrapper.Features.qualifiedClassName, org.logoce.lmf.model.lang.JavaWrapper::qualifiedClassName).build();
   private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>().build();
   private final String name;
-  private final String domain;
+  private final String qualifiedClassName;
 
-  public JavaWrapperImpl(final String name, final String domain) {
+  public JavaWrapperImpl(final String name, final String qualifiedClassName) {
     this.name = name;
-    this.domain = domain;
+    this.qualifiedClassName = qualifiedClassName;
   }
 
   @Override
@@ -26,8 +26,8 @@ public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrap
   }
 
   @Override
-  public String domain() {
-    return domain;
+  public String qualifiedClassName() {
+    return qualifiedClassName;
   }
 
   @Override

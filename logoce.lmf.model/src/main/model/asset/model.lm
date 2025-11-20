@@ -107,7 +107,7 @@
 	(Definition JavaWrapper
 		(Generic name=T)
 		(includes group=@Datatype parameters=../generics.0)
-		(-att name=domain /units.7 mandatory))
+		(-att name=qualifiedClassName /units.7 mandatory))
 
 	(Unit name=matcher matcher="rgx_match:<(.+?)>")
 	(Unit name=extractor matcher="rgx_match:<(.+?)>")
@@ -133,7 +133,7 @@
 	(Alias [0..*] value="mandatory=false many")
 	(Alias [1..*] value="mandatory many")
 
-	(JavaWrapper name=RawFeature domain=org.logoce.lmf.model.api.feature)
-	(JavaWrapper name=IModelPackage domain=org.logoce.lmf.model.api.model)
-	(JavaWrapper name=BuilderSupplier domain=org.logoce.lmf.model.api.model)
+	(JavaWrapper name=RawFeature qualifiedClassName=org.logoce.lmf.model.api.feature.RawFeature)
+	(JavaWrapper name=IModelPackage qualifiedClassName=org.logoce.lmf.model.api.model.IModelPackage)
+	(JavaWrapper name=BuilderSupplier qualifiedClassName=org.logoce.lmf.model.api.model.BuilderSupplier)
 )

@@ -10,15 +10,15 @@ public interface JavaWrapper<T> extends Datatype<T> {
     return new JavaWrapperBuilder<>();
   }
 
-  String domain();
+  String qualifiedClassName();
 
   interface Features extends Datatype.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.JAVA_WRAPPER.DOMAIN);
+    RawFeature<String, String> qualifiedClassName = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.JAVA_WRAPPER.QUALIFIED_CLASS_NAME);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<JavaWrapper<T>> {
     Builder<T> name(String name);
-    Builder<T> domain(String domain);
+    Builder<T> qualifiedClassName(String qualifiedClassName);
   }
 }

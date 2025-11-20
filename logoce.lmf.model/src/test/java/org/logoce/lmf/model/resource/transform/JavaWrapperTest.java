@@ -39,6 +39,6 @@ public class JavaWrapperTest
 		final var wrapper = (JavaWrapper<?>) attribute.datatype();
 
 		assertEquals("RawFeature", wrapper.name());
-		assertEquals("org.logoce.lmf.model.api.feature", wrapper.domain());
+		assertEquals("org.logoce.lmf.model.api.feature.RawFeature", wrapper.qualifiedClassName());
 	}
 }
