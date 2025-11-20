@@ -6,6 +6,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Operation;
+import org.logoce.lmf.model.lang.Reference;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,36 @@ public final class OperationGenerationTest
 		assertTrue(implContent.contains("System.out.println(\"ping\");"), "Impl should contain operation body");
 	}
 
+	@Test
+	public void generateInheritedOperationMethod() throws IOException
+	{
+		final var targetDir = new File("build/test-generated/operations-inheritance");
+		if (targetDir.exists())
+		{
+			deleteRecursively(targetDir);
+		}
+
+		final var metaModel = buildMetaModelWithInheritedOperation();
+		final var generator = new ModelGenerator(metaModel);
+		generator.generateJava(targetDir);
+
+		final var basePackageDir = new File(targetDir, "test/operations/inheritance");
+		final var interfaceFile = new File(basePackageDir, "Derived.java");
+		final var implFile = new File(new File(basePackageDir, "impl"), "DerivedImpl.java");
+
+		assertTrue(interfaceFile.isFile(), "Derived.java should be generated");
+		assertTrue(implFile.isFile(), "DerivedImpl.java should be generated");
+
+		final var interfaceContent = Files.readString(interfaceFile.toPath(), StandardCharsets.UTF_8);
+		final var implContent = Files.readString(implFile.toPath(), StandardCharsets.UTF_8);
+
+		assertTrue(interfaceContent.contains("void ping()"),
+				   "Derived interface should declare inherited operations");
+		assertTrue(implContent.contains("void ping()"), "Derived impl should implement inherited operations");
+		assertTrue(implContent.contains("System.out.println(\"base\");"),
+				   "Derived impl should reuse the operation body");
+	}
+
 	private static MetaModel buildMetaModelWithOperation()
 	{
 		final var operation = Operation.builder()
@@ -62,6 +93,37 @@ public final class OperationGenerationTest
 						.name("OpsModel")
 						.domain("test.operations")
 						.addGroup(() -> group)
+						.build();
+	}
+
+	private static MetaModel buildMetaModelWithInheritedOperation()
+	{
+		final var operation = Operation.builder()
+									   .name("ping")
+									   .content("System.out.println(\"base\");\n")
+									   .build();
+
+		final Group<LMObject> baseGroup = Group.<LMObject>builder()
+											   .name("Base")
+											   .concrete(false)
+											   .addOperation(() -> operation)
+											   .build();
+
+		final var include = Reference.<LMObject>builder()
+									 .group(() -> baseGroup)
+									 .build();
+
+		final Group<LMObject> derivedGroup = Group.<LMObject>builder()
+												 .name("Derived")
+												 .concrete(true)
+												 .addInclude(() -> include)
+												 .build();
+
+		return MetaModel.builder()
+						.name("OpsInheritanceModel")
+						.domain("test.operations.inheritance")
+						.addGroup(() -> baseGroup)
+						.addGroup(() -> derivedGroup)
 						.build();
 	}
 
@@ -84,4 +146,3 @@ public final class OperationGenerationTest
 		}
 	}
 }
-

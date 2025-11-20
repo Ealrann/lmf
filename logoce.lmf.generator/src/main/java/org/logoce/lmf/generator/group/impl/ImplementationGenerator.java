@@ -3,12 +3,12 @@ package org.logoce.lmf.generator.group.impl;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
+import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
@@ -54,10 +54,9 @@ public final class ImplementationGenerator
 
 	private void installOperationStubs(final TypeSpec.Builder classBuilder)
 	{
-		for (final Operation operation : group.operations())
-		{
-			classBuilder.addMethod(buildOperationStub(operation));
-		}
+		OperationUtil.collectOperations(group).stream()
+					 .map(ImplementationGenerator::buildOperationStub)
+					 .forEach(classBuilder::addMethod);
 	}
 
 	private static MethodSpec buildOperationStub(final Operation operation)
@@ -66,7 +65,7 @@ public final class ImplementationGenerator
 											.addAnnotation(Override.class)
 											.addModifiers(Modifier.PUBLIC);
 
-		final var returnType = resolveReturnType(operation);
+		final var returnType = OperationUtil.resolveReturnType(operation);
 		methodBuilder.returns(returnType);
 
 		for (final OperationParameter parameter : operation.parameters())
@@ -87,18 +86,5 @@ public final class ImplementationGenerator
 		}
 
 		return methodBuilder.build();
-	}
-
-	private static TypeName resolveReturnType(final Operation operation)
-	{
-		final var type = operation.type();
-		if (type == null)
-		{
-			return TypeName.VOID;
-		}
-		else
-		{
-			return TypeResolutionUtil.resolveSimpleType(type).parametrized();
-		}
 	}
 }
