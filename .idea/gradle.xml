@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/logoce.lmf.adapter" />
+            <option value="$PROJECT_DIR$/logoce.lmf.editorfx" />
             <option value="$PROJECT_DIR$/logoce.lmf.extender" />
             <option value="$PROJECT_DIR$/logoce.lmf.generator" />
             <option value="$PROJECT_DIR$/logoce.lmf.gradle" />

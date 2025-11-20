@@ -1,30 +1,31 @@
 plugins {
-    id 'java'
-	id "org.jetbrains.intellij" version "1.16.0"
+	id 'java'
+	id 'org.jetbrains.intellij.platform' version '2.10.4'
 }
 
 group = 'org.logoce.lmf.editor'
 version = '1.0-SNAPSHOT'
 
-intellij {
-	version = "2023.3.1"
-	type = "IC"
-	pluginName = "LMF-Editor"
-}
-
-patchPluginXml {
-	sinceBuild.set("233")
-	untilBuild.set("233.*")
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
+	maven { url "https://cache-redirector.jetbrains.com/intellij-repository/releases" }
+	maven { url "https://cache-redirector.jetbrains.com/intellij-repository/snapshots" }
 }
 
 dependencies {
 	api project(":logoce.lmf.adapter")
 	api project(":logoce.lmf.extender")
 	api project(":logoce.lmf.model")
+
+	intellijPlatform {
+		intellijIdeaCommunity("252.27397.103")
+	}
 
 	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
 	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
@@ -33,8 +34,22 @@ dependencies {
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
 }
 
+tasks.withType(JavaCompile).configureEach {
+	options.release = 25
+}
+
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
+}
+
+intellijPlatform {
+	pluginConfiguration {
+		name.set("LMF-Editor")
+		version.set(project.version.toString())
+		ideaVersion {
+			sinceBuild.set("252")
+		}
+	}
 }
 
 sourceSets {

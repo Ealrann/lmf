@@ -4,4 +4,3 @@
 		(+refers favoriteCar [0..1] (reference #CarCompany@Car))
 	)
 )
-

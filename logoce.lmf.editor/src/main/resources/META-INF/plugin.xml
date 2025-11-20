@@ -1,33 +1,8 @@
 <idea-plugin>
-    <id>logoce.lmf.editor</id>
-    <name>LMF-Editor</name>
-    <version>1.0</version>
-    <vendor email="later@logoce.com" url="http://www.logoce.com">Logoce</vendor>
-
-    <idea-version since-build="232.0" until-build="232.*"/>
-
-    <extensions defaultExtensionNs="com.intellij">
-        <fileType
-                name="LightModel"
-                implementationClass="org.logoce.lmf.editor.LMFileType"
-                fieldName="INSTANCE"
-                language="LightModel"
-                extensions="lm"/>
-        <lang.parserDefinition
-                language="LightModel"
-                implementationClass="org.logoce.lmf.editor.parser.LMParserDefinition"/>
-        <lang.syntaxHighlighterFactory
-                language="LightModel"
-                implementationClass="org.logoce.lmf.editor.highlight.LMSyntaxHighlighterFactory"/>
-        <annotator
-                language="LightModel"
-                implementationClass="org.logoce.lmf.editor.highlight.LMAnnotator"/>
-        <completion.contributor
-                language="LightModel"
-                implementationClass="org.logoce.lmf.editor.highlight.GroupCompletionContributor"/>
-        <lang.formatter
-                language="LightModel"
-                implementationClass="org.logoce.lmf.editor.format.LMFormattingModelBuilder"/>
-    </extensions>
-
+	<id>org.logoce.lmf.editor</id>
+	<name>LMF Editor</name>
+	<version>1.0-SNAPSHOT</version>
+	<vendor>Logoce</vendor>
+	<description>Minimal IntelliJ stub plugin for LMCore .lm models. Language integration and syntax support remain to be implemented.</description>
+	<depends>com.intellij.modules.platform</depends>
 </idea-plugin>

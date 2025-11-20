@@ -70,3 +70,7 @@ When modifying or adding code:
 - There is good coverage in `logoce.lmf.model` (parsing, transformation, linking, and functional multi‑model behavior).  
 - When changing core model or generator semantics, extend or adapt these tests rather than adding ad‑hoc ones elsewhere.  
 - Prefer fast, focused tests over broad integration tests inside this repo.
+
+## Operator responsibilities
+
+- The operator (not the agent) manages git operations (status/commit/rebase/etc.). The agent should not run git commands unless explicitly told to do so.

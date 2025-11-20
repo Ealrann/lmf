@@ -3,4 +3,3 @@
 		(includes #GraphExtensions@Graph)
 		(+contains name=focus (reference #GraphCore@ColoredNode) [0..1]))
 )
-
