@@ -32,6 +32,7 @@
 		(-contains includes [0..*] (reference group=@Reference))
 		(-contains features [0..*] (reference group=@Feature))
 		(-contains generics [0..*] (reference group=@Generic))
+		(-contains operations [0..*] (reference group=@Operation))
 		(-att lmBuilder /javaWrappers.2 [1..1] parameters=../generics.0))
 
 	(Group Feature
@@ -58,6 +59,16 @@
 		(-contains reference [1..1] (reference group=@Reference parameters=../../generics.0))
 		(-att lazy datatype=/units.2)
 		(-att contains datatype=/units.2))
+
+	(Definition Operation
+		(includes group=@Named)
+		(-att name=content datatype=@string [0..1])
+		(-refers type [0..1] (reference group=@Type))
+		(-contains parameters [0..*] (reference group=@OperationParameter)))
+
+	(Definition OperationParameter
+		(includes group=@Named)
+		(-refers type [1..1] (reference group=@Type)))
 
 	(Group Datatype
 		(includes group=@Type parameters=../generics.0)

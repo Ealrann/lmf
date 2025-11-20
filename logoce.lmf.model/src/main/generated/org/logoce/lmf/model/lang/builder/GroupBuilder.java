@@ -14,6 +14,7 @@ import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Group.Builder;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.Reference;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
@@ -22,12 +23,13 @@ import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<GroupBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>().add(Group.Features.name, GroupBuilder::name).add(Group.Features.concrete, GroupBuilder::concrete).add(Group.Features.lmBuilder, GroupBuilder::_lmBuilder).build();
-  private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.Features.includes, GroupBuilder::addInclude).add(Group.Features.features, GroupBuilder::addFeature).add(Group.Features.generics, GroupBuilder::addGeneric).build();
+  private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.Features.includes, GroupBuilder::addInclude).add(Group.Features.features, GroupBuilder::addFeature).add(Group.Features.generics, GroupBuilder::addGeneric).add(Group.Features.operations, GroupBuilder::addOperation).build();
   private String name;
   private boolean concrete;
   private final List<Supplier<Reference<?>>> includes = new ObservableList<>((type, elements) -> {});
   private final List<Supplier<Feature<?, ?>>> features = new ObservableList<>((type, elements) -> {});
   private final List<Supplier<Generic<?>>> generics = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Operation>> operations = new ObservableList<>((type, elements) -> {});
   private BuilderSupplier<T> lmBuilder;
 
   @Override
@@ -61,6 +63,12 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
+  public GroupBuilder<T> addOperation(Supplier<Operation> operation) {
+    this.operations.add(operation);
+    return this;
+  }
+
+  @Override
   public GroupBuilder<T> lmBuilder(BuilderSupplier<T> lmBuilder) {
     this.lmBuilder = lmBuilder;
     return this;
@@ -80,7 +88,8 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
     final var builtIncludes = BuildUtils.collectSuppliers(includes);
     final var builtFeatures = BuildUtils.collectSuppliers(features);
     final var builtGenerics = BuildUtils.collectSuppliers(generics);
-    final var built = new GroupImpl<T>(name, concrete, builtIncludes, builtFeatures, builtGenerics, lmBuilder);
+    final var builtOperations = BuildUtils.collectSuppliers(operations);
+    final var built = new GroupImpl<T>(name, concrete, builtIncludes, builtFeatures, builtGenerics, builtOperations, lmBuilder);
     return built;
   }
 

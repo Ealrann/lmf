@@ -43,7 +43,9 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 						  .add("$T.of(", ConstantTypes.LIST)
 						  .add(referenceBlockBuilder.build())
 						  .add("), Features.$N.ALL,", constantName)
-						  .add(genericBlock);
+						  .add(genericBlock)
+						  // operations: none are modelled in the meta-definition itself, use empty list
+						  .add(", $T.of()", ConstantTypes.LIST);
 
 		if (builderType != null) initializerBuilder.add(", new $T($T::new)", builderSupplierType, builderType.raw());
 		else initializerBuilder.add(", null");

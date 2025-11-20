@@ -2,12 +2,18 @@ package org.logoce.lmf.generator.group.impl;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
+import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Operation;
+import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
@@ -40,7 +46,59 @@ public final class ImplementationGenerator
 				  .forEach(featureInstallers::install);
 		typeInstallers.install(group);
 
+		installOperationStubs(classBuilder);
+
 		final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build()).build();
 		FormattedJavaWriter.write(javaFile, targetDirectory);
+	}
+
+	private void installOperationStubs(final TypeSpec.Builder classBuilder)
+	{
+		for (final Operation operation : group.operations())
+		{
+			classBuilder.addMethod(buildOperationStub(operation));
+		}
+	}
+
+	private static MethodSpec buildOperationStub(final Operation operation)
+	{
+		final var methodBuilder = MethodSpec.methodBuilder(operation.name())
+											.addAnnotation(Override.class)
+											.addModifiers(Modifier.PUBLIC);
+
+		final var returnType = resolveReturnType(operation);
+		methodBuilder.returns(returnType);
+
+		for (final OperationParameter parameter : operation.parameters())
+		{
+			final var parameterType = TypeResolutionUtil.resolveSimpleType(parameter.type()).parametrized();
+			methodBuilder.addParameter(parameterType, parameter.name());
+		}
+		final var body = operation.content();
+		if (body != null && !body.isBlank())
+		{
+			methodBuilder.addCode(body);
+		}
+		else
+		{
+			methodBuilder.addStatement("throw new $T($S)",
+									   UnsupportedOperationException.class,
+									   "Operation '" + operation.name() + "' is not implemented");
+		}
+
+		return methodBuilder.build();
+	}
+
+	private static TypeName resolveReturnType(final Operation operation)
+	{
+		final var type = operation.type();
+		if (type == null)
+		{
+			return TypeName.VOID;
+		}
+		else
+		{
+			return TypeResolutionUtil.resolveSimpleType(type).parametrized();
+		}
 	}
 }

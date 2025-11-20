@@ -29,6 +29,8 @@ public final class LMCorePackage implements IModelPackage {
     else if (group == LMCoreDefinition.Groups.GROUP) return Optional.of((IFeaturedObject.Builder<T>) Group.builder());
     else if (group == LMCoreDefinition.Groups.ATTRIBUTE) return Optional.of((IFeaturedObject.Builder<T>) Attribute.builder());
     else if (group == LMCoreDefinition.Groups.RELATION) return Optional.of((IFeaturedObject.Builder<T>) Relation.builder());
+    else if (group == LMCoreDefinition.Groups.OPERATION) return Optional.of((IFeaturedObject.Builder<T>) Operation.builder());
+    else if (group == LMCoreDefinition.Groups.OPERATION_PARAMETER) return Optional.of((IFeaturedObject.Builder<T>) OperationParameter.builder());
     else if (group == LMCoreDefinition.Groups.ALIAS) return Optional.of((IFeaturedObject.Builder<T>) Alias.builder());
     else if (group == LMCoreDefinition.Groups.ENUM) return Optional.of((IFeaturedObject.Builder<T>) Enum.builder());
     else if (group == LMCoreDefinition.Groups.UNIT) return Optional.of((IFeaturedObject.Builder<T>) Unit.builder());

@@ -1,6 +1,7 @@
 package org.logoce.lmf.generator.util;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
@@ -53,6 +54,54 @@ public class TypeResolutionUtil
 		else
 		{
 			return TypeParameter.of(className);
+		}
+	}
+
+	/**
+	 * Resolve a simple Type (Group / Datatype / Enum / Unit / JavaWrapper) into a TypeParameter
+	 * for use in operation signatures and other non-feature contexts.
+	 */
+	public static TypeParameter resolveSimpleType(final Type<?> type)
+	{
+		if (type == null)
+		{
+			throw new IllegalArgumentException("type cannot be null");
+		}
+
+		if (type instanceof Group<?> group)
+		{
+			return parametrizedType(group, List.of());
+		}
+		else if (type instanceof org.logoce.lmf.model.lang.Enum<?> enumeration)
+		{
+			final var model = (MetaModel) enumeration.lmContainer();
+			final var className = ClassName.get(model.domain(), enumeration.name());
+			return TypeParameter.of(className);
+		}
+		else if (type instanceof Unit<?> unit)
+		{
+			final var primitiveClass = GenUtils.resolvePrimitiveClass(unit.primitive());
+			final var typeName = TypeName.get(primitiveClass);
+			return TypeParameter.ofPrimitive(typeName);
+		}
+		else if (type instanceof JavaWrapper<?> wrapper)
+		{
+			final var domain = wrapper.domain();
+			final var name = wrapper.name();
+			final var className = ClassName.get(domain, name);
+			final var genericCount = GenUtils.genericCount(domain + "." + name);
+			if (genericCount != 0)
+			{
+				return TypeParameter.of(className, genericCount);
+			}
+			else
+			{
+				return TypeParameter.of(className);
+			}
+		}
+		else
+		{
+			throw new IllegalStateException("Unsupported type kind: " + type.getClass().getName());
 		}
 	}
 

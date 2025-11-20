@@ -18,6 +18,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   List<Reference<?>> includes();
   List<Feature<?, ?>> features();
   List<Generic<?>> generics();
+  List<Operation> operations();
   BuilderSupplier<T> lmBuilder();
 
   interface Features extends Type.Features<Features>, Concept.Features<Features> {
@@ -26,6 +27,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     RawFeature<Reference<?>, List<Reference<?>>> includes = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.INCLUDES);
     RawFeature<Feature<?, ?>, List<Feature<?, ?>>> features = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.FEATURES);
     RawFeature<Generic<?>, List<Generic<?>>> generics = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.GENERICS);
+    RawFeature<Operation, List<Operation>> operations = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.OPERATIONS);
     RawFeature<BuilderSupplier<?>, BuilderSupplier<?>> lmBuilder = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.LM_BUILDER);
   }
 
@@ -35,6 +37,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     Builder<T> addInclude(Supplier<Reference<?>> include);
     Builder<T> addFeature(Supplier<Feature<?, ?>> feature);
     Builder<T> addGeneric(Supplier<Generic<?>> generic);
+    Builder<T> addOperation(Supplier<Operation> operation);
     Builder<T> lmBuilder(BuilderSupplier<T> lmBuilder);
   }
 }
