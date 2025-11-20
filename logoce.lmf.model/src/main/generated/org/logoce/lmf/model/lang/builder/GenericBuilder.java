@@ -2,7 +2,6 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
@@ -17,9 +16,9 @@ import org.logoce.lmf.model.lang.impl.GenericImpl;
 
 public final class GenericBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<GenericBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder<?>>().add(Generic.Features.name, GenericBuilder::name).add(Generic.Features.boundType, GenericBuilder::boundType).build();
-  private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder<?>>().add(Generic.Features.type, GenericBuilder::_type).build();
+  private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder<?>>().add(Generic.Features.type, GenericBuilder::type).build();
   private String name;
-  private Supplier<Type<T>> type = () -> null;
+  private Supplier<Type<?>> type = () -> null;
   private BoundType boundType;
 
   @Override
@@ -29,16 +28,7 @@ public final class GenericBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
-  public GenericBuilder<T> type(Supplier<Type<T>> type) {
-    this.type = type;
-    return this;
-  }
-
-  @SuppressWarnings({
-      "unchecked",
-      "rawtypes"
-  })
-  private GenericBuilder<T> _type(final Supplier type) {
+  public GenericBuilder<T> type(Supplier<Type<?>> type) {
     this.type = type;
     return this;
   }

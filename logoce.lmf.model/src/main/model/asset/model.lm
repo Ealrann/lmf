@@ -80,7 +80,7 @@
 	(Definition Generic
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T boundType=extends type=@LMObject)
-		(-refers type [0..1] (reference group=@Type parameters=../../generics.0))
+		(-refers type [0..1] (reference group=@Type))
 		(-att boundType datatype=/enums.0))
 
 	(Definition Reference

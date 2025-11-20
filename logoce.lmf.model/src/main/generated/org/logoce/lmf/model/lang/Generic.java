@@ -11,7 +11,7 @@ public interface Generic<T extends LMObject> extends Concept<T> {
     return new GenericBuilder<>();
   }
 
-  Type<T> type();
+  Type<?> type();
   BoundType boundType();
 
   interface Features extends Concept.Features<Features> {
@@ -22,7 +22,7 @@ public interface Generic<T extends LMObject> extends Concept<T> {
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Generic<T>> {
     Builder<T> name(String name);
-    Builder<T> type(Supplier<Type<T>> type);
+    Builder<T> type(Supplier<Type<?>> type);
     Builder<T> boundType(BoundType boundType);
   }
 }

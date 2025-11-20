@@ -143,7 +143,7 @@ public interface LMCoreDefinition {
 
     interface GENERIC {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Relation<Type<?>, Type<?>> TYPE = new RelationImpl<>("type", true, false, false, Generic.Features.type, new ReferenceImpl<>(() -> Groups.TYPE, List.of(() -> LMCoreDefinition.Generics.GENERIC.get(0))), false, false);
+      Relation<Type<?>, Type<?>> TYPE = new RelationImpl<>("type", true, false, false, Generic.Features.type, new ReferenceImpl<>(() -> Groups.TYPE, List.of()), false, false);
       Attribute<BoundType, BoundType> BOUND_TYPE = new AttributeImpl<>("boundType", true, false, false, Generic.Features.boundType, Enums.BOUND_TYPE, null, List.of());
       List<Feature<?, ?>> ALL = List.of(NAME, TYPE, BOUND_TYPE);
     }

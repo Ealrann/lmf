@@ -16,10 +16,10 @@ public final class GenericImpl<T extends LMObject> extends FeaturedObject implem
   private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(org.logoce.lmf.model.lang.Generic.Features.name, org.logoce.lmf.model.lang.Generic::name).add(org.logoce.lmf.model.lang.Generic.Features.type, org.logoce.lmf.model.lang.Generic::type).add(org.logoce.lmf.model.lang.Generic.Features.boundType, org.logoce.lmf.model.lang.Generic::boundType).build();
   private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
   private final String name;
-  private final Type<T> type;
+  private final Type<?> type;
   private final BoundType boundType;
 
-  public GenericImpl(final String name, final Type<T> type, final BoundType boundType) {
+  public GenericImpl(final String name, final Type<?> type, final BoundType boundType) {
     this.name = name;
     this.type = type;
     this.boundType = boundType;
@@ -31,7 +31,7 @@ public final class GenericImpl<T extends LMObject> extends FeaturedObject implem
   }
 
   @Override
-  public Type<T> type() {
+  public Type<?> type() {
     return type;
   }
 
