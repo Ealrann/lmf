@@ -87,6 +87,15 @@ public final class ReferenceHighlighter {
 				return merged;
 			});
 		}
+		final var parens = findParenMatch(text, area.getCaretPosition());
+		if (parens != null) {
+			final var overlay = buildParenOverlay(text.length(), parens.open(), parens.close());
+			spans = spans.overlay(overlay, (a, b) -> {
+				final var merged = new ArrayList<>(a);
+				merged.addAll(b);
+				return merged;
+			});
+		}
 		area.setStyleSpans(0, spans);
 	}
 
@@ -109,7 +118,74 @@ public final class ReferenceHighlighter {
 		return builder.create();
 	}
 
+	private StyleSpans<Collection<String>> buildParenOverlay(int textLength, int open, int close) {
+		final var builder = new StyleSpansBuilder<Collection<String>>();
+		int pos = 0;
+		int first = Math.min(open, close);
+		int second = Math.max(open, close);
+		if (first > pos) {
+			builder.add(List.of(), first - pos);
+			pos = first;
+		}
+		builder.add(List.of("paren-highlight"), 1);
+		pos++;
+		if (second > pos) {
+			builder.add(List.of(), second - pos);
+			pos = second;
+		}
+		builder.add(List.of("paren-highlight"), 1);
+		pos++;
+		if (pos < textLength) {
+			builder.add(List.of(), textLength - pos);
+		}
+		return builder.create();
+	}
+
+	private ParenMatch findParenMatch(String text, int caret) {
+		final int idx = caret < text.length() && isParen(text.charAt(caret)) ? caret :
+			(caret > 0 && isParen(text.charAt(caret - 1)) ? caret - 1 : -1);
+		if (idx < 0) return null;
+		final char ch = text.charAt(idx);
+		return switch (ch) {
+			case '(' -> matchForward(text, idx);
+			case ')' -> matchBackward(text, idx);
+			default -> null;
+		};
+	}
+
+	private ParenMatch matchForward(String text, int start) {
+		int depth = 0;
+		for (int i = start; i < text.length(); i++) {
+			final char c = text.charAt(i);
+			if (c == '(') depth++;
+			else if (c == ')') {
+				depth--;
+				if (depth == 0) return new ParenMatch(start, i);
+			}
+		}
+		return null;
+	}
+
+	private ParenMatch matchBackward(String text, int start) {
+		int depth = 0;
+		for (int i = start; i >= 0; i--) {
+			final char c = text.charAt(i);
+			if (c == ')') depth++;
+			else if (c == '(') {
+				depth--;
+				if (depth == 0) return new ParenMatch(i, start);
+			}
+		}
+		return null;
+	}
+
+	private static boolean isParen(char c) {
+		return c == '(' || c == ')';
+	}
+
 	private Reference symbolToReference(Symbol symbol) {
 		return new Reference(symbol.name(), symbol.path(), symbol.offset(), symbol.length(), symbol.line(), symbol.column());
 	}
+
+	private record ParenMatch(int open, int close) {}
 }

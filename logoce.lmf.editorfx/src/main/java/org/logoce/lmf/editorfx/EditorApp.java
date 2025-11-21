@@ -816,6 +816,7 @@ public final class EditorApp extends Application {
 		if (names.isEmpty()) {
 			referencesPane.setReferences(List.of());
 			referenceHighlighter.clear(state.document().path());
+			applyHighlight(state.area(), state.area().getText(), state);
 			return;
 		}
 		final var refs = referenceHighlighter.update(state.document(), state.area(), names, token, nameResolver, modelService, slice.start(), slice.end());

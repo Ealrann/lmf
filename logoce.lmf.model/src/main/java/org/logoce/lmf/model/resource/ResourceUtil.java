@@ -56,7 +56,13 @@ public final class ResourceUtil
 		}
 		final var linker = new PModelLinker<>(modelRegistry);
 		try {
-			final var built = linker.build(roots).get(0);
+			final var linked = linker.link(roots, (pNode, e) -> {
+				final var span = spanOf(pNode, readResult.source());
+				diagnostics.add(new ParseDiagnostic(span.line(), span.column(), span.length(), span.offset(),
+													ParseDiagnostic.Severity.ERROR,
+													e.getMessage() == null ? "Link error" : e.getMessage()));
+			});
+			final var built = linked.build().get(0);
 			if (built instanceof Model model) return new ParseResult(model, diagnostics, roots, readResult.source());
 		} catch (LinkException e) {
 			final var span = spanOf(e.pNode, readResult.source());

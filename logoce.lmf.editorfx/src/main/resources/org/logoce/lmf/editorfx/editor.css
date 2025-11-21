@@ -89,3 +89,8 @@
 	-fx-background-color: rgba(150,150,150,0.18);
 	-fx-fill: #b0b0b0;
 }
+
+.paren-highlight {
+	-fx-background-color: rgba(201,146,234,0.25);
+	-fx-fill: #ffffff;
+}
