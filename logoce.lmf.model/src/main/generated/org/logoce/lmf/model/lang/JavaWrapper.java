@@ -6,7 +6,7 @@ import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.JavaWrapperBuilder;
 
-public interface JavaWrapper<T> extends Datatype<T> {
+public interface JavaWrapper<T> extends Datatype<T>, LMEntity<T> {
   static <T> Builder<T> builder() {
     return new JavaWrapperBuilder<>();
   }
@@ -14,7 +14,7 @@ public interface JavaWrapper<T> extends Datatype<T> {
   String qualifiedClassName();
   Serializer serializer();
 
-  interface Features extends Datatype.Features<Features> {
+  interface Features extends Datatype.Features<Features>, LMEntity.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, String> qualifiedClassName = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.JAVA_WRAPPER.QUALIFIED_CLASS_NAME);
     RawFeature<Serializer, Serializer> serializer = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.JAVA_WRAPPER.SERIALIZER);

@@ -22,4 +22,9 @@
 	    (includes group=@Entity)
 	    (+contains ceo (reference group=@Entity) [1..1])
 	    (+contains name=parcs (reference @Car) [0..*]))
+
+	(Definition GenericContainer
+		(Generic T boundType=Extends type=@JavaObject))
+
+	(JavaWrapper name=JavaObject qualifiedClassName=java.lang.String)
 )

@@ -90,7 +90,7 @@
 
 	(Definition Generic
 		(includes group=@Concept parameters=../generics.0)
-		(Generic T boundType=extends type=@LMObject)
+		(Generic T boundType=extends type=@LMEntity)
 		(-refers type [0..1] (reference group=@Type))
 		(-att boundType datatype=/enums.0))
 
@@ -98,15 +98,21 @@
 		(includes @LMObject)
 		(Generic name=T boundType=Extends type=@LMObject)
 		(-refers group lazy [1..1] (reference group=@Concept parameters=../../generics.0))
-		(-refers parameters lazy [0..*] (reference group=@Concept)))
+		(-refers parameters lazy [0..*] (reference group=@LMEntity)))
 
 	(Group Concept
+		(includes @Type parameters=../generics.0)
+		(includes @LMEntity parameters=../generics.0)
+		(Generic name=T))
+
+	(Group LMEntity
 		(includes @Type parameters=../generics.0)
 		(Generic name=T))
 
 	(Definition JavaWrapper
 		(Generic name=T)
-		(includes group=@Datatype parameters=../generics.0)
+		(includes @Datatype parameters=../generics.0)
+		(includes @LMEntity parameters=../generics.0)
 		(-att name=qualifiedClassName /units.7 mandatory)
 		(-contains serializer [0..1] (reference @Serializer)))
 

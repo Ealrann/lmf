@@ -8,6 +8,7 @@ import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.CodeblockBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
@@ -65,7 +66,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var groupConstantName = GenUtils.toConstantCase(group.name());
 		final var targetModel = (MetaModel) ModelUtils.root(group);
 		final var sourceModel = (MetaModel) ModelUtils.root(reference);
-		reference.parameters().forEach(genericsBlockBuilder::feed);
+		reference.parameters().stream().forEach(genericsBlockBuilder::feed);
 
 		final var builder = CodeBlock.builder().add("new $T<>(", REFERENCE_IMPL_TYPE);
 
@@ -85,28 +86,36 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 					  .build();
 	}
 
-	private static CodeBlock generateGenericsCodeblock(final Concept<?> concept)
+	private static CodeBlock generateGenericsCodeblock(final LMEntity<?> lmEntity)
 	{
-		if (concept instanceof Generic<?> generic)
+		return switch (lmEntity)
 		{
-			final var group = (Group<?>) generic.lmContainer();
-			final var model = (MetaModel) ModelUtils.root(group);
-			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
-			final var constantName = GenUtils.toConstantCase(group.name());
-			final var index = group.generics().indexOf(generic);
-
-			return CodeBlock.builder()
-							.add("() -> $T.Generics.$N.get($L)", modelDefinition, constantName, index)
-							.build();
-		}
-		else
-		{
-			final var group = (Group<?>) concept;
-			final var model = (MetaModel) ModelUtils.root(group);
-			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
-			final var constantName = GenUtils.toConstantCase(group.name());
-
-			return CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
-		}
+			case Generic<?> generic ->
+			{
+				final var group = (Group<?>) generic.lmContainer();
+				final var model = (MetaModel) ModelUtils.root(group);
+				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(group.name());
+				final var index = group.generics().indexOf(generic);
+				yield CodeBlock.builder()
+							   .add("() -> $T.Generics.$N.get($L)", modelDefinition, constantName, index)
+							   .build();
+			}
+			case Group<?> group ->
+			{
+				final var model = (MetaModel) ModelUtils.root(group);
+				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(group.name());
+				yield CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
+			}
+			case JavaWrapper<?> javaWrapper ->
+			{
+				final var model = (MetaModel) ModelUtils.root(javaWrapper);
+				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(javaWrapper.name());
+				yield CodeBlock.builder().add("() -> $T.JavaWrappers.$N", modelDefinition, constantName).build();
+			}
+			default -> throw new IllegalArgumentException("Unsupported generic parameter: " + lmEntity);
+		};
 	}
 }

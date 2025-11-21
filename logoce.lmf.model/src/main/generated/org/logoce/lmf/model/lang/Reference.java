@@ -12,15 +12,15 @@ public interface Reference<T extends LMObject> extends LMObject {
   }
 
   Concept<T> group();
-  List<Concept<?>> parameters();
+  List<LMEntity<?>> parameters();
 
   interface Features extends LMObject.Features<Features> {
     RawFeature<Concept<?>, Concept<?>> group = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.REFERENCE.GROUP);
-    RawFeature<Concept<?>, List<Concept<?>>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.REFERENCE.PARAMETERS);
+    RawFeature<LMEntity<?>, List<LMEntity<?>>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.REFERENCE.PARAMETERS);
   }
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Reference<T>> {
     Builder<T> group(Supplier<Concept<T>> group);
-    Builder<T> addParameter(Supplier<Concept<?>> parameter);
+    Builder<T> addParameter(Supplier<LMEntity<?>> parameter);
   }
 }

@@ -10,9 +10,11 @@ import java.util.List;
 
 public class TypeResolutionUtil
 {
-	public static List<ClassName> toParameters(final List<? extends Concept<?>> parameters)
+	public static List<ClassName> toParameters(final List<? extends LMEntity<?>> parameters)
 	{
-		return parameters.stream().map(p -> ClassName.get("", p.name())).toList();
+		return parameters.stream()
+						 .map(p -> ClassName.get("", p.name()))
+						 .toList();
 	}
 
 	public static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)
@@ -37,7 +39,7 @@ public class TypeResolutionUtil
 		}
 	}
 
-	public static TypeParameter parametrizedType(Group<?> group, List<? extends Concept<?>> parameters)
+	public static TypeParameter parametrizedType(Group<?> group, List<? extends LMEntity<?>> parameters)
 	{
 		final var model = (MetaModel) group.lmContainer();
 		final var className = ClassName.get(model.domain(), group.name());
@@ -63,62 +65,63 @@ public class TypeResolutionUtil
 	 */
 	public static TypeParameter resolveSimpleType(final Type<?> type)
 	{
-		if (type == null)
+		switch (type)
 		{
-			throw new IllegalArgumentException("type cannot be null");
-		}
-
-		if (type instanceof Group<?> group)
-		{
-			return parametrizedType(group, List.of());
-		}
-		else if (type instanceof org.logoce.lmf.model.lang.Enum<?> enumeration)
-		{
-			final var model = (MetaModel) enumeration.lmContainer();
-			final var className = ClassName.get(model.domain(), enumeration.name());
-			return TypeParameter.of(className);
-		}
-		else if (type instanceof Unit<?> unit)
-		{
-			final var primitiveClass = GenUtils.resolvePrimitiveClass(unit.primitive());
-			final var typeName = TypeName.get(primitiveClass);
-			return TypeParameter.ofPrimitive(typeName);
-		}
-		else if (type instanceof JavaWrapper<?> wrapper)
-		{
-			final var qualifiedName = wrapper.qualifiedClassName();
-			final var className = ClassName.bestGuess(qualifiedName);
-			final var genericCount = GenUtils.genericCount(qualifiedName);
-			if (genericCount != 0)
+			case null -> throw new IllegalArgumentException("type cannot be null");
+			case Group<?> group ->
 			{
-				return TypeParameter.of(className, genericCount);
+				return parametrizedType(group, List.of());
 			}
-			else
+			case Enum<?> enumeration ->
 			{
+				final var model = (MetaModel) enumeration.lmContainer();
+				final var className = ClassName.get(model.domain(), enumeration.name());
 				return TypeParameter.of(className);
 			}
+			case Unit<?> unit ->
+			{
+				final var primitiveClass = GenUtils.resolvePrimitiveClass(unit.primitive());
+				final var typeName = TypeName.get(primitiveClass);
+				return TypeParameter.ofPrimitive(typeName);
+			}
+			case JavaWrapper<?> wrapper ->
+			{
+				final var qualifiedName = wrapper.qualifiedClassName();
+				final var className = ClassName.bestGuess(qualifiedName);
+				final var genericCount = GenUtils.genericCount(qualifiedName);
+				if (genericCount != 0)
+				{
+					return TypeParameter.of(className, genericCount);
+				}
+				else
+				{
+					return TypeParameter.of(className);
+				}
+			}
+			default -> throw new IllegalStateException("Unsupported type kind: " + type.getClass().getName());
 		}
-		else
-		{
-			throw new IllegalStateException("Unsupported type kind: " + type.getClass().getName());
-		}
+
 	}
 
 	public static String resolveTypeHolder(final Type<?> type)
 	{
-		if (type == null) return null;
-		else if (type instanceof Group<?>) return "Groups";
-		else if (type instanceof Enum<?>) return "Enums";
-		else if (type instanceof Unit<?>) return "Units";
-		else if (type instanceof JavaWrapper<?>) return "JavaWrappers";
-		else return null;
+		return switch (type)
+		{
+			case Group<?> _ -> "Groups";
+			case Enum<?> _ -> "Enums";
+			case Unit<?> _ -> "Units";
+			case JavaWrapper<?> _ -> "JavaWrappers";
+			default -> null;
+		};
 	}
 
 	public static String resolveConceptHolder(final Concept<?> concept)
 	{
-		if (concept == null) return null;
-		else if (concept instanceof Group<?>) return "Groups";
-		else if (concept instanceof Generic<?>) return "Generics";
-		else return null;
+		return switch (concept)
+		{
+			case Group<?> _ -> "Groups";
+			case Generic<?> _ -> "Generics";
+			default -> null;
+		};
 	}
 }

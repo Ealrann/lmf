@@ -141,28 +141,36 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 					  .build();
 	}
 
-	private static CodeBlock generateGenericsCodeblock(final Concept<?> concept)
+	private static CodeBlock generateGenericsCodeblock(final LMEntity<?> lmEntity)
 	{
-		if (concept instanceof Generic<?> generic)
+		return switch (lmEntity)
 		{
-			final var group = (Group<?>) generic.lmContainer();
-			final var model = (MetaModel) ModelUtils.root(group);
-			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
-			final var constantName = GenUtils.toConstantCase(group.name());
-			final var index = group.generics().indexOf(generic);
-
-			return CodeBlock.builder()
-							.add("() -> $T.Generics.$N.get($L)", modelDefinition, constantName, index)
-							.build();
-		}
-		else
-		{
-			final var group = (Group<?>) concept;
-			final var model = (MetaModel) ModelUtils.root(group);
-			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
-			final var constantName = GenUtils.toConstantCase(group.name());
-
-			return CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
-		}
+			case Generic<?> generic ->
+			{
+				final var group = (Group<?>) generic.lmContainer();
+				final var model = (MetaModel) ModelUtils.root(group);
+				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(group.name());
+				final var index = group.generics().indexOf(generic);
+				yield CodeBlock.builder()
+							   .add("() -> $T.Generics.$N.get($L)", modelDefinition, constantName, index)
+							   .build();
+			}
+			case Group<?> group ->
+			{
+				final var model = (MetaModel) ModelUtils.root(group);
+				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(group.name());
+				yield CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
+			}
+			case JavaWrapper<?> javaWrapper ->
+			{
+				final var model = (MetaModel) ModelUtils.root(javaWrapper);
+				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(javaWrapper.name());
+				yield CodeBlock.builder().add("() -> $T.JavaWrappers.$N", modelDefinition, constantName).build();
+			}
+			default -> throw new IllegalArgumentException("Unsupported generic parameter: " + lmEntity);
+		};
 	}
 }

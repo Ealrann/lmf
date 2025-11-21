@@ -9,6 +9,7 @@ import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Concept;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Reference;
 import org.logoce.lmf.model.util.BuildUtils;
@@ -17,10 +18,10 @@ public final class ReferenceImpl<T extends LMObject> extends FeaturedObject impl
   private static final FeatureGetter<Reference<?>> GET_MAP = new FeatureGetter.Builder<Reference<?>>().add(org.logoce.lmf.model.lang.Reference.Features.group, org.logoce.lmf.model.lang.Reference::group).add(org.logoce.lmf.model.lang.Reference.Features.parameters, org.logoce.lmf.model.lang.Reference::parameters).build();
   private static final FeatureSetter<Reference<?>> SET_MAP = new FeatureSetter.Builder<Reference<?>>().build();
   private final Supplier<Concept<T>> group;
-  private final List<Supplier<Concept<?>>> parameters;
+  private final List<Supplier<LMEntity<?>>> parameters;
 
   public ReferenceImpl(final Supplier<Concept<T>> group,
-      final List<Supplier<Concept<?>>> parameters) {
+      final List<Supplier<LMEntity<?>>> parameters) {
     this.group = group;
     this.parameters = List.copyOf(parameters);
   }
@@ -31,7 +32,7 @@ public final class ReferenceImpl<T extends LMObject> extends FeaturedObject impl
   }
 
   @Override
-  public List<Concept<?>> parameters() {
+  public List<LMEntity<?>> parameters() {
     return BuildUtils.collectSuppliers(parameters);
   }
 

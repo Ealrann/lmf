@@ -202,9 +202,8 @@ public final class FeatureResolution implements IAdapter
 			final var concept = reference.group();
 			if (concept instanceof Group<?> group)
 			{
-				final var parameters = reference.parameters();
-				final var containsGeneric = parameters.stream().anyMatch(Generic.class::isInstance);
-				return new PartialFeatureResolution(TypeResolutionUtil.parametrizedType(group, parameters),
+				final var containsGeneric = reference.parameters().stream().anyMatch(Generic.class::isInstance);
+				return new PartialFeatureResolution(TypeResolutionUtil.parametrizedType(group, reference.parameters()),
 													containsGeneric);
 			}
 			else
