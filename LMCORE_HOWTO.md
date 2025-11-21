@@ -157,6 +157,17 @@ For your own M2 models:
 - Pass those generics down through `includes ... parameters=...` so that features know the unary/effective types.
 - The generator will emit Java types that carry those generics; this is powerful for strongly‑typed APIs, but it’s easy to get wrong if parameter lists don’t line up, so it’s best to copy patterns from LMCore’s `Feature` / `Attribute` / `Relation` definitions.
 
+**Common pitfall:** when you are inside an `Operation` and want to refer to a group‑level generic, you typically need to walk back up with `../../generics.0` (for example):
+
+```lm
+(Group NativeParameter
+    (Generic T)
+    (Operation name=getNativeValue
+        type=@JavaObject group=../generics.0
+        (parameters param (reference group=../../../generics.0))))
+```
+If you see linker errors about missing generics, double‑check the relative `parameters=` path.
+
 ## 7. Practical Tips
 
 - Keep `.lm` files in a dedicated `src/.../model` folder and generate Java into a sibling `generated` folder for that source set.
@@ -165,5 +176,42 @@ For your own M2 models:
   - Rename groups/definitions and tweak attributes/relations.
 - Use `+contains` for ownership/containment relationships (where moving/removing elements should propagate container changes); use `+refers` for pure references.
 - For primitive attributes, prefer `#LMCore@string`, `#LMCore@int`, etc., instead of re‑declaring units.
+- For cross‑model references, add `imports=OtherModel` on your `(MetaModel ...)` and reference with `#OtherModel@Type`. All imported models must be provided to the generator together (either in one invocation or via a build that passes all relevant .lm files to the generator).
+- Build wiring: put .lm files under `src/main/model`, apply the Gradle plugin `org.logoce.lmf.gradle-plugin`, and add `src/main/generated` to your `sourceSets`. The generator can process multiple .lm files at once; make sure upstream models are part of the `availableModels` input or imports will fail.
 
 If you need to express something that doesn’t fit these patterns, open `model.lm` (LMCore itself) and look for a similar construct; almost everything in the language is modeled there.
+
+## 8. JavaWrappers and Units
+
+- `JavaWrapper` wraps an existing Java type to reuse it as a datatype. The wrapper name is a free alias; point to the type with `qualifiedClassName`:
+  ```
+  (JavaWrapper name=Vector3f qualifiedClassName=org.joml.Vector3f)
+  (Group PositionParameter
+      (+att name=position datatype=@Vector3f [0..1]))
+  ```
+  Optional `(contains serializer (reference @Serializer))` lets you attach string conversion hooks (see LMCore’s `model.lm` for the structure).
+- `Unit` is for custom scalars with matcher/primitive info (see LMCore’s own units for patterns). Parsing/formatting logic currently lives in runtime code; the `.lm` only declares the unit.
+
+## 9. Migration cheatsheet (ecore → lm)
+
+- EClass → Group/Definition; EAttribute → `+att`/`-att`; EReference → `+contains`/`+refers`; EEnum → `(Enum ...)`; custom EDataType → `(Unit ...)` or `(JavaWrapper ...)`.
+- Root objects: `EObject` → `LMObject`; `EClass` → `Group`; containment stays with `+contains`; multiplicities map to `[0..1]`, `[1..1]`, `[0..*]`, `[1..*]`.
+- Defaults: keep `defaultValue=`; names are case‑sensitive.
+- Operations: `(Operation name=... type=(reference @ReturnType) (parameters p (reference @ParamType)))`.
+
+## 10. Tiny example
+
+```lm
+(MetaModel domain=test.model name=Hello
+    (Group Entity
+        (+att name=name datatype=#LMCore@string [1..1]))
+
+    (Enum Kind Foo,Bar)
+
+    (Definition Thing
+        (includes group=@Entity)
+        (+att name=kind datatype=@Kind [0..1])
+        (+contains name=children (reference @Thing) [0..*]))
+)
+```
+Generates `Thing`, `Kind`, builders, and feature constants; containment of `children` triggers structure notifications.

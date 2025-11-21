@@ -7,6 +7,7 @@ import org.logoce.lmf.model.lang.Model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,14 +27,24 @@ public final class ModelRegistry implements IModelRegistry
 
 	public ModelRegistry(final List<Model> models)
 	{
-		modelMap = models.stream()
-						 .flatMap(model -> streamAliases(model).map(name -> Map.entry(name, model)))
-						 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+		modelMap =  models.stream().collect(Collectors.toUnmodifiableMap(ModelRegistry::domainName, Function.identity()));
 	}
 
-	public Model getModel(final String name)
+	@Override
+	public Model getModel(final String qualifiedName)
 	{
-		return modelMap.get(name);
+		return modelMap.get(qualifiedName);
+	}
+
+	private static String domainName(final Model model)
+	{
+		return model instanceof MetaModel mm ? mm.domain() + "." + mm.name() : model.name();
+	}
+
+	@Override
+	public Model getModel(final String domain, String name)
+	{
+		return modelMap.get(domain + "." + name);
 	}
 
 	@Override
@@ -59,19 +70,25 @@ public final class ModelRegistry implements IModelRegistry
 		{
 			for (final var model : models)
 			{
-				modelMap.put(model.name(), model);
+				modelMap.put(ModelRegistry.domainName(model), model);
 			}
 		}
 
 		public void register(final Model model)
 		{
-			streamAliases(model).forEach(name -> modelMap.put(name, model));
+			modelMap.put(ModelRegistry.domainName(model), model);
 		}
 
 		@Override
-		public Model getModel(final String name)
+		public Model getModel(final String qualifiedName)
 		{
-			return modelMap.get(name);
+			return modelMap.get(qualifiedName);
+		}
+
+		@Override
+		public Model getModel(final String domain, final String name)
+		{
+			return modelMap.get(domain + "." + name);
 		}
 
 		public ModelRegistry build()
@@ -84,14 +101,5 @@ public final class ModelRegistry implements IModelRegistry
 		{
 			return modelMap.values().stream();
 		}
-	}
-
-	private static Stream<String> streamAliases(final Model model)
-	{
-		if (model instanceof MetaModel metaModel)
-		{
-			return Stream.of(metaModel.name(), metaModel.domain() + "." + metaModel.name());
-		}
-		return Stream.of(model.name());
 	}
 }

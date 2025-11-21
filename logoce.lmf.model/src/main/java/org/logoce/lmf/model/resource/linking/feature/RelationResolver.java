@@ -17,12 +17,12 @@ import java.util.Optional;
 
 public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 {
-	private final ModelRegistry modelRegistry;
+	private final ImportResolver importResolver;
 
 	public RelationResolver(final Relation<?, ?> relation, final ModelRegistry modelRegistry)
 	{
 		super(relation);
-		this.modelRegistry = modelRegistry;
+		this.importResolver = new ImportResolver(modelRegistry);
 		assert !relation.contains();
 	}
 
@@ -44,13 +44,7 @@ public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 		if (firstStep.type() == PathParser.Type.MODEL)
 		{
 			final var modelName = firstStep.text();
-			final var model = modelRegistry.getModel(modelName);
-			if (model == null)
-			{
-				final var available = modelRegistry.models().map(m -> m.name()).toList();
-				throw new AssertionError("Cannot resolve model '" + modelName + "' in registry. Available models: " +
-										 available);
-			}
+			final var model = importResolver.resolve(node, modelName, "relation " + feature.name());
 			return new ModelReferenceResolver(model, feature);
 		}
 		else

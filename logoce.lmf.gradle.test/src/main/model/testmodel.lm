@@ -1,4 +1,4 @@
-(MetaModel domain=org.logoce.lmf.model.lang name=LMCore
+(MetaModel domain=org.test.lang name=LMTestCore
 
 	(Group LMObject)
 
@@ -121,6 +121,6 @@
 	(Alias [0..*] value="mandatory=false many")
 	(Alias [1..*] value="mandatory many")
 
-	(JavaWrapper name=RawFeature domain=org.logoce.lmf.model.api.feature)
-	(JavaWrapper name=IModelPackage domain=org.logoce.lmf.model.api.model)
+	(JavaWrapper name=RawFeature qualifiedClassName=org.logoce.lmf.model.api.feature.RawFeature)
+	(JavaWrapper name=IModelPackage qualifiedClassName=org.logoce.lmf.model.api.model.IModelPackage)
 )
