@@ -8,7 +8,6 @@ import org.logoce.lmf.generator.util.*;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
-import org.logoce.lmf.model.lang.impl.ReferenceImpl;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import java.util.List;
@@ -19,7 +18,6 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	public static final ClassName ATTRIBUTE_BUILDER_TYPE = ClassName.get(AttributeBuilder.class);
 	public static final ClassName RELATION_TYPE = ClassName.get(Relation.class);
 	public static final ClassName RELATION_BUILDER_TYPE = ClassName.get(RelationBuilder.class);
-	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
 
 	private final Group<?> group;
 
@@ -93,11 +91,15 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			else
 			{
 				final var relation = (Relation<?, ?>) input;
-				final var reference = relation.reference();
-				final var refBlock = generateReferencesCodeblock(reference);
+				final var conceptBlock = generateConceptCodeblock(relation.concept());
 
-				initBuilder.add(".reference(() -> $L)", refBlock)
-						   .add(".lazy($L)", relation.lazy())
+				initBuilder.add(".concept($L)", conceptBlock);
+
+				relation.parameters()
+						.forEach(parameter -> initBuilder.add(".addParameter($L)",
+															 generateGenericsCodeblock(parameter)));
+
+				initBuilder.add(".lazy($L)", relation.lazy())
 						   .add(".contains($L)", relation.contains());
 			}
 
@@ -120,32 +122,13 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		return CodeBlock.of("$T.Features.$N.$N", modelDefinition, constantGroupName, constantFeatureName);
 	}
 
-	public static CodeBlock generateReferencesCodeblock(final Reference<?> reference)
+	private static CodeBlock generateConceptCodeblock(final Concept<?> concept)
 	{
-		final var genericsBlockBuilder = new CodeblockBuilder<>(", ", FeaturesFieldBuilder::generateGenericsCodeblock);
-		final var group = reference.group();
-		final var groupConstantName = GenUtils.toConstantCase(group.name());
-		reference.parameters().forEach(genericsBlockBuilder::feed);
-
-		final var targetModel = (MetaModel) ModelUtils.root(group);
-		final var sourceModel = (MetaModel) ModelUtils.root(reference);
-		final var builder = CodeBlock.builder().add("new $T<>(", REFERENCE_IMPL_TYPE);
-
-		if (targetModel == sourceModel)
+		if (concept == null)
 		{
-			final var conceptHolder = TypeResolutionUtil.resolveConceptHolder(group);
-			builder.add("() -> $N.$N, ", conceptHolder, groupConstantName);
+			return CodeBlock.of("() -> null");
 		}
-		else
-		{
-			final var modelDefinition = ClassName.get(targetModel.domain(), targetModel.name() + "Definition");
-			builder.add("() -> $T.Groups.$N, ", modelDefinition, groupConstantName);
-		}
-
-		return builder.add("$T.of(", ConstantTypes.LIST)
-					  .add(genericsBlockBuilder.build())
-					  .add("))")
-					  .build();
+		return generateGenericsCodeblock(concept);
 	}
 
 	private static CodeBlock generateGenericsCodeblock(final LMEntity<?> lmEntity)

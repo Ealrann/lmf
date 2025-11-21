@@ -80,7 +80,7 @@ public class WeakTypingTest
 				(MetaModel Test
 				    (Group Container
 				        (Generic T Extends #LMCore/groups.0)
-				        (-contains cargo [1..1] (reference /groups.2 /groups.0/generics.0))
+				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
 				    )
 				    (Definition Car)
 				    (Group CarContainer (includes /groups.0 /groups.1))

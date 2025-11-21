@@ -17,11 +17,11 @@
 
 	(Definition MetaModel
 		(includes group=@Model)
-		(-contains groups [0..*] (reference group=@Group))
-		(-contains enums [0..*] (reference group=@Enum))
-		(-contains units [0..*] (reference group=@Unit))
-		(-contains aliases [0..*] (reference group=@Alias))
-		(-contains javaWrappers [0..*] (reference @JavaWrapper))
+		(-contains groups [0..*] @Group)
+		(-contains enums [0..*] @Enum)
+		(-contains units [0..*] @Unit)
+		(-contains aliases [0..*] @Alias)
+		(-contains javaWrappers [0..*] @JavaWrapper)
 		(-att lPackage /javaWrappers.1 [1..1]))
 
 	(Definition Group
@@ -29,9 +29,9 @@
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T extends @LMObject)
 		(-att concrete datatype=@boolean)
-		(-contains includes [0..*] (reference group=@Reference))
-		(-contains features [0..*] (reference group=@Feature))
-		(-contains generics [0..*] (reference group=@Generic)))
+		(-contains includes [0..*] @Include)
+		(-contains features [0..*] @Feature)
+		(-contains generics [0..*] @Generic))
 
 	(Group Feature
 		(includes group=@Named)
@@ -46,7 +46,7 @@
 		(includes group=@Feature parameters=../generics.0,../generics.1)
 		(Generic UnaryType)
 		(Generic EffectiveType)
-		(-refers datatype [1..1] (reference @Datatype parameters=../../generics.0))
+		(-refers datatype [1..1] @Datatype parameters=../../generics.0)
 		(-att name=defaultValue /units.7)
 		(-refers parameters [0..*] (reference group=@Generic)))
 
@@ -54,7 +54,8 @@
 		(includes group=@Feature parameters=../generics.0,../generics.1)
 		(Generic UnaryType boundType=Extends type=@LMObject)
 		(Generic EffectiveType)
-		(-contains reference [1..1] (reference group=@Reference parameters=../../generics.0))
+		(-refers concept [1..1] @Concept parameters=../../generics.0)
+		(-refers parameters [0..*] @Concept)
 		(-att lazy datatype=/units.2)
 		(-att contains datatype=/units.2))
 
@@ -81,12 +82,6 @@
 		(Generic T boundType=extends type=@LMObject)
 		(-refers type [0..1] (reference group=@Type parameters=../../generics.0))
 		(-att boundType datatype=/enums.0))
-
-	(Definition Reference
-		(includes @LMObject)
-		(Generic name=T boundType=Extends type=@LMObject)
-		(-refers group lazy [1..1] (reference group=@Concept parameters=../../generics.0))
-		(-refers parameters lazy [0..*] (reference group=@Concept)))
 
 	(Group Concept 
 		(includes @Named)

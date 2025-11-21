@@ -17,11 +17,11 @@
 
 	(Definition MetaModel
 		(includes group=@Model)
-		(-contains groups [0..*] (reference group=@Group))
-		(-contains enums [0..*] (reference group=@Enum))
-		(-contains units [0..*] (reference group=@Unit))
-		(-contains aliases [0..*] (reference group=@Alias))
-		(-contains javaWrappers [0..*] (reference @JavaWrapper))
+		(-contains groups [0..*] concept=@Group)
+		(-contains enums [0..*] @Enum)
+		(-contains units [0..*] @Unit)
+		(-contains aliases [0..*] @Alias)
+		(-contains javaWrappers [0..*] @JavaWrapper)
 		(-att lmPackage /javaWrappers.1 [1..1]))
 
 	(Definition Group
@@ -29,17 +29,17 @@
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T extends @LMObject)
 		(-att concrete datatype=@boolean)
-		(-contains includes [0..*] (reference group=@Include))
-		(-contains features [0..*] (reference group=@Feature))
-		(-contains generics [0..*] (reference group=@Generic))
-		(-contains operations [0..*] (reference group=@Operation))
+		(-contains includes [0..*] @Include)
+		(-contains features [0..*] @Feature)
+		(-contains generics [0..*] @Generic)
+		(-contains operations [0..*] @Operation)
 		(-att lmBuilder /javaWrappers.2 [1..1] parameters=../generics.0))
 
 	(Definition Include
 		(includes @LMObject)
 		(Generic name=T boundType=Extends type=@LMObject)
-		(-refers group lazy [1..1] (reference group=@Group parameters=../../generics.0))
-		(-refers parameters lazy [0..*] (reference group=@LMEntity)))
+		(-refers group lazy [1..1] @Group parameters=../generics.0)
+		(-refers parameters lazy [0..*] @LMEntity))
 
 	(Group Feature
 		(includes group=@Named)
@@ -54,27 +54,28 @@
 		(includes group=@Feature parameters=../generics.0,../generics.1)
 		(Generic UnaryType)
 		(Generic EffectiveType)
-		(-refers datatype [1..1] (reference @Datatype parameters=../../generics.0))
+		(-refers datatype [1..1] @Datatype parameters=../generics.0)
 		(-att name=defaultValue /units.7)
-		(-refers parameters [0..*] (reference group=@Generic)))
+		(-refers parameters [0..*] @Generic))
 
 	(Definition Relation
 		(includes group=@Feature parameters=../generics.0,../generics.1)
 		(Generic UnaryType boundType=Extends type=@LMObject)
 		(Generic EffectiveType)
-		(-contains reference [1..1] (reference group=@Reference parameters=../../generics.0))
+		(-refers concept lazy [1..1] @Concept parameters=../generics.0)
+		(-refers parameters lazy [0..*] @LMEntity)
 		(-att lazy datatype=/units.2)
 		(-att contains datatype=/units.2))
 
 	(Definition Operation
 		(includes group=@Named)
 		(-att name=content datatype=@string [0..1])
-		(-refers type [0..1] (reference group=@Type))
-		(-contains parameters [0..*] (reference group=@OperationParameter)))
+		(-refers type [0..1] @Type)
+		(-contains parameters [0..*] @OperationParameter))
 
 	(Definition OperationParameter
 		(includes group=@Named)
-		(-refers type [1..1] (reference group=@Type)))
+		(-refers type [1..1] @Type))
 
 	(Group Datatype
 		(includes group=@Type parameters=../generics.0)
@@ -97,14 +98,8 @@
 	(Definition Generic
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T boundType=extends type=@LMEntity)
-		(-refers type [0..1] (reference group=@Type))
+		(-refers type [0..1] @Type)
 		(-att boundType datatype=/enums.0))
-
-	(Definition Reference
-		(includes @LMObject)
-		(Generic name=T boundType=Extends type=@LMObject)
-		(-refers group lazy [1..1] (reference group=@Concept parameters=../../generics.0))
-		(-refers parameters lazy [0..*] (reference group=@LMEntity)))
 
 	(Group Concept
 		(includes @Type parameters=../generics.0)
@@ -120,7 +115,7 @@
 		(includes @Datatype parameters=../generics.0)
 		(includes @LMEntity parameters=../generics.0)
 		(-att name=qualifiedClassName /units.7 mandatory)
-		(-contains serializer [0..1] (reference @Serializer)))
+		(-contains serializer [0..1] @Serializer))
 
 	(Definition Serializer
 		(includes group=@LMObject)

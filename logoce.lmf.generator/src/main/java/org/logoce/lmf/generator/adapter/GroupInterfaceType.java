@@ -12,7 +12,6 @@ import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Include;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Reference;
 
 import java.util.List;
 import java.util.stream.Stream;

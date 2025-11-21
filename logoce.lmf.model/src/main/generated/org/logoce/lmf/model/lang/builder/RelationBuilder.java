@@ -3,26 +3,30 @@ package org.logoce.lmf.model.lang.builder;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Concept;
+import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Reference;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Relation.Builder;
 import org.logoce.lmf.model.lang.impl.RelationImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
 
 public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Builder<UnaryType, EffectiveType> {
   private static final FeatureInserter<RelationBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.name, RelationBuilder::name).add(Relation.Features.immutable, RelationBuilder::immutable).add(Relation.Features.many, RelationBuilder::many).add(Relation.Features.mandatory, RelationBuilder::mandatory).add(Relation.Features.rawFeature, RelationBuilder::_rawFeature).add(Relation.Features.lazy, RelationBuilder::lazy).add(Relation.Features.contains, RelationBuilder::contains).build();
-  private static final RelationLazyInserter<RelationBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.reference, RelationBuilder::_reference).build();
+  private static final RelationLazyInserter<RelationBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.concept, RelationBuilder::_concept).add(Relation.Features.parameters, RelationBuilder::addParameter).build();
   private String name;
   private boolean immutable;
   private boolean many;
   private boolean mandatory;
   private RawFeature<UnaryType, EffectiveType> rawFeature;
-  private Supplier<Reference<UnaryType>> reference;
+  private Supplier<Concept<UnaryType>> concept;
+  private final List<Supplier<LMEntity<?>>> parameters = new ObservableList<>((type, elements) -> {});
   private boolean lazy;
   private boolean contains;
 
@@ -67,9 +71,8 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> reference(
-      Supplier<Reference<UnaryType>> reference) {
-    this.reference = reference;
+  public RelationBuilder<UnaryType, EffectiveType> concept(Supplier<Concept<UnaryType>> concept) {
+    this.concept = concept;
     return this;
   }
 
@@ -77,8 +80,14 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
       "unchecked",
       "rawtypes"
   })
-  private RelationBuilder<UnaryType, EffectiveType> _reference(final Supplier reference) {
-    this.reference = reference;
+  private RelationBuilder<UnaryType, EffectiveType> _concept(final Supplier concept) {
+    this.concept = concept;
+    return this;
+  }
+
+  @Override
+  public RelationBuilder<UnaryType, EffectiveType> addParameter(Supplier<LMEntity<?>> parameter) {
+    this.parameters.add(parameter);
     return this;
   }
 
@@ -96,7 +105,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
 
   @Override
   public Relation<UnaryType, EffectiveType> build() {
-    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, many, mandatory, rawFeature, reference.get(), lazy, contains);
+    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, many, mandatory, rawFeature, concept, parameters, lazy, contains);
     return built;
   }
 

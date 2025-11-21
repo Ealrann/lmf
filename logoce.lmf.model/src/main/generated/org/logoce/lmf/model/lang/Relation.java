@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang;
 
 import java.lang.Boolean;
 import java.lang.String;
+import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
@@ -12,7 +13,8 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
     return new RelationBuilder<>();
   }
 
-  Reference<UnaryType> reference();
+  Concept<UnaryType> concept();
+  List<LMEntity<?>> parameters();
   boolean lazy();
   boolean contains();
 
@@ -22,7 +24,8 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
     RawFeature<Boolean, Boolean> many = Feature.Features.many;
     RawFeature<Boolean, Boolean> mandatory = Feature.Features.mandatory;
     RawFeature<RawFeature<?, ?>, RawFeature<?, ?>> rawFeature = Feature.Features.rawFeature;
-    RawFeature<Reference<?>, Reference<?>> reference = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.RELATION.REFERENCE);
+    RawFeature<Concept<?>, Concept<?>> concept = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.RELATION.CONCEPT);
+    RawFeature<LMEntity<?>, List<LMEntity<?>>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.RELATION.PARAMETERS);
     RawFeature<Boolean, Boolean> lazy = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.RELATION.LAZY);
     RawFeature<Boolean, Boolean> contains = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.RELATION.CONTAINS);
   }
@@ -33,7 +36,8 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
     Builder<UnaryType, EffectiveType> many(boolean many);
     Builder<UnaryType, EffectiveType> mandatory(boolean mandatory);
     Builder<UnaryType, EffectiveType> rawFeature(RawFeature<UnaryType, EffectiveType> rawFeature);
-    Builder<UnaryType, EffectiveType> reference(Supplier<Reference<UnaryType>> reference);
+    Builder<UnaryType, EffectiveType> concept(Supplier<Concept<UnaryType>> concept);
+    Builder<UnaryType, EffectiveType> addParameter(Supplier<LMEntity<?>> parameter);
     Builder<UnaryType, EffectiveType> lazy(boolean lazy);
     Builder<UnaryType, EffectiveType> contains(boolean contains);
   }

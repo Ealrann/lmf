@@ -7,19 +7,19 @@
 	(Definition Car
 		(includes group=@Entity)
 		(-att name=brand datatype=@Brand [1..1] defaultValue="Peugeot")
-		(+contains name=passengers (reference @Person) [0..*])
+		(+contains name=passengers @Person [0..*])
 	)
 
 	(Definition CarParc
-		(+contains cars [0..*] (reference @Car))
+		(+contains cars [0..*] @Car)
 	)
 
 	(Definition Person
 	    (includes group=@Entity)
-	    (+refers car [0..1] (reference @Car)))
+	    (+refers car [0..1] @Car))
 
 	(Definition CarCompany
 	    (includes group=@Entity)
-	    (+contains ceo (reference @Person) [1..1])
-	    (+contains name=parcs (reference @Car) [0..*]))
+	    (+contains ceo @Person [1..1])
+	    (+contains name=parcs @Car [0..*]))
 )

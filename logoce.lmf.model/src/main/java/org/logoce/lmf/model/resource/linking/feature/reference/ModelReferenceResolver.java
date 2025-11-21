@@ -52,7 +52,7 @@ public class ModelReferenceResolver implements ReferenceResolver
 	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?>>> resolveName(final String name,
 																						 final Relation<T, ?> relation)
 	{
-		final var group = (Group<?>) relation.reference().group();
+		final var group = (Group<?>) relation.concept();
 		return ModelUtils.streamTree(model)
 						 .filter(o -> ModelUtils.isSubGroup(group, o.lmGroup()))
 						 .map(o -> (T) o)
@@ -98,7 +98,8 @@ public class ModelReferenceResolver implements ReferenceResolver
 
 		public <T extends Relation<?, ?>> Optional<FeatureResolution<Relation<?, ?>>> build(final T relation)
 		{
-			if (ModelUtils.isSubGroup(relation.reference().group(), current.lmGroup()))
+			final var concept = relation.concept();
+			if (concept instanceof Group<?> group && ModelUtils.isSubGroup(group, current.lmGroup()))
 			{
 				return Optional.of(buildInternal(relation, current));
 			}

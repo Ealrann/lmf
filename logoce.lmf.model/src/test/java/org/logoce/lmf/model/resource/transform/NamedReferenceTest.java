@@ -23,7 +23,7 @@ public class NamedReferenceTest
 							  "    (-att [1..1] name=isNice datatype=#LMCore@boolean)" +
 							  "    )" +
 							  "  (Definition name=Object" +
-							  "    (-contains name=info (reference group=@Info))" +
+							  "    (-contains name=info @Info)" +
 							  "    )" +
 							  ") ";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -53,6 +53,6 @@ public class NamedReferenceTest
 
 		final var rel1 = (Relation<?, ?>) group1.features().get(0);
 		assertEquals("info", rel1.name());
-		assertEquals(group0, rel1.reference().group());
+		assertEquals(group0, rel1.concept());
 	}
 }

@@ -100,13 +100,13 @@ public final class LinkNodeBuilder<I extends PNode>
 	private <T extends LMObject> ModelGroup<T> findModelGroupFromParent(final PGroup<I> node,
 																		final Group<?> parentGroup)
 	{
-		final var containmentName = node.type().firstToken();
-		final var groupFromParent = parentGroup.features()
+			final var containmentName = node.type().firstToken();
+			final var groupFromParent = parentGroup.features()
 											   .stream()
 											   .filter(Relation.class::isInstance)
 											   .map(Relation.class::cast)
 											   .filter(r -> r.name().equals(containmentName))
-											   .map(r -> r.reference().group())
+											   .map(Relation::concept)
 											   .findAny()
 											   .orElseThrow(() -> buildException(node, containmentName, parentGroup));
 
@@ -132,7 +132,7 @@ public final class LinkNodeBuilder<I extends PNode>
 	{
 		return metaResolvers.get(parentGroup)
 							.streamContainmentRelations()
-							.filter(r -> ModelUtils.isSubGroup(r.reference().group(), childGroup))
+							.filter(r -> ModelUtils.isSubGroup(r.concept(), childGroup))
 							.findAny();
 	}
 

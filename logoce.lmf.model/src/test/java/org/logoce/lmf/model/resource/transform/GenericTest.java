@@ -98,7 +98,7 @@ public class GenericTest
 				(MetaModel Test
 				    (Group name=Container
 				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
-				        (-contains cargo [1..1] (reference group=/groups.2 parameters=/groups.0/generics.0))
+				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
 				    )
 				    (Definition name=Car)
 				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
@@ -125,7 +125,7 @@ public class GenericTest
 		assertEquals("Car", car.name());
 		assertEquals("CarContainer", carContainer.name());
 
-		assertEquals(genericOfContainer, cargoRelation.reference().parameters().get(0));
+		assertEquals(genericOfContainer, cargoRelation.parameters().get(0));
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
 
 	}

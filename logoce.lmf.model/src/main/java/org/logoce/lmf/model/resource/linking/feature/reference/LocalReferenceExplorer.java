@@ -46,7 +46,7 @@ public class LocalReferenceExplorer implements ReferenceResolver
 			}
 		}
 
-		if (ModelUtils.isSubGroup(relation.reference().group(), current.group()))
+		if (ModelUtils.isSubGroup(relation.concept(), current.group()))
 		{
 			return Optional.of(buildResolution(relation, current));
 		}
@@ -89,7 +89,7 @@ public class LocalReferenceExplorer implements ReferenceResolver
 
 	private boolean groupMatch(LinkNodeInternal<?, ?, ?> node)
 	{
-		final var concept = relation.reference().group();
+		final var concept = relation.concept();
 		if (concept instanceof Group<?> group)
 		{
 			return ModelUtils.isSubGroup(group, node.group());
