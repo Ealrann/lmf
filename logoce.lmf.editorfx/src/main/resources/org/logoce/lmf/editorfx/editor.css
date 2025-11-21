@@ -90,7 +90,8 @@
 	-fx-fill: #b0b0b0;
 }
 
-.paren-highlight {
+.code-area .paren-highlight {
 	-fx-background-color: rgba(201,146,234,0.25);
 	-fx-fill: #ffffff;
+	-fx-font-weight: bold;
 }

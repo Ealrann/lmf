@@ -73,7 +73,7 @@ public final class ReferenceHighlighter {
 	}
 
 	public void applyHighlight(CodeArea area, Document doc) {
-		final String text = doc.getText();
+		final String text = area.getText();
 		final var base = highlighter.computeHighlighting(text);
 		final var diag = new ArrayList<>(doc.diagnostics());
 		diag.addAll(transientErrors.getOrDefault(doc.path(), List.of()));
@@ -142,15 +142,18 @@ public final class ReferenceHighlighter {
 	}
 
 	private ParenMatch findParenMatch(String text, int caret) {
-		final int idx = caret < text.length() && isParen(text.charAt(caret)) ? caret :
-			(caret > 0 && isParen(text.charAt(caret - 1)) ? caret - 1 : -1);
-		if (idx < 0) return null;
-		final char ch = text.charAt(idx);
-		return switch (ch) {
-			case '(' -> matchForward(text, idx);
-			case ')' -> matchBackward(text, idx);
-			default -> null;
-		};
+		final int leftIdx = caret > 0 ? caret - 1 : -1;
+		if (leftIdx >= 0 && isParen(text.charAt(leftIdx))) {
+			return text.charAt(leftIdx) == '('
+				   ? matchForward(text, leftIdx)
+				   : matchBackward(text, leftIdx);
+		}
+		if (caret < text.length() && isParen(text.charAt(caret))) {
+			return text.charAt(caret) == '('
+				   ? matchForward(text, caret)
+				   : matchBackward(text, caret);
+		}
+		return null;
 	}
 
 	private ParenMatch matchForward(String text, int start) {

@@ -101,7 +101,7 @@
 		(-refers parameters lazy [0..*] (reference group=@Concept)))
 
 	(Group Concept
-		(includes @Named)
+		(includes @Type parameters=../generics.0)
 		(Generic name=T))
 
 	(Definition JavaWrapper

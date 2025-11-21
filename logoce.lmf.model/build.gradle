@@ -2,6 +2,7 @@ import org.gradle.api.tasks.JavaExec
 
 plugins {
 	id 'maven-publish'
+	id 'application'
 }
 
 dependencies {
@@ -68,4 +69,8 @@ publishing {
 			from components.java
 		}
 	}
+}
+
+application {
+	mainClass = 'org.logoce.lmf.model.tool.ModelValidator'
 }
