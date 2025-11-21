@@ -10,6 +10,7 @@ import org.logoce.lmf.generator.util.GenericParameter;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Include;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Reference;
 
@@ -49,7 +50,7 @@ public final class GroupInterfaceType extends AbstractGroupType implements IAdap
 		return new Values(groupType, model.domain(), group, superInterfaces, typedParameters);
 	}
 
-	private static List<TypeName> resolveIncludes(final List<Reference<?>> includes, final Group<?> group)
+	private static List<TypeName> resolveIncludes(final List<Include<?>> includes, final Group<?> group)
 	{
 		if (includes.isEmpty())
 		{

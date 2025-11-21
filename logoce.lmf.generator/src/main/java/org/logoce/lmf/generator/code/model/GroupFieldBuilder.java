@@ -12,13 +12,13 @@ import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
-import org.logoce.lmf.model.lang.impl.ReferenceImpl;
+import org.logoce.lmf.model.lang.impl.IncludeImpl;
 import org.logoce.lmf.model.util.ModelUtils;
 
 public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {
 	public static final ClassName GROUP_IMPL_TYPE = ClassName.get(GroupImpl.class);
-	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
+	public static final ClassName INCLUDE_IMPL_TYPE = ClassName.get(IncludeImpl.class);
 
 	@Override
 	public FieldSpec build(Group<?> group)
@@ -59,16 +59,16 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 						.build();
 	}
 
-	public static CodeBlock generateReferencesCodeblock(final Reference<?> reference)
+	public static CodeBlock generateReferencesCodeblock(final Include<?> reference)
 	{
 		final var genericsBlockBuilder = new CodeblockBuilder<>(", ", GroupFieldBuilder::generateGenericsCodeblock);
 		final var group = reference.group();
 		final var groupConstantName = GenUtils.toConstantCase(group.name());
 		final var targetModel = (MetaModel) ModelUtils.root(group);
 		final var sourceModel = (MetaModel) ModelUtils.root(reference);
-		reference.parameters().stream().forEach(genericsBlockBuilder::feed);
+		reference.parameters().forEach(genericsBlockBuilder::feed);
 
-		final var builder = CodeBlock.builder().add("new $T<>(", REFERENCE_IMPL_TYPE);
+		final var builder = CodeBlock.builder().add("new $T<>(", INCLUDE_IMPL_TYPE);
 
 		if (targetModel == sourceModel)
 		{

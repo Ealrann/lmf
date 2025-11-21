@@ -76,6 +76,6 @@ public final class MetaModelRegistry
 
 	private static boolean isChildOf(final Group<?> child, final Group<?> parent)
 	{
-		return child.includes().stream().map(Reference::group).anyMatch(parent::equals);
+		return child.includes().stream().map(Include::group).anyMatch(parent::equals);
 	}
 }

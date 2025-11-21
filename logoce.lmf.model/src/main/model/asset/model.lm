@@ -29,11 +29,17 @@
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T extends @LMObject)
 		(-att concrete datatype=@boolean)
-		(-contains includes [0..*] (reference group=@Reference))
+		(-contains includes [0..*] (reference group=@Include))
 		(-contains features [0..*] (reference group=@Feature))
 		(-contains generics [0..*] (reference group=@Generic))
 		(-contains operations [0..*] (reference group=@Operation))
 		(-att lmBuilder /javaWrappers.2 [1..1] parameters=../generics.0))
+
+	(Definition Include
+		(includes @LMObject)
+		(Generic name=T boundType=Extends type=@LMObject)
+		(-refers group lazy [1..1] (reference group=@Group parameters=../../generics.0))
+		(-refers parameters lazy [0..*] (reference group=@LMEntity)))
 
 	(Group Feature
 		(includes group=@Named)

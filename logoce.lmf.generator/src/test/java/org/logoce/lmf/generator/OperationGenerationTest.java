@@ -2,11 +2,7 @@ package org.logoce.lmf.generator;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.generator.model.ModelGenerator;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Operation;
-import org.logoce.lmf.model.lang.Reference;
+import org.logoce.lmf.model.lang.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +78,6 @@ public final class OperationGenerationTest
 									   .content("System.out.println(\"ping\");\n")
 									   .build();
 
-		@SuppressWarnings("rawtypes")
 		final var groupBuilder = Group.builder();
 		final Group<?> group = groupBuilder.name("Foo")
 										   .concrete(true)
@@ -109,9 +104,9 @@ public final class OperationGenerationTest
 											   .addOperation(() -> operation)
 											   .build();
 
-		final var include = Reference.<LMObject>builder()
-									 .group(() -> baseGroup)
-									 .build();
+		final var include = Include.<LMObject>builder()
+								   .group(() -> baseGroup)
+								   .build();
 
 		final Group<LMObject> derivedGroup = Group.<LMObject>builder()
 												 .name("Derived")

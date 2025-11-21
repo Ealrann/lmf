@@ -15,7 +15,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   }
 
   boolean concrete();
-  List<Reference<?>> includes();
+  List<Include<?>> includes();
   List<Feature<?, ?>> features();
   List<Generic<?>> generics();
   List<Operation> operations();
@@ -24,7 +24,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   interface Features extends Type.Features<Features>, Concept.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<Boolean, Boolean> concrete = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.CONCRETE);
-    RawFeature<Reference<?>, List<Reference<?>>> includes = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.INCLUDES);
+    RawFeature<Include<?>, List<Include<?>>> includes = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.INCLUDES);
     RawFeature<Feature<?, ?>, List<Feature<?, ?>>> features = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.FEATURES);
     RawFeature<Generic<?>, List<Generic<?>>> generics = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.GENERICS);
     RawFeature<Operation, List<Operation>> operations = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.OPERATIONS);
@@ -34,7 +34,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Group<T>> {
     Builder<T> name(String name);
     Builder<T> concrete(boolean concrete);
-    Builder<T> addInclude(Supplier<Reference<?>> include);
+    Builder<T> addInclude(Supplier<Include<?>> include);
     Builder<T> addFeature(Supplier<Feature<?, ?>> feature);
     Builder<T> addGeneric(Supplier<Generic<?>> generic);
     Builder<T> addOperation(Supplier<Operation> operation);

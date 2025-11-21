@@ -13,9 +13,9 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Group.Builder;
+import org.logoce.lmf.model.lang.Include;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
-import org.logoce.lmf.model.lang.Reference;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
 import org.logoce.lmf.model.notification.list.ObservableList;
@@ -26,7 +26,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.Features.includes, GroupBuilder::addInclude).add(Group.Features.features, GroupBuilder::addFeature).add(Group.Features.generics, GroupBuilder::addGeneric).add(Group.Features.operations, GroupBuilder::addOperation).build();
   private String name;
   private boolean concrete;
-  private final List<Supplier<Reference<?>>> includes = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Include<?>>> includes = new ObservableList<>((type, elements) -> {});
   private final List<Supplier<Feature<?, ?>>> features = new ObservableList<>((type, elements) -> {});
   private final List<Supplier<Generic<?>>> generics = new ObservableList<>((type, elements) -> {});
   private final List<Supplier<Operation>> operations = new ObservableList<>((type, elements) -> {});
@@ -45,7 +45,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
-  public GroupBuilder<T> addInclude(Supplier<Reference<?>> include) {
+  public GroupBuilder<T> addInclude(Supplier<Include<?>> include) {
     this.includes.add(include);
     return this;
   }

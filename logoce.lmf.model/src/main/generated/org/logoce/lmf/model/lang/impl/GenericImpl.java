@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.Type;
 
-public final class GenericImpl<T extends LMEntity> extends FeaturedObject implements Generic<T> {
+public final class GenericImpl<T extends LMEntity<?>> extends FeaturedObject implements Generic<T> {
   private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(org.logoce.lmf.model.lang.Generic.Features.name, org.logoce.lmf.model.lang.Generic::name).add(org.logoce.lmf.model.lang.Generic.Features.type, org.logoce.lmf.model.lang.Generic::type).add(org.logoce.lmf.model.lang.Generic.Features.boundType, org.logoce.lmf.model.lang.Generic::boundType).build();
   private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
   private final String name;

@@ -27,6 +27,7 @@ public final class LMCorePackage implements IModelPackage {
   public <T extends LMObject> Optional<IFeaturedObject.Builder<T>> builder(Group<T> group) {
     if (group == LMCoreDefinition.Groups.META_MODEL) return Optional.of((IFeaturedObject.Builder<T>) MetaModel.builder());
     else if (group == LMCoreDefinition.Groups.GROUP) return Optional.of((IFeaturedObject.Builder<T>) Group.builder());
+    else if (group == LMCoreDefinition.Groups.INCLUDE) return Optional.of((IFeaturedObject.Builder<T>) Include.builder());
     else if (group == LMCoreDefinition.Groups.ATTRIBUTE) return Optional.of((IFeaturedObject.Builder<T>) Attribute.builder());
     else if (group == LMCoreDefinition.Groups.RELATION) return Optional.of((IFeaturedObject.Builder<T>) Relation.builder());
     else if (group == LMCoreDefinition.Groups.OPERATION) return Optional.of((IFeaturedObject.Builder<T>) Operation.builder());

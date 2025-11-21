@@ -17,7 +17,7 @@ public class TypeResolutionUtil
 						 .toList();
 	}
 
-	public static TypeParameter resolveInclude(final Reference<?> refInclude, final Group<?> group)
+	public static TypeParameter resolveInclude(final Include<?> refInclude, final Group<?> group)
 	{
 		final var params = toParameters(refInclude.parameters());
 		final var refIncludeGroup = refInclude.group();

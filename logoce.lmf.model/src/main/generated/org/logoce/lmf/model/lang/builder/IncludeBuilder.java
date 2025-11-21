@@ -1,0 +1,63 @@
+package org.logoce.lmf.model.lang.builder;
+
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.List;
+import java.util.function.Supplier;
+import org.logoce.lmf.model.feature.FeatureInserter;
+import org.logoce.lmf.model.feature.RelationLazyInserter;
+import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Include;
+import org.logoce.lmf.model.lang.Include.Builder;
+import org.logoce.lmf.model.lang.LMEntity;
+import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.impl.IncludeImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
+
+public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
+  private static final FeatureInserter<IncludeBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder<?>>().build();
+  private static final RelationLazyInserter<IncludeBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder<?>>().add(Include.Features.group, IncludeBuilder::_group).add(Include.Features.parameters, IncludeBuilder::addParameter).build();
+  private Supplier<Group<T>> group;
+  private final List<Supplier<LMEntity<?>>> parameters = new ObservableList<>((type, elements) -> {});
+
+  @Override
+  public IncludeBuilder<T> group(Supplier<Group<T>> group) {
+    this.group = group;
+    return this;
+  }
+
+  @SuppressWarnings({
+      "unchecked",
+      "rawtypes"
+  })
+  private IncludeBuilder<T> _group(final Supplier group) {
+    this.group = group;
+    return this;
+  }
+
+  @Override
+  public IncludeBuilder<T> addParameter(Supplier<LMEntity<?>> parameter) {
+    this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public Include<T> build() {
+    final var built = new IncludeImpl<T>(group, parameters);
+    return built;
+  }
+
+  @Override
+  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
+      final AttributeType value) {
+    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+  }
+
+  @Override
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+      final Supplier<RelationType> supplier) {
+    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+  }
+}
