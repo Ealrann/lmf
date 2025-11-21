@@ -6,9 +6,9 @@ import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.util.*;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.impl.AttributeImpl;
+import org.logoce.lmf.model.lang.builder.AttributeBuilder;
+import org.logoce.lmf.model.lang.builder.RelationBuilder;
 import org.logoce.lmf.model.lang.impl.ReferenceImpl;
-import org.logoce.lmf.model.lang.impl.RelationImpl;
 import org.logoce.lmf.model.util.ModelUtils;
 
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.List;
 public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Feature<?, ?>>
 {
 	public static final ClassName ATTRIBUTE_TYPE = ClassName.get(Attribute.class);
-	public static final ClassName ATTRIBUTE_IMPL_TYPE = ClassName.get(AttributeImpl.class);
+	public static final ClassName ATTRIBUTE_BUILDER_TYPE = ClassName.get(AttributeBuilder.class);
 	public static final ClassName RELATION_TYPE = ClassName.get(Relation.class);
-	public static final ClassName RELATION_IMPL_TYPE = ClassName.get(RelationImpl.class);
+	public static final ClassName RELATION_BUILDER_TYPE = ClassName.get(RelationBuilder.class);
 	public static final ClassName REFERENCE_IMPL_TYPE = ClassName.get(ReferenceImpl.class);
 
 	private final Group<?> group;
@@ -50,12 +50,16 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		}
 		else
 		{
-			initBuilder.add("new $T<>(", isAttribute ? ATTRIBUTE_IMPL_TYPE : RELATION_IMPL_TYPE)
-					   .add("$S, ", name)
-					   .add("$L, ", input.immutable())
-					   .add("$L, ", input.many())
-					   .add("$L, ", input.mandatory())
-					   .add("$N.Features.$N, ", parentGroup.name(), name);
+			final var builderType = isAttribute
+									? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
+									: TypeParameter.of(RELATION_BUILDER_TYPE, types);
+
+			initBuilder.add("new $T()", builderType.parametrized())
+					   .add(".name($S)", name)
+					   .add(".immutable($L)", input.immutable())
+					   .add(".many($L)", input.many())
+					   .add(".mandatory($L)", input.mandatory())
+					   .add(".rawFeature($N.Features.$N)", parentGroup.name(), name);
 
 			if (isAttribute)
 			{
@@ -64,26 +68,27 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
 				final var typeName = GenUtils.toConstantCase(datatype.name());
 
+				CodeBlock datatypeBlock;
 				if (datatype != null && typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
 				{
 					final var parentModel = (MetaModel) parentGroup.lmContainer();
 					if (typeModel != parentModel)
 					{
 						final var modelDefinition = ClassName.get(typeModel.domain(), typeModel.name() + "Definition");
-						initBuilder.add("$T.$N.$N, ", modelDefinition, typeHolder, typeName);
+						datatypeBlock = CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeName);
 					}
 					else
 					{
-						initBuilder.add("$N.$N, ", typeHolder, typeName);
+						datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 					}
 				}
 				else
 				{
-					initBuilder.add("$N.$N, ", typeHolder, typeName);
+					datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 				}
 
-				initBuilder.add("$S, ", attribute.defaultValue())
-						   .add("$T.of()", ConstantTypes.LIST);
+				initBuilder.add(".datatype(() -> $L)", datatypeBlock)
+						   .add(".defaultValue($S)", attribute.defaultValue());
 			}
 			else
 			{
@@ -91,10 +96,12 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var reference = relation.reference();
 				final var refBlock = generateReferencesCodeblock(reference);
 
-				initBuilder.add(refBlock).add(", $L, ", relation.lazy()).add("$L", relation.contains());
+				initBuilder.add(".reference(() -> $L)", refBlock)
+						   .add(".lazy($L)", relation.lazy())
+						   .add(".contains($L)", relation.contains());
 			}
 
-			initBuilder.add(")");
+			initBuilder.add(".build()");
 		}
 
 		return FieldSpec.builder(mainType.parametrized(), constantName, modifiers)

@@ -11,13 +11,13 @@ import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.impl.GroupImpl;
+import org.logoce.lmf.model.lang.builder.GroupBuilder;
 import org.logoce.lmf.model.lang.impl.IncludeImpl;
 import org.logoce.lmf.model.util.ModelUtils;
 
 public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {
-	public static final ClassName GROUP_IMPL_TYPE = ClassName.get(GroupImpl.class);
+	public static final ClassName GROUP_BUILDER_TYPE = ClassName.get(GroupBuilder.class);
 	public static final ClassName INCLUDE_IMPL_TYPE = ClassName.get(IncludeImpl.class);
 
 	@Override
@@ -28,31 +28,34 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var builderType = group.concrete() ? group.adapt(GroupBuilderClassType.class) : null;
 		final var builtType = interfaceType.parametrizedWildcard();
 		final var typedGroup = ConstantTypes.GROUP.nest(builtType);
+		final var builderTargetType = builtType;
 		final var constantName = GenUtils.toConstantCase(name);
 		final var initializerBuilder = CodeBlock.builder();
 
-		final var referenceBlockBuilder = new CodeblockBuilder<>(", ", GroupFieldBuilder::generateReferencesCodeblock);
-		group.includes().forEach(referenceBlockBuilder::feed);
-
-		final var genericBlock = group.generics().isEmpty()
-								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST)
-								 : CodeBlock.of("Generics.$N", constantName);
-
 		final var builderSupplierRaw = ClassName.get(BuilderSupplier.class);
 
-		initializerBuilder.add("new $T<>(", GROUP_IMPL_TYPE)
-						  .add("$S, $L, ", name, group.concrete())
-						  .add("$T.of(", ConstantTypes.LIST)
-						  .add(referenceBlockBuilder.build())
-						  .add("), Features.$N.ALL,", constantName)
-						  .add(genericBlock)
-						  // operations: none are modelled in the meta-definition itself, use empty list
-						  .add(", $T.of()", ConstantTypes.LIST);
+		initializerBuilder.add("new $T<$T>()", GROUP_BUILDER_TYPE, builderTargetType)
+						  .add(".name($S)", name)
+						  .add(".concrete($L)", group.concrete());
 
-		if (builderType != null) initializerBuilder.add(", new $T<>($T::new)", builderSupplierRaw, builderType.raw());
-		else initializerBuilder.add(", null");
+		group.includes().forEach(include -> initializerBuilder.add(".addInclude(() -> $L)",
+																   generateReferencesCodeblock(include)));
 
-		initializerBuilder.add(")");
+		final var features = ModelUtils.streamAllFeatures(group).toList();
+		for (int i = 0; i < features.size(); i++)
+		{
+			initializerBuilder.add(".addFeature(() -> Features.$N.ALL.get($L))", constantName, i);
+		}
+
+		final var generics = group.generics();
+		for (int i = 0; i < generics.size(); i++)
+		{
+			initializerBuilder.add(".addGeneric(() -> Generics.$N.get($L))", constantName, i);
+		}
+
+		if (builderType != null) initializerBuilder.add(".lmBuilder(new $T<>($T::new))", builderSupplierRaw, builderType.raw());
+
+		initializerBuilder.add(".build()");
 
 		return FieldSpec.builder(typedGroup.parametrized(), constantName, modifiers)
 						.initializer(initializerBuilder.build())

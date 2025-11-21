@@ -6,14 +6,14 @@ import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.impl.JavaWrapperImpl;
-import org.logoce.lmf.model.lang.impl.SerializerImpl;
+import org.logoce.lmf.model.lang.builder.JavaWrapperBuilder;
+import org.logoce.lmf.model.lang.builder.SerializerBuilder;
 
 public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<JavaWrapper<?>>
 {
 	public static final ClassName JAVA_WRAPPER_TYPE = ClassName.get(JavaWrapper.class);
-	public static final ClassName JAVA_WRAPPER_IMPL_TYPE = ClassName.get(JavaWrapperImpl.class);
-	public static final ClassName SERIALIZER_IMPL_TYPE = ClassName.get(SerializerImpl.class);
+	public static final ClassName JAVA_WRAPPER_BUILDER_TYPE = ClassName.get(JavaWrapperBuilder.class);
+	public static final ClassName SERIALIZER_BUILDER_TYPE = ClassName.get(SerializerBuilder.class);
 
 	@Override
 	public FieldSpec build(JavaWrapper<?> input)
@@ -28,18 +28,22 @@ public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<Jav
 		final var constantName = GenUtils.toConstantCase(name);
 		final var serializer = input.serializer();
 		final var serializerInit = serializer == null
-								   ? CodeBlock.of("null")
-								   : CodeBlock.of("new $T($S, $S)",
-												  SERIALIZER_IMPL_TYPE,
-												  serializer.toString(),
-												  serializer.fromString());
+								   ? CodeBlock.of("() -> null")
+								   : CodeBlock.builder()
+											   .add("() -> new $T()", SERIALIZER_BUILDER_TYPE)
+											   .add(".toString($S)", serializer.toString())
+											   .add(".fromString($S)", serializer.fromString())
+											   .add(".build()")
+											   .build();
 
 		return FieldSpec.builder(fullType.parametrized(), constantName, modifiers)
-						.initializer("new $T<>($S, $S, $L)",
-									 JAVA_WRAPPER_IMPL_TYPE,
-									 name,
-									 qualifiedName,
-									 serializerInit)
+						.initializer(CodeBlock.builder()
+											  .add("new $T<$T>()", JAVA_WRAPPER_BUILDER_TYPE, typed.parametrized())
+											  .add(".name($S)", name)
+											  .add(".qualifiedClassName($S)", qualifiedName)
+											  .add(".serializer($L)", serializerInit)
+											  .add(".build()")
+											  .build())
 						.build();
 	}
 }

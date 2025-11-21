@@ -6,7 +6,6 @@ import java.lang.Float;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
-import java.util.Arrays;
 import java.util.List;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
@@ -25,7 +24,8 @@ import org.logoce.lmf.model.lang.builder.ReferenceBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
 import org.logoce.lmf.model.lang.builder.SerializerBuilder;
 import org.logoce.lmf.model.lang.builder.UnitBuilder;
-import org.logoce.lmf.model.lang.impl.*;
+import org.logoce.lmf.model.lang.impl.IncludeImpl;
+import org.logoce.lmf.model.lang.impl.ReferenceImpl;
 
 public interface LMCoreDefinition {
   interface Features {
@@ -34,7 +34,7 @@ public interface LMCoreDefinition {
     }
 
     interface NAMED {
-      Attribute<String, String> NAME = new AttributeImpl<>("name", true, false, true, Named.Features.name, Units.STRING, null, List.of());
+      Attribute<String, String> NAME = new AttributeBuilder<String, String>().name("name").immutable(true).many(false).mandatory(true).rawFeature(Named.Features.name).datatype(() -> Units.STRING).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME);
     }
 
@@ -45,8 +45,8 @@ public interface LMCoreDefinition {
 
     interface MODEL {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, String> DOMAIN = new AttributeImpl<>("domain", true, false, true, Model.Features.domain, Units.STRING, null, List.of());
-      Attribute<String, List<String>> IMPORTS = new AttributeImpl<>("imports", true, true, false, Model.Features.imports, Units.STRING, null, List.of());
+      Attribute<String, String> DOMAIN = new AttributeBuilder<String, String>().name("domain").immutable(true).many(false).mandatory(true).rawFeature(Model.Features.domain).datatype(() -> Units.STRING).defaultValue(null).build();
+      Attribute<String, List<String>> IMPORTS = new AttributeBuilder<String, List<String>>().name("imports").immutable(true).many(true).mandatory(false).rawFeature(Model.Features.imports).datatype(() -> Units.STRING).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS);
     }
 
@@ -54,12 +54,12 @@ public interface LMCoreDefinition {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
       Attribute<String, String> DOMAIN = LMCoreDefinition.Features.MODEL.DOMAIN;
       Attribute<String, List<String>> IMPORTS = LMCoreDefinition.Features.MODEL.IMPORTS;
-      Relation<Group<?>, List<Group<?>>> GROUPS = new RelationImpl<>("groups", true, true, false, MetaModel.Features.groups, new ReferenceImpl<>(() -> Groups.GROUP, List.of()), false, true);
-      Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationImpl<>("enums", true, true, false, MetaModel.Features.enums, new ReferenceImpl<>(() -> Groups.ENUM, List.of()), false, true);
-      Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationImpl<>("units", true, true, false, MetaModel.Features.units, new ReferenceImpl<>(() -> Groups.UNIT, List.of()), false, true);
-      Relation<Alias, List<Alias>> ALIASES = new RelationImpl<>("aliases", true, true, false, MetaModel.Features.aliases, new ReferenceImpl<>(() -> Groups.ALIAS, List.of()), false, true);
-      Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationImpl<>("javaWrappers", true, true, false, MetaModel.Features.javaWrappers, new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER, List.of()), false, true);
-      Attribute<IModelPackage, IModelPackage> LM_PACKAGE = new AttributeImpl<>("lmPackage", true, false, true, MetaModel.Features.lmPackage, JavaWrappers.I_MODEL_PACKAGE, null, List.of());
+      Relation<Group<?>, List<Group<?>>> GROUPS = new RelationBuilder<Group<?>, List<Group<?>>>().name("groups").immutable(true).many(true).mandatory(false).rawFeature(MetaModel.Features.groups).reference(() -> new ReferenceImpl<>(() -> Groups.GROUP, List.of())).lazy(false).contains(true).build();
+      Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationBuilder<Enum<?>, List<Enum<?>>>().name("enums").immutable(true).many(true).mandatory(false).rawFeature(MetaModel.Features.enums).reference(() -> new ReferenceImpl<>(() -> Groups.ENUM, List.of())).lazy(false).contains(true).build();
+      Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationBuilder<Unit<?>, List<Unit<?>>>().name("units").immutable(true).many(true).mandatory(false).rawFeature(MetaModel.Features.units).reference(() -> new ReferenceImpl<>(() -> Groups.UNIT, List.of())).lazy(false).contains(true).build();
+      Relation<Alias, List<Alias>> ALIASES = new RelationBuilder<Alias, List<Alias>>().name("aliases").immutable(true).many(true).mandatory(false).rawFeature(MetaModel.Features.aliases).reference(() -> new ReferenceImpl<>(() -> Groups.ALIAS, List.of())).lazy(false).contains(true).build();
+      Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationBuilder<JavaWrapper<?>, List<JavaWrapper<?>>>().name("javaWrappers").immutable(true).many(true).mandatory(false).rawFeature(MetaModel.Features.javaWrappers).reference(() -> new ReferenceImpl<>(() -> Groups.JAVA_WRAPPER, List.of())).lazy(false).contains(true).build();
+      Attribute<IModelPackage, IModelPackage> LM_PACKAGE = new AttributeBuilder<IModelPackage, IModelPackage>().name("lmPackage").immutable(true).many(false).mandatory(true).rawFeature(MetaModel.Features.lmPackage).datatype(() -> JavaWrappers.I_MODEL_PACKAGE).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE);
     }
 
@@ -75,27 +75,27 @@ public interface LMCoreDefinition {
 
     interface GROUP {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<Boolean, Boolean> CONCRETE = new AttributeImpl<>("concrete", true, false, false, Group.Features.concrete, Units.BOOLEAN, null, List.of());
-      Relation<Include<?>, List<Include<?>>> INCLUDES = new RelationImpl<>("includes", true, true, false, Group.Features.includes, new ReferenceImpl<>(() -> Groups.INCLUDE, List.of()), false, true);
-      Relation<Feature<?, ?>, List<Feature<?, ?>>> FEATURES = new RelationImpl<>("features", true, true, false, Group.Features.features, new ReferenceImpl<>(() -> Groups.FEATURE, List.of()), false, true);
-      Relation<Generic<?>, List<Generic<?>>> GENERICS = new RelationImpl<>("generics", true, true, false, Group.Features.generics, new ReferenceImpl<>(() -> Groups.GENERIC, List.of()), false, true);
-      Relation<Operation, List<Operation>> OPERATIONS = new RelationImpl<>("operations", true, true, false, Group.Features.operations, new ReferenceImpl<>(() -> Groups.OPERATION, List.of()), false, true);
-      Attribute<BuilderSupplier<?>, BuilderSupplier<?>> LM_BUILDER = new AttributeImpl<>("lmBuilder", true, false, true, Group.Features.lmBuilder, JavaWrappers.BUILDER_SUPPLIER, null, List.of());
+      Attribute<Boolean, Boolean> CONCRETE = new AttributeBuilder<Boolean, Boolean>().name("concrete").immutable(true).many(false).mandatory(false).rawFeature(Group.Features.concrete).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
+      Relation<Include<?>, List<Include<?>>> INCLUDES = new RelationBuilder<Include<?>, List<Include<?>>>().name("includes").immutable(true).many(true).mandatory(false).rawFeature(Group.Features.includes).reference(() -> new ReferenceImpl<>(() -> Groups.INCLUDE, List.of())).lazy(false).contains(true).build();
+      Relation<Feature<?, ?>, List<Feature<?, ?>>> FEATURES = new RelationBuilder<Feature<?, ?>, List<Feature<?, ?>>>().name("features").immutable(true).many(true).mandatory(false).rawFeature(Group.Features.features).reference(() -> new ReferenceImpl<>(() -> Groups.FEATURE, List.of())).lazy(false).contains(true).build();
+      Relation<Generic<?>, List<Generic<?>>> GENERICS = new RelationBuilder<Generic<?>, List<Generic<?>>>().name("generics").immutable(true).many(true).mandatory(false).rawFeature(Group.Features.generics).reference(() -> new ReferenceImpl<>(() -> Groups.GENERIC, List.of())).lazy(false).contains(true).build();
+      Relation<Operation, List<Operation>> OPERATIONS = new RelationBuilder<Operation, List<Operation>>().name("operations").immutable(true).many(true).mandatory(false).rawFeature(Group.Features.operations).reference(() -> new ReferenceImpl<>(() -> Groups.OPERATION, List.of())).lazy(false).contains(true).build();
+      Attribute<BuilderSupplier<?>, BuilderSupplier<?>> LM_BUILDER = new AttributeBuilder<BuilderSupplier<?>, BuilderSupplier<?>>().name("lmBuilder").immutable(true).many(false).mandatory(true).rawFeature(Group.Features.lmBuilder).datatype(() -> JavaWrappers.BUILDER_SUPPLIER).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, CONCRETE, INCLUDES, FEATURES, GENERICS, OPERATIONS, LM_BUILDER);
     }
 
     interface INCLUDE {
-      Relation<Group<?>, Group<?>> GROUP = new RelationImpl<>("group", true, false, true, Include.Features.group, new ReferenceImpl<>(() -> Groups.GROUP, List.of(() -> LMCoreDefinition.Generics.INCLUDE.get(0))), true, false);
-      Relation<LMEntity<?>, List<LMEntity<?>>> PARAMETERS = new RelationImpl<>("parameters", true, true, false, Include.Features.parameters, new ReferenceImpl<>(() -> Groups.LM_ENTITY, List.of()), true, false);
+      Relation<Group<?>, Group<?>> GROUP = new RelationBuilder<Group<?>, Group<?>>().name("group").immutable(true).many(false).mandatory(true).rawFeature(Include.Features.group).reference(() -> new ReferenceImpl<>(() -> Groups.GROUP, List.of(() -> LMCoreDefinition.Generics.INCLUDE.get(0)))).lazy(true).contains(false).build();
+      Relation<LMEntity<?>, List<LMEntity<?>>> PARAMETERS = new RelationBuilder<LMEntity<?>, List<LMEntity<?>>>().name("parameters").immutable(true).many(true).mandatory(false).rawFeature(Include.Features.parameters).reference(() -> new ReferenceImpl<>(() -> Groups.LM_ENTITY, List.of())).lazy(true).contains(false).build();
       List<Feature<?, ?>> ALL = List.of(GROUP, PARAMETERS);
     }
 
     interface FEATURE {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<Boolean, Boolean> IMMUTABLE = new AttributeImpl<>("immutable", true, false, false, Feature.Features.immutable, Units.BOOLEAN, null, List.of());
-      Attribute<Boolean, Boolean> MANY = new AttributeImpl<>("many", true, false, false, Feature.Features.many, Units.BOOLEAN, null, List.of());
-      Attribute<Boolean, Boolean> MANDATORY = new AttributeImpl<>("mandatory", true, false, false, Feature.Features.mandatory, Units.BOOLEAN, null, List.of());
-      Attribute<RawFeature<?, ?>, RawFeature<?, ?>> RAW_FEATURE = new AttributeImpl<>("rawFeature", true, false, false, Feature.Features.rawFeature, JavaWrappers.RAW_FEATURE, null, List.of());
+      Attribute<Boolean, Boolean> IMMUTABLE = new AttributeBuilder<Boolean, Boolean>().name("immutable").immutable(true).many(false).mandatory(false).rawFeature(Feature.Features.immutable).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
+      Attribute<Boolean, Boolean> MANY = new AttributeBuilder<Boolean, Boolean>().name("many").immutable(true).many(false).mandatory(false).rawFeature(Feature.Features.many).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
+      Attribute<Boolean, Boolean> MANDATORY = new AttributeBuilder<Boolean, Boolean>().name("mandatory").immutable(true).many(false).mandatory(false).rawFeature(Feature.Features.mandatory).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
+      Attribute<RawFeature<?, ?>, RawFeature<?, ?>> RAW_FEATURE = new AttributeBuilder<RawFeature<?, ?>, RawFeature<?, ?>>().name("rawFeature").immutable(true).many(false).mandatory(false).rawFeature(Feature.Features.rawFeature).datatype(() -> JavaWrappers.RAW_FEATURE).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, IMMUTABLE, MANY, MANDATORY, RAW_FEATURE);
     }
 
@@ -105,9 +105,9 @@ public interface LMCoreDefinition {
       Attribute<Boolean, Boolean> MANY = LMCoreDefinition.Features.FEATURE.MANY;
       Attribute<Boolean, Boolean> MANDATORY = LMCoreDefinition.Features.FEATURE.MANDATORY;
       Attribute<RawFeature<?, ?>, RawFeature<?, ?>> RAW_FEATURE = LMCoreDefinition.Features.FEATURE.RAW_FEATURE;
-      Relation<Datatype<?>, Datatype<?>> DATATYPE = new RelationImpl<>("datatype", true, false, true, Attribute.Features.datatype, new ReferenceImpl<>(() -> Groups.DATATYPE, List.of(() -> LMCoreDefinition.Generics.ATTRIBUTE.get(0))), false, false);
-      Attribute<String, String> DEFAULT_VALUE = new AttributeImpl<>("defaultValue", true, false, false, Attribute.Features.defaultValue, Units.STRING, null, List.of());
-      Relation<Generic<?>, List<Generic<?>>> PARAMETERS = new RelationImpl<>("parameters", true, true, false, Attribute.Features.parameters, new ReferenceImpl<>(() -> Groups.GENERIC, List.of()), false, false);
+      Relation<Datatype<?>, Datatype<?>> DATATYPE = new RelationBuilder<Datatype<?>, Datatype<?>>().name("datatype").immutable(true).many(false).mandatory(true).rawFeature(Attribute.Features.datatype).reference(() -> new ReferenceImpl<>(() -> Groups.DATATYPE, List.of(() -> LMCoreDefinition.Generics.ATTRIBUTE.get(0)))).lazy(false).contains(false).build();
+      Attribute<String, String> DEFAULT_VALUE = new AttributeBuilder<String, String>().name("defaultValue").immutable(true).many(false).mandatory(false).rawFeature(Attribute.Features.defaultValue).datatype(() -> Units.STRING).defaultValue(null).build();
+      Relation<Generic<?>, List<Generic<?>>> PARAMETERS = new RelationBuilder<Generic<?>, List<Generic<?>>>().name("parameters").immutable(true).many(true).mandatory(false).rawFeature(Attribute.Features.parameters).reference(() -> new ReferenceImpl<>(() -> Groups.GENERIC, List.of())).lazy(false).contains(false).build();
       List<Feature<?, ?>> ALL = List.of(NAME, IMMUTABLE, MANY, MANDATORY, RAW_FEATURE, DATATYPE, DEFAULT_VALUE, PARAMETERS);
     }
 
@@ -117,23 +117,23 @@ public interface LMCoreDefinition {
       Attribute<Boolean, Boolean> MANY = LMCoreDefinition.Features.FEATURE.MANY;
       Attribute<Boolean, Boolean> MANDATORY = LMCoreDefinition.Features.FEATURE.MANDATORY;
       Attribute<RawFeature<?, ?>, RawFeature<?, ?>> RAW_FEATURE = LMCoreDefinition.Features.FEATURE.RAW_FEATURE;
-      Relation<Reference<?>, Reference<?>> REFERENCE = new RelationImpl<>("reference", true, false, true, Relation.Features.reference, new ReferenceImpl<>(() -> Groups.REFERENCE, List.of(() -> LMCoreDefinition.Generics.RELATION.get(0))), false, true);
-      Attribute<Boolean, Boolean> LAZY = new AttributeImpl<>("lazy", true, false, false, Relation.Features.lazy, Units.BOOLEAN, null, List.of());
-      Attribute<Boolean, Boolean> CONTAINS = new AttributeImpl<>("contains", true, false, false, Relation.Features.contains, Units.BOOLEAN, null, List.of());
+      Relation<Reference<?>, Reference<?>> REFERENCE = new RelationBuilder<Reference<?>, Reference<?>>().name("reference").immutable(true).many(false).mandatory(true).rawFeature(Relation.Features.reference).reference(() -> new ReferenceImpl<>(() -> Groups.REFERENCE, List.of(() -> LMCoreDefinition.Generics.RELATION.get(0)))).lazy(false).contains(true).build();
+      Attribute<Boolean, Boolean> LAZY = new AttributeBuilder<Boolean, Boolean>().name("lazy").immutable(true).many(false).mandatory(false).rawFeature(Relation.Features.lazy).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
+      Attribute<Boolean, Boolean> CONTAINS = new AttributeBuilder<Boolean, Boolean>().name("contains").immutable(true).many(false).mandatory(false).rawFeature(Relation.Features.contains).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, IMMUTABLE, MANY, MANDATORY, RAW_FEATURE, REFERENCE, LAZY, CONTAINS);
     }
 
     interface OPERATION {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, String> CONTENT = new AttributeImpl<>("content", true, false, false, Operation.Features.content, Units.STRING, null, List.of());
-      Relation<Type<?>, Type<?>> TYPE = new RelationImpl<>("type", true, false, false, Operation.Features.type, new ReferenceImpl<>(() -> Groups.TYPE, List.of()), false, false);
-      Relation<OperationParameter, List<OperationParameter>> PARAMETERS = new RelationImpl<>("parameters", true, true, false, Operation.Features.parameters, new ReferenceImpl<>(() -> Groups.OPERATION_PARAMETER, List.of()), false, true);
+      Attribute<String, String> CONTENT = new AttributeBuilder<String, String>().name("content").immutable(true).many(false).mandatory(false).rawFeature(Operation.Features.content).datatype(() -> Units.STRING).defaultValue(null).build();
+      Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).many(false).mandatory(false).rawFeature(Operation.Features.type).reference(() -> new ReferenceImpl<>(() -> Groups.TYPE, List.of())).lazy(false).contains(false).build();
+      Relation<OperationParameter, List<OperationParameter>> PARAMETERS = new RelationBuilder<OperationParameter, List<OperationParameter>>().name("parameters").immutable(true).many(true).mandatory(false).rawFeature(Operation.Features.parameters).reference(() -> new ReferenceImpl<>(() -> Groups.OPERATION_PARAMETER, List.of())).lazy(false).contains(true).build();
       List<Feature<?, ?>> ALL = List.of(NAME, CONTENT, TYPE, PARAMETERS);
     }
 
     interface OPERATION_PARAMETER {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Relation<Type<?>, Type<?>> TYPE = new RelationImpl<>("type", true, false, true, OperationParameter.Features.type, new ReferenceImpl<>(() -> Groups.TYPE, List.of()), false, false);
+      Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).many(false).mandatory(true).rawFeature(OperationParameter.Features.type).reference(() -> new ReferenceImpl<>(() -> Groups.TYPE, List.of())).lazy(false).contains(false).build();
       List<Feature<?, ?>> ALL = List.of(NAME, TYPE);
     }
 
@@ -144,140 +144,132 @@ public interface LMCoreDefinition {
 
     interface ALIAS {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, String> VALUE = new AttributeImpl<>("value", true, false, true, Alias.Features.value, Units.STRING, null, List.of());
+      Attribute<String, String> VALUE = new AttributeBuilder<String, String>().name("value").immutable(true).many(false).mandatory(true).rawFeature(Alias.Features.value).datatype(() -> Units.STRING).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, VALUE);
     }
 
     interface ENUM {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, List<String>> LITERALS = new AttributeImpl<>("literals", true, true, false, Enum.Features.literals, Units.STRING, null, List.of());
+      Attribute<String, List<String>> LITERALS = new AttributeBuilder<String, List<String>>().name("literals").immutable(true).many(true).mandatory(false).rawFeature(Enum.Features.literals).datatype(() -> Units.STRING).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, LITERALS);
     }
 
     interface UNIT {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, String> MATCHER = new AttributeImpl<>("matcher", true, false, false, Unit.Features.matcher, Units.MATCHER, null, List.of());
-      Attribute<String, String> DEFAULT_VALUE = new AttributeImpl<>("defaultValue", true, false, false, Unit.Features.defaultValue, Units.STRING, null, List.of());
-      Attribute<Primitive, Primitive> PRIMITIVE = new AttributeImpl<>("primitive", true, false, false, Unit.Features.primitive, Enums.PRIMITIVE, "String", List.of());
-      Attribute<String, String> EXTRACTOR = new AttributeImpl<>("extractor", true, false, false, Unit.Features.extractor, Units.EXTRACTOR, null, List.of());
+      Attribute<String, String> MATCHER = new AttributeBuilder<String, String>().name("matcher").immutable(true).many(false).mandatory(false).rawFeature(Unit.Features.matcher).datatype(() -> Units.MATCHER).defaultValue(null).build();
+      Attribute<String, String> DEFAULT_VALUE = new AttributeBuilder<String, String>().name("defaultValue").immutable(true).many(false).mandatory(false).rawFeature(Unit.Features.defaultValue).datatype(() -> Units.STRING).defaultValue(null).build();
+      Attribute<Primitive, Primitive> PRIMITIVE = new AttributeBuilder<Primitive, Primitive>().name("primitive").immutable(true).many(false).mandatory(false).rawFeature(Unit.Features.primitive).datatype(() -> Enums.PRIMITIVE).defaultValue("String").build();
+      Attribute<String, String> EXTRACTOR = new AttributeBuilder<String, String>().name("extractor").immutable(true).many(false).mandatory(false).rawFeature(Unit.Features.extractor).datatype(() -> Units.EXTRACTOR).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, MATCHER, DEFAULT_VALUE, PRIMITIVE, EXTRACTOR);
     }
 
     interface GENERIC {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Relation<Type<?>, Type<?>> TYPE = new RelationImpl<>("type", true, false, false, Generic.Features.type, new ReferenceImpl<>(() -> Groups.TYPE, List.of()), false, false);
-      Attribute<BoundType, BoundType> BOUND_TYPE = new AttributeImpl<>("boundType", true, false, false, Generic.Features.boundType, Enums.BOUND_TYPE, null, List.of());
+      Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).many(false).mandatory(false).rawFeature(Generic.Features.type).reference(() -> new ReferenceImpl<>(() -> Groups.TYPE, List.of())).lazy(false).contains(false).build();
+      Attribute<BoundType, BoundType> BOUND_TYPE = new AttributeBuilder<BoundType, BoundType>().name("boundType").immutable(true).many(false).mandatory(false).rawFeature(Generic.Features.boundType).datatype(() -> Enums.BOUND_TYPE).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(NAME, TYPE, BOUND_TYPE);
     }
 
     interface REFERENCE {
-      Relation<Concept<?>, Concept<?>> GROUP = new RelationImpl<>("group", true, false, true, Reference.Features.group, new ReferenceImpl<>(() -> Groups.CONCEPT, List.of(() -> LMCoreDefinition.Generics.REFERENCE.get(0))), true, false);
-      Relation<LMEntity<?>, List<LMEntity<?>>> PARAMETERS = new RelationImpl<>("parameters", true, true, false, Reference.Features.parameters, new ReferenceImpl<>(() -> Groups.LM_ENTITY, List.of()), true, false);
+      Relation<Concept<?>, Concept<?>> GROUP = new RelationBuilder<Concept<?>, Concept<?>>().name("group").immutable(true).many(false).mandatory(true).rawFeature(Reference.Features.group).reference(() -> new ReferenceImpl<>(() -> Groups.CONCEPT, List.of(() -> LMCoreDefinition.Generics.REFERENCE.get(0)))).lazy(true).contains(false).build();
+      Relation<LMEntity<?>, List<LMEntity<?>>> PARAMETERS = new RelationBuilder<LMEntity<?>, List<LMEntity<?>>>().name("parameters").immutable(true).many(true).mandatory(false).rawFeature(Reference.Features.parameters).reference(() -> new ReferenceImpl<>(() -> Groups.LM_ENTITY, List.of())).lazy(true).contains(false).build();
       List<Feature<?, ?>> ALL = List.of(GROUP, PARAMETERS);
     }
 
     interface JAVA_WRAPPER {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Attribute<String, String> QUALIFIED_CLASS_NAME = new AttributeImpl<>("qualifiedClassName", true, false, true, JavaWrapper.Features.qualifiedClassName, Units.STRING, null, List.of());
-      Relation<Serializer, Serializer> SERIALIZER = new RelationImpl<>("serializer", true, false, false, JavaWrapper.Features.serializer, new ReferenceImpl<>(() -> Groups.SERIALIZER, List.of()), false, true);
+      Attribute<String, String> QUALIFIED_CLASS_NAME = new AttributeBuilder<String, String>().name("qualifiedClassName").immutable(true).many(false).mandatory(true).rawFeature(JavaWrapper.Features.qualifiedClassName).datatype(() -> Units.STRING).defaultValue(null).build();
+      Relation<Serializer, Serializer> SERIALIZER = new RelationBuilder<Serializer, Serializer>().name("serializer").immutable(true).many(false).mandatory(false).rawFeature(JavaWrapper.Features.serializer).reference(() -> new ReferenceImpl<>(() -> Groups.SERIALIZER, List.of())).lazy(false).contains(true).build();
       List<Feature<?, ?>> ALL = List.of(NAME, QUALIFIED_CLASS_NAME, SERIALIZER);
     }
 
     interface SERIALIZER {
-      Attribute<String, String> TO_STRING = new AttributeImpl<>("toString", true, false, true, Serializer.Features.toString, Units.STRING, null, List.of());
-      Attribute<String, String> FROM_STRING = new AttributeImpl<>("fromString", true, false, true, Serializer.Features.fromString, Units.STRING, null, List.of());
+      Attribute<String, String> TO_STRING = new AttributeBuilder<String, String>().name("toString").immutable(true).many(false).mandatory(true).rawFeature(Serializer.Features.toString).datatype(() -> Units.STRING).defaultValue(null).build();
+      Attribute<String, String> FROM_STRING = new AttributeBuilder<String, String>().name("fromString").immutable(true).many(false).mandatory(true).rawFeature(Serializer.Features.fromString).datatype(() -> Units.STRING).defaultValue(null).build();
       List<Feature<?, ?>> ALL = List.of(TO_STRING, FROM_STRING);
     }
   }
 
   interface Generics {
-    List<Generic<?>> TYPE = List.of(new GenericImpl<>("T", null, null));
-    List<Generic<?>> LM_ENTITY = List.of(new GenericImpl<>("T", null, null));
-    List<Generic<?>> CONCEPT = List.of(new GenericImpl<>("T", null, null));
-    List<Generic<?>> GROUP = List.of(new GenericImpl<>("T", LMCoreDefinition.Groups.LM_OBJECT, BoundType.Extends));
-    List<Generic<?>> INCLUDE = List.of(new GenericImpl<>("T", LMCoreDefinition.Groups.LM_OBJECT, BoundType.Extends));
-    List<Generic<?>> FEATURE = List.of(new GenericImpl<>("UnaryType", null, null),new GenericImpl<>("EffectiveType", null, null));
-    List<Generic<?>> ATTRIBUTE = List.of(new GenericImpl<>("UnaryType", null, null),new GenericImpl<>("EffectiveType", null, null));
-    List<Generic<?>> RELATION = List.of(new GenericImpl<>("UnaryType", LMCoreDefinition.Groups.LM_OBJECT, BoundType.Extends),new GenericImpl<>("EffectiveType", null, null));
-    List<Generic<?>> DATATYPE = List.of(new GenericImpl<>("T", null, null));
-    List<Generic<?>> ENUM = List.of(new GenericImpl<>("T", null, null));
-    List<Generic<?>> UNIT = List.of(new GenericImpl<>("T", null, null));
-    List<Generic<?>> GENERIC = List.of(new GenericImpl<>("T", LMCoreDefinition.Groups.LM_ENTITY, BoundType.Extends));
-    List<Generic<?>> REFERENCE = List.of(new GenericImpl<>("T", LMCoreDefinition.Groups.LM_OBJECT, BoundType.Extends));
-    List<Generic<?>> JAVA_WRAPPER = List.of(new GenericImpl<>("T", null, null));
+    List<Generic<?>> TYPE = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
+    List<Generic<?>> LM_ENTITY = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
+    List<Generic<?>> CONCEPT = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
+    List<Generic<?>> GROUP = List.of(new GenericBuilder<>().name("T").type(() -> LMCoreDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build());
+    List<Generic<?>> INCLUDE = List.of(new GenericBuilder<>().name("T").type(() -> LMCoreDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build());
+    List<Generic<?>> FEATURE = List.of(new GenericBuilder<>().name("UnaryType").type(() -> null).build(),new GenericBuilder<>().name("EffectiveType").type(() -> null).build());
+    List<Generic<?>> ATTRIBUTE = List.of(new GenericBuilder<>().name("UnaryType").type(() -> null).build(),new GenericBuilder<>().name("EffectiveType").type(() -> null).build());
+    List<Generic<?>> RELATION = List.of(new GenericBuilder<>().name("UnaryType").type(() -> LMCoreDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build(),new GenericBuilder<>().name("EffectiveType").type(() -> null).build());
+    List<Generic<?>> DATATYPE = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
+    List<Generic<?>> ENUM = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
+    List<Generic<?>> UNIT = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
+    List<Generic<?>> GENERIC = List.of(new GenericBuilder<>().name("T").type(() -> LMCoreDefinition.Groups.LM_ENTITY).boundType(BoundType.Extends).build());
+    List<Generic<?>> REFERENCE = List.of(new GenericBuilder<>().name("T").type(() -> LMCoreDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build());
+    List<Generic<?>> JAVA_WRAPPER = List.of(new GenericBuilder<>().name("T").type(() -> null).build());
   }
 
   interface Groups {
-    Group<LMObject> LM_OBJECT = new GroupImpl<>("LMObject", false, List.of(), Features.LM_OBJECT.ALL,List.of(), List.of(), null);
-    Group<Named> NAMED = new GroupImpl<>("Named", false, List.of(new IncludeImpl<>(() -> LM_OBJECT, List.of())),
-										 Features.NAMED.ALL,List.of(), List.of(), null);
-    Group<Type<?>> TYPE = new GroupImpl<>("Type", false, List.of(new IncludeImpl<>(() -> NAMED, List.of())), Features.TYPE.ALL,Generics.TYPE, List.of(), null);
-    Group<Model> MODEL = new GroupImpl<>("Model", false, List.of(new IncludeImpl<>(() -> NAMED, List.of())), Features.MODEL.ALL,List.of(), List.of(), null);
-    Group<MetaModel> META_MODEL = new GroupImpl<>("MetaModel", true, List.of(new IncludeImpl<>(() -> MODEL, List.of())), Features.META_MODEL.ALL,List.of(), List.of(), new BuilderSupplier<>(MetaModelBuilder::new));
-    Group<LMEntity<?>> LM_ENTITY = new GroupImpl<>("LMEntity", false, List.of(new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.LM_ENTITY.get(0)))), Features.LM_ENTITY.ALL,Generics.LM_ENTITY, List.of(), null);
-    Group<Concept<?>> CONCEPT = new GroupImpl<>("Concept", false, List.of(new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.CONCEPT.get(0))),new IncludeImpl<>(() -> LM_ENTITY, List.of(() -> LMCoreDefinition.Generics.CONCEPT.get(0)))), Features.CONCEPT.ALL,Generics.CONCEPT, List.of(), null);
-    Group<Group<?>> GROUP = new GroupImpl<>("Group", true, List.of(new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0))),new IncludeImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0)))), Features.GROUP.ALL,Generics.GROUP, List.of(), new BuilderSupplier<>(GroupBuilder::new));
-    Group<Include<?>> INCLUDE = new GroupImpl<>("Include", true, List.of(new IncludeImpl<>(() -> LM_OBJECT, List.of())), Features.INCLUDE.ALL,Generics.INCLUDE, List.of(), new BuilderSupplier<>(IncludeBuilder::new));
-    Group<Feature<?, ?>> FEATURE = new GroupImpl<>("Feature", false, List.of(new IncludeImpl<>(() -> NAMED, List.of())), Features.FEATURE.ALL,Generics.FEATURE, List.of(), null);
-    Group<Attribute<?, ?>> ATTRIBUTE = new GroupImpl<>("Attribute", true, List.of(new IncludeImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.ATTRIBUTE.get(0),() -> LMCoreDefinition.Generics.ATTRIBUTE.get(1)))), Features.ATTRIBUTE.ALL,Generics.ATTRIBUTE, List.of(), new BuilderSupplier<>(AttributeBuilder::new));
-    Group<Relation<?, ?>> RELATION = new GroupImpl<>("Relation", true, List.of(new IncludeImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.RELATION.get(0),() -> LMCoreDefinition.Generics.RELATION.get(1)))), Features.RELATION.ALL,Generics.RELATION, List.of(), new BuilderSupplier<>(RelationBuilder::new));
-    Group<Operation> OPERATION = new GroupImpl<>("Operation", true, List.of(new IncludeImpl<>(() -> NAMED, List.of())), Features.OPERATION.ALL,List.of(), List.of(), new BuilderSupplier<>(OperationBuilder::new));
-    Group<OperationParameter> OPERATION_PARAMETER = new GroupImpl<>("OperationParameter", true, List.of(new IncludeImpl<>(() -> NAMED, List.of())), Features.OPERATION_PARAMETER.ALL,List.of(), List.of(), new BuilderSupplier<>(OperationParameterBuilder::new));
-    Group<Datatype<?>> DATATYPE = new GroupImpl<>("Datatype", false, List.of(new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.DATATYPE.get(0)))), Features.DATATYPE.ALL,Generics.DATATYPE, List.of(), null);
-    Group<Alias> ALIAS = new GroupImpl<>("Alias", true, List.of(new IncludeImpl<>(() -> NAMED, List.of())), Features.ALIAS.ALL,List.of(), List.of(), new BuilderSupplier<>(AliasBuilder::new));
-    Group<Enum<?>> ENUM = new GroupImpl<>("Enum", true, List.of(new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.ENUM.get(0)))), Features.ENUM.ALL,Generics.ENUM, List.of(), new BuilderSupplier<>(EnumBuilder::new));
-    Group<Unit<?>> UNIT = new GroupImpl<>("Unit", true, List.of(new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.UNIT.get(0)))), Features.UNIT.ALL,Generics.UNIT, List.of(), new BuilderSupplier<>(UnitBuilder::new));
-    Group<Generic<?>> GENERIC = new GroupImpl<>("Generic", true, List.of(new IncludeImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GENERIC.get(0)))), Features.GENERIC.ALL,Generics.GENERIC, List.of(), new BuilderSupplier<>(GenericBuilder::new));
-    Group<Reference<?>> REFERENCE = new GroupImpl<>("Reference", true, List.of(new IncludeImpl<>(() -> LM_OBJECT, List.of())), Features.REFERENCE.ALL,Generics.REFERENCE, List.of(), new BuilderSupplier<>(ReferenceBuilder::new));
-    Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupImpl<>("JavaWrapper", true, List.of(new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0))),new IncludeImpl<>(() -> LM_ENTITY, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))), Features.JAVA_WRAPPER.ALL,Generics.JAVA_WRAPPER, List.of(), new BuilderSupplier<>(JavaWrapperBuilder::new));
-    Group<Serializer> SERIALIZER = new GroupImpl<>("Serializer", true, List.of(new IncludeImpl<>(() -> LM_OBJECT, List.of())), Features.SERIALIZER.ALL,List.of(), List.of(), new BuilderSupplier<>(SerializerBuilder::new));
+    Group<LMObject> LM_OBJECT = new GroupBuilder<LMObject>().name("LMObject").concrete(false).build();
+    Group<Named> NAMED = new GroupBuilder<Named>().name("Named").concrete(false).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.NAMED.ALL.get(0)).build();
+    Group<Type<?>> TYPE = new GroupBuilder<Type<?>>().name("Type").concrete(false).addInclude(() -> new IncludeImpl<>(() -> NAMED, List.of())).addFeature(() -> Features.TYPE.ALL.get(0)).addGeneric(() -> Generics.TYPE.get(0)).build();
+    Group<Model> MODEL = new GroupBuilder<Model>().name("Model").concrete(false).addInclude(() -> new IncludeImpl<>(() -> NAMED, List.of())).addFeature(() -> Features.MODEL.ALL.get(0)).addFeature(() -> Features.MODEL.ALL.get(1)).addFeature(() -> Features.MODEL.ALL.get(2)).build();
+    Group<MetaModel> META_MODEL = new GroupBuilder<MetaModel>().name("MetaModel").concrete(true).addInclude(() -> new IncludeImpl<>(() -> MODEL, List.of())).addFeature(() -> Features.META_MODEL.ALL.get(0)).addFeature(() -> Features.META_MODEL.ALL.get(1)).addFeature(() -> Features.META_MODEL.ALL.get(2)).addFeature(() -> Features.META_MODEL.ALL.get(3)).addFeature(() -> Features.META_MODEL.ALL.get(4)).addFeature(() -> Features.META_MODEL.ALL.get(5)).addFeature(() -> Features.META_MODEL.ALL.get(6)).addFeature(() -> Features.META_MODEL.ALL.get(7)).addFeature(() -> Features.META_MODEL.ALL.get(8)).lmBuilder(new BuilderSupplier<>(MetaModelBuilder::new)).build();
+    Group<LMEntity<?>> LM_ENTITY = new GroupBuilder<LMEntity<?>>().name("LMEntity").concrete(false).addInclude(() -> new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.LM_ENTITY.get(0)))).addFeature(() -> Features.LM_ENTITY.ALL.get(0)).addGeneric(() -> Generics.LM_ENTITY.get(0)).build();
+    Group<Concept<?>> CONCEPT = new GroupBuilder<Concept<?>>().name("Concept").concrete(false).addInclude(() -> new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.CONCEPT.get(0)))).addInclude(() -> new IncludeImpl<>(() -> LM_ENTITY, List.of(() -> LMCoreDefinition.Generics.CONCEPT.get(0)))).addFeature(() -> Features.CONCEPT.ALL.get(0)).addGeneric(() -> Generics.CONCEPT.get(0)).build();
+    Group<Group<?>> GROUP = new GroupBuilder<Group<?>>().name("Group").concrete(true).addInclude(() -> new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0)))).addInclude(() -> new IncludeImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0)))).addFeature(() -> Features.GROUP.ALL.get(0)).addFeature(() -> Features.GROUP.ALL.get(1)).addFeature(() -> Features.GROUP.ALL.get(2)).addFeature(() -> Features.GROUP.ALL.get(3)).addFeature(() -> Features.GROUP.ALL.get(4)).addFeature(() -> Features.GROUP.ALL.get(5)).addFeature(() -> Features.GROUP.ALL.get(6)).addGeneric(() -> Generics.GROUP.get(0)).lmBuilder(new BuilderSupplier<>(GroupBuilder::new)).build();
+    Group<Include<?>> INCLUDE = new GroupBuilder<Include<?>>().name("Include").concrete(true).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.INCLUDE.ALL.get(0)).addFeature(() -> Features.INCLUDE.ALL.get(1)).addGeneric(() -> Generics.INCLUDE.get(0)).lmBuilder(new BuilderSupplier<>(IncludeBuilder::new)).build();
+    Group<Feature<?, ?>> FEATURE = new GroupBuilder<Feature<?, ?>>().name("Feature").concrete(false).addInclude(() -> new IncludeImpl<>(() -> NAMED, List.of())).addFeature(() -> Features.FEATURE.ALL.get(0)).addFeature(() -> Features.FEATURE.ALL.get(1)).addFeature(() -> Features.FEATURE.ALL.get(2)).addFeature(() -> Features.FEATURE.ALL.get(3)).addFeature(() -> Features.FEATURE.ALL.get(4)).addGeneric(() -> Generics.FEATURE.get(0)).addGeneric(() -> Generics.FEATURE.get(1)).build();
+    Group<Attribute<?, ?>> ATTRIBUTE = new GroupBuilder<Attribute<?, ?>>().name("Attribute").concrete(true).addInclude(() -> new IncludeImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.ATTRIBUTE.get(0),() -> LMCoreDefinition.Generics.ATTRIBUTE.get(1)))).addFeature(() -> Features.ATTRIBUTE.ALL.get(0)).addFeature(() -> Features.ATTRIBUTE.ALL.get(1)).addFeature(() -> Features.ATTRIBUTE.ALL.get(2)).addFeature(() -> Features.ATTRIBUTE.ALL.get(3)).addFeature(() -> Features.ATTRIBUTE.ALL.get(4)).addFeature(() -> Features.ATTRIBUTE.ALL.get(5)).addFeature(() -> Features.ATTRIBUTE.ALL.get(6)).addFeature(() -> Features.ATTRIBUTE.ALL.get(7)).addGeneric(() -> Generics.ATTRIBUTE.get(0)).addGeneric(() -> Generics.ATTRIBUTE.get(1)).lmBuilder(new BuilderSupplier<>(AttributeBuilder::new)).build();
+    Group<Relation<?, ?>> RELATION = new GroupBuilder<Relation<?, ?>>().name("Relation").concrete(true).addInclude(() -> new IncludeImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.RELATION.get(0),() -> LMCoreDefinition.Generics.RELATION.get(1)))).addFeature(() -> Features.RELATION.ALL.get(0)).addFeature(() -> Features.RELATION.ALL.get(1)).addFeature(() -> Features.RELATION.ALL.get(2)).addFeature(() -> Features.RELATION.ALL.get(3)).addFeature(() -> Features.RELATION.ALL.get(4)).addFeature(() -> Features.RELATION.ALL.get(5)).addFeature(() -> Features.RELATION.ALL.get(6)).addFeature(() -> Features.RELATION.ALL.get(7)).addGeneric(() -> Generics.RELATION.get(0)).addGeneric(() -> Generics.RELATION.get(1)).lmBuilder(new BuilderSupplier<>(RelationBuilder::new)).build();
+    Group<Operation> OPERATION = new GroupBuilder<Operation>().name("Operation").concrete(true).addInclude(() -> new IncludeImpl<>(() -> NAMED, List.of())).addFeature(() -> Features.OPERATION.ALL.get(0)).addFeature(() -> Features.OPERATION.ALL.get(1)).addFeature(() -> Features.OPERATION.ALL.get(2)).addFeature(() -> Features.OPERATION.ALL.get(3)).lmBuilder(new BuilderSupplier<>(OperationBuilder::new)).build();
+    Group<OperationParameter> OPERATION_PARAMETER = new GroupBuilder<OperationParameter>().name("OperationParameter").concrete(true).addInclude(() -> new IncludeImpl<>(() -> NAMED, List.of())).addFeature(() -> Features.OPERATION_PARAMETER.ALL.get(0)).addFeature(() -> Features.OPERATION_PARAMETER.ALL.get(1)).lmBuilder(new BuilderSupplier<>(OperationParameterBuilder::new)).build();
+    Group<Datatype<?>> DATATYPE = new GroupBuilder<Datatype<?>>().name("Datatype").concrete(false).addInclude(() -> new IncludeImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.DATATYPE.get(0)))).addFeature(() -> Features.DATATYPE.ALL.get(0)).addGeneric(() -> Generics.DATATYPE.get(0)).build();
+    Group<Alias> ALIAS = new GroupBuilder<Alias>().name("Alias").concrete(true).addInclude(() -> new IncludeImpl<>(() -> NAMED, List.of())).addFeature(() -> Features.ALIAS.ALL.get(0)).addFeature(() -> Features.ALIAS.ALL.get(1)).lmBuilder(new BuilderSupplier<>(AliasBuilder::new)).build();
+    Group<Enum<?>> ENUM = new GroupBuilder<Enum<?>>().name("Enum").concrete(true).addInclude(() -> new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.ENUM.get(0)))).addFeature(() -> Features.ENUM.ALL.get(0)).addFeature(() -> Features.ENUM.ALL.get(1)).addGeneric(() -> Generics.ENUM.get(0)).lmBuilder(new BuilderSupplier<>(EnumBuilder::new)).build();
+    Group<Unit<?>> UNIT = new GroupBuilder<Unit<?>>().name("Unit").concrete(true).addInclude(() -> new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.UNIT.get(0)))).addFeature(() -> Features.UNIT.ALL.get(0)).addFeature(() -> Features.UNIT.ALL.get(1)).addFeature(() -> Features.UNIT.ALL.get(2)).addFeature(() -> Features.UNIT.ALL.get(3)).addFeature(() -> Features.UNIT.ALL.get(4)).addGeneric(() -> Generics.UNIT.get(0)).lmBuilder(new BuilderSupplier<>(UnitBuilder::new)).build();
+    Group<Generic<?>> GENERIC = new GroupBuilder<Generic<?>>().name("Generic").concrete(true).addInclude(() -> new IncludeImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GENERIC.get(0)))).addFeature(() -> Features.GENERIC.ALL.get(0)).addFeature(() -> Features.GENERIC.ALL.get(1)).addFeature(() -> Features.GENERIC.ALL.get(2)).addGeneric(() -> Generics.GENERIC.get(0)).lmBuilder(new BuilderSupplier<>(GenericBuilder::new)).build();
+    Group<Reference<?>> REFERENCE = new GroupBuilder<Reference<?>>().name("Reference").concrete(true).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.REFERENCE.ALL.get(0)).addFeature(() -> Features.REFERENCE.ALL.get(1)).addGeneric(() -> Generics.REFERENCE.get(0)).lmBuilder(new BuilderSupplier<>(ReferenceBuilder::new)).build();
+    Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupBuilder<JavaWrapper<?>>().name("JavaWrapper").concrete(true).addInclude(() -> new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))).addInclude(() -> new IncludeImpl<>(() -> LM_ENTITY, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))).addFeature(() -> Features.JAVA_WRAPPER.ALL.get(0)).addFeature(() -> Features.JAVA_WRAPPER.ALL.get(1)).addFeature(() -> Features.JAVA_WRAPPER.ALL.get(2)).addGeneric(() -> Generics.JAVA_WRAPPER.get(0)).lmBuilder(new BuilderSupplier<>(JavaWrapperBuilder::new)).build();
+    Group<Serializer> SERIALIZER = new GroupBuilder<Serializer>().name("Serializer").concrete(true).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.SERIALIZER.ALL.get(0)).addFeature(() -> Features.SERIALIZER.ALL.get(1)).lmBuilder(new BuilderSupplier<>(SerializerBuilder::new)).build();
     List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, LM_ENTITY, CONCEPT, GROUP, INCLUDE, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, REFERENCE, JAVA_WRAPPER, SERIALIZER);
   }
 
   interface Units {
-    Unit<String> MATCHER = new UnitImpl<>("matcher", "rgx_match:<(.+?)>", null, Primitive.String, null);
-    Unit<String> EXTRACTOR = new UnitImpl<>("extractor", "rgx_match:<(.+?)>", null, Primitive.String, null);
-    Unit<Boolean> BOOLEAN = new UnitImpl<>("boolean", "rgx_match:<(true|false)>", "false", Primitive.Boolean, null);
-    Unit<Integer> INT = new UnitImpl<>("int", "rgx_match:<[0-9]+>", "0", Primitive.Int, null);
-    Unit<Long> LONG = new UnitImpl<>("long", "rgx_match:<[0-9]+[Ll]>", "0L", Primitive.Long, null);
-    Unit<Float> FLOAT = new UnitImpl<>("float", "rgx_match:<[0-9.]+[Ff]>", "0f", Primitive.Float, null);
-    Unit<Double> DOUBLE = new UnitImpl<>("double", "rgx_match:<[0-9.]+>", "0.", Primitive.Double, null);
-    Unit<String> STRING = new UnitImpl<>("string", null, null, Primitive.String, null);
+    Unit<String> MATCHER = new UnitBuilder<String>().name("matcher").matcher("rgx_match:<(.+?)>").defaultValue(null).primitive(Primitive.String).extractor(null).build();
+    Unit<String> EXTRACTOR = new UnitBuilder<String>().name("extractor").matcher("rgx_match:<(.+?)>").defaultValue(null).primitive(Primitive.String).extractor(null).build();
+    Unit<Boolean> BOOLEAN = new UnitBuilder<Boolean>().name("boolean").matcher("rgx_match:<(true|false)>").defaultValue("false").primitive(Primitive.Boolean).extractor(null).build();
+    Unit<Integer> INT = new UnitBuilder<Integer>().name("int").matcher("rgx_match:<[0-9]+>").defaultValue("0").primitive(Primitive.Int).extractor(null).build();
+    Unit<Long> LONG = new UnitBuilder<Long>().name("long").matcher("rgx_match:<[0-9]+[Ll]>").defaultValue("0L").primitive(Primitive.Long).extractor(null).build();
+    Unit<Float> FLOAT = new UnitBuilder<Float>().name("float").matcher("rgx_match:<[0-9.]+[Ff]>").defaultValue("0f").primitive(Primitive.Float).extractor(null).build();
+    Unit<Double> DOUBLE = new UnitBuilder<Double>().name("double").matcher("rgx_match:<[0-9.]+>").defaultValue("0.").primitive(Primitive.Double).extractor(null).build();
+    Unit<String> STRING = new UnitBuilder<String>().name("string").matcher(null).defaultValue(null).primitive(Primitive.String).extractor(null).build();
     List<Unit<?>> ALL = List.of(MATCHER, EXTRACTOR, BOOLEAN, INT, LONG, FLOAT, DOUBLE, STRING);
   }
 
   interface Enums {
-    Enum<BoundType> BOUND_TYPE = new EnumImpl<>("BoundType",
-    Arrays.stream(BoundType.values())
-    .map(java.lang.Enum::name)
-    .toList());
-
-    Enum<Primitive> PRIMITIVE = new EnumImpl<>("Primitive",
-    Arrays.stream(Primitive.values())
-    .map(java.lang.Enum::name)
-    .toList());
+    Enum<BoundType> BOUND_TYPE = new EnumBuilder<BoundType>().name("BoundType").addLiteral("extends").addLiteral("super").build();
+    Enum<Primitive> PRIMITIVE = new EnumBuilder<Primitive>().name("Primitive").addLiteral("boolean").addLiteral("int").addLiteral("long").addLiteral("float").addLiteral("double").addLiteral("string").build();
     List<Enum<?>> ALL = List.of(BOUND_TYPE, PRIMITIVE);
   }
 
   interface Aliases {
-    Alias DEFINITION = new AliasImpl("Definition", "Group concrete");
-    Alias PLUS_CONTAINS = new AliasImpl("+contains", "Relation contains immutable=false");
-    Alias MINUS_CONTAINS = new AliasImpl("-contains", "Relation contains immutable");
-    Alias PLUS_REFERS = new AliasImpl("+refers", "Relation contains=false immutable=false");
-    Alias MINUS_REFERS = new AliasImpl("-refers", "Relation contains=false immutable");
-    Alias PLUS_ATT = new AliasImpl("+att", "Attribute immutable=false");
-    Alias MINUS_ATT = new AliasImpl("-att", "Attribute immutable");
-    Alias LSB_0_DOT_DOT_1_RSB = new AliasImpl("[0..1]", "mandatory=false many=false");
-    Alias LSB_1_DOT_DOT_1_RSB = new AliasImpl("[1..1]", "mandatory many=false");
-    Alias LSB_0_DOT_DOT_STAR_RSB = new AliasImpl("[0..*]", "mandatory=false many");
-    Alias LSB_1_DOT_DOT_STAR_RSB = new AliasImpl("[1..*]", "mandatory many");
+    Alias DEFINITION = new AliasBuilder().name("Definition").value("Group concrete").build();
+    Alias PLUS_CONTAINS = new AliasBuilder().name("+contains").value("Relation contains immutable=false").build();
+    Alias MINUS_CONTAINS = new AliasBuilder().name("-contains").value("Relation contains immutable").build();
+    Alias PLUS_REFERS = new AliasBuilder().name("+refers").value("Relation contains=false immutable=false").build();
+    Alias MINUS_REFERS = new AliasBuilder().name("-refers").value("Relation contains=false immutable").build();
+    Alias PLUS_ATT = new AliasBuilder().name("+att").value("Attribute immutable=false").build();
+    Alias MINUS_ATT = new AliasBuilder().name("-att").value("Attribute immutable").build();
+    Alias LSB_0_DOT_DOT_1_RSB = new AliasBuilder().name("[0..1]").value("mandatory=false many=false").build();
+    Alias LSB_1_DOT_DOT_1_RSB = new AliasBuilder().name("[1..1]").value("mandatory many=false").build();
+    Alias LSB_0_DOT_DOT_STAR_RSB = new AliasBuilder().name("[0..*]").value("mandatory=false many").build();
+    Alias LSB_1_DOT_DOT_STAR_RSB = new AliasBuilder().name("[1..*]").value("mandatory many").build();
     List<Alias> ALL = List.of(DEFINITION, PLUS_CONTAINS, MINUS_CONTAINS, PLUS_REFERS, MINUS_REFERS, PLUS_ATT, MINUS_ATT, LSB_0_DOT_DOT_1_RSB, LSB_1_DOT_DOT_1_RSB, LSB_0_DOT_DOT_STAR_RSB, LSB_1_DOT_DOT_STAR_RSB);
   }
 
   interface JavaWrappers {
-    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "org.logoce.lmf.model.api.feature.RawFeature", null);
-    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "org.logoce.lmf.model.api.model.IModelPackage", null);
-    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperImpl<>("BuilderSupplier", "org.logoce.lmf.model.api.model.BuilderSupplier", null);
+    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperBuilder<RawFeature<?, ?>>().name("RawFeature").qualifiedClassName("org.logoce.lmf.model.api.feature.RawFeature").serializer(() -> null).build();
+    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperBuilder<IModelPackage>().name("IModelPackage").qualifiedClassName("org.logoce.lmf.model.api.model.IModelPackage").serializer(() -> null).build();
+    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperBuilder<BuilderSupplier<?>>().name("BuilderSupplier").qualifiedClassName("org.logoce.lmf.model.api.model.BuilderSupplier").serializer(() -> null).build();
     List<JavaWrapper<?>> ALL = List.of(RAW_FEATURE, I_MODEL_PACKAGE, BUILDER_SUPPLIER);
   }
 }

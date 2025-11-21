@@ -5,7 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.util.*;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.impl.GenericImpl;
+import org.logoce.lmf.model.lang.builder.GenericBuilder;
 import org.logoce.lmf.model.util.ModelUtils;
 
 public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?>>
@@ -13,7 +13,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 	private static final TypeParameter GENERIC_TYPE = TypeParameter.of(ClassName.get(Generic.class), 1);
 	private static final TypeParameter LIST_OF_GENERIC = TypeParameter.of(ConstantTypes.LIST,
 																		  GENERIC_TYPE.parametrizedWildcard());
-	private static final ClassName GENERIC_IMPL_TYPE = ClassName.get(GenericImpl.class);
+	private static final ClassName GENERIC_BUILDER_TYPE = ClassName.get(GenericBuilder.class);
 	private static final ClassName BT_TYPE = ClassName.get(BoundType.class);
 
 	@Override
@@ -34,19 +34,18 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 
 	private static CodeBlock generateGenericsCodeblock(final Generic<?> generic)
 	{
-		final var type = generic.type();
+		final var builder = CodeBlock.builder()
+									 .add("new $T<>()", GENERIC_BUILDER_TYPE)
+									 .add(".name($S)", generic.name())
+									 .add(".type(() -> $L)", typeBlock(generic.type()));
+
 		final var boundType = generic.boundType();
+		if (boundType != null)
+		{
+			builder.add(".boundType($T.$L)", BT_TYPE, boundType);
+		}
 
-		final var btBlock = boundType == null ? CodeBlock.of("null") : CodeBlock.of("$T.$L", BT_TYPE, boundType);
-
-		final var typeCodeblock = typeBlock(type);
-		return CodeBlock.builder()
-						.add("new $T<>($S, ", GENERIC_IMPL_TYPE, generic.name())
-						.add(typeCodeblock)
-						.add(", ")
-						.add(btBlock)
-						.add(")")
-						.build();
+		return builder.add(".build()").build();
 	}
 
 	private static CodeBlock typeBlock(Type<?> type)
