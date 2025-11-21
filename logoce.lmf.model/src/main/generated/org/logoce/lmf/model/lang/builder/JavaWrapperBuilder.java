@@ -10,13 +10,15 @@ import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.JavaWrapper.Builder;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.Serializer;
 import org.logoce.lmf.model.lang.impl.JavaWrapperImpl;
 
 public final class JavaWrapperBuilder<T> implements Builder<T> {
   private static final FeatureInserter<JavaWrapperBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.Features.name, JavaWrapperBuilder::name).add(JavaWrapper.Features.qualifiedClassName, JavaWrapperBuilder::qualifiedClassName).build();
-  private static final RelationLazyInserter<JavaWrapperBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder<?>>().build();
+  private static final RelationLazyInserter<JavaWrapperBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.Features.serializer, JavaWrapperBuilder::serializer).build();
   private String name;
   private String qualifiedClassName;
+  private Supplier<Serializer> serializer = () -> null;
 
   @Override
   public JavaWrapperBuilder<T> name(String name) {
@@ -31,8 +33,14 @@ public final class JavaWrapperBuilder<T> implements Builder<T> {
   }
 
   @Override
+  public JavaWrapperBuilder<T> serializer(Supplier<Serializer> serializer) {
+    this.serializer = serializer;
+    return this;
+  }
+
+  @Override
   public JavaWrapper<T> build() {
-    final var built = new JavaWrapperImpl<T>(name, qualifiedClassName);
+    final var built = new JavaWrapperImpl<T>(name, qualifiedClassName, serializer.get());
     return built;
   }
 

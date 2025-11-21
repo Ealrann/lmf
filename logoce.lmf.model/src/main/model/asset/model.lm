@@ -107,7 +107,13 @@
 	(Definition JavaWrapper
 		(Generic name=T)
 		(includes group=@Datatype parameters=../generics.0)
-		(-att name=qualifiedClassName /units.7 mandatory))
+		(-att name=qualifiedClassName /units.7 mandatory)
+		(-contains serializer [0..1] (reference @Serializer)))
+
+	(Definition Serializer
+		(includes group=@LMObject)
+		(-att toString @string [1..1])
+		(-att fromString @string [1..1]))
 
 	(Unit name=matcher matcher="rgx_match:<(.+?)>")
 	(Unit name=extractor matcher="rgx_match:<(.+?)>")

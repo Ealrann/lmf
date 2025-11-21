@@ -22,6 +22,7 @@ import org.logoce.lmf.model.lang.builder.OperationBuilder;
 import org.logoce.lmf.model.lang.builder.OperationParameterBuilder;
 import org.logoce.lmf.model.lang.builder.ReferenceBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
+import org.logoce.lmf.model.lang.builder.SerializerBuilder;
 import org.logoce.lmf.model.lang.builder.UnitBuilder;
 import org.logoce.lmf.model.lang.impl.AliasImpl;
 import org.logoce.lmf.model.lang.impl.AttributeImpl;
@@ -174,7 +175,14 @@ public interface LMCoreDefinition {
     interface JAVA_WRAPPER {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
       Attribute<String, String> QUALIFIED_CLASS_NAME = new AttributeImpl<>("qualifiedClassName", true, false, true, JavaWrapper.Features.qualifiedClassName, Units.STRING, null, List.of());
-      List<Feature<?, ?>> ALL = List.of(NAME, QUALIFIED_CLASS_NAME);
+      Relation<Serializer, Serializer> SERIALIZER = new RelationImpl<>("serializer", true, false, false, JavaWrapper.Features.serializer, new ReferenceImpl<>(() -> Groups.SERIALIZER, List.of()), false, true);
+      List<Feature<?, ?>> ALL = List.of(NAME, QUALIFIED_CLASS_NAME, SERIALIZER);
+    }
+
+    interface SERIALIZER {
+      Attribute<String, String> TO_STRING = new AttributeImpl<>("toString", true, false, true, Serializer.Features.toString, Units.STRING, null, List.of());
+      Attribute<String, String> FROM_STRING = new AttributeImpl<>("fromString", true, false, true, Serializer.Features.fromString, Units.STRING, null, List.of());
+      List<Feature<?, ?>> ALL = List.of(TO_STRING, FROM_STRING);
     }
   }
 
@@ -198,22 +206,23 @@ public interface LMCoreDefinition {
     Group<Named> NAMED = new GroupImpl<>("Named", false, List.of(new ReferenceImpl<>(() -> LM_OBJECT, List.of())), Features.NAMED.ALL,List.of(), List.of(), null);
     Group<Type<?>> TYPE = new GroupImpl<>("Type", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.TYPE.ALL,Generics.TYPE, List.of(), null);
     Group<Model> MODEL = new GroupImpl<>("Model", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.MODEL.ALL,List.of(), List.of(), null);
-    Group<MetaModel> META_MODEL = new GroupImpl<>("MetaModel", true, List.of(new ReferenceImpl<>(() -> MODEL, List.of())), Features.META_MODEL.ALL,List.of(), List.of(), new BuilderSupplier(MetaModelBuilder::new));
+    Group<MetaModel> META_MODEL = new GroupImpl<>("MetaModel", true, List.of(new ReferenceImpl<>(() -> MODEL, List.of())), Features.META_MODEL.ALL,List.of(), List.of(), new BuilderSupplier<>(MetaModelBuilder::new));
     Group<Concept<?>> CONCEPT = new GroupImpl<>("Concept", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.CONCEPT.ALL,Generics.CONCEPT, List.of(), null);
-    Group<Group<?>> GROUP = new GroupImpl<>("Group", true, List.of(new ReferenceImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0))),new ReferenceImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0)))), Features.GROUP.ALL,Generics.GROUP, List.of(), new BuilderSupplier(GroupBuilder::new));
+    Group<Group<?>> GROUP = new GroupImpl<>("Group", true, List.of(new ReferenceImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0))),new ReferenceImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GROUP.get(0)))), Features.GROUP.ALL,Generics.GROUP, List.of(), new BuilderSupplier<>(GroupBuilder::new));
     Group<Feature<?, ?>> FEATURE = new GroupImpl<>("Feature", false, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.FEATURE.ALL,Generics.FEATURE, List.of(), null);
-    Group<Attribute<?, ?>> ATTRIBUTE = new GroupImpl<>("Attribute", true, List.of(new ReferenceImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.ATTRIBUTE.get(0),() -> LMCoreDefinition.Generics.ATTRIBUTE.get(1)))), Features.ATTRIBUTE.ALL,Generics.ATTRIBUTE, List.of(), new BuilderSupplier(AttributeBuilder::new));
-    Group<Relation<?, ?>> RELATION = new GroupImpl<>("Relation", true, List.of(new ReferenceImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.RELATION.get(0),() -> LMCoreDefinition.Generics.RELATION.get(1)))), Features.RELATION.ALL,Generics.RELATION, List.of(), new BuilderSupplier(RelationBuilder::new));
-    Group<Operation> OPERATION = new GroupImpl<>("Operation", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.OPERATION.ALL,List.of(), List.of(), new BuilderSupplier(OperationBuilder::new));
-    Group<OperationParameter> OPERATION_PARAMETER = new GroupImpl<>("OperationParameter", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.OPERATION_PARAMETER.ALL,List.of(), List.of(), new BuilderSupplier(OperationParameterBuilder::new));
+    Group<Attribute<?, ?>> ATTRIBUTE = new GroupImpl<>("Attribute", true, List.of(new ReferenceImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.ATTRIBUTE.get(0),() -> LMCoreDefinition.Generics.ATTRIBUTE.get(1)))), Features.ATTRIBUTE.ALL,Generics.ATTRIBUTE, List.of(), new BuilderSupplier<>(AttributeBuilder::new));
+    Group<Relation<?, ?>> RELATION = new GroupImpl<>("Relation", true, List.of(new ReferenceImpl<>(() -> FEATURE, List.of(() -> LMCoreDefinition.Generics.RELATION.get(0),() -> LMCoreDefinition.Generics.RELATION.get(1)))), Features.RELATION.ALL,Generics.RELATION, List.of(), new BuilderSupplier<>(RelationBuilder::new));
+    Group<Operation> OPERATION = new GroupImpl<>("Operation", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.OPERATION.ALL,List.of(), List.of(), new BuilderSupplier<>(OperationBuilder::new));
+    Group<OperationParameter> OPERATION_PARAMETER = new GroupImpl<>("OperationParameter", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.OPERATION_PARAMETER.ALL,List.of(), List.of(), new BuilderSupplier<>(OperationParameterBuilder::new));
     Group<Datatype<?>> DATATYPE = new GroupImpl<>("Datatype", false, List.of(new ReferenceImpl<>(() -> TYPE, List.of(() -> LMCoreDefinition.Generics.DATATYPE.get(0)))), Features.DATATYPE.ALL,Generics.DATATYPE, List.of(), null);
-    Group<Alias> ALIAS = new GroupImpl<>("Alias", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.ALIAS.ALL,List.of(), List.of(), new BuilderSupplier(AliasBuilder::new));
-    Group<Enum<?>> ENUM = new GroupImpl<>("Enum", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.ENUM.get(0)))), Features.ENUM.ALL,Generics.ENUM, List.of(), new BuilderSupplier(EnumBuilder::new));
-    Group<Unit<?>> UNIT = new GroupImpl<>("Unit", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.UNIT.get(0)))), Features.UNIT.ALL,Generics.UNIT, List.of(), new BuilderSupplier(UnitBuilder::new));
-    Group<Generic<?>> GENERIC = new GroupImpl<>("Generic", true, List.of(new ReferenceImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GENERIC.get(0)))), Features.GENERIC.ALL,Generics.GENERIC, List.of(), new BuilderSupplier(GenericBuilder::new));
-    Group<Reference<?>> REFERENCE = new GroupImpl<>("Reference", true, List.of(new ReferenceImpl<>(() -> LM_OBJECT, List.of())), Features.REFERENCE.ALL,Generics.REFERENCE, List.of(), new BuilderSupplier(ReferenceBuilder::new));
-    Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupImpl<>("JavaWrapper", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))), Features.JAVA_WRAPPER.ALL,Generics.JAVA_WRAPPER, List.of(), new BuilderSupplier(JavaWrapperBuilder::new));
-    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, CONCEPT, GROUP, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, REFERENCE, JAVA_WRAPPER);
+    Group<Alias> ALIAS = new GroupImpl<>("Alias", true, List.of(new ReferenceImpl<>(() -> NAMED, List.of())), Features.ALIAS.ALL,List.of(), List.of(), new BuilderSupplier<>(AliasBuilder::new));
+    Group<Enum<?>> ENUM = new GroupImpl<>("Enum", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.ENUM.get(0)))), Features.ENUM.ALL,Generics.ENUM, List.of(), new BuilderSupplier<>(EnumBuilder::new));
+    Group<Unit<?>> UNIT = new GroupImpl<>("Unit", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.UNIT.get(0)))), Features.UNIT.ALL,Generics.UNIT, List.of(), new BuilderSupplier<>(UnitBuilder::new));
+    Group<Generic<?>> GENERIC = new GroupImpl<>("Generic", true, List.of(new ReferenceImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GENERIC.get(0)))), Features.GENERIC.ALL,Generics.GENERIC, List.of(), new BuilderSupplier<>(GenericBuilder::new));
+    Group<Reference<?>> REFERENCE = new GroupImpl<>("Reference", true, List.of(new ReferenceImpl<>(() -> LM_OBJECT, List.of())), Features.REFERENCE.ALL,Generics.REFERENCE, List.of(), new BuilderSupplier<>(ReferenceBuilder::new));
+    Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupImpl<>("JavaWrapper", true, List.of(new ReferenceImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))), Features.JAVA_WRAPPER.ALL,Generics.JAVA_WRAPPER, List.of(), new BuilderSupplier<>(JavaWrapperBuilder::new));
+    Group<Serializer> SERIALIZER = new GroupImpl<>("Serializer", true, List.of(new ReferenceImpl<>(() -> LM_OBJECT, List.of())), Features.SERIALIZER.ALL,List.of(), List.of(), new BuilderSupplier<>(SerializerBuilder::new));
+    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, CONCEPT, GROUP, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, REFERENCE, JAVA_WRAPPER, SERIALIZER);
   }
 
   interface Units {
@@ -257,9 +266,9 @@ public interface LMCoreDefinition {
   }
 
   interface JavaWrappers {
-    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "org.logoce.lmf.model.api.feature.RawFeature");
-    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "org.logoce.lmf.model.api.model.IModelPackage");
-    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperImpl<>("BuilderSupplier", "org.logoce.lmf.model.api.model.BuilderSupplier");
+    JavaWrapper<RawFeature<?, ?>> RAW_FEATURE = new JavaWrapperImpl<>("RawFeature", "org.logoce.lmf.model.api.feature.RawFeature", null);
+    JavaWrapper<IModelPackage> I_MODEL_PACKAGE = new JavaWrapperImpl<>("IModelPackage", "org.logoce.lmf.model.api.model.IModelPackage", null);
+    JavaWrapper<BuilderSupplier<?>> BUILDER_SUPPLIER = new JavaWrapperImpl<>("BuilderSupplier", "org.logoce.lmf.model.api.model.BuilderSupplier", null);
     List<JavaWrapper<?>> ALL = List.of(RAW_FEATURE, I_MODEL_PACKAGE, BUILDER_SUPPLIER);
   }
 }

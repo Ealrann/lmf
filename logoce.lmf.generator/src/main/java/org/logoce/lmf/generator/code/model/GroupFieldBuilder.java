@@ -25,7 +25,8 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var name = group.name();
 		final var interfaceType = group.adapt(GroupInterfaceType.class);
 		final var builderType = group.concrete() ? group.adapt(GroupBuilderClassType.class) : null;
-		final var typedGroup = ConstantTypes.GROUP.nest(interfaceType.parametrizedWildcard());
+		final var builtType = interfaceType.parametrizedWildcard();
+		final var typedGroup = ConstantTypes.GROUP.nest(builtType);
 		final var constantName = GenUtils.toConstantCase(name);
 		final var initializerBuilder = CodeBlock.builder();
 
@@ -36,7 +37,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 								 ? CodeBlock.of("$T.of()", ConstantTypes.LIST)
 								 : CodeBlock.of("Generics.$N", constantName);
 
-		final var builderSupplierType = ClassName.get(BuilderSupplier.class);
+		final var builderSupplierRaw = ClassName.get(BuilderSupplier.class);
 
 		initializerBuilder.add("new $T<>(", GROUP_IMPL_TYPE)
 						  .add("$S, $L, ", name, group.concrete())
@@ -47,7 +48,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 						  // operations: none are modelled in the meta-definition itself, use empty list
 						  .add(", $T.of()", ConstantTypes.LIST);
 
-		if (builderType != null) initializerBuilder.add(", new $T($T::new)", builderSupplierType, builderType.raw());
+		if (builderType != null) initializerBuilder.add(", new $T<>($T::new)", builderSupplierRaw, builderType.raw());
 		else initializerBuilder.add(", null");
 
 		initializerBuilder.add(")");
