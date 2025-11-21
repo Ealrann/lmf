@@ -20,7 +20,7 @@ module logoce.lmf.model
 	exports org.logoce.lmf.model.api.feature;
 	exports org.logoce.lmf.model.api.model;
 
-	exports org.logoce.lmf.model.feature to logoce.lmf.generator;
+	exports org.logoce.lmf.model.feature;
 
 	provides IAdapterProvider with Extenders;
 }

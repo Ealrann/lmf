@@ -11,6 +11,8 @@ import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GenerateLmfSources extends DefaultTask
 {
@@ -33,16 +35,20 @@ public abstract class GenerateLmfSources extends DefaultTask
 			throw new IllegalStateException("Cannot create output directory " + outputDir);
 		}
 
-		for (final var modelFile : getModelFiles().getFiles())
+		final List<File> modelFiles = new ArrayList<>(getModelFiles().getFiles());
+
+		if (modelFiles.isEmpty())
 		{
-			logger.lifecycle("Generating LMF sources from {}", modelFile);
-			runGenerator(modelFile, outputDir);
+			logger.lifecycle("No LMF model files to generate.");
+			return;
 		}
+
+		logger.lifecycle("Generating LMF sources from {}", modelFiles);
+		runGenerator(modelFiles, outputDir);
 	}
 
-	private static void runGenerator(final File modelFile, final File outputDir)
+	private static void runGenerator(final List<File> modelFiles, final File outputDir)
 	{
-		org.logoce.lmf.generator.Main.generate(modelFile, outputDir);
+		org.logoce.lmf.generator.Main.generate(outputDir, modelFiles, modelFiles);
 	}
 }
-

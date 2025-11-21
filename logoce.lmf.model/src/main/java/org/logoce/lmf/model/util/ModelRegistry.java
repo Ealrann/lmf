@@ -1,13 +1,12 @@
 package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Named;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,7 +26,9 @@ public final class ModelRegistry implements IModelRegistry
 
 	public ModelRegistry(final List<Model> models)
 	{
-		modelMap = models.stream().collect(Collectors.toUnmodifiableMap(Named::name, Function.identity()));
+		modelMap = models.stream()
+						 .flatMap(model -> streamAliases(model).map(name -> Map.entry(name, model)))
+						 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	public Model getModel(final String name)
@@ -64,7 +65,7 @@ public final class ModelRegistry implements IModelRegistry
 
 		public void register(final Model model)
 		{
-			modelMap.put(model.name(), model);
+			streamAliases(model).forEach(name -> modelMap.put(name, model));
 		}
 
 		@Override
@@ -83,5 +84,14 @@ public final class ModelRegistry implements IModelRegistry
 		{
 			return modelMap.values().stream();
 		}
+	}
+
+	private static Stream<String> streamAliases(final Model model)
+	{
+		if (model instanceof MetaModel metaModel)
+		{
+			return Stream.of(metaModel.name(), metaModel.domain() + "." + metaModel.name());
+		}
+		return Stream.of(model.name());
 	}
 }
