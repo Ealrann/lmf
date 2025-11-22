@@ -36,6 +36,7 @@ public final class LMCorePackage implements IModelPackage {
     else if (group == LMCoreDefinition.Groups.ENUM) return Optional.of((IFeaturedObject.Builder<T>) Enum.builder());
     else if (group == LMCoreDefinition.Groups.UNIT) return Optional.of((IFeaturedObject.Builder<T>) Unit.builder());
     else if (group == LMCoreDefinition.Groups.GENERIC) return Optional.of((IFeaturedObject.Builder<T>) Generic.builder());
+    else if (group == LMCoreDefinition.Groups.GENERIC_EXTENSION) return Optional.of((IFeaturedObject.Builder<T>) GenericExtension.builder());
     else if (group == LMCoreDefinition.Groups.JAVA_WRAPPER) return Optional.of((IFeaturedObject.Builder<T>) JavaWrapper.builder());
     else if (group == LMCoreDefinition.Groups.SERIALIZER) return Optional.of((IFeaturedObject.Builder<T>) Serializer.builder());
     return Optional.empty();

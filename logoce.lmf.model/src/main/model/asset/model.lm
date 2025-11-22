@@ -8,7 +8,7 @@
 
 	(Group Type
 		(includes group=@Named)
-		(generics name=T))
+		(generics T))
 
 	(Group Model
 		(includes group=@Named)
@@ -27,7 +27,8 @@
 	(Definition Group
 		(includes group=@Type parameters=../generics.0)
 		(includes group=@Concept parameters=../generics.0)
-		(Generic T extends @LMObject)
+		(Generic T
+			(extension boundType=extends type=@LMObject))
 		(-att concrete datatype=@boolean)
 		(-contains includes [0..*] @Include)
 		(-contains features [0..*] @Feature)
@@ -37,7 +38,8 @@
 
 	(Definition Include
 		(includes @LMObject)
-		(Generic name=T boundType=Extends type=@LMObject)
+		(Generic T
+			(extension boundType=extends type=@LMObject))
 		(-refers group lazy [1..1] @Group parameters=../generics.0)
 		(-refers parameters lazy [0..*] @LMEntity))
 
@@ -60,7 +62,8 @@
 
 	(Definition Relation
 		(includes group=@Feature parameters=../generics.0,../generics.1)
-		(Generic UnaryType boundType=Extends type=@LMObject)
+		(Generic UnaryType
+			(extension boundType=extends type=@LMObject))
 		(Generic EffectiveType)
 		(-refers concept lazy [1..1] @Concept parameters=../generics.0)
 		(-refers parameters lazy [0..*] @LMEntity)
@@ -97,9 +100,17 @@
 
 	(Definition Generic
 		(includes group=@Concept parameters=../generics.0)
-		(Generic T boundType=extends type=@LMEntity)
+		(Generic T
+			(extension extends @LMEntity))
 		(-refers type [0..1] @Type)
-		(-att boundType datatype=/enums.0))
+		(-att boundType datatype=/enums.0)
+		(-contains extension [0..1] @GenericExtension))
+
+	(Definition GenericExtension
+		(includes @LMObject)
+		(-refers type [0..1] @LMEntity)
+        (-att boundType datatype=/enums.0)
+		(-contains extension [0..1] @GenericExtension))
 
 	(Group Concept
 		(includes @Type parameters=../generics.0)

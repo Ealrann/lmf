@@ -8,6 +8,7 @@ import org.logoce.lmf.model.util.ModelRegistry;
 import java.io.ByteArrayInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GenericTest
@@ -17,7 +18,7 @@ public class GenericTest
 	@Test
 	public void simpleGeneric()
 	{
-		final var textModel = "(Generic name=UnaryType boundType=Extends type=#LMCore/groups.0)";
+		final var textModel = "(Generic name=UnaryType (extension boundType=Extends type=#LMCore/groups.0))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
@@ -28,8 +29,9 @@ public class GenericTest
 
 		final var generic = (Generic<?>) root;
 		assertEquals("UnaryType", generic.name());
-		assertEquals(BoundType.Extends, generic.boundType());
-		assertEquals(generic.type(), LMCorePackage.MODEL.groups().get(0));
+		assertNotNull(generic.extension());
+		assertEquals(BoundType.Extends, generic.extension().boundType());
+		assertEquals(generic.extension().type(), LMCorePackage.MODEL.groups().get(0));
 	}
 
 	@Test
@@ -37,7 +39,7 @@ public class GenericTest
 	{
 		final var textModel = "(MetaModel Test " +
 							  "  (Group name=GenericGroup" +
-							  "    (Generic name=T boundType=Super type=/groups.1))" +
+							  "    (Generic name=T (extension boundType=Super type=/groups.1)))" +
 							  "  (Group name=ICategory))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
@@ -53,8 +55,9 @@ public class GenericTest
 		final var generic = group0.generics().get(0);
 
 		assertEquals("T", generic.name());
-		assertEquals(BoundType.Super, generic.boundType());
-		assertEquals(generic.type(), group1);
+		assertNotNull(generic.extension());
+		assertEquals(BoundType.Super, generic.extension().boundType());
+		assertEquals(generic.extension().type(), group1);
 	}
 
 	@Test
@@ -63,7 +66,8 @@ public class GenericTest
 		final var textModel = """
 				(MetaModel Test
 				    (Group name=Container
-				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
+				        (Generic name=T
+				            (extension boundType=Extends type=#LMCore/groups.0))
 				    )
 				    (Definition name=Car)
 				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
@@ -88,6 +92,11 @@ public class GenericTest
 		assertEquals("Car", car.name());
 		assertEquals("CarContainer", carContainer.name());
 
+		final var generic = container.generics().get(0);
+		assertNotNull(generic.extension());
+		assertEquals(BoundType.Extends, generic.extension().boundType());
+		assertEquals(generic.extension().type(), LMCorePackage.MODEL.groups().get(0));
+
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
 	}
 
@@ -97,7 +106,8 @@ public class GenericTest
 		final var textModel = """
 				(MetaModel Test
 				    (Group name=Container
-				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
+				        (Generic name=T
+				            (extension boundType=Extends type=#LMCore/groups.0))
 				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
 				    )
 				    (Definition name=Car)
@@ -128,5 +138,8 @@ public class GenericTest
 		assertEquals(genericOfContainer, cargoRelation.parameters().get(0));
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
 
+		assertNotNull(genericOfContainer.extension());
+		assertEquals(BoundType.Extends, genericOfContainer.extension().boundType());
+		assertEquals(genericOfContainer.extension().type(), LMCorePackage.MODEL.groups().get(0));
 	}
 }

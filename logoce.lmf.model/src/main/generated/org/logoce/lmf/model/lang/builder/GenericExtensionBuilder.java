@@ -1,0 +1,58 @@
+package org.logoce.lmf.model.lang.builder;
+
+import java.lang.Override;
+import java.util.function.Supplier;
+import org.logoce.lmf.model.feature.FeatureInserter;
+import org.logoce.lmf.model.feature.RelationLazyInserter;
+import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.BoundType;
+import org.logoce.lmf.model.lang.GenericExtension;
+import org.logoce.lmf.model.lang.GenericExtension.Builder;
+import org.logoce.lmf.model.lang.LMEntity;
+import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.impl.GenericExtensionImpl;
+
+public final class GenericExtensionBuilder implements Builder {
+  private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.boundType, GenericExtensionBuilder::boundType).build();
+  private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.type, GenericExtensionBuilder::type).add(GenericExtension.Features.extension, GenericExtensionBuilder::extension).build();
+  private Supplier<LMEntity<?>> type = () -> null;
+  private BoundType boundType;
+  private Supplier<GenericExtension> extension = () -> null;
+
+  @Override
+  public GenericExtensionBuilder type(Supplier<LMEntity<?>> type) {
+    this.type = type;
+    return this;
+  }
+
+  @Override
+  public GenericExtensionBuilder boundType(BoundType boundType) {
+    this.boundType = boundType;
+    return this;
+  }
+
+  @Override
+  public GenericExtensionBuilder extension(Supplier<GenericExtension> extension) {
+    this.extension = extension;
+    return this;
+  }
+
+  @Override
+  public GenericExtension build() {
+    final var built = new GenericExtensionImpl(type.get(), boundType, extension.get());
+    return built;
+  }
+
+  @Override
+  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
+      final AttributeType value) {
+    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+  }
+
+  @Override
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+      final Supplier<RelationType> supplier) {
+    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+  }
+}

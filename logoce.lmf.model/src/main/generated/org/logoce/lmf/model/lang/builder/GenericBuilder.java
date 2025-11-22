@@ -9,6 +9,7 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.Generic.Builder;
+import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
@@ -17,10 +18,11 @@ import org.logoce.lmf.model.lang.impl.GenericImpl;
 
 public final class GenericBuilder<T extends LMEntity<?>> implements Builder<T> {
   private static final FeatureInserter<GenericBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder<?>>().add(Generic.Features.name, GenericBuilder::name).add(Generic.Features.boundType, GenericBuilder::boundType).build();
-  private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder<?>>().add(Generic.Features.type, GenericBuilder::type).build();
+  private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder<?>>().add(Generic.Features.type, GenericBuilder::type).add(Generic.Features.extension, GenericBuilder::extension).build();
   private String name;
   private Supplier<Type<?>> type = () -> null;
   private BoundType boundType;
+  private Supplier<GenericExtension> extension = () -> null;
 
   @Override
   public GenericBuilder<T> name(String name) {
@@ -41,8 +43,14 @@ public final class GenericBuilder<T extends LMEntity<?>> implements Builder<T> {
   }
 
   @Override
+  public GenericBuilder<T> extension(Supplier<GenericExtension> extension) {
+    this.extension = extension;
+    return this;
+  }
+
+  @Override
   public Generic<T> build() {
-    final var built = new GenericImpl<T>(name, type.get(), boundType);
+    final var built = new GenericImpl<T>(name, type.get(), boundType, extension.get());
     return built;
   }
 

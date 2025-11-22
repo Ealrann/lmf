@@ -13,16 +13,19 @@ public interface Generic<T extends LMEntity<?>> extends Concept<T> {
 
   Type<?> type();
   BoundType boundType();
+  GenericExtension extension();
 
   interface Features extends Concept.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.TYPE);
     RawFeature<BoundType, BoundType> boundType = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC.BOUND_TYPE);
+    RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.EXTENSION);
   }
 
   interface Builder<T extends LMEntity<?>> extends IFeaturedObject.Builder<Generic<T>> {
     Builder<T> name(String name);
     Builder<T> type(Supplier<Type<?>> type);
     Builder<T> boundType(BoundType boundType);
+    Builder<T> extension(Supplier<GenericExtension> extension);
   }
 }
