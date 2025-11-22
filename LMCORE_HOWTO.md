@@ -52,8 +52,8 @@ General patterns:
     (+att name=foo datatype=#LMCore@string [1..1])
     (-att name=bar datatype=@MyEnum [0..1] defaultValue=SomeLiteral)
 
-    (+contains name=children [0..*] (reference @ChildType))
-    (+refers name=owner [0..1] (reference @OwnerType))
+    (+contains name=children @ChildType [0..*])
+    (+refers name=owner @OwnerType [0..1])
 ```
 
 - `datatype`:
@@ -63,14 +63,25 @@ General patterns:
 - `[min..max]`:
   - `[0..1]`, `[1..1]`, `[0..*]`, `[1..*]` are aliases that expand to `mandatory` / `many` flags.
 
-**Relation targets**:
+**Relation targets (concept/parameters)**:
+
+- Relations now point directly to a concept; the `reference ...` form is removed.
+- For a plain target:
 
 ```lm
-    (reference @SomeGroup)
-    (reference group=@SomeGroup)
+    (+contains name=children @SomeGroup [0..*])
+    (+refers name=owner @SomeGroup [0..1])
 ```
 
-Both forms refer to the `Group` called `SomeGroup`; the `group=` form is used when disambiguation is needed.
+- When the target is generic, pass parameters explicitly:
+
+```lm
+    (+refers name=typedChild @GenericContainer parameters=/generics.0)
+```
+
+- You can still add `group=@SomeGroup` if you need disambiguation, but `@SomeGroup` alone is enough in most cases.
+
+Under the hood, the runtime populates `Relation.concept()` and `Relation.parameters()`; there is no `relation.reference()` anymore.
 
 ## 4. Enums and Units
 
@@ -105,19 +116,19 @@ For most domain models you can stick to LMCore’s built‑in primitives (`#LMCo
     (Definition Car
         (includes group=@Entity)
         (-att name=brand datatype=@Brand [1..1] defaultValue="Peugeot")
-        (+contains name=passengers (reference @Person) [0..*]))
+        (+contains name=passengers @Person [0..*]))
 
     (Definition CarParc
-        (+contains cars [0..*] (reference @Car)))
+        (+contains cars [0..*] @Car))
 
     (Definition Person
         (includes group=@Entity)
-        (+refers car [0..1] (reference @Car)))
+        (+refers car [0..1] @Car))
 
     (Definition CarCompany
         (includes group=@Entity)
-        (+contains ceo (reference @Person) [1..1])
-        (+contains name=parcs (reference @Car) [0..*]))
+        (+contains ceo @Person [1..1])
+        (+contains name=parcs @Car [0..*]))
 )
 ```
 
@@ -189,7 +200,7 @@ If you need to express something that doesn’t fit these patterns, open `model.
   (Group PositionParameter
       (+att name=position datatype=@Vector3f [0..1]))
   ```
-  Optional `(contains serializer (reference @Serializer))` lets you attach string conversion hooks (see LMCore’s `model.lm` for the structure).
+  Optional `(contains serializer @Serializer)` lets you attach string conversion hooks (see LMCore’s `model.lm` for the structure).
 - `Unit` is for custom scalars with matcher/primitive info (see LMCore’s own units for patterns). Parsing/formatting logic currently lives in runtime code; the `.lm` only declares the unit.
 
 ## 9. Migration cheatsheet (ecore → lm)
@@ -197,7 +208,7 @@ If you need to express something that doesn’t fit these patterns, open `model.
 - EClass → Group/Definition; EAttribute → `+att`/`-att`; EReference → `+contains`/`+refers`; EEnum → `(Enum ...)`; custom EDataType → `(Unit ...)` or `(JavaWrapper ...)`.
 - Root objects: `EObject` → `LMObject`; `EClass` → `Group`; containment stays with `+contains`; multiplicities map to `[0..1]`, `[1..1]`, `[0..*]`, `[1..*]`.
 - Defaults: keep `defaultValue=`; names are case‑sensitive.
-- Operations: `(Operation name=... type=(reference @ReturnType) (parameters p (reference @ParamType)))`.
+- Operations: `(Operation name=... type=@ReturnType (parameters p @ParamType))`.
 
 ## 10. Tiny example
 
@@ -211,7 +222,7 @@ If you need to express something that doesn’t fit these patterns, open `model.
     (Definition Thing
         (includes group=@Entity)
         (+att name=kind datatype=@Kind [0..1])
-        (+contains name=children (reference @Thing) [0..*]))
+        (+contains name=children @Thing [0..*]))
 )
 ```
 Generates `Thing`, `Kind`, builders, and feature constants; containment of `children` triggers structure notifications.
