@@ -48,7 +48,7 @@ public class GroupTest
 				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
 				    )
 				    (Definition name=Car)
-				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
+				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
 				)
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -79,7 +79,8 @@ public class GroupTest
 					 carContainer.includes()
 								 .get(0)
 								 .parameters()
-								 .get(0));
+								 .get(0)
+								 .type());
 	}
 
 	@Test
@@ -90,7 +91,7 @@ public class GroupTest
 					(Group Feature
 					    (Generic UnaryType)
 					    (Generic EffectiveType))
-					(Group Attribute (includes /groups.0 parameters=/groups.1/generics.0,/groups.1/generics.1)
+					(Group Attribute (includes group=/groups.0 (parameters type=/groups.1/generics.0) (parameters type=/groups.1/generics.1))
 						(Generic UnaryType) (Generic EffectiveType))
 				)
 				""";
@@ -118,8 +119,8 @@ public class GroupTest
 		final var parameters = include.parameters();
 
 		assertEquals(include.group(), featureGroup);
-		assertEquals(parameters.get(0), attGeneric0);
-		assertEquals(parameters.get(0), attGeneric0);
-		assertEquals(parameters.get(1), attGeneric1);
+		assertEquals(parameters.get(0).type(), attGeneric0);
+		assertEquals(parameters.get(0).type(), attGeneric0);
+		assertEquals(parameters.get(1).type(), attGeneric1);
 	}
 }

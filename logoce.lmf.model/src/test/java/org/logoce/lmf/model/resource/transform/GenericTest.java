@@ -70,7 +70,7 @@ public class GenericTest
 				            (GenericExtension boundType=Extends type=#LMCore/groups.0))
 				    )
 				    (Definition name=Car)
-				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
+				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
 				)
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -97,7 +97,7 @@ public class GenericTest
 		assertEquals(BoundType.Extends, generic.extension().boundType());
 		assertEquals(generic.extension().type(), LMCorePackage.MODEL.groups().get(0));
 
-		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
+		assertEquals(car, carContainer.includes().get(0).parameters().get(0).type());
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class GenericTest
 				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
 				    )
 				    (Definition name=Car)
-				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
+				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
 				)
 				""";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
@@ -136,7 +136,7 @@ public class GenericTest
 		assertEquals("CarContainer", carContainer.name());
 
 		assertEquals(genericOfContainer, cargoRelation.parameters().get(0));
-		assertEquals(car, carContainer.includes().get(0).parameters().get(0));
+		assertEquals(car, carContainer.includes().get(0).parameters().get(0).type());
 
 		assertNotNull(genericOfContainer.extension());
 		assertEquals(BoundType.Extends, genericOfContainer.extension().boundType());

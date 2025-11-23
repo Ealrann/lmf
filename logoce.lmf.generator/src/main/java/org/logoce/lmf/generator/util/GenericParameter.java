@@ -63,7 +63,7 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 		throw new IllegalArgumentException("Type cannot be parameterized: " + baseType.getClass().getSimpleName());
 	}
 
-	private static TypeName resolveParameterType(final org.logoce.lmf.model.lang.GenericParameter parameter)
+	public static TypeName resolveParameterType(final org.logoce.lmf.model.lang.GenericParameter parameter)
 	{
 		final var type = parameter.type();
 		final var nestedParameters = parameter.parameters();

@@ -25,8 +25,10 @@
 		(-att lmPackage /javaWrappers.1 [1..1]))
 
 	(Definition Group
-		(includes group=@Type parameters=../generics.0)
-		(includes group=@Concept parameters=../generics.0)
+		(includes group=@Type
+			(parameters ../../generics.0))
+		(includes group=@Concept
+		    (parameters ../../generics.0))
 		(Generic T
 			(extension boundType=extends type=@LMObject))
 		(-att concrete datatype=@boolean)
@@ -41,7 +43,7 @@
 		(Generic T
 			(extension boundType=extends type=@LMObject))
 		(-refers group lazy [1..1] @Group parameters=../generics.0)
-		(-refers parameters lazy [0..*] @LMEntity)
+		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Feature
 		(includes group=@Named)
@@ -53,7 +55,9 @@
 		(-att name=rawFeature datatype=/javaWrappers.0 parameters=../generics.0,../generics.1))
 
 	(Definition Attribute
-		(includes group=@Feature parameters=../generics.0,../generics.1)
+		(includes group=@Feature
+			(parameters ../../generics.0)
+			(parameters ../../generics.1))
 		(Generic UnaryType)
 		(Generic EffectiveType)
 		(-refers datatype [1..1] @Datatype parameters=../generics.0)
@@ -61,7 +65,9 @@
 		(-refers parameters [0..*] @Generic))
 
 	(Definition Relation
-		(includes group=@Feature parameters=../generics.0,../generics.1)
+		(includes group=@Feature
+			(parameters ../../generics.0)
+			(parameters ../../generics.1))
 		(Generic UnaryType
 			(extension boundType=extends type=@LMObject))
 		(Generic EffectiveType)
@@ -81,17 +87,20 @@
 		(-refers type [1..1] @Type))
 
 	(Group Datatype
-		(includes group=@Type parameters=../generics.0)
+		(includes group=@Type
+			(parameters ../../generics.0))
 		(Generic T))
 	(Definition Alias
 		(includes group=@Named)
 		(-att value datatype=@string [1..1]))
 	(Definition Enum
-		(includes group=@Datatype parameters=../generics.0)
+		(includes group=@Datatype
+			(parameters ../../generics.0))
 		(Generic T)
 		(-att literals datatype=@string [0..*]))
 	(Definition Unit
-		(includes group=@Datatype parameters=../generics.0)
+		(includes group=@Datatype
+			(parameters ../../generics.0))
 		(Generic T)
 		(-att matcher /units.0 [0..1])
 		(-att name=defaultValue datatype=@string [0..1])
@@ -99,7 +108,8 @@
 		(-att extractor /units.1 [0..1]))
 
 	(Definition Generic
-		(includes group=@Concept parameters=../generics.0)
+		(includes group=@Concept
+			(parameters ../../generics.0))
 		(Generic T
 			(extension extends @LMEntity))
 		(-refers type [0..1] @Type)
@@ -120,18 +130,23 @@
 		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Concept
-		(includes @Type parameters=../generics.0)
-		(includes @LMEntity parameters=../generics.0)
+		(includes @Type
+			(parameters ../../generics.0))
+		(includes @LMEntity
+			(parameters ../../generics.0))
 		(Generic name=T))
 
 	(Group LMEntity
-		(includes @Type parameters=../generics.0)
+		(includes @Type
+			(parameters ../../generics.0))
 		(Generic name=T))
 
 	(Definition JavaWrapper
 		(Generic name=T)
-		(includes @Datatype parameters=../generics.0)
-		(includes @LMEntity parameters=../generics.0)
+		(includes @Datatype
+			(parameters ../../generics.0))
+		(includes @LMEntity
+			(parameters ../../generics.0))
 		(-att name=qualifiedClassName /units.7 mandatory)
 		(-contains serializer [0..1] @Serializer))
 

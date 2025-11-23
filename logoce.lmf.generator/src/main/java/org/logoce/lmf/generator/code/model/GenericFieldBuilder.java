@@ -87,7 +87,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 		return builder.add(".build()").build();
 	}
 
-	private static CodeBlock genericParameterBlock(final GenericParameter parameter)
+	public static CodeBlock genericParameterBlock(final GenericParameter parameter)
 	{
 		final var builder = CodeBlock.builder()
 									 .add("new $T()", GENERIC_PARAMETER_BUILDER_TYPE);

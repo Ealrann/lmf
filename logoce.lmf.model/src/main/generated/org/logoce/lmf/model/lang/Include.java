@@ -12,15 +12,15 @@ public interface Include<T extends LMObject> extends LMObject {
   }
 
   Group<T> group();
-  List<LMEntity<?>> parameters();
+  List<GenericParameter> parameters();
 
   interface Features extends LMObject.Features<Features> {
     RawFeature<Group<?>, Group<?>> group = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.INCLUDE.GROUP);
-    RawFeature<LMEntity<?>, List<LMEntity<?>>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.INCLUDE.PARAMETERS);
+    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.INCLUDE.PARAMETERS);
   }
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Include<T>> {
     Builder<T> group(Supplier<Group<T>> group);
-    Builder<T> addParameter(Supplier<LMEntity<?>> parameter);
+    Builder<T> addParameter(Supplier<GenericParameter> parameter);
   }
 }

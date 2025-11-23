@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
+import org.logoce.lmf.model.lang.GenericParameter;
 
 import java.util.List;
 
@@ -20,7 +21,10 @@ public class TypeResolutionUtil
 
 	public static TypeParameter resolveInclude(final Include<?> refInclude, final Group<?> group)
 	{
-		final var params = toParameters(refInclude.parameters());
+		final var params = refInclude.parameters()
+									 .stream()
+									 .map(org.logoce.lmf.generator.util.GenericParameter::resolveParameterType)
+									 .toList();
 		final var refIncludeGroup = refInclude.group();
 		final var model = (MetaModel) refIncludeGroup.lmContainer();
 		final var className = ClassName.get(model.domain(), refIncludeGroup.name());
