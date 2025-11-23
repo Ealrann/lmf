@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang.impl;
 
 import java.lang.Override;
+import java.util.List;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -12,18 +13,18 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMEntity;
 
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
-  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(org.logoce.lmf.model.lang.GenericExtension.Features.type, org.logoce.lmf.model.lang.GenericExtension::type).add(org.logoce.lmf.model.lang.GenericExtension.Features.boundType, org.logoce.lmf.model.lang.GenericExtension::boundType).add(org.logoce.lmf.model.lang.GenericExtension.Features.parameter, org.logoce.lmf.model.lang.GenericExtension::parameter).build();
+  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(org.logoce.lmf.model.lang.GenericExtension.Features.type, org.logoce.lmf.model.lang.GenericExtension::type).add(org.logoce.lmf.model.lang.GenericExtension.Features.boundType, org.logoce.lmf.model.lang.GenericExtension::boundType).add(org.logoce.lmf.model.lang.GenericExtension.Features.parameters, org.logoce.lmf.model.lang.GenericExtension::parameters).build();
   private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>().build();
   private final LMEntity<?> type;
   private final BoundType boundType;
-  private final GenericParameter parameter;
+  private final List<GenericParameter> parameters;
 
   public GenericExtensionImpl(final LMEntity<?> type, final BoundType boundType,
-      final GenericParameter parameter) {
+      final List<GenericParameter> parameters) {
     this.type = type;
     this.boundType = boundType;
-    this.parameter = parameter;
-    setContainer(parameter, GenericExtension.Features.parameter);
+    this.parameters = List.copyOf(parameters);
+    setContainer(parameters, GenericExtension.Features.parameters);
   }
 
   @Override
@@ -37,8 +38,8 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
   }
 
   @Override
-  public GenericParameter parameter() {
-    return parameter;
+  public List<GenericParameter> parameters() {
+    return parameters;
   }
 
   @Override

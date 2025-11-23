@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang;
 
 import java.lang.Boolean;
+import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
@@ -14,19 +15,19 @@ public interface GenericParameter extends LMObject {
   boolean wildcard();
   BoundType wildcardBoundType();
   LMEntity<?> type();
-  GenericParameter parameter();
+  List<GenericParameter> parameters();
 
   interface Features extends LMObject.Features<Features> {
     RawFeature<Boolean, Boolean> wildcard = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.WILDCARD);
     RawFeature<BoundType, BoundType> wildcardBoundType = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.WILDCARD_BOUND_TYPE);
     RawFeature<LMEntity<?>, LMEntity<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.TYPE);
-    RawFeature<GenericParameter, GenericParameter> parameter = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.PARAMETER);
+    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<GenericParameter> {
     Builder wildcard(boolean wildcard);
     Builder wildcardBoundType(BoundType wildcardBoundType);
     Builder type(Supplier<LMEntity<?>> type);
-    Builder parameter(Supplier<GenericParameter> parameter);
+    Builder addParameter(Supplier<GenericParameter> parameter);
   }
 }

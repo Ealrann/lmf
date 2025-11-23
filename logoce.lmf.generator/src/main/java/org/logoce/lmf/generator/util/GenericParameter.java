@@ -1,6 +1,5 @@
 package org.logoce.lmf.generator.util;
 
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
@@ -31,29 +30,34 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 		}
 
 		final var baseType = TypeResolutionUtil.resolveSimpleType(type);
-		final var parameter = extension.parameter();
+		final var parameters = extension.parameters()
+										.stream()
+										.map(GenericParameter::resolveParameterType)
+										.toList();
 
-		if (parameter != null && baseType instanceof TypeParameter.SimpleType)
+		if (!parameters.isEmpty() && baseType instanceof TypeParameter.SimpleType)
 		{
 			throw new IllegalArgumentException("Cannot parameterize non-class type: " + type.name());
 		}
 
-		final var resolvedType = parameter != null
-								 ? parameterize(baseType, resolveParameterType(parameter))
-								 : baseType.parametrized();
+		final var resolvedType = parameters.isEmpty()
+								 ? baseType.parametrized()
+								 : parameterize(baseType, parameters);
 
 		return resolvedType.box();
 	}
 
-	private static TypeName parameterize(final TypeParameter baseType, final TypeName parameterType)
+	private static TypeName parameterize(final TypeParameter baseType, final java.util.List<? extends TypeName> parameterTypes)
 	{
 		if (baseType instanceof TypeParameter.SimpleTypeParameter simple)
 		{
-			return ParameterizedTypeName.get(simple.raw(), parameterType.box());
+			return com.squareup.javapoet.ParameterizedTypeName.get(simple.raw(),
+																  parameterTypes.stream().map(TypeName::box).toArray(TypeName[]::new));
 		}
 		if (baseType instanceof TypeParameter.CombinedTypeParameter combined)
 		{
-			return ParameterizedTypeName.get(combined.raw(), parameterType.box());
+			return com.squareup.javapoet.ParameterizedTypeName.get(combined.raw(),
+																   parameterTypes.stream().map(TypeName::box).toArray(TypeName[]::new));
 		}
 
 		throw new IllegalArgumentException("Type cannot be parameterized: " + baseType.getClass().getSimpleName());
@@ -62,11 +66,11 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 	private static TypeName resolveParameterType(final org.logoce.lmf.model.lang.GenericParameter parameter)
 	{
 		final var type = parameter.type();
-		final var nestedParameter = parameter.parameter();
+		final var nestedParameters = parameter.parameters();
 
 		if (type instanceof Generic<?> genericType)
 		{
-			if (nestedParameter != null)
+			if (!nestedParameters.isEmpty())
 			{
 				throw new IllegalArgumentException("Generic type parameter cannot declare nested parameters: " +
 												   genericType.name());
@@ -78,11 +82,13 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 		}
 
 		final var baseType = TypeResolutionUtil.resolveSimpleType(type);
-		final var nestedType = nestedParameter != null ? resolveParameterType(nestedParameter) : null;
+		final var nestedTypes = nestedParameters.stream()
+												.map(GenericParameter::resolveParameterType)
+												.toList();
 
-		final var resolvedType = nestedType != null
-								 ? parameterize(baseType, nestedType)
-								 : baseType.parametrized().box();
+		final var resolvedType = nestedTypes.isEmpty()
+								 ? baseType.parametrized().box()
+								 : parameterize(baseType, nestedTypes).box();
 
 		return parameter.wildcard()
 			   ? wildcard(resolvedType, parameter.wildcardBoundType())

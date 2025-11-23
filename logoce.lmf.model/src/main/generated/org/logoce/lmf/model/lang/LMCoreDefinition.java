@@ -175,16 +175,16 @@ public interface LMCoreDefinition {
     interface GENERIC_EXTENSION {
       Relation<LMEntity<?>, LMEntity<?>> TYPE = new RelationBuilder<LMEntity<?>, LMEntity<?>>().name("type").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.type).concept(() -> LMCoreDefinition.Groups.LM_ENTITY).lazy(false).contains(false).build();
       Attribute<BoundType, BoundType> BOUND_TYPE = new AttributeBuilder<BoundType, BoundType>().name("boundType").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.boundType).datatype(() -> Enums.BOUND_TYPE).defaultValue(null).build();
-      Relation<GenericParameter, GenericParameter> PARAMETER = new RelationBuilder<GenericParameter, GenericParameter>().name("parameter").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.parameter).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).lazy(false).contains(true).build();
-      List<Feature<?, ?>> ALL = List.of(TYPE, BOUND_TYPE, PARAMETER);
+      Relation<GenericParameter, List<GenericParameter>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("parameters").immutable(true).many(true).mandatory(false).rawFeature(GenericExtension.Features.parameters).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).lazy(false).contains(true).build();
+      List<Feature<?, ?>> ALL = List.of(TYPE, BOUND_TYPE, PARAMETERS);
     }
 
     interface GENERIC_PARAMETER {
       Attribute<Boolean, Boolean> WILDCARD = new AttributeBuilder<Boolean, Boolean>().name("wildcard").immutable(true).many(false).mandatory(false).rawFeature(GenericParameter.Features.wildcard).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
       Attribute<BoundType, BoundType> WILDCARD_BOUND_TYPE = new AttributeBuilder<BoundType, BoundType>().name("wildcardBoundType").immutable(true).many(false).mandatory(false).rawFeature(GenericParameter.Features.wildcardBoundType).datatype(() -> Enums.BOUND_TYPE).defaultValue(null).build();
       Relation<LMEntity<?>, LMEntity<?>> TYPE = new RelationBuilder<LMEntity<?>, LMEntity<?>>().name("type").immutable(true).many(false).mandatory(true).rawFeature(GenericParameter.Features.type).concept(() -> LMCoreDefinition.Groups.LM_ENTITY).lazy(false).contains(false).build();
-      Relation<GenericParameter, GenericParameter> PARAMETER = new RelationBuilder<GenericParameter, GenericParameter>().name("parameter").immutable(true).many(false).mandatory(false).rawFeature(GenericParameter.Features.parameter).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).lazy(false).contains(true).build();
-      List<Feature<?, ?>> ALL = List.of(WILDCARD, WILDCARD_BOUND_TYPE, TYPE, PARAMETER);
+      Relation<GenericParameter, List<GenericParameter>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("parameters").immutable(true).many(true).mandatory(false).rawFeature(GenericParameter.Features.parameters).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).lazy(false).contains(true).build();
+      List<Feature<?, ?>> ALL = List.of(WILDCARD, WILDCARD_BOUND_TYPE, TYPE, PARAMETERS);
     }
 
     interface JAVA_WRAPPER {

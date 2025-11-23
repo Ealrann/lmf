@@ -27,8 +27,8 @@
 		(Generic Y)
 		(Generic T
 			(extension boundType=Extends type=@JavaList
-				(parameter wildcard=true wildcardBoundType=Extends type=@JavaSupplier
-				    (parameter wildcard=true wildcardBoundType=Super type=../../../../generics.0)))))
+				(parameters wildcard=true wildcardBoundType=Extends type=@JavaSupplier
+				    (parameters wildcard=true wildcardBoundType=Super type=../../../../generics.0)))))
 
 	(JavaWrapper name=JavaObject qualifiedClassName=java.lang.String)
 	(JavaWrapper name=JavaList qualifiedClassName=java.util.List)

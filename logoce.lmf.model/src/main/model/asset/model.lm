@@ -41,7 +41,7 @@
 		(Generic T
 			(extension boundType=extends type=@LMObject))
 		(-refers group lazy [1..1] @Group parameters=../generics.0)
-		(-refers parameters lazy [0..*] @LMEntity))
+		(-refers parameters lazy [0..*] @LMEntity)
 
 	(Group Feature
 		(includes group=@Named)
@@ -110,14 +110,14 @@
 		(includes @LMObject)
 		(-refers type [0..1] @LMEntity)
         (-att boundType datatype=/enums.0)
-		(-contains parameter [0..1] @GenericParameter))
+		(-contains parameters [0..*] @GenericParameter))
 
 	(Definition GenericParameter
 		(includes @LMObject)
 		(-att wildcard @boolean)
         (-att wildcardBoundType datatype=/enums.0)
 		(-refers type [1..1] @LMEntity)
-		(-contains parameter [0..1] @GenericParameter))
+		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Concept
 		(includes @Type parameters=../generics.0)

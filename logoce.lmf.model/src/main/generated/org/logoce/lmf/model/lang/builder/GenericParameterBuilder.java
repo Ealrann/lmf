@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
+import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
@@ -12,14 +13,16 @@ import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.GenericParameterImpl;
+import org.logoce.lmf.model.notification.list.ObservableList;
+import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericParameterBuilder implements Builder {
   private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>().add(GenericParameter.Features.wildcard, GenericParameterBuilder::wildcard).add(GenericParameter.Features.wildcardBoundType, GenericParameterBuilder::wildcardBoundType).build();
-  private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>().add(GenericParameter.Features.type, GenericParameterBuilder::type).add(GenericParameter.Features.parameter, GenericParameterBuilder::parameter).build();
+  private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>().add(GenericParameter.Features.type, GenericParameterBuilder::type).add(GenericParameter.Features.parameters, GenericParameterBuilder::addParameter).build();
   private boolean wildcard;
   private BoundType wildcardBoundType;
   private Supplier<LMEntity<?>> type;
-  private Supplier<GenericParameter> parameter = () -> null;
+  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
 
   @Override
   public GenericParameterBuilder wildcard(boolean wildcard) {
@@ -40,14 +43,15 @@ public final class GenericParameterBuilder implements Builder {
   }
 
   @Override
-  public GenericParameterBuilder parameter(Supplier<GenericParameter> parameter) {
-    this.parameter = parameter;
+  public GenericParameterBuilder addParameter(Supplier<GenericParameter> parameter) {
+    this.parameters.add(parameter);
     return this;
   }
 
   @Override
   public GenericParameter build() {
-    final var built = new GenericParameterImpl(wildcard, wildcardBoundType, type.get(), parameter.get());
+    final var builtParameters = BuildUtils.collectSuppliers(parameters);
+    final var built = new GenericParameterImpl(wildcard, wildcardBoundType, type.get(), builtParameters);
     return built;
   }
 

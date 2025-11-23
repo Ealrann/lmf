@@ -72,10 +72,10 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 			builder.add(".type(() -> $L)", typeBlock(type));
 		}
 
-		final var parameter = extension.parameter();
-		if (parameter != null)
+		final var parameters = extension.parameters();
+		if (parameters != null && !parameters.isEmpty())
 		{
-			builder.add(".parameter(() -> $L)", genericParameterBlock(parameter));
+			parameters.forEach(param -> builder.add(".addParameter(() -> $L)", genericParameterBlock(param)));
 		}
 
 		final var boundType = extension.boundType();
@@ -109,10 +109,10 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 			builder.add(".type(() -> $L)", typeBlock(type));
 		}
 
-		final var nestedParameter = parameter.parameter();
-		if (nestedParameter != null)
+		final var nestedParameters = parameter.parameters();
+		if (nestedParameters != null && !nestedParameters.isEmpty())
 		{
-			builder.add(".parameter(() -> $L)", genericParameterBlock(nestedParameter));
+			nestedParameters.forEach(param -> builder.add(".addParameter(() -> $L)", genericParameterBlock(param)));
 		}
 
 		return builder.add(".build()").build();
@@ -122,10 +122,31 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 	{
 		if (type != null)
 		{
+			if (type instanceof Generic<?> generic)
+			{
+				final var container = generic.lmContainer();
+				if (container instanceof Group<?> group)
+				{
+					final var index = group.generics().indexOf(generic);
+					if (index < 0)
+					{
+						throw new IllegalStateException("Generic " + generic.name() + " not found in container");
+					}
+					final var model = (MetaModel) ModelUtils.root(group);
+					final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+					final var groupConstantName = GenUtils.toConstantCase(group.name());
+					return CodeBlock.of("$T.Generics.$N.get($L)", modelDefinition, groupConstantName, index);
+				}
+			}
+
 			final var model = (MetaModel) ModelUtils.root(type);
 			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
 			final var typeConstantName = GenUtils.toConstantCase(type.name());
 			final var typeHolder = TypeResolutionUtil.resolveTypeHolder(type);
+			if (typeHolder == null)
+			{
+				throw new IllegalArgumentException("Cannot resolve type holder for: " + type.getClass().getSimpleName());
+			}
 			return CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeConstantName);
 		}
 		else
