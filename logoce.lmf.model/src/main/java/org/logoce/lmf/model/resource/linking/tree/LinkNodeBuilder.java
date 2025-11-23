@@ -61,25 +61,25 @@ public final class LinkNodeBuilder<I extends PNode>
 	{
 		final var pGroup = node.data();
 		final var parent = node.parent();
-		final var nodeType = pGroup.type();
 
-		if (parent != null)
-		{
-			final var parentData = parent.data();
-			final var parentType = parentData.type();
-			final var parentModelGroup = findModelGroupByValue(parentType).orElseThrow(() -> buildException(parentData,
-																											parentType));
-			final var parentGroup = parentModelGroup.group();
-			final var modelGroup = this.<T>findModelGroupByValue(nodeType)
-									   .orElseGet(() -> findModelGroupFromParent(pGroup, parentGroup));
-			return buildNodeInfoWithParent(pGroup, parentGroup, modelGroup);
-		}
-		else
-		{
-			final var modelGroup = this.<T>findModelGroupByValue(nodeType)
-									   .orElseThrow(() -> buildException(pGroup, nodeType));
-			return new LinkInfo<>(pGroup.pnode(), null, pGroup.features(), modelGroup);
-		}
+		final var modelGroup = resolveModelGroup(node);
+
+		return parent != null
+			   ? buildNodeInfoWithParent(pGroup, resolveModelGroup(parent).group(), modelGroup)
+			   : new LinkInfo<>(pGroup.pnode(), null, pGroup.features(), modelGroup);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends LMObject> ModelGroup<T> resolveModelGroup(final BasicTree<PGroup<I>, ?> node)
+	{
+		final var directResolution = this.<T>findModelGroupByValue(node.data().type());
+		if (directResolution.isPresent()) return directResolution.get();
+
+		final var parent = node.parent();
+		if (parent == null) throw buildException(node.data(), node.data().type());
+
+		final var parentGroup = resolveModelGroup(parent).group();
+		return findModelGroupFromParent(node.data(), parentGroup);
 	}
 
 	private <T extends LMObject> LinkInfo<T, I> buildNodeInfoWithParent(final PGroup<I> pGroup,

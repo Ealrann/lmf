@@ -3,10 +3,15 @@ package org.logoce.lmf.generator.code.model;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import org.logoce.lmf.generator.util.*;
+import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.CodeblockBuilder;
+import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TypeParameter;
+import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.builder.GenericBuilder;
 import org.logoce.lmf.model.lang.builder.GenericExtensionBuilder;
+import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.util.ModelUtils;
 
 public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?>>
@@ -16,6 +21,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 																		  GENERIC_TYPE.parametrizedWildcard());
 	private static final ClassName GENERIC_BUILDER_TYPE = ClassName.get(GenericBuilder.class);
 	private static final ClassName GENERIC_EXTENSION_BUILDER_TYPE = ClassName.get(GenericExtensionBuilder.class);
+	private static final ClassName GENERIC_PARAMETER_BUILDER_TYPE = ClassName.get(GenericParameterBuilder.class);
 	private static final ClassName BT_TYPE = ClassName.get(BoundType.class);
 
 	@Override
@@ -57,28 +63,56 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Group<?
 
 	private static CodeBlock genericExtensionBlock(final GenericExtension extension)
 	{
-		return genericExtensionBlock(extension.type(), extension.boundType(), extension.extension());
-	}
-
-	private static CodeBlock genericExtensionBlock(final Type<?> type, final BoundType boundType,
-												   final GenericExtension nestedExtension)
-	{
 		final var builder = CodeBlock.builder()
 									 .add("new $T()", GENERIC_EXTENSION_BUILDER_TYPE);
 
+		final var type = extension.type();
 		if (type != null)
 		{
 			builder.add(".type(() -> $L)", typeBlock(type));
 		}
 
+		final var parameter = extension.parameter();
+		if (parameter != null)
+		{
+			builder.add(".parameter(() -> $L)", genericParameterBlock(parameter));
+		}
+
+		final var boundType = extension.boundType();
 		if (boundType != null)
 		{
 			builder.add(".boundType($T.$L)", BT_TYPE, boundType);
 		}
 
-		if (nestedExtension != null)
+		return builder.add(".build()").build();
+	}
+
+	private static CodeBlock genericParameterBlock(final GenericParameter parameter)
+	{
+		final var builder = CodeBlock.builder()
+									 .add("new $T()", GENERIC_PARAMETER_BUILDER_TYPE);
+
+		if (parameter.wildcard())
 		{
-			builder.add(".extension(() -> $L)", genericExtensionBlock(nestedExtension));
+			builder.add(".wildcard(true)");
+		}
+
+		final var wildcardBoundType = parameter.wildcardBoundType();
+		if (wildcardBoundType != null)
+		{
+			builder.add(".wildcardBoundType($T.$L)", BT_TYPE, wildcardBoundType);
+		}
+
+		final var type = parameter.type();
+		if (type != null)
+		{
+			builder.add(".type(() -> $L)", typeBlock(type));
+		}
+
+		final var nestedParameter = parameter.parameter();
+		if (nestedParameter != null)
+		{
+			builder.add(".parameter(() -> $L)", genericParameterBlock(nestedParameter));
 		}
 
 		return builder.add(".build()").build();

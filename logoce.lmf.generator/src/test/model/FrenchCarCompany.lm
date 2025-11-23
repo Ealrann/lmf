@@ -1,4 +1,4 @@
-(MetaModel domain=test.model name=FrenchCarCompany imports=test.model.CarCompany
+(MetaModel domain=test.model2 name=FrenchCarCompany imports=test.model.CarCompany
 	(Definition French
 		(includes #CarCompany@Entity)
 		(+refers favoriteCar [0..1] #CarCompany@Car)

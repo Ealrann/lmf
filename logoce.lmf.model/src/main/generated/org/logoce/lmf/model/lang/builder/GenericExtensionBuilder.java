@@ -8,6 +8,7 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.GenericExtension.Builder;
+import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
@@ -15,10 +16,10 @@ import org.logoce.lmf.model.lang.impl.GenericExtensionImpl;
 
 public final class GenericExtensionBuilder implements Builder {
   private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.boundType, GenericExtensionBuilder::boundType).build();
-  private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.type, GenericExtensionBuilder::type).add(GenericExtension.Features.extension, GenericExtensionBuilder::extension).build();
+  private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.type, GenericExtensionBuilder::type).add(GenericExtension.Features.parameter, GenericExtensionBuilder::parameter).build();
   private Supplier<LMEntity<?>> type = () -> null;
   private BoundType boundType;
-  private Supplier<GenericExtension> extension = () -> null;
+  private Supplier<GenericParameter> parameter = () -> null;
 
   @Override
   public GenericExtensionBuilder type(Supplier<LMEntity<?>> type) {
@@ -33,14 +34,14 @@ public final class GenericExtensionBuilder implements Builder {
   }
 
   @Override
-  public GenericExtensionBuilder extension(Supplier<GenericExtension> extension) {
-    this.extension = extension;
+  public GenericExtensionBuilder parameter(Supplier<GenericParameter> parameter) {
+    this.parameter = parameter;
     return this;
   }
 
   @Override
   public GenericExtension build() {
-    final var built = new GenericExtensionImpl(type.get(), boundType, extension.get());
+    final var built = new GenericExtensionImpl(type.get(), boundType, parameter.get());
     return built;
   }
 

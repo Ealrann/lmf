@@ -28,7 +28,7 @@
 		(includes group=@Type parameters=../generics.0)
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T
-			(extension boundType=extends type=@LMObject))
+			(GenericExtension boundType=extends type=@LMObject))
 		(-att concrete datatype=@boolean)
 		(-contains includes [0..*] @Include)
 		(-contains features [0..*] @Feature)
@@ -54,7 +54,7 @@
 	(Definition Relation
 		(includes group=@Feature parameters=../generics.0,../generics.1)
 		(Generic UnaryType
-			(extension boundType=Extends type=@LMObject))
+			(GenericExtension boundType=Extends type=@LMObject))
 		(Generic EffectiveType)
 		(-refers concept [1..1] @Concept parameters=../../generics.0)
 		(-refers parameters [0..*] @Concept)
@@ -82,7 +82,7 @@
 	(Definition Generic
 		(includes group=@Concept parameters=../generics.0)
 		(Generic T
-			(extension boundType=extends type=@LMObject))
+			(GenericExtension boundType=extends type=@LMObject))
 		(-refers type [0..1] (reference group=@Type parameters=../../generics.0))
 		(-att boundType datatype=/enums.0))
 

@@ -12,17 +12,17 @@ public interface GenericExtension extends LMObject {
 
   LMEntity<?> type();
   BoundType boundType();
-  GenericExtension extension();
+  GenericParameter parameter();
 
   interface Features extends LMObject.Features<Features> {
     RawFeature<LMEntity<?>, LMEntity<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.TYPE);
     RawFeature<BoundType, BoundType> boundType = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.BOUND_TYPE);
-    RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.EXTENSION);
+    RawFeature<GenericParameter, GenericParameter> parameter = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.PARAMETER);
   }
 
   interface Builder extends IFeaturedObject.Builder<GenericExtension> {
     Builder type(Supplier<LMEntity<?>> type);
     Builder boundType(BoundType boundType);
-    Builder extension(Supplier<GenericExtension> extension);
+    Builder parameter(Supplier<GenericParameter> parameter);
   }
 }

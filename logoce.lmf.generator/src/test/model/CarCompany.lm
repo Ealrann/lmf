@@ -24,8 +24,12 @@
 	    (+contains name=parcs @Car [0..*]))
 
 	(Definition GenericContainer
+		(Generic Y)
 		(Generic T
-			(extension boundType=Extends type=@JavaObject)))
+			(extension boundType=Extends type=@JavaList
+				(parameter wildcard=true wildcardBoundType=Extends type=@JavaSupplier))))
 
 	(JavaWrapper name=JavaObject qualifiedClassName=java.lang.String)
+	(JavaWrapper name=JavaList qualifiedClassName=java.util.List)
+	(JavaWrapper name=JavaSupplier qualifiedClassName=java.util.function.Supplier)
 )

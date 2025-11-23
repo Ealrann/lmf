@@ -110,7 +110,14 @@
 		(includes @LMObject)
 		(-refers type [0..1] @LMEntity)
         (-att boundType datatype=/enums.0)
-		(-contains extension [0..1] @GenericExtension))
+		(-contains parameter [0..1] @GenericParameter))
+
+	(Definition GenericParameter
+		(includes @LMObject)
+		(-att wildcard @boolean)
+        (-att wildcardBoundType datatype=/enums.0)
+		(-refers type [1..1] @LMEntity)
+		(-contains parameter [0..1] @GenericParameter))
 
 	(Group Concept
 		(includes @Type parameters=../generics.0)

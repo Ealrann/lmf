@@ -15,6 +15,7 @@ import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.EnumBuilder;
 import org.logoce.lmf.model.lang.builder.GenericBuilder;
 import org.logoce.lmf.model.lang.builder.GenericExtensionBuilder;
+import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.lang.builder.GroupBuilder;
 import org.logoce.lmf.model.lang.builder.IncludeBuilder;
 import org.logoce.lmf.model.lang.builder.JavaWrapperBuilder;
@@ -174,8 +175,16 @@ public interface LMCoreDefinition {
     interface GENERIC_EXTENSION {
       Relation<LMEntity<?>, LMEntity<?>> TYPE = new RelationBuilder<LMEntity<?>, LMEntity<?>>().name("type").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.type).concept(() -> LMCoreDefinition.Groups.LM_ENTITY).lazy(false).contains(false).build();
       Attribute<BoundType, BoundType> BOUND_TYPE = new AttributeBuilder<BoundType, BoundType>().name("boundType").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.boundType).datatype(() -> Enums.BOUND_TYPE).defaultValue(null).build();
-      Relation<GenericExtension, GenericExtension> EXTENSION = new RelationBuilder<GenericExtension, GenericExtension>().name("extension").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.extension).concept(() -> LMCoreDefinition.Groups.GENERIC_EXTENSION).lazy(false).contains(true).build();
-      List<Feature<?, ?>> ALL = List.of(TYPE, BOUND_TYPE, EXTENSION);
+      Relation<GenericParameter, GenericParameter> PARAMETER = new RelationBuilder<GenericParameter, GenericParameter>().name("parameter").immutable(true).many(false).mandatory(false).rawFeature(GenericExtension.Features.parameter).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).lazy(false).contains(true).build();
+      List<Feature<?, ?>> ALL = List.of(TYPE, BOUND_TYPE, PARAMETER);
+    }
+
+    interface GENERIC_PARAMETER {
+      Attribute<Boolean, Boolean> WILDCARD = new AttributeBuilder<Boolean, Boolean>().name("wildcard").immutable(true).many(false).mandatory(false).rawFeature(GenericParameter.Features.wildcard).datatype(() -> Units.BOOLEAN).defaultValue(null).build();
+      Attribute<BoundType, BoundType> WILDCARD_BOUND_TYPE = new AttributeBuilder<BoundType, BoundType>().name("wildcardBoundType").immutable(true).many(false).mandatory(false).rawFeature(GenericParameter.Features.wildcardBoundType).datatype(() -> Enums.BOUND_TYPE).defaultValue(null).build();
+      Relation<LMEntity<?>, LMEntity<?>> TYPE = new RelationBuilder<LMEntity<?>, LMEntity<?>>().name("type").immutable(true).many(false).mandatory(true).rawFeature(GenericParameter.Features.type).concept(() -> LMCoreDefinition.Groups.LM_ENTITY).lazy(false).contains(false).build();
+      Relation<GenericParameter, GenericParameter> PARAMETER = new RelationBuilder<GenericParameter, GenericParameter>().name("parameter").immutable(true).many(false).mandatory(false).rawFeature(GenericParameter.Features.parameter).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).lazy(false).contains(true).build();
+      List<Feature<?, ?>> ALL = List.of(WILDCARD, WILDCARD_BOUND_TYPE, TYPE, PARAMETER);
     }
 
     interface JAVA_WRAPPER {
@@ -229,9 +238,10 @@ public interface LMCoreDefinition {
     Group<Unit<?>> UNIT = new GroupBuilder<Unit<?>>().name("Unit").concrete(true).addInclude(() -> new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.UNIT.get(0)))).addFeature(() -> Features.UNIT.ALL.get(0)).addFeature(() -> Features.UNIT.ALL.get(1)).addFeature(() -> Features.UNIT.ALL.get(2)).addFeature(() -> Features.UNIT.ALL.get(3)).addFeature(() -> Features.UNIT.ALL.get(4)).addGeneric(() -> Generics.UNIT.get(0)).lmBuilder(new BuilderSupplier<>(UnitBuilder::new)).build();
     Group<Generic<?>> GENERIC = new GroupBuilder<Generic<?>>().name("Generic").concrete(true).addInclude(() -> new IncludeImpl<>(() -> CONCEPT, List.of(() -> LMCoreDefinition.Generics.GENERIC.get(0)))).addFeature(() -> Features.GENERIC.ALL.get(0)).addFeature(() -> Features.GENERIC.ALL.get(1)).addFeature(() -> Features.GENERIC.ALL.get(2)).addFeature(() -> Features.GENERIC.ALL.get(3)).addGeneric(() -> Generics.GENERIC.get(0)).lmBuilder(new BuilderSupplier<>(GenericBuilder::new)).build();
     Group<GenericExtension> GENERIC_EXTENSION = new GroupBuilder<GenericExtension>().name("GenericExtension").concrete(true).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.GENERIC_EXTENSION.ALL.get(0)).addFeature(() -> Features.GENERIC_EXTENSION.ALL.get(1)).addFeature(() -> Features.GENERIC_EXTENSION.ALL.get(2)).lmBuilder(new BuilderSupplier<>(GenericExtensionBuilder::new)).build();
+    Group<GenericParameter> GENERIC_PARAMETER = new GroupBuilder<GenericParameter>().name("GenericParameter").concrete(true).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.GENERIC_PARAMETER.ALL.get(0)).addFeature(() -> Features.GENERIC_PARAMETER.ALL.get(1)).addFeature(() -> Features.GENERIC_PARAMETER.ALL.get(2)).addFeature(() -> Features.GENERIC_PARAMETER.ALL.get(3)).lmBuilder(new BuilderSupplier<>(GenericParameterBuilder::new)).build();
     Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupBuilder<JavaWrapper<?>>().name("JavaWrapper").concrete(true).addInclude(() -> new IncludeImpl<>(() -> DATATYPE, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))).addInclude(() -> new IncludeImpl<>(() -> LM_ENTITY, List.of(() -> LMCoreDefinition.Generics.JAVA_WRAPPER.get(0)))).addFeature(() -> Features.JAVA_WRAPPER.ALL.get(0)).addFeature(() -> Features.JAVA_WRAPPER.ALL.get(1)).addFeature(() -> Features.JAVA_WRAPPER.ALL.get(2)).addGeneric(() -> Generics.JAVA_WRAPPER.get(0)).lmBuilder(new BuilderSupplier<>(JavaWrapperBuilder::new)).build();
     Group<Serializer> SERIALIZER = new GroupBuilder<Serializer>().name("Serializer").concrete(true).addInclude(() -> new IncludeImpl<>(() -> LM_OBJECT, List.of())).addFeature(() -> Features.SERIALIZER.ALL.get(0)).addFeature(() -> Features.SERIALIZER.ALL.get(1)).lmBuilder(new BuilderSupplier<>(SerializerBuilder::new)).build();
-    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, LM_ENTITY, CONCEPT, GROUP, INCLUDE, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, GENERIC_EXTENSION, JAVA_WRAPPER, SERIALIZER);
+    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, LM_ENTITY, CONCEPT, GROUP, INCLUDE, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, GENERIC_EXTENSION, GENERIC_PARAMETER, JAVA_WRAPPER, SERIALIZER);
   }
 
   interface Units {

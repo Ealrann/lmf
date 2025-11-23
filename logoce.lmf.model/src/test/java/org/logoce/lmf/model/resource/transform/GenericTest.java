@@ -18,7 +18,7 @@ public class GenericTest
 	@Test
 	public void simpleGeneric()
 	{
-		final var textModel = "(Generic name=UnaryType (extension boundType=Extends type=#LMCore/groups.0))";
+		final var textModel = "(Generic name=UnaryType (GenericExtension boundType=Extends type=#LMCore/groups.0))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
@@ -39,7 +39,7 @@ public class GenericTest
 	{
 		final var textModel = "(MetaModel Test " +
 							  "  (Group name=GenericGroup" +
-							  "    (Generic name=T (extension boundType=Super type=/groups.1)))" +
+							  "    (Generic name=T (GenericExtension boundType=Super type=/groups.1)))" +
 							  "  (Group name=ICategory))";
 		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
 		final var ptree = treeBuilder.read(inputStream);
@@ -67,7 +67,7 @@ public class GenericTest
 				(MetaModel Test
 				    (Group name=Container
 				        (Generic name=T
-				            (extension boundType=Extends type=#LMCore/groups.0))
+				            (GenericExtension boundType=Extends type=#LMCore/groups.0))
 				    )
 				    (Definition name=Car)
 				    (Group name=CarContainer (includes group=/groups.0 parameters=/groups.1))
@@ -107,7 +107,7 @@ public class GenericTest
 				(MetaModel Test
 				    (Group name=Container
 				        (Generic name=T
-				            (extension boundType=Extends type=#LMCore/groups.0))
+				            (GenericExtension boundType=Extends type=#LMCore/groups.0))
 				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
 				    )
 				    (Definition name=Car)
