@@ -1,5 +1,6 @@
 package org.logoce.lmf.generator.util;
 
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
@@ -31,37 +32,70 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 
 		final var baseType = TypeResolutionUtil.resolveSimpleType(type);
 		final var parameter = extension.parameter();
-		final var extensionType = parameter != null
-								  ? TypeParameter.of(baseType.raw(), resolveParameterType(parameter))
-								  : baseType;
 
-		return extensionType.parametrized().box();
+		if (parameter != null && baseType instanceof TypeParameter.SimpleType)
+		{
+			throw new IllegalArgumentException("Cannot parameterize non-class type: " + type.name());
+		}
+
+		final var resolvedType = parameter != null
+								 ? parameterize(baseType, resolveParameterType(parameter))
+								 : baseType.parametrized();
+
+		return resolvedType.box();
+	}
+
+	private static TypeName parameterize(final TypeParameter baseType, final TypeName parameterType)
+	{
+		if (baseType instanceof TypeParameter.SimpleTypeParameter simple)
+		{
+			return ParameterizedTypeName.get(simple.raw(), parameterType.box());
+		}
+		if (baseType instanceof TypeParameter.CombinedTypeParameter combined)
+		{
+			return ParameterizedTypeName.get(combined.raw(), parameterType.box());
+		}
+
+		throw new IllegalArgumentException("Type cannot be parameterized: " + baseType.getClass().getSimpleName());
 	}
 
 	private static TypeName resolveParameterType(final org.logoce.lmf.model.lang.GenericParameter parameter)
 	{
-		final var baseType = TypeResolutionUtil.resolveSimpleType(parameter.type());
+		final var type = parameter.type();
 		final var nestedParameter = parameter.parameter();
-		final var nestedType = nestedParameter != null
-							   ? resolveParameterType(nestedParameter)
-							   : null;
 
-		final var parameterType = nestedType != null
-								  ? TypeParameter.of(baseType.raw(), nestedType)
-								  : baseType;
-
-		final var resolvedType = parameterType.parametrized().box();
-		if (!parameter.wildcard())
+		if (type instanceof Generic<?> genericType)
 		{
-			return resolvedType;
+			if (nestedParameter != null)
+			{
+				throw new IllegalArgumentException("Generic type parameter cannot declare nested parameters: " +
+												   genericType.name());
+			}
+			final var typeVar = TypeVariableName.get(genericType.name());
+			return parameter.wildcard()
+				   ? wildcard(typeVar, parameter.wildcardBoundType())
+				   : typeVar;
 		}
 
-		final var wildcardBoundType = parameter.wildcardBoundType();
-		return switch (wildcardBoundType)
+		final var baseType = TypeResolutionUtil.resolveSimpleType(type);
+		final var nestedType = nestedParameter != null ? resolveParameterType(nestedParameter) : null;
+
+		final var resolvedType = nestedType != null
+								 ? parameterize(baseType, nestedType)
+								 : baseType.parametrized().box();
+
+		return parameter.wildcard()
+			   ? wildcard(resolvedType, parameter.wildcardBoundType())
+			   : resolvedType;
+	}
+
+	private static TypeName wildcard(final TypeName type, final BoundType boundType)
+	{
+		return switch (boundType)
 		{
-			case Super -> WildcardTypeName.supertypeOf(resolvedType);
-			case Extends -> WildcardTypeName.subtypeOf(resolvedType);
-			case null -> WildcardTypeName.subtypeOf(resolvedType);
+			case Super -> WildcardTypeName.supertypeOf(type);
+			case Extends -> WildcardTypeName.subtypeOf(type);
+			case null -> WildcardTypeName.subtypeOf(type);
 		};
 	}
 }

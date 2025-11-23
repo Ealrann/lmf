@@ -2,6 +2,7 @@ package org.logoce.lmf.generator.util;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.*;
@@ -97,6 +98,11 @@ public class TypeResolutionUtil
 				{
 					return TypeParameter.of(className);
 				}
+			}
+			case Generic<?> generic ->
+			{
+				final var typeName = TypeVariableName.get(generic.name());
+				return new TypeParameter.SimpleType(typeName);
 			}
 			default -> throw new IllegalStateException("Unsupported type kind: " + type.getClass().getName());
 		}
