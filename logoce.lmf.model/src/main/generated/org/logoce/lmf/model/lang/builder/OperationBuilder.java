@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.Operation.Builder;
@@ -19,10 +20,11 @@ import org.logoce.lmf.model.util.BuildUtils;
 
 public final class OperationBuilder implements Builder {
   private static final FeatureInserter<OperationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationBuilder>().add(Operation.Features.name, OperationBuilder::name).add(Operation.Features.content, OperationBuilder::content).build();
-  private static final RelationLazyInserter<OperationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationBuilder>().add(Operation.Features.type, OperationBuilder::type).add(Operation.Features.parameters, OperationBuilder::addParameter).build();
+  private static final RelationLazyInserter<OperationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationBuilder>().add(Operation.Features.returnType, OperationBuilder::returnType).add(Operation.Features.returnTypeParameters, OperationBuilder::addReturnTypeParameter).add(Operation.Features.parameters, OperationBuilder::addParameter).build();
   private String name;
   private String content;
-  private Supplier<Type<?>> type = () -> null;
+  private Supplier<Type<?>> returnType = () -> null;
+  private final List<Supplier<GenericParameter>> returnTypeParameters = new ObservableList<>((type, elements) -> {});
   private final List<Supplier<OperationParameter>> parameters = new ObservableList<>((type, elements) -> {});
 
   @Override
@@ -38,8 +40,14 @@ public final class OperationBuilder implements Builder {
   }
 
   @Override
-  public OperationBuilder type(Supplier<Type<?>> type) {
-    this.type = type;
+  public OperationBuilder returnType(Supplier<Type<?>> returnType) {
+    this.returnType = returnType;
+    return this;
+  }
+
+  @Override
+  public OperationBuilder addReturnTypeParameter(Supplier<GenericParameter> returnTypeParameter) {
+    this.returnTypeParameters.add(returnTypeParameter);
     return this;
   }
 
@@ -51,8 +59,9 @@ public final class OperationBuilder implements Builder {
 
   @Override
   public Operation build() {
+    final var builtReturnTypeParameters = BuildUtils.collectSuppliers(returnTypeParameters);
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new OperationImpl(name, content, type.get(), builtParameters);
+    final var built = new OperationImpl(name, content, returnType.get(), builtReturnTypeParameters, builtParameters);
     return built;
   }
 

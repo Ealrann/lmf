@@ -13,20 +13,23 @@ public interface Operation extends Named {
   }
 
   String content();
-  Type<?> type();
+  Type<?> returnType();
+  List<GenericParameter> returnTypeParameters();
   List<OperationParameter> parameters();
 
   interface Features extends Named.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, String> content = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.OPERATION.CONTENT);
-    RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.OPERATION.TYPE);
+    RawFeature<Type<?>, Type<?>> returnType = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.OPERATION.RETURN_TYPE);
+    RawFeature<GenericParameter, List<GenericParameter>> returnTypeParameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.OPERATION.RETURN_TYPE_PARAMETERS);
     RawFeature<OperationParameter, List<OperationParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.OPERATION.PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<Operation> {
     Builder name(String name);
     Builder content(String content);
-    Builder type(Supplier<Type<?>> type);
+    Builder returnType(Supplier<Type<?>> returnType);
+    Builder addReturnTypeParameter(Supplier<GenericParameter> returnTypeParameter);
     Builder addParameter(Supplier<OperationParameter> parameter);
   }
 }

@@ -9,7 +9,6 @@ import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.OperationUtil;
-import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Operation;
@@ -70,7 +69,7 @@ public final class ImplementationGenerator
 
 		for (final OperationParameter parameter : operation.parameters())
 		{
-			final var parameterType = TypeResolutionUtil.resolveSimpleType(parameter.type()).parametrized();
+			final var parameterType = OperationUtil.resolveParameterType(parameter);
 			methodBuilder.addParameter(parameterType, parameter.name());
 		}
 		final var body = operation.content();

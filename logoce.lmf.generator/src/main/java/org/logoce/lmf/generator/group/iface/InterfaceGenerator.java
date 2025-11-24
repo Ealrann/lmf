@@ -11,7 +11,6 @@ import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.type.InterfaceBuildMethodBuilder;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.OperationUtil;
-import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
@@ -112,8 +111,9 @@ public final class InterfaceGenerator
 
 		for (final OperationParameter parameter : operation.parameters())
 		{
-			final var parameterType = TypeResolutionUtil.resolveSimpleType(parameter.type()).parametrized();
-			final var parameterSpec = ParameterSpec.builder(parameterType, parameter.name()).build();
+			final var parameterType = OperationUtil.resolveParameterType(parameter);
+			final var parameterName = parameter.name();
+			final var parameterSpec = ParameterSpec.builder(parameterType, parameterName).build();
 			methodBuilder.addParameter(parameterSpec);
 		}
 
