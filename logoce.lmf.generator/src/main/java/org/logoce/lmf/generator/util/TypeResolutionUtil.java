@@ -44,13 +44,15 @@ public class TypeResolutionUtil
 		}
 	}
 
-	public static TypeParameter parametrizedType(Group<?> group, List<? extends LMEntity<?>> parameters)
+	public static TypeParameter parametrizedType(Group<?> group, List<? extends GenericParameter> parameters)
 	{
 		final var model = (MetaModel) group.lmContainer();
 		final var className = ClassName.get(model.domain(), group.name());
 		if (!parameters.isEmpty())
 		{
-			final var params = toParameters(parameters);
+			final var params = parameters.stream()
+										 .map(org.logoce.lmf.generator.util.GenericParameter::resolveParameterType)
+										 .toList();
 			return TypeParameter.of(className, params);
 		}
 		else if (!group.generics().isEmpty())

@@ -11,7 +11,7 @@ import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Attribute.Builder;
 import org.logoce.lmf.model.lang.Datatype;
-import org.logoce.lmf.model.lang.Generic;
+import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.AttributeImpl;
@@ -20,15 +20,15 @@ import org.logoce.lmf.model.util.BuildUtils;
 
 public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder<UnaryType, EffectiveType> {
   private static final FeatureInserter<AttributeBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.name, AttributeBuilder::name).add(Attribute.Features.immutable, AttributeBuilder::immutable).add(Attribute.Features.many, AttributeBuilder::many).add(Attribute.Features.mandatory, AttributeBuilder::mandatory).add(Attribute.Features.rawFeature, AttributeBuilder::_rawFeature).add(Attribute.Features.defaultValue, AttributeBuilder::defaultValue).build();
-  private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.datatype, AttributeBuilder::_datatype).add(Attribute.Features.parameters, AttributeBuilder::addParameter).build();
+  private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.parameters, AttributeBuilder::addParameter).add(Attribute.Features.datatype, AttributeBuilder::_datatype).build();
   private String name;
   private boolean immutable;
   private boolean many;
   private boolean mandatory;
+  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
   private RawFeature<UnaryType, EffectiveType> rawFeature;
   private Supplier<Datatype<UnaryType>> datatype;
   private String defaultValue;
-  private final List<Supplier<Generic<?>>> parameters = new ObservableList<>((type, elements) -> {});
 
   @Override
   public AttributeBuilder<UnaryType, EffectiveType> name(String name) {
@@ -51,6 +51,13 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   @Override
   public AttributeBuilder<UnaryType, EffectiveType> mandatory(boolean mandatory) {
     this.mandatory = mandatory;
+    return this;
+  }
+
+  @Override
+  public AttributeBuilder<UnaryType, EffectiveType> addParameter(
+      Supplier<GenericParameter> parameter) {
+    this.parameters.add(parameter);
     return this;
   }
 
@@ -93,15 +100,9 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> addParameter(Supplier<Generic<?>> parameter) {
-    this.parameters.add(parameter);
-    return this;
-  }
-
-  @Override
   public Attribute<UnaryType, EffectiveType> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new AttributeImpl<UnaryType, EffectiveType>(name, immutable, many, mandatory, rawFeature, datatype.get(), defaultValue, builtParameters);
+    final var built = new AttributeImpl<UnaryType, EffectiveType>(name, immutable, many, mandatory, builtParameters, rawFeature, datatype.get(), defaultValue);
     return built;
   }
 

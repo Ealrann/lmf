@@ -185,7 +185,9 @@ public final class FeatureResolution implements IAdapter
 					}
 					else
 					{
-						final var params = TypeResolutionUtil.toParameters(parameters);
+						final var params = parameters.stream()
+													 .map(org.logoce.lmf.generator.util.GenericParameter::resolveParameterType)
+													 .toList();
 						return new PartialFeatureResolution(TypeParameter.of(className, params), true);
 					}
 				}
@@ -202,7 +204,9 @@ public final class FeatureResolution implements IAdapter
 			final var parameters = relation.parameters();
 			if (concept instanceof Group<?> group)
 			{
-				final var containsGeneric = parameters.stream().anyMatch(Generic.class::isInstance);
+				final var containsGeneric = parameters.stream()
+													   .map(org.logoce.lmf.model.lang.GenericParameter::type)
+													   .anyMatch(Generic.class::isInstance);
 				return new PartialFeatureResolution(TypeResolutionUtil.parametrizedType(group, parameters),
 													containsGeneric);
 			}

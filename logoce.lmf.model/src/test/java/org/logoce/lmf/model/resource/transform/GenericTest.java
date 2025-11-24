@@ -108,7 +108,7 @@ public class GenericTest
 				    (Group name=Container
 				        (Generic name=T
 				            (GenericExtension boundType=Extends type=#LMCore/groups.0))
-				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
+				        (-contains cargo [1..1] /groups.2 (parameters type=/groups.0/generics.0))
 				    )
 				    (Definition name=Car)
 				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
@@ -135,7 +135,7 @@ public class GenericTest
 		assertEquals("Car", car.name());
 		assertEquals("CarContainer", carContainer.name());
 
-		assertEquals(genericOfContainer, cargoRelation.parameters().get(0));
+		assertEquals(genericOfContainer, cargoRelation.parameters().get(0).type());
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0).type());
 
 		assertNotNull(genericOfContainer.extension());

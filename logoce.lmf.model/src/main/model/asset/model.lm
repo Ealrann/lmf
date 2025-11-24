@@ -36,13 +36,15 @@
 		(-contains features [0..*] @Feature)
 		(-contains generics [0..*] @Generic)
 		(-contains operations [0..*] @Operation)
-		(-att lmBuilder /javaWrappers.2 [1..1] parameters=../generics.0))
+		(-att lmBuilder /javaWrappers.2 [1..1]
+		    (parameters type=../../generics.0)))
 
 	(Definition Include
 		(includes @LMObject)
 		(Generic T
 			(extension boundType=extends type=@LMObject))
-		(-refers group lazy [1..1] @Group parameters=../generics.0)
+		(-refers group lazy [1..1] @Group
+		    (parameters type=../../generics.0))
 		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Feature
@@ -52,7 +54,10 @@
 		(-att name=immutable datatype=@boolean)
 		(-att name=many datatype=@boolean)
 		(-att name=mandatory datatype=@boolean)
-		(-att name=rawFeature datatype=/javaWrappers.0 parameters=../generics.0,../generics.1))
+		(-contains parameters [0..*] @GenericParameter)
+		(-att name=rawFeature datatype=/javaWrappers.0
+		    (parameters type=../../generics.0)
+		    (parameters type=../../generics.1)))
 
 	(Definition Attribute
 		(includes group=@Feature
@@ -60,9 +65,9 @@
 			(parameters ../../generics.1))
 		(Generic UnaryType)
 		(Generic EffectiveType)
-		(-refers datatype [1..1] @Datatype parameters=../generics.0)
-		(-att name=defaultValue /units.7)
-		(-refers parameters [0..*] @Generic))
+		(-refers datatype [1..1] @Datatype
+		    (parameters type=../../generics.0))
+		(-att name=defaultValue /units.7))
 
 	(Definition Relation
 		(includes group=@Feature
@@ -71,8 +76,8 @@
 		(Generic UnaryType
 			(extension boundType=extends type=@LMObject))
 		(Generic EffectiveType)
-		(-refers concept lazy [1..1] @Concept parameters=../generics.0)
-		(-refers parameters lazy [0..*] @LMEntity)
+		(-refers concept lazy [1..1] @Concept
+		    (parameters type=../../generics.0))
 		(-att lazy datatype=/units.2)
 		(-att contains datatype=/units.2))
 

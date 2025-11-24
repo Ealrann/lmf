@@ -28,7 +28,10 @@
 		(Generic T
 			(extension boundType=Extends type=@JavaList
 				(parameters wildcard=true wildcardBoundType=Extends type=@JavaSupplier
-				    (parameters wildcard=true wildcardBoundType=Super type=../../../../generics.0)))))
+				    (parameters wildcard=true wildcardBoundType=Super type=../../../../generics.0))))
+		(-att list [0..1] @JavaList
+			(parameters wildcard=true wildcardBoundType=Extends type=@JavaSupplier
+				(parameters wildcard=true wildcardBoundType=Super type=../../../generics.0))))
 
 	(JavaWrapper name=JavaObject qualifiedClassName=java.lang.String)
 	(JavaWrapper name=JavaList qualifiedClassName=java.util.List)

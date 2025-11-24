@@ -94,14 +94,13 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var conceptBlock = generateConceptCodeblock(relation.concept());
 
 				initBuilder.add(".concept($L)", conceptBlock);
-
-				relation.parameters()
-						.forEach(parameter -> initBuilder.add(".addParameter($L)",
-															 generateGenericsCodeblock(parameter)));
-
 				initBuilder.add(".lazy($L)", relation.lazy())
 						   .add(".contains($L)", relation.contains());
 			}
+
+			input.parameters()
+				 .forEach(parameter -> initBuilder.add(".addParameter(() -> $L)",
+													  generateParameterCodeblock(parameter)));
 
 			initBuilder.add(".build()");
 		}
@@ -129,6 +128,11 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			return CodeBlock.of("() -> null");
 		}
 		return generateGenericsCodeblock(concept);
+	}
+
+	private static CodeBlock generateParameterCodeblock(final org.logoce.lmf.model.lang.GenericParameter parameter)
+	{
+		return GenericFieldBuilder.genericParameterBlock(parameter);
 	}
 
 	private static CodeBlock generateGenericsCodeblock(final LMEntity<?> lmEntity)
