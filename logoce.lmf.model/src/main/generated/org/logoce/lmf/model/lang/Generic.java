@@ -6,8 +6,8 @@ import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.GenericBuilder;
 
-public interface Generic<T extends LMEntity<?>> extends Concept<T> {
-  static <T extends LMEntity<?>> Builder<T> builder() {
+public interface Generic<T> extends Concept<T> {
+  static <T> Builder<T> builder() {
     return new GenericBuilder<>();
   }
 
@@ -18,7 +18,7 @@ public interface Generic<T extends LMEntity<?>> extends Concept<T> {
     RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.EXTENSION);
   }
 
-  interface Builder<T extends LMEntity<?>> extends IFeaturedObject.Builder<Generic<T>> {
+  interface Builder<T> extends IFeaturedObject.Builder<Generic<T>> {
     Builder<T> name(String name);
     Builder<T> extension(Supplier<GenericExtension> extension);
   }

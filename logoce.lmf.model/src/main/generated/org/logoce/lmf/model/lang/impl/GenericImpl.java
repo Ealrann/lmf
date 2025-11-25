@@ -9,9 +9,8 @@ import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.LMEntity;
 
-public final class GenericImpl<T extends LMEntity<?>> extends FeaturedObject implements Generic<T> {
+public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
   private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(org.logoce.lmf.model.lang.Generic.Features.name, org.logoce.lmf.model.lang.Generic::name).add(org.logoce.lmf.model.lang.Generic.Features.extension, org.logoce.lmf.model.lang.Generic::extension).build();
   private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
   private final String name;

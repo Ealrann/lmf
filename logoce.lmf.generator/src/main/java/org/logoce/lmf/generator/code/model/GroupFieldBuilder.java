@@ -52,7 +52,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var generics = group.generics();
 		for (int i = 0; i < generics.size(); i++)
 		{
-			initializerBuilder.add(".addGeneric(() -> Generics.$N.get($L))", constantName, i);
+			initializerBuilder.add(".addGeneric(() -> Generics.$N.ALL.get($L))", constantName, i);
 		}
 
 		if (builderType != null) initializerBuilder.add(".lmBuilder(new $T<>($T::new))", builderSupplierRaw, builderType.raw());
@@ -108,7 +108,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 				final var constantName = GenUtils.toConstantCase(group.name());
 				final var index = group.generics().indexOf(generic);
 				yield CodeBlock.builder()
-							   .add("() -> $T.Generics.$N.get($L)", modelDefinition, constantName, index)
+							   .add("() -> $T.Generics.$N.ALL.get($L)", modelDefinition, constantName, index)
 							   .build();
 			}
 			case Group<?> group ->

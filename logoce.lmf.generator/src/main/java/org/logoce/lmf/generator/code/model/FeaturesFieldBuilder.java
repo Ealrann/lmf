@@ -147,7 +147,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var constantName = GenUtils.toConstantCase(group.name());
 				final var index = group.generics().indexOf(generic);
 				yield CodeBlock.builder()
-							   .add("() -> $T.Generics.$N.get($L)", modelDefinition, constantName, index)
+							   .add("() -> $T.Generics.$N.ALL.get($L)", modelDefinition, constantName, index)
 							   .build();
 			}
 			case Group<?> group ->

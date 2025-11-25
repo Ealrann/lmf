@@ -117,8 +117,7 @@
 	(Definition Generic
 		(includes group=@Concept
 			(parameters ../../generics.0))
-		(Generic T
-			(extension extends @LMEntity))
+		(Generic T)
 		(-contains extension [0..1] @GenericExtension))
 
 	(Definition GenericExtension

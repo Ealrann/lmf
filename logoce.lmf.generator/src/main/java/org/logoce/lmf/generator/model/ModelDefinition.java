@@ -43,12 +43,16 @@ public class ModelDefinition
 																				new GroupFieldBuilder(),
 																				this::streamOrderedGroup,
 																				ConstantTypes.GROUP_ALL_BUILDER);
-	private final InterfaceBuilder<MetaModel> genericBuilder = new FieldBuilder<>("Generics",
-																				  new GenericFieldBuilder(),
-																			  m -> this.streamOrderedGroup(m)
-																					   .filter(g -> !g.generics()
-																									  .isEmpty()),
-																				  null);
+	private final InterfaceBuilder<Group<?>> genericInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(
+																										g.name()),
+																						 g -> new GenericFieldBuilder(),
+																						 g -> g.generics().stream(),
+																						 ConstantTypes.GENERIC_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> genericBuilder = new SubInterfaceBuilder<>("Generics",
+																						genericInterfaceBuilder,
+																						m -> this.streamOrderedGroup(m)
+																							 .filter(g -> !g.generics()
+																											.isEmpty()));
 
 	private final InterfaceBuilder<Group<?>> groupInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
 																						FeaturesFieldBuilder::new,

@@ -43,12 +43,15 @@ public class MaintainerMultiModelTest
 
 	private static final String ACTION_MODEL = """
 			(MetaModel domain=org.sheepy.lily.core.model name=Action imports=org.sheepy.lily.core.model.Types
-				(JavaWrapper name=ActionList qualifiedClassName=java.util.List
-					(Generic T
-						(extension boundType=extends type=@Action)))
+				(Definition ActionList
+			         (Generic T (extension boundType=extends type=@Action))
+			         (-att list [1..1] @JavaList
+			             (parameters ../../generics.0)))
+
+			    (JavaWrapper name=JavaList qualifiedClassName=java.util.List)
 
 				(Group Action
-					(includes group=#Types@LNamedElement))
+					(includes group=#Types@Dummy))
 
 				(Definition CloseApplicationAction
 					(includes group=@Action))
