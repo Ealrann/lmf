@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,6 +72,37 @@ public final class OperationGenerationTest
 				   "Derived impl should reuse the operation body");
 	}
 
+	@Test
+	public void generateOperationWithGenericParameters() throws IOException
+	{
+		final var targetDir = new File("build/test-generated/operations-generics");
+		if (targetDir.exists())
+		{
+			deleteRecursively(targetDir);
+		}
+
+		final var modelFile = new File("src/test/model/OperationsGeneric.lm");
+		Main.generate(targetDir, List.of(modelFile), List.of());
+
+		final var basePackageDir = new File(targetDir, "test/operations/generics");
+		final var interfaceFile = new File(basePackageDir, "Service.java");
+		final var implFile = new File(new File(basePackageDir, "impl"), "ServiceImpl.java");
+
+		assertTrue(interfaceFile.isFile(), "Service.java should be generated");
+		assertTrue(implFile.isFile(), "ServiceImpl.java should be generated");
+
+		final var interfaceContent = Files.readString(interfaceFile.toPath(), StandardCharsets.UTF_8);
+		final var implContent = Files.readString(implFile.toPath(), StandardCharsets.UTF_8);
+
+		assertTrue(interfaceContent.contains("interface Service<T> extends LMObject"),
+				   "Interface should carry the group generic and extend LMObject");
+		assertTrue(interfaceContent.contains("List<T> collect(List<T> items)"),
+				   "Interface should declare parameterized operation signature");
+		assertTrue(implContent.contains("List<T> collect(List<T> items)"),
+				   "Implementation should implement the parameterized signature");
+		assertTrue(implContent.contains("return items;"), "Implementation should keep the custom body");
+	}
+
 	private static MetaModel buildMetaModelWithOperation()
 	{
 		final var operation = Operation.builder()
@@ -121,7 +153,6 @@ public final class OperationGenerationTest
 						.addGroup(() -> derivedGroup)
 						.build();
 	}
-
 	private static void deleteRecursively(final File file)
 	{
 		if (file.isDirectory())
