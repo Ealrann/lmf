@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.lang.Override;
 import java.util.List;
+import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -15,11 +16,11 @@ import org.logoce.lmf.model.lang.LMEntity;
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
   private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(org.logoce.lmf.model.lang.GenericExtension.Features.type, org.logoce.lmf.model.lang.GenericExtension::type).add(org.logoce.lmf.model.lang.GenericExtension.Features.boundType, org.logoce.lmf.model.lang.GenericExtension::boundType).add(org.logoce.lmf.model.lang.GenericExtension.Features.parameters, org.logoce.lmf.model.lang.GenericExtension::parameters).build();
   private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>().build();
-  private final LMEntity<?> type;
+  private final Supplier<LMEntity<?>> type;
   private final BoundType boundType;
   private final List<GenericParameter> parameters;
 
-  public GenericExtensionImpl(final LMEntity<?> type, final BoundType boundType,
+  public GenericExtensionImpl(final Supplier<LMEntity<?>> type, final BoundType boundType,
       final List<GenericParameter> parameters) {
     this.type = type;
     this.boundType = boundType;
@@ -29,7 +30,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
 
   @Override
   public LMEntity<?> type() {
-    return type;
+    return type.get();
   }
 
   @Override

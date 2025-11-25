@@ -31,8 +31,8 @@ public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<Jav
 								   ? CodeBlock.of("() -> null")
 								   : CodeBlock.builder()
 											   .add("() -> new $T()", SERIALIZER_BUILDER_TYPE)
-											   .add(".toString($S)", serializer.toString())
-											   .add(".fromString($S)", serializer.fromString())
+											   .add(".create($S)", serializer.create())
+											   .add(".convert($S)", serializer.convert())
 											   .add(".build()")
 											   .build();
 

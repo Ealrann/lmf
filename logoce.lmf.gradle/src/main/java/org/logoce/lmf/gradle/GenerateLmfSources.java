@@ -9,6 +9,7 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
+import org.logoce.lmf.gradle.diagnostics.GenerationFailureReporter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,12 +31,12 @@ public abstract class GenerateLmfSources extends DefaultTask
 		final var logger = getLogger();
 		final var outputDir = getOutputDir().get().getAsFile();
 
+		final List<File> modelFiles = new ArrayList<>(getModelFiles().getFiles());
+
 		if (outputDir.exists() == false && outputDir.mkdirs() == false)
 		{
 			throw new IllegalStateException("Cannot create output directory " + outputDir);
 		}
-
-		final List<File> modelFiles = new ArrayList<>(getModelFiles().getFiles());
 
 		if (modelFiles.isEmpty())
 		{
@@ -44,7 +45,14 @@ public abstract class GenerateLmfSources extends DefaultTask
 		}
 
 		logger.lifecycle("Generating LMF sources from {}", modelFiles);
-		runGenerator(modelFiles, outputDir);
+		try
+		{
+			runGenerator(modelFiles, outputDir);
+		}
+		catch (Exception e)
+		{
+			GenerationFailureReporter.report(logger, modelFiles, e);
+		}
 	}
 
 	private static void runGenerator(final List<File> modelFiles, final File outputDir)

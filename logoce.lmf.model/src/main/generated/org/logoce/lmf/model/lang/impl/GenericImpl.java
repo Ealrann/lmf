@@ -5,27 +5,20 @@ import java.lang.String;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
-import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMEntity;
-import org.logoce.lmf.model.lang.Type;
 
 public final class GenericImpl<T extends LMEntity<?>> extends FeaturedObject implements Generic<T> {
-  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(org.logoce.lmf.model.lang.Generic.Features.name, org.logoce.lmf.model.lang.Generic::name).add(org.logoce.lmf.model.lang.Generic.Features.type, org.logoce.lmf.model.lang.Generic::type).add(org.logoce.lmf.model.lang.Generic.Features.boundType, org.logoce.lmf.model.lang.Generic::boundType).add(org.logoce.lmf.model.lang.Generic.Features.extension, org.logoce.lmf.model.lang.Generic::extension).build();
+  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(org.logoce.lmf.model.lang.Generic.Features.name, org.logoce.lmf.model.lang.Generic::name).add(org.logoce.lmf.model.lang.Generic.Features.extension, org.logoce.lmf.model.lang.Generic::extension).build();
   private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
   private final String name;
-  private final Type<?> type;
-  private final BoundType boundType;
   private final GenericExtension extension;
 
-  public GenericImpl(final String name, final Type<?> type, final BoundType boundType,
-      final GenericExtension extension) {
+  public GenericImpl(final String name, final GenericExtension extension) {
     this.name = name;
-    this.type = type;
-    this.boundType = boundType;
     this.extension = extension;
     setContainer(extension, Generic.Features.extension);
   }
@@ -33,16 +26,6 @@ public final class GenericImpl<T extends LMEntity<?>> extends FeaturedObject imp
   @Override
   public String name() {
     return name;
-  }
-
-  @Override
-  public Type<?> type() {
-    return type;
-  }
-
-  @Override
-  public BoundType boundType() {
-    return boundType;
   }
 
   @Override

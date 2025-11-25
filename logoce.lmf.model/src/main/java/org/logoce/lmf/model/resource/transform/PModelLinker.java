@@ -47,7 +47,9 @@ public final class PModelLinker<I extends PNode>
 
 	public PModel<I> link(final List<? extends BasicTree<I, ?>> roots)
 	{
-		return link(roots, (t, e) -> e.printStackTrace());
+		return link(roots, (t, e) -> {
+			throw e;
+		});
 	}
 
 	@SuppressWarnings("unchecked")

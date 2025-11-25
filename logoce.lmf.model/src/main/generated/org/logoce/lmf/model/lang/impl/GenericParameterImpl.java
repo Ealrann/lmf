@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.lang.Override;
 import java.util.List;
+import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -16,11 +17,11 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
   private static final FeatureSetter<GenericParameter> SET_MAP = new FeatureSetter.Builder<GenericParameter>().build();
   private final boolean wildcard;
   private final BoundType wildcardBoundType;
-  private final LMEntity<?> type;
+  private final Supplier<LMEntity<?>> type;
   private final List<GenericParameter> parameters;
 
   public GenericParameterImpl(final boolean wildcard, final BoundType wildcardBoundType,
-      final LMEntity<?> type, final List<GenericParameter> parameters) {
+      final Supplier<LMEntity<?>> type, final List<GenericParameter> parameters) {
     this.wildcard = wildcard;
     this.wildcardBoundType = wildcardBoundType;
     this.type = type;
@@ -40,7 +41,7 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
 
   @Override
   public LMEntity<?> type() {
-    return type;
+    return type.get();
   }
 
   @Override

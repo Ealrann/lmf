@@ -13,26 +13,26 @@ import org.logoce.lmf.model.lang.Serializer.Builder;
 import org.logoce.lmf.model.lang.impl.SerializerImpl;
 
 public final class SerializerBuilder implements Builder {
-  private static final FeatureInserter<SerializerBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<SerializerBuilder>().add(Serializer.Features.toString, SerializerBuilder::toString).add(Serializer.Features.fromString, SerializerBuilder::fromString).build();
+  private static final FeatureInserter<SerializerBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<SerializerBuilder>().add(Serializer.Features.create, SerializerBuilder::create).add(Serializer.Features.convert, SerializerBuilder::convert).build();
   private static final RelationLazyInserter<SerializerBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<SerializerBuilder>().build();
-  private String toString;
-  private String fromString;
+  private String create;
+  private String convert;
 
   @Override
-  public SerializerBuilder toString(String toString) {
-    this.toString = toString;
+  public SerializerBuilder create(String create) {
+    this.create = create;
     return this;
   }
 
   @Override
-  public SerializerBuilder fromString(String fromString) {
-    this.fromString = fromString;
+  public SerializerBuilder convert(String convert) {
+    this.convert = convert;
     return this;
   }
 
   @Override
   public Serializer build() {
-    final var built = new SerializerImpl(toString, fromString);
+    final var built = new SerializerImpl(create, convert);
     return built;
   }
 

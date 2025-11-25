@@ -3,6 +3,7 @@ package org.logoce.lmf.model.resource.linking.feature;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
+import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
 import org.logoce.lmf.model.util.ModelRegistry;
 
@@ -27,8 +28,8 @@ public final class ImportResolver
 		if (model == null)
 		{
 			final var available = modelRegistry.models().map(ImportResolver::qualifiedName).toList();
-			throw new AssertionError("Cannot resolve model '" + modelName + "' in registry. Available models: " +
-									 available);
+			throw new LinkException("Cannot resolve model '" + modelName + "' in registry. Available models: " +
+									available, node.pNode());
 		}
 		return model;
 	}
@@ -60,8 +61,8 @@ public final class ImportResolver
 			return model.qualifiedName();
 		}
 
-		throw new AssertionError("Cannot resolve imported model '" + modelName + "' in " + model.qualifiedName() +
-								 ". Available imports: " + model.imports());
+		throw new LinkException("Cannot resolve imported model '" + modelName + "' in " + model.qualifiedName() +
+								". Available imports: " + model.imports(), node.pNode());
 	}
 
 	private ModelContext owningModel(final LinkNodeInternal<?, ?, ?> node, final String context)

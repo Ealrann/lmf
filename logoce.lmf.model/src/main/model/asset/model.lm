@@ -119,13 +119,11 @@
 			(parameters ../../generics.0))
 		(Generic T
 			(extension extends @LMEntity))
-		(-refers type [0..1] @Type)
-		(-att boundType datatype=/enums.0)
 		(-contains extension [0..1] @GenericExtension))
 
 	(Definition GenericExtension
 		(includes @LMObject)
-		(-refers type [0..1] @LMEntity)
+		(-refers type lazy [0..1] @LMEntity)
         (-att boundType datatype=/enums.0)
 		(-contains parameters [0..*] @GenericParameter))
 
@@ -133,7 +131,7 @@
 		(includes @LMObject)
 		(-att wildcard @boolean)
         (-att wildcardBoundType datatype=/enums.0)
-		(-refers type [1..1] @LMEntity)
+		(-refers type lazy [1..1] @LMEntity)
 		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Concept
@@ -159,8 +157,8 @@
 
 	(Definition Serializer
 		(includes group=@LMObject)
-		(-att toString @string [1..1])
-		(-att fromString @string [1..1]))
+		(-att create @string [1..1])
+		(-att convert @string [1..1]))
 
 	(Unit name=matcher matcher="rgx_match:<(.+?)>")
 	(Unit name=extractor matcher="rgx_match:<(.+?)>")

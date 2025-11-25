@@ -51,7 +51,7 @@ public final class GenericParameterBuilder implements Builder {
   @Override
   public GenericParameter build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new GenericParameterImpl(wildcard, wildcardBoundType, type.get(), builtParameters);
+    final var built = new GenericParameterImpl(wildcard, wildcardBoundType, type, builtParameters);
     return built;
   }
 

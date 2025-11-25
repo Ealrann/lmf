@@ -10,16 +10,16 @@ public interface Serializer extends LMObject {
     return new SerializerBuilder();
   }
 
-  String toString();
-  String fromString();
+  String create();
+  String convert();
 
   interface Features extends LMObject.Features<Features> {
-    RawFeature<String, String> toString = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.TO_STRING);
-    RawFeature<String, String> fromString = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.FROM_STRING);
+    RawFeature<String, String> create = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.CREATE);
+    RawFeature<String, String> convert = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.CONVERT);
   }
 
   interface Builder extends IFeaturedObject.Builder<Serializer> {
-    Builder toString(String toString);
-    Builder fromString(String fromString);
+    Builder create(String create);
+    Builder convert(String convert);
   }
 }

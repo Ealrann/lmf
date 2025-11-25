@@ -7,12 +7,15 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.linking.FeatureResolution;
+import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.linking.linker.NodeLinker;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.transform.ResolutionAttempt;
 import org.logoce.lmf.model.util.tree.AbstractTree;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 public final class LinkNodeFull<T extends LMObject, I extends PNode> extends AbstractTree<LinkNodeFull<?, I>> implements
@@ -24,6 +27,7 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	private final List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions;
 	private List<ResolutionAttempt<Relation<?, ?>>> relationResolutions;
 	private T builtObject = null;
+	private static final ThreadLocal<Set<LinkNodeFull<?, ?>>> BUILD_STACK = ThreadLocal.withInitial(HashSet::new);
 
 	public LinkNodeFull(final LinkInfo<T, I> info,
 						final LinkNodeFull<?, I> parent,
@@ -72,12 +76,24 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	{
 		if (builtObject == null)
 		{
+			final var stack = BUILD_STACK.get();
+			if (stack.contains(this))
+			{
+				throw new LinkException("Cyclic model containment while building group '" +
+										group().name() +
+										"' near token '" +
+										firstToken() +
+										"'", pNode());
+			}
+			stack.add(this);
 			streamChildren().forEach(this::injectContainment);
 
 			attributeResolutions.forEach(this::install);
 			relationResolutions.forEach(this::install);
 
 			builtObject = builder.build();
+			stack.remove(this);
+			if (stack.isEmpty()) BUILD_STACK.remove();
 		}
 		return builtObject;
 	}
@@ -90,8 +106,20 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 		}
 		if (tokenResolution.exception() != null)
 		{
-			tokenResolution.exception().printStackTrace();
+			throw buildLinkException(tokenResolution);
 		}
+	}
+
+	private LinkException buildLinkException(final ResolutionAttempt<?> tokenResolution)
+	{
+		final PFeature feature = tokenResolution.feature();
+		final var token = feature.firstToken();
+		final var groupName = group().name();
+		final var baseMessage = tokenResolution.exception().getMessage();
+		final var message = (baseMessage == null || baseMessage.isBlank())
+						   ? "Cannot resolve token '" + token + "' in group '" + groupName + "'"
+						   : baseMessage + " in group '" + groupName + "' for token '" + token + "'";
+		return new LinkException(message, pNode());
 	}
 
 	private void injectContainment(final LinkNodeFull<?, I> child)
@@ -125,5 +153,11 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	public Group<T> group()
 	{
 		return info.modelGroup().group();
+	}
+
+	private String firstToken()
+	{
+		final var tokens = pNode().tokens();
+		return tokens.isEmpty() ? group().name() : tokens.getFirst().value();
 	}
 }

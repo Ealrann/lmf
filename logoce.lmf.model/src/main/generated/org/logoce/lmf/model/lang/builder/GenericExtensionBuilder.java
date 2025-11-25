@@ -45,7 +45,7 @@ public final class GenericExtensionBuilder implements Builder {
   @Override
   public GenericExtension build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new GenericExtensionImpl(type.get(), boundType, builtParameters);
+    final var built = new GenericExtensionImpl(type, boundType, builtParameters);
     return built;
   }
 

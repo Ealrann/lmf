@@ -22,10 +22,6 @@ public class ModelUtils
 		{
 			return isSubGroup(parentGroup, check);
 		}
-		else if (parent instanceof Generic<?> genericParent && genericParent.type() instanceof Group<?> parentGroup)
-		{
-			return isSubGroup(parentGroup, check);
-		}
 		else
 		{
 			return false;

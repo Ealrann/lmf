@@ -168,16 +168,19 @@ For your own M2 models:
 - Pass those generics down through `includes ... parameters=...` so that features know the unary/effective types.
 - The generator will emit Java types that carry those generics; this is powerful for strongly‑typed APIs, but it’s easy to get wrong if parameter lists don’t line up, so it’s best to copy patterns from LMCore’s `Feature` / `Attribute` / `Relation` definitions.
 
-**Common pitfall:** when you are inside an `Operation` and want to refer to a group‑level generic, you typically need to walk back up with `../../generics.0` (for example):
+**Common pitfall:** `Operation` now carries a `returnType` plus contained `returnTypeParameters` and `parameters` (each `OperationParameter` can itself have contained `parameters` for generics). When you need to refer to a group‑level generic from inside an operation parameter, you still have to walk back up with the right number of `../generics.N` hops. Example:
 
 ```lm
 (Group NativeParameter
     (Generic T)
     (Operation name=getNativeValue
-        type=@JavaObject group=../generics.0
-        (parameters param (reference group=../../../generics.0))))
+        (returnType @JavaObject
+            (returnTypeParameters (parameters type=../generics.0)))
+        (parameters param
+            (type @JavaObject)
+            (parameters wildcard=true wildcardBoundType=Extends type=../../generics.0))))
 ```
-If you see linker errors about missing generics, double‑check the relative `parameters=` path.
+If you see linker errors about missing generics, double‑check the relative `parameters` paths inside both `returnTypeParameters` and `OperationParameter.parameters`.
 
 ## 7. Practical Tips
 
@@ -208,7 +211,7 @@ If you need to express something that doesn’t fit these patterns, open `model.
 - EClass → Group/Definition; EAttribute → `+att`/`-att`; EReference → `+contains`/`+refers`; EEnum → `(Enum ...)`; custom EDataType → `(Unit ...)` or `(JavaWrapper ...)`.
 - Root objects: `EObject` → `LMObject`; `EClass` → `Group`; containment stays with `+contains`; multiplicities map to `[0..1]`, `[1..1]`, `[0..*]`, `[1..*]`.
 - Defaults: keep `defaultValue=`; names are case‑sensitive.
-- Operations: `(Operation name=... type=@ReturnType (parameters p @ParamType))`.
+- Operations: `(Operation name=... (returnType @ReturnType) (parameters p (type @ParamType)))`; add `returnTypeParameters` and `parameters` blocks for generic type arguments as needed.
 
 ## 10. Tiny example
 

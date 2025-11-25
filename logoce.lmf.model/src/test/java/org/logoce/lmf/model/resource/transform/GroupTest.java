@@ -4,12 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GroupTest
@@ -44,8 +46,9 @@ public class GroupTest
 		final var textModel = """
 				(MetaModel Test
 				    (Group name=Container
-				        (Generic name=T boundType=Extends type=#LMCore/groups.0)
-				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
+				        (Generic name=T
+				            (extension boundType=Extends type=#LMCore/groups.0))
+				        (-contains cargo [1..1] /groups.2 (parameters /groups.0/generics.0))
 				    )
 				    (Definition name=Car)
 				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
@@ -122,5 +125,31 @@ public class GroupTest
 		assertEquals(parameters.get(0).type(), attGeneric0);
 		assertEquals(parameters.get(0).type(), attGeneric0);
 		assertEquals(parameters.get(1).type(), attGeneric1);
+	}
+
+	@Test
+	public void selfBoundGeneric()
+	{
+		final var textModel = """
+				(MetaModel Test
+				    (Group Maintainable
+				        (Generic T
+				            (extension boundType=Extends type=@Maintainable
+				                (parameters ../../../generics.0)))
+				        (+refers name=maintainer [0..1] @Maintainable
+				            (parameters ../../generics.0)))
+				    (Group Maintainer
+				        (Generic T
+				            (extension boundType=Extends type=@Maintainable
+				                (parameters ../../../generics.0)))
+				        (+refers name=maintained [0..*] @Maintainable
+				            (parameters ../../generics.0)))
+				)
+				""";
+
+		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
+		final var ptree = treeBuilder.read(inputStream);
+		final var linker = new PModelLinker<>(ModelRegistry.empty());
+		linker.build(ptree);
 	}
 }

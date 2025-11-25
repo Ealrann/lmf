@@ -79,8 +79,9 @@ public class WeakTypingTest
 		final var textModel = """
 				(MetaModel Test
 				    (Group Container
-				        (Generic T Extends #LMCore/groups.0)
-				        (-contains cargo [1..1] /groups.2 parameters=/groups.0/generics.0)
+				        (Generic T
+				            (extension boundType=Extends type=#LMCore/groups.0))
+				        (-contains cargo [1..1] /groups.2 (parameters /groups.0/generics.0))
 				    )
 				    (Definition Car)
 				    (Group CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
