@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
@@ -186,10 +187,10 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 				throw new IllegalArgumentException("Generic type parameter cannot declare nested parameters: " +
 												   genericType.name());
 			}
-			final var resolvedType = resolveGenericBaseType(genericType);
-			return parameter.wildcard() && parameter.wildcardBoundType() == BoundType.Super
-				   ? WildcardTypeName.supertypeOf(resolvedType)
-				   : resolvedType;
+			final var placeholder = WildcardTypeName.subtypeOf(TypeName.OBJECT);
+			return parameter.wildcard()
+				   ? wildcard(TypeName.OBJECT, parameter.wildcardBoundType())
+				   : placeholder;
 		}
 
 		final var baseType = TypeResolutionUtil.resolveSimpleType(type);
@@ -242,6 +243,16 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 		}
 
 		throw new IllegalArgumentException("Type cannot be parameterized: " + baseType.getClass().getSimpleName());
+	}
+
+	private static TypeName wildcard(final TypeName type, final BoundType boundType)
+	{
+		return switch (boundType)
+		{
+			case Super -> WildcardTypeName.supertypeOf(type);
+			case Extends -> WildcardTypeName.subtypeOf(type);
+			case null -> WildcardTypeName.subtypeOf(type);
+		};
 	}
 
 	private record GenericTyping(TypeName fieldType, TypeName builderType) {}

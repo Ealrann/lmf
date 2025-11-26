@@ -17,7 +17,7 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
   boolean lazy();
   boolean contains();
 
-  interface Features extends Feature.Features<Features> {
+  interface Features<T extends Features<T>> extends Feature.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<Boolean, Boolean> immutable = Feature.Features.immutable;
     RawFeature<Boolean, Boolean> many = Feature.Features.many;

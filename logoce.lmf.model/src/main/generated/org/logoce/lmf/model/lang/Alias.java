@@ -12,7 +12,7 @@ public interface Alias extends Named {
 
   String value();
 
-  interface Features extends Named.Features<Features> {
+  interface Features<T extends Features<T>> extends Named.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, String> value = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.ALIAS.VALUE);
   }

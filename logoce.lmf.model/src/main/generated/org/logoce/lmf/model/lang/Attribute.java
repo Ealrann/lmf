@@ -16,7 +16,7 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
   Datatype<UnaryType> datatype();
   String defaultValue();
 
-  interface Features extends Feature.Features<Features> {
+  interface Features<T extends Features<T>> extends Feature.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<Boolean, Boolean> immutable = Feature.Features.immutable;
     RawFeature<Boolean, Boolean> many = Feature.Features.many;

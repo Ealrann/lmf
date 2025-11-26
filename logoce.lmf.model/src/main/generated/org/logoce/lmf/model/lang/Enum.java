@@ -13,7 +13,7 @@ public interface Enum<T> extends Datatype<T> {
 
   List<String> literals();
 
-  interface Features extends Datatype.Features<Features> {
+  interface Features<T extends Features<T>> extends Datatype.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, List<String>> literals = new RawFeature<>(true,false,() -> LMCoreDefinition.Features.ENUM.LITERALS);
   }

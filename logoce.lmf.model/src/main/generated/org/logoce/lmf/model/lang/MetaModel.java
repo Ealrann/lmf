@@ -20,7 +20,7 @@ public interface MetaModel extends Model {
   List<JavaWrapper<?>> javaWrappers();
   IModelPackage lmPackage();
 
-  interface Features extends Model.Features<Features> {
+  interface Features<T extends Features<T>> extends Model.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, String> domain = Model.Features.domain;
     RawFeature<String, List<String>> imports = Model.Features.imports;

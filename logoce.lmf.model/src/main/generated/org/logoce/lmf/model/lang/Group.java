@@ -21,7 +21,7 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   List<Operation> operations();
   BuilderSupplier<T> lmBuilder();
 
-  interface Features extends Type.Features<Features>, Concept.Features<Features> {
+  interface Features<T extends Features<T>> extends Type.Features<T>, Concept.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<Boolean, Boolean> concrete = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.CONCRETE);
     RawFeature<Include<?>, List<Include<?>>> includes = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.INCLUDES);

@@ -18,6 +18,7 @@ module logoce.lmf.model
 	exports org.logoce.lmf.model.util;
 	exports org.logoce.lmf.model.util.tree;
 	exports org.logoce.lmf.model.api.notification;
+	exports org.logoce.lmf.model.notification.impl;
 	exports org.logoce.lmf.model.api.feature;
 	exports org.logoce.lmf.model.api.model;
 

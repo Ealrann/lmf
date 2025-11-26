@@ -15,7 +15,7 @@ public interface Unit<T> extends Datatype<T> {
   Primitive primitive();
   String extractor();
 
-  interface Features extends Datatype.Features<Features> {
+  interface Features<T extends Features<T>> extends Datatype.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, String> matcher = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.UNIT.MATCHER);
     RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.UNIT.DEFAULT_VALUE);

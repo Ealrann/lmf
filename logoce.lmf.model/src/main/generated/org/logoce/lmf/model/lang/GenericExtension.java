@@ -15,7 +15,7 @@ public interface GenericExtension extends LMObject {
   BoundType boundType();
   List<GenericParameter> parameters();
 
-  interface Features extends LMObject.Features<Features> {
+  interface Features<T extends Features<T>> extends LMObject.Features<T> {
     RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.TYPE);
     RawFeature<BoundType, BoundType> boundType = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.BOUND_TYPE);
     RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GENERIC_EXTENSION.PARAMETERS);

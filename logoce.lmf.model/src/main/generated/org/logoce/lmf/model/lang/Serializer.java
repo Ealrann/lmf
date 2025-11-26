@@ -13,7 +13,7 @@ public interface Serializer extends LMObject {
   String create();
   String convert();
 
-  interface Features extends LMObject.Features<Features> {
+  interface Features<T extends Features<T>> extends LMObject.Features<T> {
     RawFeature<String, String> create = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.CREATE);
     RawFeature<String, String> convert = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.CONVERT);
   }

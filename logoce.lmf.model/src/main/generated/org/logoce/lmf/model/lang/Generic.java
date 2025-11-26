@@ -13,7 +13,7 @@ public interface Generic<T> extends Concept<T>, Datatype<T> {
 
   GenericExtension extension();
 
-  interface Features extends Concept.Features<Features>, Datatype.Features<Features> {
+  interface Features<T extends Features<T>> extends Concept.Features<T>, Datatype.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.EXTENSION);
   }
