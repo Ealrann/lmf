@@ -33,8 +33,8 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
       "unchecked",
       "rawtypes"
   })
-  private IncludeBuilder<T> _group(final Supplier group) {
-    this.group = group;
+  private IncludeBuilder<T> _group(final Supplier<Group<?>> group) {
+    this.group = (Supplier) group;
     return this;
   }
 

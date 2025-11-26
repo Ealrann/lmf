@@ -6,13 +6,10 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
-import org.logoce.lmf.model.util.ModelUtils;
-import org.logoce.lmf.generator.util.TypeParameter;
+import org.logoce.lmf.model.lang.Type;
+import org.logoce.lmf.model.lang.Generic;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public final class OperationUtil
 {
@@ -20,45 +17,34 @@ public final class OperationUtil
 	{
 	}
 
-	public static List<Operation> collectOperations(final Group<?> group)
+	/**
+	 * Returns the operations declared directly on the given group.
+	 */
+	public static List<Operation> collectOperations(final Group<?> owner)
 	{
-		final Map<String, Operation> operations = new LinkedHashMap<>();
-		ModelUtils.streamHierarchy(group)
-				  .flatMap(g -> g.operations().stream())
-				  .forEach(operation -> operations.put(signature(operation), operation));
-		return List.copyOf(operations.values());
+		return List.copyOf(owner.operations());
 	}
 
 	public static TypeName resolveReturnType(final Operation operation)
+	{
+		return resolveReturnType(operation, (Group<?>) operation.lmContainer());
+	}
+
+	public static TypeName resolveReturnType(final Operation operation, final Group<?> owner)
 	{
 		final var type = operation.returnType();
 		if (type == null)
 		{
 			return TypeName.VOID;
 		}
-		final var baseType = TypeResolutionUtil.resolveSimpleType(type);
+		final var baseType = resolveType(type, owner);
 		return parameterize(baseType, operation.returnTypeParameters());
 	}
 
-	private static String signature(final Operation operation)
+	public static TypeName resolveParameterType(final OperationParameter parameter, final Group<?> owner)
 	{
-		final var parameters = operation.parameters()
-										.stream()
-										.map(OperationUtil::signature)
-										.collect(Collectors.joining(","));
-		final var returnType = resolveReturnType(operation).toString();
-		return operation.name() + "(" + parameters + "):" + returnType;
-	}
-
-	public static TypeName resolveParameterType(final OperationParameter parameter)
-	{
-		final var baseType = TypeResolutionUtil.resolveSimpleType(parameter.type());
+		final var baseType = resolveType(parameter.type(), owner);
 		return parameterize(baseType, parameter.parameters());
-	}
-
-	private static String signature(final OperationParameter parameter)
-	{
-		return resolveParameterType(parameter).toString();
 	}
 
 	private static TypeName parameterize(final TypeParameter baseType, final List<GenericParameter> params)
@@ -81,5 +67,18 @@ public final class OperationUtil
 		}
 
 		throw new IllegalArgumentException("Type cannot be parameterized: " + baseType.getClass().getSimpleName());
+	}
+
+	private static TypeParameter resolveType(final Type<?> type, final Group<?> owner)
+	{
+		if (type instanceof Generic<?> generic)
+		{
+			final var bound = TypeResolutionUtil.resolveGenericBinding(generic, owner, false);
+			if (bound != null)
+			{
+				return bound;
+			}
+		}
+		return TypeResolutionUtil.resolveSimpleType(type);
 	}
 }

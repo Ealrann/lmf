@@ -30,9 +30,11 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 	private final TypeParameter inserterBuilderType;
 	private final ClassName interfaceClassName;
 	private final ClassName builderClassName;
+	private final Group<?> ownerGroup;
 
 	public RelationMapFieldBuilder(final Group<?> group)
 	{
+		this.ownerGroup = group;
 		final var interfaceType = group.adapt(GroupInterfaceType.class);
 		final var builderType = group.adapt(GroupBuilderClassType.class);
 		final var wildcardInterface = builderType.parametrizedWildcard();
@@ -67,7 +69,9 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 		final var hasGenerics = resolution.hasGeneric();
 		final var methodName = MethodUtil.builderMethodName(resolution);
 		final var usedMethod = hasGenerics ? '_' + methodName : methodName;
-		final var group = (Group<?>) resolution.feature().lmContainer();
+		final var group = hasGenerics && resolution.feature().lmContainer() != ownerGroup
+						  ? ownerGroup
+						  : (Group<?>) resolution.feature().lmContainer();
 		final var featureName = resolution.name();
 
 		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)

@@ -29,22 +29,24 @@ public final class ImplementationFeatureUtil
 	private static final Modifier[] MODIFIERS = {Modifier.PUBLIC};
 	private static final ClassName SET_NOTIFICATION_TYPE = ClassName.get(
 			"org.logoce.lmf.model.notification.impl", "SetNotifiation");
-	private static final FeatureMethodBuilder GETTER_BUILDER = ImplementationFeatureUtil.getterBuilder();
-	private static final FeatureMethodBuilder SETTER_BUILDER = ImplementationFeatureUtil.setterBuilder();
-	private static final FeatureFieldBuilder FIELD_BUILDER = ImplementationFeatureUtil.fieldBuilder();
 	private static final ConstructorBuilder CONSTRUCTOR_BUILDER = ImplementationFeatureUtil.parameterBuilder();
 	public static final LMGroupMethodBuilder LM_GROUP_METHOD_BUILDER = new LMGroupMethodBuilder();
 	public static final SetMapMethodBuilder SETTERMAP_METHOD_BUILDER = new SetMapMethodBuilder();
 	public static final GetMapMethodBuilder GETTERMAP_METHOD_BUILDER = new GetMapMethodBuilder();
 
 	@SuppressWarnings("unchecked")
-	public static CodeInstaller<FeatureResolution> buildFeatureInstallers(final TypeSpec.Builder classBuilder)
+	public static CodeInstaller<FeatureResolution> buildFeatureInstallers(final TypeSpec.Builder classBuilder,
+																		  final Group<?> ownerGroup)
 	{
-		return CodeInstaller.compose(CodeInstaller.of(GETTER_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(SETTER_BUILDER,
+		final var getterBuilder = getterBuilder(ownerGroup);
+		final var setterBuilder = setterBuilder(ownerGroup);
+		final var fieldBuilder = fieldBuilder(ownerGroup);
+
+		return CodeInstaller.compose(CodeInstaller.of(getterBuilder, classBuilder::addMethod),
+									 CodeInstaller.of(setterBuilder,
 													  classBuilder::addMethod,
 													  ImplementationFeatureUtil::setterPredicate),
-									 CodeInstaller.of(FIELD_BUILDER, classBuilder::addField));
+									 CodeInstaller.of(fieldBuilder, classBuilder::addField));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -68,11 +70,11 @@ public final class ImplementationFeatureUtil
 		return !feature.many() && !feature.immutable();
 	}
 
-	private static FeatureFieldBuilder fieldBuilder()
+	private static FeatureFieldBuilder fieldBuilder(final Group<?> ownerGroup)
 	{
 		return new FeatureFieldBuilder(false,
 									   FeatureResolution::name,
-									   ImplementationFeatureUtil::fieldFeatureType,
+									   f -> fieldFeatureType(f, ownerGroup),
 									   ImplementationFeatureUtil::fieldInitializer);
 	}
 
@@ -101,22 +103,22 @@ public final class ImplementationFeatureUtil
 		return new ConstructorBuilder();
 	}
 
-	private static FeatureMethodBuilder getterBuilder()
+	private static FeatureMethodBuilder getterBuilder(final Group<?> ownerGroup)
 	{
 		return new FeatureMethodBuilder(MODIFIERS,
 										FeatureResolution::name,
-										ImplementationFeatureUtil::methodFeatureType,
+										f -> methodFeatureType(f, ownerGroup),
 										Optional.empty(),
 										Optional.of(ImplementationCodeUtil::featureReturnStatement),
 										List.of(ConstantTypes.OVERRIDE));
 	}
 
-	private static FeatureMethodBuilder setterBuilder()
+	private static FeatureMethodBuilder setterBuilder(final Group<?> ownerGroup)
 	{
 		return new FeatureMethodBuilder(MODIFIERS,
 										FeatureResolution::name,
 										f -> TypeName.VOID,
-										Optional.of(FeatureResolution::parameterSpec),
+										Optional.of(f -> f.parameterSpec(ownerGroup)),
 										Optional.of(ImplementationFeatureUtil::featureChangeStatement),
 										List.of(ConstantTypes.OVERRIDE));
 	}
@@ -162,13 +164,13 @@ public final class ImplementationFeatureUtil
 		return CodeBlock.of("setContainer($N, $L)", paramName, rawFeatureExpr);
 	}
 
-	private static TypeName fieldFeatureType(FeatureResolution resolution)
+	private static TypeName fieldFeatureType(FeatureResolution resolution, Group<?> owner)
 	{
-		return resolution.implementationType().parametrized();
+		return resolution.implementationTypeFor(owner).parametrized();
 	}
 
-	private static TypeName methodFeatureType(FeatureResolution resolution)
+	private static TypeName methodFeatureType(FeatureResolution resolution, Group<?> owner)
 	{
-		return resolution.effectiveType().parametrized();
+		return resolution.effectiveTypeFor(owner).parametrized();
 	}
 }

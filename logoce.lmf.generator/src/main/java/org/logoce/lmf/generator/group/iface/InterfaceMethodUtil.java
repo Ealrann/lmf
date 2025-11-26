@@ -5,6 +5,7 @@ import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.model.lang.Feature;
+import org.logoce.lmf.model.lang.Group;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -32,12 +33,12 @@ public final class InterfaceMethodUtil
 										List.of());
 	}
 
-	public static FeatureMethodBuilder builderMethodBuilder(TypeName typedBuilder)
+	public static FeatureMethodBuilder builderMethodBuilder(TypeName typedBuilder, Group<?> owner)
 	{
 		return new FeatureMethodBuilder(BUILDER_METHOD_MODIFIERS,
 										MethodUtil::builderMethodName,
 										f -> typedBuilder,
-										Optional.of(FeatureResolution::builderParameterSpec),
+										Optional.of(f -> f.builderParameterSpec(owner)),
 										Optional.empty(),
 										List.of());
 	}

@@ -17,6 +17,13 @@ The LMCore definition itself lives in `logoce.lmf.model/src/main/model/asset/mod
 - `domain` is the Java package where generated types will live.
 - `name` is the model name; the generator will produce e.g. `MyModelDefinition`, `MyModelPackage`, etc.
 
+### Quick start for new `.lm` authors
+- Start from a small working model (e.g. `logoce.lmf.generator/src/test/model/CarCompany.lm`) and tweak names/domain first.
+- Use `Group` for abstract concepts, `Definition` for concrete ones. `includes group=@Base` sets inheritance.
+- Generics live under the group/definition that owns them; pass them down via `includes ... (parameters ../../generics.N)`.
+- Operations need explicit type arguments: use `returnTypeParameters` for the return type and `OperationParameter ... (parameters ...)` for arguments.
+- Cross‑model refs: add `imports=Other.Domain.Model` on `(MetaModel ...)`, then reference with `#OtherModel@Type`.
+
 ## 2. Groups vs Definitions
 
 - **Group** = abstract concept (like a “class kind”).
@@ -167,19 +174,20 @@ For your own M2 models:
 - Add `(generics name=T)` or `(Generic T ...)` blocks to groups when you need a type parameter.
 - Pass those generics down through `includes ... parameters=...` so that features know the unary/effective types.
 - The generator will emit Java types that carry those generics; this is powerful for strongly‑typed APIs, but it’s easy to get wrong if parameter lists don’t line up, so it’s best to copy patterns from LMCore’s `Feature` / `Attribute` / `Relation` definitions.
+- Relative paths: `../` climbs one level in the current block, `/groups.N/generics.M` jumps by index. When in doubt, mirror LMCore’s patterns (e.g. `Attribute`/`Relation` in `model.lm`).
 
-**Common pitfall:** `Operation` now carries a `returnType` plus contained `returnTypeParameters` and `parameters` (each `OperationParameter` can itself have contained `parameters` for generics). When you need to refer to a group‑level generic from inside an operation parameter, you still have to walk back up with the right number of `../generics.N` hops. Example:
+**Common pitfall:** `Operation` now carries a `returnType` plus contained `returnTypeParameters` and `parameters` (each `OperationParameter` can itself have contained `parameters` for generics). When you need to refer to a group‑level generic from inside an operation parameter, you still have to walk back up with the right number of `../generics.N` hops. Example (pattern aligned with LMCore’s `model.lm`):
 
 ```lm
 (Group NativeParameter
+    (includes group=@Parameter)
     (Generic T)
-    (Operation name=getNativeValue
-        (returnType @JavaObject
-            (returnTypeParameters (parameters type=../generics.0)))
-        (parameters param
-            (type @JavaObject)
+    (Operation name=getNativeValue returnType=@JavaObject
+        (returnTypeParameters ../../generics.0)
+        (OperationParameter name=value type=@JavaObject
             (parameters wildcard=true wildcardBoundType=Extends type=../../generics.0))))
 ```
+
 If you see linker errors about missing generics, double‑check the relative `parameters` paths inside both `returnTypeParameters` and `OperationParameter.parameters`.
 
 ## 7. Practical Tips

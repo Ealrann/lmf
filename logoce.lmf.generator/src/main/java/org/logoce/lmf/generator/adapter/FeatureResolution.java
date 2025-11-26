@@ -29,16 +29,21 @@ public final class FeatureResolution implements IAdapter
 	public final Feature<?, ?> feature;
 	public final TypeParameter singleType;
 	public final TypeParameter effectiveType;
+	public final TypeParameter rawSingleType;
+	public final TypeParameter rawEffectiveType;
 	public final boolean hasGeneric;
 
 	private FeatureResolution(final Feature<?, ?> feature)
 	{
 		final var partialResolution = resolveType(feature);
 		final var effectiveType = encapsulateEffectiveType(feature, partialResolution.singleType());
+		final var rawEffectiveType = encapsulateEffectiveType(feature, partialResolution.rawSingleType());
 
 		this.feature = feature;
 		this.singleType = partialResolution.singleType();
 		this.effectiveType = effectiveType;
+		this.rawSingleType = partialResolution.rawSingleType();
+		this.rawEffectiveType = rawEffectiveType;
 		this.hasGeneric = partialResolution.containsGeneric();
 	}
 
@@ -57,9 +62,62 @@ public final class FeatureResolution implements IAdapter
 		return effectiveType;
 	}
 
+	public TypeParameter singleTypeFor(final Group<?> owner)
+	{
+		return resolveSingleTypeForOwner(owner);
+	}
+
+	public TypeParameter effectiveTypeFor(final Group<?> owner)
+	{
+		return encapsulateEffectiveType(feature, resolveSingleTypeForOwner(owner));
+	}
+
+	public TypeParameter rawSingleType()
+	{
+		return rawSingleType;
+	}
+
+	public TypeParameter rawEffectiveType()
+	{
+		return rawEffectiveType;
+	}
+
+	public TypeParameter rawSingleTypeFor(final Group<?> owner)
+	{
+		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
+		{
+			final var bound = TypeResolutionUtil.resolveGenericBinding(generic, owner);
+			if (bound != null)
+			{
+				return bound;
+			}
+		}
+		return rawSingleType;
+	}
+
+	public TypeParameter rawEffectiveTypeFor(final Group<?> owner)
+	{
+		return encapsulateEffectiveType(feature, rawSingleTypeFor(owner));
+	}
+
 	public boolean hasGeneric()
 	{
 		return hasGeneric;
+	}
+
+	public boolean requiresOwnerSpecialization(final Group<?> owner)
+	{
+		if (owner == feature.lmContainer())
+		{
+			return false;
+		}
+
+		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
+		{
+			return TypeResolutionUtil.resolveGenericBinding(generic, owner) != null;
+		}
+
+		return false;
 	}
 
 	public String name()
@@ -80,27 +138,58 @@ public final class FeatureResolution implements IAdapter
 		}
 	}
 
+	public TypeParameter implementationTypeFor(final Group<?> owner)
+	{
+		if (feature instanceof Relation<?, ?> relation && relation.lazy())
+		{
+			final var suppliedType = resolveSingleTypeForOwner(owner).nestIn(ConstantTypes.SUPPLIER);
+			return feature.many() ? suppliedType.nestIn(ConstantTypes.LIST) : suppliedType;
+		}
+		else
+		{
+			return effectiveTypeFor(owner);
+		}
+	}
+
 	public TypeName builderType()
+	{
+		return builderTypeFor((Group<?>) feature.lmContainer());
+	}
+
+	public TypeName builderTypeFor(final Group<?> owner)
 	{
 		final var relation = feature instanceof Relation<?, ?>;
 		final var many = feature.many();
-		if (!relation) return effectiveType().parametrized();
-		else if (many) return singleType.nestIn(ConstantTypes.SUPPLIER).nestIn(ConstantTypes.LIST).parametrized();
-		else return singleType.nestIn(ConstantTypes.SUPPLIER).parametrized();
+		final var single = singleTypeFor(owner);
+		final var effective = effectiveTypeFor(owner);
+		if (!relation) return effective.parametrized();
+		else if (many) return single.nestIn(ConstantTypes.SUPPLIER).nestIn(ConstantTypes.LIST).parametrized();
+		else return single.nestIn(ConstantTypes.SUPPLIER).parametrized();
 	}
 
 	public ParameterSpec parameterSpec()
 	{
+		return parameterSpec((Group<?>) feature.lmContainer());
+	}
+
+	public ParameterSpec parameterSpec(final Group<?> owner)
+	{
 		final var name = MethodUtil.validateParameterName(name());
-		final var type = implementationType().parametrized();
+		final var type = implementationTypeFor(owner).parametrized();
 		return ParameterSpec.builder(type, name).addModifiers(Modifier.FINAL).build();
 	}
 
 	public ParameterSpec builderParameterSpec()
 	{
+		return builderParameterSpec((Group<?>) feature.lmContainer());
+	}
+
+	public ParameterSpec builderParameterSpec(final Group<?> owner)
+	{
 		final var relation = feature instanceof Relation<?, ?>;
 		final var name = MethodUtil.builderSingleParameterName(this);
-		final var type = relation ? singleType.nestIn(ConstantTypes.SUPPLIER) : singleType;
+		final var resolvedSingleType = resolveSingleTypeForOwner(owner);
+		final var type = relation ? resolvedSingleType.nestIn(ConstantTypes.SUPPLIER) : resolvedSingleType;
 		final var paramType = type.parametrized();
 		return ParameterSpec.builder(paramType, name).build();
 	}
@@ -153,71 +242,113 @@ public final class FeatureResolution implements IAdapter
 		}
 	}
 
+	private TypeParameter resolveSingleTypeForOwner(final Group<?> owner)
+	{
+		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
+		{
+			final var bound = TypeResolutionUtil.resolveGenericBinding(generic, owner);
+			if (bound != null)
+			{
+				return bound;
+			}
+		}
+		return singleType;
+	}
+
 	private static PartialFeatureResolution resolveType(final Feature<?, ?> feature)
 	{
 		if (feature instanceof Attribute<?, ?> attribute)
-		{
-			final var datatype = attribute.datatype();
-			if (datatype instanceof Unit<?> unit)
 			{
-				final var primitiveType = GenUtils.resolvePrimitiveClass(unit.primitive());
-				final var typeName = TypeName.get(primitiveType);
-				return new PartialFeatureResolution(TypeParameter.ofPrimitive(typeName), false);
-			}
-			else if (datatype instanceof Enum<?> enumeration)
-			{
-				final var model = (MetaModel) enumeration.lmContainer();
-				final var className = ClassName.get(model.domain(), enumeration.name());
-				return new PartialFeatureResolution(TypeParameter.of(className), false);
+				final var datatype = attribute.datatype();
+				switch (datatype)
+				{
+					case Unit<?> unit ->
+					{
+						final var primitiveType = GenUtils.resolvePrimitiveClass(unit.primitive());
+						final var typeName = TypeName.get(primitiveType);
+						final var typeParameter = TypeParameter.ofPrimitive(typeName);
+						return new PartialFeatureResolution(typeParameter, typeParameter, false);
+					}
+					case Enum<?> enumeration ->
+					{
+						final var model = (MetaModel) enumeration.lmContainer();
+						final var className = ClassName.get(model.domain(), enumeration.name());
+						final var typeParameter = TypeParameter.of(className);
+						return new PartialFeatureResolution(typeParameter, typeParameter, false);
+					}
+					case Generic<?> generic ->
+					{
+						final var extension = generic.extension();
+						if (extension != null && extension.type() instanceof Group<?> group)
+						{
+							throw new IllegalArgumentException(
+									"Generic %s bound to group %s cannot be used as attribute datatype".formatted(
+											generic.name(),
+											group.name()));
+						}
+
+						final var resolution = TypeResolutionUtil.resolveGenericDatatype(generic);
+						return new PartialFeatureResolution(resolution.resolvedType(),
+															resolution.rawType(),
+															resolution.containsGeneric());
+					}
+					case null, default ->
+					{
+						final var javaWrapper = (JavaWrapper<?>) datatype;
+						final var parameters = attribute.parameters();
+						final var qualifiedName = javaWrapper.qualifiedClassName();
+						final var className = ClassName.bestGuess(qualifiedName);
+						final var genericCount = GenUtils.genericCount(qualifiedName);
+						if (genericCount != 0)
+						{
+							if (parameters.isEmpty())
+							{
+								final var typeParameter = TypeParameter.of(className, genericCount);
+								return new PartialFeatureResolution(typeParameter, typeParameter, true);
+							}
+							else
+							{
+								final var params = parameters.stream()
+															 .map(org.logoce.lmf.generator.util.GenericParameter::resolveParameterType)
+															 .toList();
+								final var typeParameter = TypeParameter.of(className, params);
+								return new PartialFeatureResolution(typeParameter, typeParameter, true);
+							}
+						}
+						else
+						{
+							final var typeParameter = TypeParameter.of(className);
+							return new PartialFeatureResolution(typeParameter, typeParameter, false);
+						}
+					}
+				}
 			}
 			else
 			{
-				final var javaWrapper = (JavaWrapper<?>) datatype;
-				final var parameters = attribute.parameters();
-				final var qualifiedName = javaWrapper.qualifiedClassName();
-				final var className = ClassName.bestGuess(qualifiedName);
-				final var genericCount = GenUtils.genericCount(qualifiedName);
-				if (genericCount != 0)
+				final var relation = (Relation<?, ?>) feature;
+				final var concept = relation.concept();
+				final var parameters = relation.parameters();
+				if (concept instanceof Group<?> group)
 				{
-					if (parameters.isEmpty())
-					{
-						return new PartialFeatureResolution(TypeParameter.of(className, genericCount), true);
-					}
-					else
-					{
-						final var params = parameters.stream()
-													 .map(org.logoce.lmf.generator.util.GenericParameter::resolveParameterType)
-													 .toList();
-						return new PartialFeatureResolution(TypeParameter.of(className, params), true);
-					}
+					final var containsGeneric = parameters.stream()
+														   .map(org.logoce.lmf.model.lang.GenericParameter::type)
+														   .anyMatch(Generic.class::isInstance);
+					final var typeParameter = TypeResolutionUtil.parametrizedType(group, parameters);
+					return new PartialFeatureResolution(typeParameter,
+														typeParameter,
+														containsGeneric);
 				}
 				else
 				{
-					return new PartialFeatureResolution(TypeParameter.of(className), false);
+					final var generic = (Generic<?>) concept;
+					final var className = ClassName.get("", generic.name());
+					final var typeParameter = TypeParameter.of(className);
+					return new PartialFeatureResolution(typeParameter, typeParameter, true);
 				}
 			}
 		}
-		else
-		{
-			final var relation = (Relation<?, ?>) feature;
-			final var concept = relation.concept();
-			final var parameters = relation.parameters();
-			if (concept instanceof Group<?> group)
-			{
-				final var containsGeneric = parameters.stream()
-													   .map(org.logoce.lmf.model.lang.GenericParameter::type)
-													   .anyMatch(Generic.class::isInstance);
-				return new PartialFeatureResolution(TypeResolutionUtil.parametrizedType(group, parameters),
-													containsGeneric);
-			}
-			else
-			{
-				final var generic = (Generic<?>) concept;
-				final var className = ClassName.get("", generic.name());
-				return new PartialFeatureResolution(TypeParameter.of(className), true);
-			}
-		}
-	}
 
-	private record PartialFeatureResolution(TypeParameter singleType, boolean containsGeneric) {}
+	private record PartialFeatureResolution(TypeParameter singleType,
+											TypeParameter rawSingleType,
+											boolean containsGeneric) {}
 }

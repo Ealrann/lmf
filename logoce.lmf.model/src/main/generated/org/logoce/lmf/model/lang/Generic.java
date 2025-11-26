@@ -6,14 +6,14 @@ import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.GenericBuilder;
 
-public interface Generic<T> extends Concept<T> {
+public interface Generic<T> extends Concept<T>, Datatype<T> {
   static <T> Builder<T> builder() {
     return new GenericBuilder<>();
   }
 
   GenericExtension extension();
 
-  interface Features extends Concept.Features<Features> {
+  interface Features extends Concept.Features<Features>, Datatype.Features<Features> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.EXTENSION);
   }

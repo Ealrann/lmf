@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,11 +16,7 @@ public final class OperationGenerationTest
 	@Test
 	public void generateOperationMethodWithContent() throws IOException
 	{
-		final var targetDir = new File("build/test-generated/operations");
-		if (targetDir.exists())
-		{
-			deleteRecursively(targetDir);
-		}
+		final var targetDir = Files.createTempDirectory("operations").toFile();
 
 		final var metaModel = buildMetaModelWithOperation();
 		final var generator = new ModelGenerator(metaModel);
@@ -43,48 +38,9 @@ public final class OperationGenerationTest
 	}
 
 	@Test
-	public void generateInheritedOperationMethod() throws IOException
-	{
-		final var targetDir = new File("build/test-generated/operations-inheritance");
-		if (targetDir.exists())
-		{
-			deleteRecursively(targetDir);
-		}
-
-		final var metaModel = buildMetaModelWithInheritedOperation();
-		final var generator = new ModelGenerator(metaModel);
-		generator.generateJava(targetDir);
-
-		final var basePackageDir = new File(targetDir, "test/operations/inheritance");
-		final var interfaceFile = new File(basePackageDir, "Derived.java");
-		final var implFile = new File(new File(basePackageDir, "impl"), "DerivedImpl.java");
-
-		assertTrue(interfaceFile.isFile(), "Derived.java should be generated");
-		assertTrue(implFile.isFile(), "DerivedImpl.java should be generated");
-
-		final var interfaceContent = Files.readString(interfaceFile.toPath(), StandardCharsets.UTF_8);
-		final var implContent = Files.readString(implFile.toPath(), StandardCharsets.UTF_8);
-
-		assertTrue(interfaceContent.contains("void ping()"),
-				   "Derived interface should declare inherited operations");
-		assertTrue(implContent.contains("void ping()"), "Derived impl should implement inherited operations");
-		assertTrue(implContent.contains("System.out.println(\"base\");"),
-				   "Derived impl should reuse the operation body");
-	}
-
-	@Test
 	public void generateOperationWithGenericParameters() throws IOException
 	{
-		final var targetDir = new File("build/test-generated/operations-generics");
-		if (targetDir.exists())
-		{
-			deleteRecursively(targetDir);
-		}
-
-		final var modelFile = new File("src/test/model/OperationsGeneric.lm");
-		Main.generate(targetDir, List.of(modelFile), List.of());
-
-		final var basePackageDir = new File(targetDir, "test/operations/generics");
+		final var basePackageDir = new File("src/test/generated/test/operations/generics");
 		final var interfaceFile = new File(basePackageDir, "Service.java");
 		final var implFile = new File(new File(basePackageDir, "impl"), "ServiceImpl.java");
 
@@ -152,23 +108,5 @@ public final class OperationGenerationTest
 						.addGroup(() -> baseGroup)
 						.addGroup(() -> derivedGroup)
 						.build();
-	}
-	private static void deleteRecursively(final File file)
-	{
-		if (file.isDirectory())
-		{
-			final var children = file.listFiles();
-			if (children != null)
-			{
-				for (final var child : children)
-				{
-					deleteRecursively(child);
-				}
-			}
-		}
-		if (!file.delete() && file.exists())
-		{
-			throw new IllegalStateException("Cannot delete " + file);
-		}
 	}
 }

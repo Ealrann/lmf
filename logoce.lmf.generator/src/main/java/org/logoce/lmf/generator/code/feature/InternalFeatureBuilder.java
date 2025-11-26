@@ -31,6 +31,7 @@ public class InternalFeatureBuilder
 		final var callbackType = featureResolution.notificationCallbackType();
 		final var parent = (Group<?>) feature.lmContainer();
 		final var local = parent == group;
+		final var specialize = featureResolution.requiresOwnerSpecialization(group);
 		final var concrete = group.concrete();
 		final var featuresType = local
 								 ? concrete ? ClassName.get("", "Features") : ClassName.get("", "Features<?>")
@@ -39,7 +40,9 @@ public class InternalFeatureBuilder
 												   callbackType.box(),
 												   featuresType.box());
 
-		final var initializer = local ? localInitializer(feature) : parentInitializer(feature);
+		final var initializer = local || specialize
+								? localInitializer(feature, group)
+								: parentInitializer(feature);
 
 		return FieldSpec.builder(type, feature.name())
 						.addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -50,14 +53,18 @@ public class InternalFeatureBuilder
 	public FieldSpec toConstantFeature(FeatureResolution featureResolution)
 	{
 		final var feature = featureResolution.feature();
-		final var singleType = featureResolution.singleType().parametrizedWildcard();
-		final var effectiveType = featureResolution.effectiveType().parametrizedWildcard();
+		final var specialize = featureResolution.requiresOwnerSpecialization(group);
+		final var targetGroup = specialize ? group : (Group<?>) feature.lmContainer();
+		final var singleType = featureResolution.rawSingleTypeFor(targetGroup).parametrizedWildcard();
+		final var effectiveType = featureResolution.rawEffectiveTypeFor(targetGroup).parametrizedWildcard();
 
 		final var type = ParameterizedTypeName.get(ClassName.get(RawFeature.class),
 												   singleType.box(),
 												   effectiveType.box());
 
-		final var initializer = feature.lmContainer() == group ? localInitializer(feature) : parentInitializer(feature);
+		final var initializer = feature.lmContainer() == group || specialize
+								? localInitializer(feature, group)
+								: parentInitializer(feature);
 
 		return FieldSpec.builder(type, feature.name())
 						.addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -65,12 +72,12 @@ public class InternalFeatureBuilder
 						.build();
 	}
 
-	private static CodeBlock localInitializer(final Feature<?, ?> feature)
+	private static CodeBlock localInitializer(final Feature<?, ?> feature, final Group<?> owner)
 	{
-		final var model = (MetaModel) ModelUtils.root(feature);
+		final var model = (MetaModel) ModelUtils.root(owner);
 		final var definitionFile = model.name() + "Definition";
 		final var modelDefinition = ClassName.get(model.domain(), definitionFile);
-		final var group = (Group<?>) feature.lmContainer();
+		final var group = owner;
 		final var many = feature.many();
 		final var relation = feature instanceof Relation<?, ?>;
 

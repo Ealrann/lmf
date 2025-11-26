@@ -37,7 +37,7 @@ public final class ImplementationGenerator
 		final var classBuilder = implementationType.classSpecBuilder()
 												   .superclass(FEATURE_OBJECT_TYPE)
 												   .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder);
+		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder, group);
 		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(interfaceType, classBuilder);
 
 		ModelUtils.streamAllFeatures(group)
@@ -53,23 +53,24 @@ public final class ImplementationGenerator
 
 	private void installOperationStubs(final TypeSpec.Builder classBuilder)
 	{
-		OperationUtil.collectOperations(group).stream()
-					 .map(ImplementationGenerator::buildOperationStub)
-					 .forEach(classBuilder::addMethod);
+		OperationUtil.collectOperations(group)
+					  .stream()
+					  .map(operation -> buildOperationStub(operation, group))
+					  .forEach(classBuilder::addMethod);
 	}
 
-	private static MethodSpec buildOperationStub(final Operation operation)
+	private static MethodSpec buildOperationStub(final Operation operation, final Group<?> owner)
 	{
 		final var methodBuilder = MethodSpec.methodBuilder(operation.name())
 											.addAnnotation(Override.class)
 											.addModifiers(Modifier.PUBLIC);
 
-		final var returnType = OperationUtil.resolveReturnType(operation);
+		final var returnType = OperationUtil.resolveReturnType(operation, owner);
 		methodBuilder.returns(returnType);
 
 		for (final OperationParameter parameter : operation.parameters())
 		{
-			final var parameterType = OperationUtil.resolveParameterType(parameter);
+			final var parameterType = OperationUtil.resolveParameterType(parameter, owner);
 			methodBuilder.addParameter(parameterType, parameter.name());
 		}
 		final var body = operation.content();

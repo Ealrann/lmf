@@ -74,9 +74,10 @@ public final class InterfaceGenerator
 						  .map(SETTER_METHOD_BUILDER::build)
 						  .forEach(interfaceBuilder::addMethod);
 
-		// Operations
-		OperationUtil.collectOperations(group)
-					 .forEach(operation -> interfaceBuilder.addMethod(buildOperationMethod(operation)));
+		final var operations = group.concrete()
+								? OperationUtil.collectOperations(group)
+								: group.operations();
+		operations.forEach(operation -> interfaceBuilder.addMethod(buildOperationMethod(operation)));
 
 		final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build()).build();
 		FormattedJavaWriter.write(javaFile, targetDirectory);
@@ -91,7 +92,7 @@ public final class InterfaceGenerator
 												  final List<FeatureResolution> featureResolutions)
 	{
 		final var typedBuilder = builderType.parametrized();
-		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder);
+		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder, builderType.group);
 
 		final var builderTypeBuilder = builderType.interfaceSpecBuilder()
 												  .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
@@ -101,20 +102,36 @@ public final class InterfaceGenerator
 		return builderTypeBuilder.build();
 	}
 
-	private static MethodSpec buildOperationMethod(final Operation operation)
+	private MethodSpec buildOperationMethod(final Operation operation)
 	{
 		final var methodBuilder = MethodSpec.methodBuilder(operation.name())
-											.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+											.addModifiers(group.concrete() ? Modifier.ABSTRACT : Modifier.DEFAULT,
+														  Modifier.PUBLIC);
 
-		final var returnType = OperationUtil.resolveReturnType(operation);
+		final var returnType = OperationUtil.resolveReturnType(operation, group);
 		methodBuilder.returns(returnType);
 
 		for (final OperationParameter parameter : operation.parameters())
 		{
-			final var parameterType = OperationUtil.resolveParameterType(parameter);
+			final var parameterType = OperationUtil.resolveParameterType(parameter, group);
 			final var parameterName = parameter.name();
 			final var parameterSpec = ParameterSpec.builder(parameterType, parameterName).build();
 			methodBuilder.addParameter(parameterSpec);
+		}
+
+		if (!group.concrete())
+		{
+			final var body = operation.content();
+			if (body != null && !body.isBlank())
+			{
+				methodBuilder.addCode(body);
+			}
+			else
+			{
+				methodBuilder.addStatement("throw new $T($S)",
+										   UnsupportedOperationException.class,
+										   "Operation '" + operation.name() + "' is not implemented");
+			}
 		}
 
 		return methodBuilder.build();

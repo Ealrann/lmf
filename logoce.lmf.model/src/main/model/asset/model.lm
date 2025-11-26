@@ -117,12 +117,14 @@
 	(Definition Generic
 		(includes group=@Concept
 			(parameters ../../generics.0))
+		(includes group=@Datatype
+			(parameters ../../generics.0))
 		(Generic T)
 		(-contains extension [0..1] @GenericExtension))
 
 	(Definition GenericExtension
 		(includes @LMObject)
-		(-refers type lazy [0..1] @LMEntity)
+		(-refers type lazy [0..1] @Type)
         (-att boundType datatype=/enums.0)
 		(-contains parameters [0..*] @GenericParameter))
 
@@ -130,17 +132,10 @@
 		(includes @LMObject)
 		(-att wildcard @boolean)
         (-att wildcardBoundType datatype=/enums.0)
-		(-refers type lazy [1..1] @LMEntity)
+		(-refers type lazy [1..1] @Type)
 		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Concept
-		(includes @Type
-			(parameters ../../generics.0))
-		(includes @LMEntity
-			(parameters ../../generics.0))
-		(Generic name=T))
-
-	(Group LMEntity
 		(includes @Type
 			(parameters ../../generics.0))
 		(Generic name=T))
@@ -148,8 +143,6 @@
 	(Definition JavaWrapper
 		(Generic name=T)
 		(includes @Datatype
-			(parameters ../../generics.0))
-		(includes @LMEntity
 			(parameters ../../generics.0))
 		(-att name=qualifiedClassName /units.7 mandatory)
 		(-contains serializer [0..1] @Serializer))

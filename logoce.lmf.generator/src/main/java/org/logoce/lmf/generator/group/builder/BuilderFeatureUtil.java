@@ -2,8 +2,11 @@ package org.logoce.lmf.generator.group.builder;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import com.squareup.javapoet.WildcardTypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.FeatureFieldBuilder;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
@@ -13,6 +16,7 @@ import org.logoce.lmf.generator.code.type.*;
 import org.logoce.lmf.generator.code.util.CodeInstaller;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.DefaultValueUtil;
+import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
@@ -25,19 +29,20 @@ public final class BuilderFeatureUtil
 {
 	private static final Modifier[] PUBLIC_ONLY = {Modifier.PUBLIC};
 	public static final Modifier[] PRIVATE_ONLY = {Modifier.PRIVATE};
-	private static final FeatureFieldBuilder FIELD_BUILDER = BuilderFeatureUtil.fieldBuilder();
 	public static final AttributePushMethodBuilder ATTRIBUTE_PUSH_BUILDER = new AttributePushMethodBuilder();
 	public static final RelationPushMethodBuilder RELATION_PUSH_BUILDER = new RelationPushMethodBuilder();
 
 	@SuppressWarnings("unchecked")
 	public static CodeInstaller<FeatureResolution> buildFeatureInstallers(final TypeSpec.Builder classBuilder,
-																		  final TypeName builderType)
+																		  final TypeName builderType,
+																		  final Group<?> ownerGroup)
 	{
-		final var setterBuilder = BuilderFeatureUtil.setterBuilder(builderType);
-		final var rawSetterBuilder = BuilderFeatureUtil.rawSetterBuilder(builderType);
+		final var setterBuilder = BuilderFeatureUtil.setterBuilder(builderType, ownerGroup);
+		final var rawSetterBuilder = BuilderFeatureUtil.rawSetterBuilder(builderType, ownerGroup);
+		final var fieldBuilder = BuilderFeatureUtil.fieldBuilder(ownerGroup);
 
 		return CodeInstaller.compose(CodeInstaller.of(setterBuilder, classBuilder::addMethod),
-									 CodeInstaller.of(FIELD_BUILDER, classBuilder::addField),
+									 CodeInstaller.of(fieldBuilder, classBuilder::addField),
 									 CodeInstaller.of(rawSetterBuilder,
 													  classBuilder::addMethod,
 													  FeatureResolution::hasGeneric));
@@ -58,11 +63,11 @@ public final class BuilderFeatureUtil
 									 CodeInstaller.of(relationMapBuilder, classBuilder::addField));
 	}
 
-	private static FeatureFieldBuilder fieldBuilder()
+	private static FeatureFieldBuilder fieldBuilder(final Group<?> ownerGroup)
 	{
 		return new FeatureFieldBuilder(true,
 									   FeatureResolution::name,
-									   FeatureResolution::builderType,
+									   f -> f.builderTypeFor(ownerGroup),
 									   BuilderFeatureUtil::fieldInitializer);
 	}
 
@@ -94,45 +99,53 @@ public final class BuilderFeatureUtil
 		}
 	}
 
-	private static FeatureMethodBuilder setterBuilder(TypeName returnType)
+	private static FeatureMethodBuilder setterBuilder(TypeName returnType, Group<?> ownerGroup)
 	{
 		return new FeatureMethodBuilder(PUBLIC_ONLY,
 										MethodUtil::builderMethodName,
 										f -> returnType,
-										Optional.of(FeatureResolution::builderParameterSpec),
-										Optional.of(p -> featureChangeStatement(p, false)),
+										Optional.of(f -> f.builderParameterSpec(ownerGroup)),
+										Optional.of(p -> featureChangeStatement(p, false, ownerGroup)),
 										List.of(ConstantTypes.OVERRIDE));
 	}
 
-	private static FeatureMethodBuilder rawSetterBuilder(TypeName returnType)
+	private static FeatureMethodBuilder rawSetterBuilder(TypeName returnType, Group<?> ownerGroup)
 	{
 		return new FeatureMethodBuilder(PRIVATE_ONLY,
 										f -> '_' + f.name(),
 										f -> returnType,
-										Optional.of(f -> ParameterSpec.builder(f.feature() instanceof Relation<?, ?>
-																			   ? ConstantTypes.SUPPLIER
-																			   : f.singleType().raw(),
-																			   MethodUtil.builderSingleParameterName(f),
-																			   Modifier.FINAL).build()),
-										Optional.of(p -> featureChangeStatement(p, true)),
+										Optional.of(f ->
+												{
+													final var baseType = f.rawSingleTypeFor(ownerGroup);
+													final var paramType = f.feature() instanceof Relation<?, ?>
+																		 ? ParameterizedTypeName.get(ConstantTypes.SUPPLIER, baseType.parametrizedWildcard().box())
+																		 : baseType.parametrizedWildcard();
+													return ParameterSpec.builder(paramType,
+																				 MethodUtil.builderSingleParameterName(f),
+																				 Modifier.FINAL)
+																		.build();
+												}),
+										Optional.of(p -> featureChangeStatement(p, true, ownerGroup)),
 										List.of(ConstantTypes.SUPPRESS_RAW_UNCHECKED));
 	}
 
-	private static List<CodeBlock> featureChangeStatement(final FeatureParameter parameter, final boolean raw)
+	private static List<CodeBlock> featureChangeStatement(final FeatureParameter parameter,
+														  final boolean raw,
+														  final Group<?> ownerGroup)
 	{
-		return List.of(assignationStatement(parameter, raw), CodeBlock.of("return this"));
+		return List.of(assignationStatement(parameter, raw, ownerGroup), CodeBlock.of("return this"));
 	}
 
-	private static CodeBlock assignationStatement(final FeatureParameter parameter, final boolean raw)
+	private static CodeBlock assignationStatement(final FeatureParameter parameter,
+												  final boolean raw,
+												  final Group<?> ownerGroup)
 	{
 		final var resolution = parameter.feature();
 		final var feature = resolution.feature();
 		final var many = feature.many();
-		final boolean isGenericAttribute = resolution.hasGeneric() && feature instanceof Attribute<?, ?>;
-		final boolean needSupplyResolution = raw && isGenericAttribute;
 
 		if (many) return assignPatternMany(parameter);
-		else if (needSupplyResolution) return assignPatternCast(parameter);
+		else if (raw) return assignPatternCast(parameter, ownerGroup);
 		else return assignPatternSingle(parameter);
 	}
 
@@ -146,11 +159,21 @@ public final class BuilderFeatureUtil
 
 	private static CodeBlock assignPatternCast(final FeatureParameter parameter)
 	{
+		return assignPatternCast(parameter, null);
+	}
+
+	private static CodeBlock assignPatternCast(final FeatureParameter parameter, final Group<?> ownerGroup)
+	{
 		final var resolution = parameter.feature();
 		final var feature = resolution.feature();
 		final var paramName = parameter.parameterName();
-		final var cast = resolution.effectiveType().parametrized();
-		return CodeBlock.of("this.$N = ($T) $N", feature.name(), cast, paramName);
+		final var cast = ownerGroup != null
+						 ? resolution.builderTypeFor(ownerGroup)
+						 : parameter.parameterSpec().type;
+		final var effectiveCast = cast instanceof ParameterizedTypeName param && param.rawType.equals(ConstantTypes.SUPPLIER)
+								  ? param.rawType
+								  : cast;
+		return CodeBlock.of("this.$N = ($T) $N", feature.name(), effectiveCast, paramName);
 	}
 
 	private static CodeBlock assignPatternSingle(final FeatureParameter parameter)

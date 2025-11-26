@@ -14,20 +14,20 @@ public interface GenericParameter extends LMObject {
 
   boolean wildcard();
   BoundType wildcardBoundType();
-  LMEntity<?> type();
+  Type<?> type();
   List<GenericParameter> parameters();
 
   interface Features extends LMObject.Features<Features> {
     RawFeature<Boolean, Boolean> wildcard = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.WILDCARD);
     RawFeature<BoundType, BoundType> wildcardBoundType = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.WILDCARD_BOUND_TYPE);
-    RawFeature<LMEntity<?>, LMEntity<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.TYPE);
+    RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.TYPE);
     RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<GenericParameter> {
     Builder wildcard(boolean wildcard);
     Builder wildcardBoundType(BoundType wildcardBoundType);
-    Builder type(Supplier<LMEntity<?>> type);
+    Builder type(Supplier<Type<?>> type);
     Builder addParameter(Supplier<GenericParameter> parameter);
   }
 }

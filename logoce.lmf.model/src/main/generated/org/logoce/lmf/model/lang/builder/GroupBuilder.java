@@ -78,7 +78,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
       "unchecked",
       "rawtypes"
   })
-  private GroupBuilder<T> _lmBuilder(final BuilderSupplier lmBuilder) {
+  private GroupBuilder<T> _lmBuilder(final BuilderSupplier<?> lmBuilder) {
     this.lmBuilder = (BuilderSupplier<T>) lmBuilder;
     return this;
   }

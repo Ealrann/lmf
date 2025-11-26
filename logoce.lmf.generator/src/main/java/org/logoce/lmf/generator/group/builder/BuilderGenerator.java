@@ -29,7 +29,7 @@ public final class BuilderGenerator
 		final var typedInterface = builderType.parametrized();
 
 		final var classBuilder = builderType.classSpecBuilder().addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-		final var featureInstallers = BuilderFeatureUtil.buildFeatureInstallers(classBuilder, typedInterface);
+		final var featureInstallers = BuilderFeatureUtil.buildFeatureInstallers(classBuilder, typedInterface, group);
 		final var typeInstallers = BuilderFeatureUtil.buildTypeInstallers(classBuilder, group);
 
 		final var featureResolutions = ModelUtils.streamAllFeatures(group)

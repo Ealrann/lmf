@@ -11,16 +11,16 @@ import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.LMEntity;
+import org.logoce.lmf.model.lang.Type;
 
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
   private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(org.logoce.lmf.model.lang.GenericExtension.Features.type, org.logoce.lmf.model.lang.GenericExtension::type).add(org.logoce.lmf.model.lang.GenericExtension.Features.boundType, org.logoce.lmf.model.lang.GenericExtension::boundType).add(org.logoce.lmf.model.lang.GenericExtension.Features.parameters, org.logoce.lmf.model.lang.GenericExtension::parameters).build();
   private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>().build();
-  private final Supplier<LMEntity<?>> type;
+  private final Supplier<Type<?>> type;
   private final BoundType boundType;
   private final List<GenericParameter> parameters;
 
-  public GenericExtensionImpl(final Supplier<LMEntity<?>> type, final BoundType boundType,
+  public GenericExtensionImpl(final Supplier<Type<?>> type, final BoundType boundType,
       final List<GenericParameter> parameters) {
     this.type = type;
     this.boundType = boundType;
@@ -29,7 +29,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
   }
 
   @Override
-  public LMEntity<?> type() {
+  public Type<?> type() {
     return type.get();
   }
 

@@ -51,7 +51,10 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 	private CodeBlock buildStatement(final FeatureResolution resolution)
 	{
 		final var featureName = resolution.name();
-		final var group = (Group<?>) resolution.feature().lmContainer();
+		final var ownerGroup = interfaceType.group;
+		final var group = resolution.hasGeneric() && resolution.feature().lmContainer() != ownerGroup
+						 ? ownerGroup
+						 : (Group<?>) resolution.feature().lmContainer();
 		final var constantGroupName = GenUtils.toConstantCase(group.name());
 
 		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
@@ -64,7 +67,7 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		}
 		else
 		{
-			final var model = (MetaModel) ModelUtils.root(resolution.feature());
+			final var model = (MetaModel) ModelUtils.root(group);
 			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
 			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
 								modelDefinition,

@@ -9,9 +9,9 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.GenericParameter.Builder;
-import org.logoce.lmf.model.lang.LMEntity;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.Type;
 import org.logoce.lmf.model.lang.impl.GenericParameterImpl;
 import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
@@ -21,7 +21,7 @@ public final class GenericParameterBuilder implements Builder {
   private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>().add(GenericParameter.Features.type, GenericParameterBuilder::type).add(GenericParameter.Features.parameters, GenericParameterBuilder::addParameter).build();
   private boolean wildcard;
   private BoundType wildcardBoundType;
-  private Supplier<LMEntity<?>> type;
+  private Supplier<Type<?>> type;
   private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
 
   @Override
@@ -37,7 +37,7 @@ public final class GenericParameterBuilder implements Builder {
   }
 
   @Override
-  public GenericParameterBuilder type(Supplier<LMEntity<?>> type) {
+  public GenericParameterBuilder type(Supplier<Type<?>> type) {
     this.type = type;
     return this;
   }

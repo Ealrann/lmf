@@ -73,7 +73,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
       "unchecked",
       "rawtypes"
   })
-  private RelationBuilder<UnaryType, EffectiveType> _rawFeature(final RawFeature rawFeature) {
+  private RelationBuilder<UnaryType, EffectiveType> _rawFeature(final RawFeature<?, ?> rawFeature) {
     this.rawFeature = (RawFeature<UnaryType, EffectiveType>) rawFeature;
     return this;
   }
@@ -88,8 +88,8 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
       "unchecked",
       "rawtypes"
   })
-  private RelationBuilder<UnaryType, EffectiveType> _concept(final Supplier concept) {
-    this.concept = concept;
+  private RelationBuilder<UnaryType, EffectiveType> _concept(final Supplier<Concept<?>> concept) {
+    this.concept = (Supplier) concept;
     return this;
   }
 

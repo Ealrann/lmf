@@ -1,4 +1,5 @@
 .gradle/
+.gradle-user/
 .metadata
 *.class
 *.java~

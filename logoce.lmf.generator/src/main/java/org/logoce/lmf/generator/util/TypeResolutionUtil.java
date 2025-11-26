@@ -115,6 +115,47 @@ public class TypeResolutionUtil
 
 	}
 
+	public static GenericResolution resolveGenericDatatype(final Generic<?> generic)
+	{
+		final var extension = generic.extension();
+		final var hasExtensionType = extension != null && extension.type() != null;
+		final var parameterTypes = hasExtensionType
+								   ? extension.parameters()
+											   .stream()
+											   .map(org.logoce.lmf.generator.util.GenericParameter::resolveParameterType)
+											   .toList()
+								   : List.<TypeName>of();
+
+		final TypeParameter resolvedType;
+		final TypeParameter rawType;
+
+		if (hasExtensionType)
+		{
+			final var baseType = resolveSimpleType(extension.type());
+			resolvedType = parameterTypes.isEmpty() ? baseType : parameterize(baseType, parameterTypes);
+
+			if (baseType instanceof TypeParameter.SimpleTypeParameter simple)
+			{
+				rawType = TypeParameter.of(simple.raw(), simple.parameters());
+			}
+			else if (baseType instanceof TypeParameter.CombinedTypeParameter combined)
+			{
+				rawType = TypeParameter.of(combined.raw(), combined.parameters());
+			}
+			else
+			{
+				rawType = resolvedType;
+			}
+		}
+		else
+		{
+			resolvedType = resolveSimpleType(generic);
+			rawType = TypeParameter.of(ClassName.get(Object.class));
+		}
+
+		return new GenericResolution(resolvedType, rawType, true);
+	}
+
 	public static String resolveTypeHolder(final Type<?> type)
 	{
 		return switch (type)
@@ -135,5 +176,95 @@ public class TypeResolutionUtil
 			case Generic<?> _ -> "Generics";
 			default -> null;
 		};
+	}
+
+	private static TypeParameter parameterize(final TypeParameter baseType,
+											  final List<? extends TypeName> parameters)
+	{
+		if (parameters.isEmpty())
+		{
+			return baseType;
+		}
+
+		if (baseType instanceof TypeParameter.SimpleTypeParameter simple)
+		{
+			return TypeParameter.of(simple.raw(), parameters);
+		}
+		if (baseType instanceof TypeParameter.CombinedTypeParameter combined)
+		{
+			return TypeParameter.of(combined.raw(), parameters);
+		}
+		return baseType;
+	}
+
+	public record GenericResolution(TypeParameter resolvedType, TypeParameter rawType, boolean containsGeneric) {}
+
+	public static TypeParameter resolveGenericBinding(final Generic<?> generic, final Group<?> owner)
+	{
+		return resolveGenericBinding(generic, owner, true);
+	}
+
+	public static TypeParameter resolveGenericBinding(final Generic<?> generic,
+													  final Group<?> owner,
+													  final boolean boxPrimitive)
+	{
+		final var boundType = resolveGenericBindingType(generic, owner);
+		if (boundType == null) return null;
+		final var bound = resolveSimpleType(boundType);
+		if (!boxPrimitive)
+		{
+			return bound;
+		}
+		return bound != null ? boxIfPrimitive(bound) : null;
+	}
+
+	public static Type<?> resolveGenericBindingType(final Generic<?> generic, final Group<?> owner)
+	{
+		return resolveGenericBindingType(generic, owner, owner);
+	}
+
+	private static Type<?> resolveGenericBindingType(final Generic<?> generic,
+													 final Group<?> current,
+													 final Group<?> root)
+	{
+		if (current == generic.lmContainer())
+		{
+			return null;
+		}
+
+		for (final Include<?> include : current.includes())
+		{
+			final var includeGroup = (Group<?>) include.group();
+			if (includeGroup == generic.lmContainer())
+			{
+				final var index = includeGroup.generics().indexOf(generic);
+				if (index >= 0 && index < include.parameters().size())
+				{
+					final var parameter = include.parameters().get(index);
+					return parameter.type();
+				}
+			}
+
+			final var nested = resolveGenericBindingType(generic, includeGroup, root);
+			if (nested != null)
+			{
+				return nested;
+			}
+		}
+
+		return null;
+	}
+
+	private static TypeParameter boxIfPrimitive(final TypeParameter type)
+	{
+		if (type.parameters().isEmpty())
+		{
+			final var typeName = type.parametrized();
+			if (typeName.isPrimitive())
+			{
+				return new TypeParameter.SimpleType(typeName.box());
+			}
+		}
+		return type;
 	}
 }

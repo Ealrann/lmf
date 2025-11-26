@@ -63,13 +63,36 @@ When modifying or adding code:
 
 - **Modules and visibility**
   - Respect JPMS module boundaries; if you need access across modules, prefer adding targeted `exports`/`requires` rather than using raw/classpath tricks.  
-  - Avoid introducing new package cycles; keep generator‑specific logic in `logoce.lmf.generator` and runtime concerns in `logoce.lmf.model`.
+- Avoid introducing new package cycles; keep generator‑specific logic in `logoce.lmf.generator` and runtime concerns in `logoce.lmf.model`.
 
 ## Tests and Validation
 
 - There is good coverage in `logoce.lmf.model` (parsing, transformation, linking, and functional multi‑model behavior).  
 - When changing core model or generator semantics, extend or adapt these tests rather than adding ad‑hoc ones elsewhere.  
 - Prefer fast, focused tests over broad integration tests inside this repo.
+
+## Quick Orientation for Newcomers
+
+- **Where the language is defined**: LMCore’s own meta‑model lives in `logoce.lmf.model/src/main/model/asset/model.lm`. This file shows the authoritative shapes for Groups, Features, Generics, Operations, etc. If something in `.lm` feels unclear, look here first.
+- **Where generation logic lives**: `logoce.lmf.generator` consumes `.lm` models to emit Java. Generated sources for LMCore itself are under `logoce.lmf.model/src/main/generated`. Never hand‑edit generated files.
+- **.lm syntax cheat sheet**:
+  - `+att/-att` = Attribute (mutable/immutable). `+contains/-contains` = Relation with `contains=true`. `+refers/-refers` = Relation with `contains=false`.
+  - `Group` is an abstract concept; `Definition` is a concrete group. `includes group=@Base` sets inheritance; pass generics via `(parameters ../../generics.0)` style hops.
+  - Generics: declare with `(Generic T ...)` inside a group/definition. Reference them with relative paths (`../generics.N` or `/groups.X/generics.N`). For operations, provide `returnTypeParameters` and per‑parameter `parameters` blocks to carry type arguments.
+  - Operations (pattern from LMCore): 
+    ```lm
+    (Operation name=collect content="return items;" returnType=@JavaList
+        (returnTypeParameters type=/groups.0/generics.0)
+        (OperationParameter name=items type=@JavaList
+            (parameters type=/groups.0/generics.0)))
+    ```
+    Linker errors usually mean a missing/incorrect relative path or a containment that doesn’t exist (e.g., putting generics under a type that has no `generics` feature).
+  - Cross‑model imports: add `imports=OtherModelDomain.Name` on `MetaModel` and reference external types with `#OtherModel@Type`.
+- **Common pitfalls**:
+  - JavaWrappers do not contain `generics` in LMCore; placing generics under them will fail to link.
+  - Relative generic paths must be exact; `../../generics.0` counts from the current node up through parents.
+  - Operations must carry their return type arguments in `returnTypeParameters`; parameter type arguments go in each `OperationParameter`’s `parameters`.
+- **Debugging linker errors**: Messages like “Cannot find containment relation…” or “Cannot resolve named token …” indicate a missing feature on the parent group or a bad reference path. Compare against `model.lm` to ensure your structure matches LMCore’s containment layout. Use existing tests (`logoce.lmf.model/src/test/java/...` and generator tests in `logoce.lmf.generator/src/test/java`) as working patterns.
 
 ## Operator responsibilities
 

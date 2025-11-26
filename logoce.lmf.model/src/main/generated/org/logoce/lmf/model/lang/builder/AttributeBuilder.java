@@ -72,7 +72,8 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
       "unchecked",
       "rawtypes"
   })
-  private AttributeBuilder<UnaryType, EffectiveType> _rawFeature(final RawFeature rawFeature) {
+  private AttributeBuilder<UnaryType, EffectiveType> _rawFeature(
+      final RawFeature<?, ?> rawFeature) {
     this.rawFeature = (RawFeature<UnaryType, EffectiveType>) rawFeature;
     return this;
   }
@@ -88,8 +89,9 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
       "unchecked",
       "rawtypes"
   })
-  private AttributeBuilder<UnaryType, EffectiveType> _datatype(final Supplier datatype) {
-    this.datatype = datatype;
+  private AttributeBuilder<UnaryType, EffectiveType> _datatype(
+      final Supplier<Datatype<?>> datatype) {
+    this.datatype = (Supplier) datatype;
     return this;
   }
 
