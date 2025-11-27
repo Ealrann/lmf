@@ -9,6 +9,7 @@ import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
 import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 
 import java.util.List;
 
@@ -54,12 +55,11 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 									? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
 									: TypeParameter.of(RELATION_BUILDER_TYPE, types);
 
-			initBuilder.add("new $T()", builderType.parametrized())
-					   .add(".name($S)", name)
-					   .add(".immutable($L)", input.immutable())
-					   .add(".many($L)", input.many())
-					   .add(".mandatory($L)", input.mandatory())
-					   .add(".rawFeature($N.Features.$N)", targetGroup.name(), name);
+			initBuilder.add("new $T()", builderType.parametrized());
+
+			BuilderInitializerUtil.appendAttributes(input, initBuilder,
+													attribute -> attribute.rawFeature() != Feature.Features.rawFeature);
+			initBuilder.add(".rawFeature($N.Features.$N)", targetGroup.name(), name);
 
 				if (isAttribute)
 				{
@@ -127,7 +127,6 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 					initBuilder.add(".datatype(() -> $L)", datatypeBlock);
 				}
 
-				initBuilder.add(".defaultValue($S)", attribute.defaultValue());
 			}
 			else
 			{
@@ -135,8 +134,6 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				final var conceptBlock = generateConceptCodeblock(relation.concept());
 
 				initBuilder.add(".concept($L)", conceptBlock);
-				initBuilder.add(".lazy($L)", relation.lazy())
-						   .add(".contains($L)", relation.contains());
 			}
 
 				input.parameters()

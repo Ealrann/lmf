@@ -1,4 +1,4 @@
-(MetaModel domain=org.logoce.lmf.model.lang name=LMCore
+(MetaModel domain=org.logoce.lmf.model name=LMCore extraPackage="lang" genNamePackage=false
 
 	(Group LMObject)
 
@@ -23,7 +23,7 @@
 		(-contains aliases [0..*] @Alias)
 		(-contains javaWrappers [0..*] @JavaWrapper)
 		(-att lmPackage /javaWrappers.1 [1..1])
-		(-att genNamePackage @boolean)
+		(-att genNamePackage @boolean defaultValue="true")
 		(-att extraPackage @string))
 
 	(Definition Group

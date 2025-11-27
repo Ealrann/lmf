@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
@@ -41,8 +42,9 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 		final var builder = CodeBlock.builder()
 									 .add(builderType != null ? "new $T()" : "new $T<>()", builderType != null
 																							   ? builderType
-																							   : GENERIC_BUILDER_TYPE)
-									 .add(".name($S)", generic.name());
+																							   : GENERIC_BUILDER_TYPE);
+
+		BuilderInitializerUtil.appendAttributes(generic, builder);
 
 		final var extensionBlock = resolveExtensionBlock(generic);
 		if (extensionBlock != null)

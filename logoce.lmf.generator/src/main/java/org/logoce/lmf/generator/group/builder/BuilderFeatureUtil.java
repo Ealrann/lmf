@@ -15,6 +15,7 @@ import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.code.type.*;
 import org.logoce.lmf.generator.code.util.CodeInstaller;
 import org.logoce.lmf.generator.code.type.RelationManyListMethodBuilder;
+import org.logoce.lmf.generator.code.type.AttributeManyListMethodBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.DefaultValueUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
@@ -41,6 +42,7 @@ public final class BuilderFeatureUtil
 		final var setterBuilder = BuilderFeatureUtil.setterBuilder(builderType, ownerGroup);
 		final var rawSetterBuilder = BuilderFeatureUtil.rawSetterBuilder(builderType, ownerGroup);
 		final var relationManyListBuilder = new RelationManyListMethodBuilder(builderType, ownerGroup);
+		final var attributeManyListBuilder = new AttributeManyListMethodBuilder(builderType, ownerGroup);
 		final var fieldBuilder = BuilderFeatureUtil.fieldBuilder(ownerGroup);
 
 		return CodeInstaller.compose(CodeInstaller.of(setterBuilder, classBuilder::addMethod),
@@ -50,7 +52,10 @@ public final class BuilderFeatureUtil
 													  FeatureResolution::hasGeneric),
 									 CodeInstaller.of(relationManyListBuilder,
 													  classBuilder::addMethod,
-													  RelationManyListMethodBuilder::isManyRelation));
+													  RelationManyListMethodBuilder::isManyRelation),
+									 CodeInstaller.of(attributeManyListBuilder,
+													  classBuilder::addMethod,
+													  AttributeManyListMethodBuilder::isManyAttribute));
 	}
 
 	@SuppressWarnings("unchecked")

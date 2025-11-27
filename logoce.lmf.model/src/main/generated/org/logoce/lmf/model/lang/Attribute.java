@@ -36,6 +36,6 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
     Builder<UnaryType, EffectiveType> rawFeature(RawFeature<UnaryType, EffectiveType> rawFeature);
     Builder<UnaryType, EffectiveType> datatype(Supplier<Datatype<UnaryType>> datatype);
     Builder<UnaryType, EffectiveType> defaultValue(String defaultValue);
-    Builder<UnaryType, EffectiveType> parameters(List<GenericParameter> parameters);
+    Builder<UnaryType, EffectiveType> addParameters(List<GenericParameter> parameters);
   }
 }

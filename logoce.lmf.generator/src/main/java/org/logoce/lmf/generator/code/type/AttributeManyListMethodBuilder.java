@@ -9,17 +9,17 @@ import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Relation;
 
 import javax.lang.model.element.Modifier;
 
-public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureResolution, MethodSpec>
+public final class AttributeManyListMethodBuilder implements CodeBuilder<FeatureResolution, MethodSpec>
 {
 	private final TypeName returnType;
 	private final Group<?> ownerGroup;
 
-	public RelationManyListMethodBuilder(final TypeName returnType, final Group<?> ownerGroup)
+	public AttributeManyListMethodBuilder(final TypeName returnType, final Group<?> ownerGroup)
 	{
 		this.returnType = returnType;
 		this.ownerGroup = ownerGroup;
@@ -30,10 +30,8 @@ public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureR
 	{
 		final var methodName = "add" + GenUtils.capitalizeFirstLetter(resolution.name());
 		final var paramName = MethodUtil.validateParameterName(resolution.name());
-		final var elementType = resolution.singleTypeFor(ownerGroup).parametrizedWildcard();
+		final var elementType = boxIfPrimitive(resolution.singleTypeFor(ownerGroup).parametrized());
 		final var listType = ParameterizedTypeName.get(ConstantTypes.LIST, elementType.box());
-		final var supplierType = ParameterizedTypeName.get(ConstantTypes.SUPPLIER, elementType.box());
-
 		final var parameter = ParameterSpec.builder(listType, paramName, Modifier.FINAL).build();
 
 		return MethodSpec.methodBuilder(methodName)
@@ -41,16 +39,18 @@ public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureR
 						 .addAnnotation(ConstantTypes.OVERRIDE)
 						 .returns(returnType)
 						 .addParameter(parameter)
-						 .addStatement("$N.stream().map(value -> ($T) () -> value).forEach(this.$N::add)",
-									   paramName,
-									   supplierType,
-									   resolution.name())
+						 .addStatement("this.$N.addAll($N)", resolution.name(), paramName)
 						 .addStatement("return this")
 						 .build();
 	}
 
-	public static boolean isManyRelation(final FeatureResolution resolution)
+	public static boolean isManyAttribute(final FeatureResolution resolution)
 	{
-		return resolution.feature() instanceof Relation<?, ?> relation && relation.many();
+		return resolution.feature() instanceof Attribute<?, ?> attribute && attribute.many();
+	}
+
+	private static TypeName boxIfPrimitive(final TypeName type)
+	{
+		return type.isPrimitive() ? type.box() : type;
 	}
 }

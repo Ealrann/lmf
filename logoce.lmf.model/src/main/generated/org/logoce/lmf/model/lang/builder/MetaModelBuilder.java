@@ -55,14 +55,19 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
+  public MetaModelBuilder addImports(final List<String> imports) {
+    this.imports.addAll(imports);
+    return this;
+  }
+
+  @Override
   public MetaModelBuilder addGroup(Supplier<Group<?>> group) {
     this.groups.add(group);
     return this;
   }
 
   @Override
-  public MetaModelBuilder groups(final List<Group<?>> groups) {
-    this.groups.clear();
+  public MetaModelBuilder addGroups(final List<Group<?>> groups) {
     groups.stream().map(value -> (Supplier<Group<?>>) () -> value).forEach(this.groups::add);
     return this;
   }
@@ -74,8 +79,7 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
-  public MetaModelBuilder enums(final List<Enum<?>> enums) {
-    this.enums.clear();
+  public MetaModelBuilder addEnums(final List<Enum<?>> enums) {
     enums.stream().map(value -> (Supplier<Enum<?>>) () -> value).forEach(this.enums::add);
     return this;
   }
@@ -87,8 +91,7 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
-  public MetaModelBuilder units(final List<Unit<?>> units) {
-    this.units.clear();
+  public MetaModelBuilder addUnits(final List<Unit<?>> units) {
     units.stream().map(value -> (Supplier<Unit<?>>) () -> value).forEach(this.units::add);
     return this;
   }
@@ -100,8 +103,7 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
-  public MetaModelBuilder aliases(final List<Alias> aliases) {
-    this.aliases.clear();
+  public MetaModelBuilder addAliases(final List<Alias> aliases) {
     aliases.stream().map(value -> (Supplier<Alias>) () -> value).forEach(this.aliases::add);
     return this;
   }
@@ -113,8 +115,7 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
-  public MetaModelBuilder javaWrappers(final List<JavaWrapper<?>> javaWrappers) {
-    this.javaWrappers.clear();
+  public MetaModelBuilder addJavaWrappers(final List<JavaWrapper<?>> javaWrappers) {
     javaWrappers.stream().map(value -> (Supplier<JavaWrapper<?>>) () -> value).forEach(this.javaWrappers::add);
     return this;
   }

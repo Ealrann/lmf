@@ -21,5 +21,6 @@ public interface Enum<T> extends Datatype<T> {
   interface Builder<T> extends IFeaturedObject.Builder<Enum<T>> {
     Builder<T> name(String name);
     Builder<T> addLiteral(String literal);
+    Builder<T> addLiterals(List<String> literals);
   }
 }

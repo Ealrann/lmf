@@ -154,11 +154,11 @@ public class ModelPackage
 
 		initializer.add(".lmPackage(Instance)");
 
-		initializer.add(".groups($N.Groups.ALL)", definitionName);
-		initializer.add(".enums($N.Enums.ALL)", definitionName);
-		initializer.add(".units($N.Units.ALL)", definitionName);
-		initializer.add(".aliases($N.Aliases.ALL)", definitionName);
-		initializer.add(".javaWrappers($N.JavaWrappers.ALL)", definitionName);
+		initializer.add(".addGroups($N.Groups.ALL)", definitionName);
+		initializer.add(".addEnums($N.Enums.ALL)", definitionName);
+		initializer.add(".addUnits($N.Units.ALL)", definitionName);
+		initializer.add(".addAliases($N.Aliases.ALL)", definitionName);
+		initializer.add(".addJavaWrappers($N.JavaWrappers.ALL)", definitionName);
 
 		initializer.add(".build()");
 		return initializer.build();

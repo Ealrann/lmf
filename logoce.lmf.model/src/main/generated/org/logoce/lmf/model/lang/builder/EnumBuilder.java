@@ -33,6 +33,12 @@ public final class EnumBuilder<T> implements Builder<T> {
   }
 
   @Override
+  public EnumBuilder<T> addLiterals(final List<String> literals) {
+    this.literals.addAll(literals);
+    return this;
+  }
+
+  @Override
   public Enum<T> build() {
     final var built = new EnumImpl<T>(name, literals);
     return built;

@@ -49,10 +49,11 @@ public interface MetaModel extends Model {
     Builder lmPackage(IModelPackage lmPackage);
     Builder genNamePackage(boolean genNamePackage);
     Builder extraPackage(String extraPackage);
-    Builder groups(List<Group<?>> groups);
-    Builder enums(List<Enum<?>> enums);
-    Builder units(List<Unit<?>> units);
-    Builder aliases(List<Alias> aliases);
-    Builder javaWrappers(List<JavaWrapper<?>> javaWrappers);
+    Builder addGroups(List<Group<?>> groups);
+    Builder addEnums(List<Enum<?>> enums);
+    Builder addUnits(List<Unit<?>> units);
+    Builder addAliases(List<Alias> aliases);
+    Builder addJavaWrappers(List<JavaWrapper<?>> javaWrappers);
+    Builder addImports(List<String> imports);
   }
 }

@@ -31,7 +31,7 @@ public interface Operation extends Named {
     Builder returnType(Supplier<Type<?>> returnType);
     Builder addReturnTypeParameter(Supplier<GenericParameter> returnTypeParameter);
     Builder addParameter(Supplier<OperationParameter> parameter);
-    Builder returnTypeParameters(List<GenericParameter> returnTypeParameters);
-    Builder parameters(List<OperationParameter> parameters);
+    Builder addReturnTypeParameters(List<GenericParameter> returnTypeParameters);
+    Builder addParameters(List<OperationParameter> parameters);
   }
 }

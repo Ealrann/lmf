@@ -63,9 +63,8 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> parameters(
+  public RelationBuilder<UnaryType, EffectiveType> addParameters(
       final List<GenericParameter> parameters) {
-    this.parameters.clear();
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }

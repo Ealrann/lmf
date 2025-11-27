@@ -10,6 +10,7 @@ import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.CodeblockBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
@@ -36,23 +37,18 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 
 		final var builderSupplierRaw = ClassName.get(BuilderSupplier.class);
 
-		initializerBuilder.add("new $T<$T>()", GROUP_BUILDER_TYPE, builderTargetType)
-						  .add(".name($S)", name)
-						  .add(".concrete($L)", group.concrete());
+		initializerBuilder.add("new $T<$T>()", GROUP_BUILDER_TYPE, builderTargetType);
+
+		BuilderInitializerUtil.appendAttributes(group, initializerBuilder);
 
 		group.includes().forEach(include -> initializerBuilder.add(".addInclude(() -> $L)",
 																   generateReferencesCodeblock(include)));
 
-		final var features = ModelUtils.streamAllFeatures(group).toList();
-		for (int i = 0; i < features.size(); i++)
-		{
-			initializerBuilder.add(".addFeature(() -> Features.$N.ALL.get($L))", constantName, i);
-		}
+		initializerBuilder.add(".addFeatures(Features.$N.ALL)", constantName);
 
-		final var generics = group.generics();
-		for (int i = 0; i < generics.size(); i++)
+		if (!group.generics().isEmpty())
 		{
-			initializerBuilder.add(".addGeneric(() -> Generics.$N.ALL.get($L))", constantName, i);
+			initializerBuilder.add(".addGenerics(Generics.$N.ALL)", constantName);
 		}
 
 		if (builderType != null) initializerBuilder.add(".lmBuilder(new $T<>($T::new))", builderSupplierRaw, builderType.raw());

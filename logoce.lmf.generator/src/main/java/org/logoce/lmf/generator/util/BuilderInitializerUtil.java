@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.ConstantTypes;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -44,7 +45,15 @@ public final class BuilderInitializerUtil
 		if (attribute.many())
 		{
 			final var methodName = toManyMethodName(attribute.name());
-			((List<?>) value).forEach(entry -> initializer.add(".$L($L)", methodName, literalFor(entry)));
+			final var values = (List<?>) value;
+			final var listLiteral = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST);
+			for (int i = 0; i < values.size(); i++)
+			{
+				if (i > 0) listLiteral.add(", ");
+				listLiteral.add("$L", literalFor(values.get(i)));
+			}
+			listLiteral.add(")");
+			initializer.add(".$L($L)", methodName, listLiteral.build());
 			return;
 		}
 
@@ -64,10 +73,7 @@ public final class BuilderInitializerUtil
 
 	private static String toManyMethodName(final String attributeName)
 	{
-		final var baseName = attributeName.endsWith("s") && attributeName.length() > 1
-				? attributeName.substring(0, attributeName.length() - 1)
-				: attributeName;
-		return "add" + GenUtils.capitalizeFirstLetter(baseName);
+		return "add" + GenUtils.capitalizeFirstLetter(attributeName);
 	}
 
 	private static CodeBlock literalFor(final Object value)

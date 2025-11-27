@@ -25,6 +25,6 @@ public interface OperationParameter extends Named {
     Builder name(String name);
     Builder type(Supplier<Type<?>> type);
     Builder addParameter(Supplier<GenericParameter> parameter);
-    Builder parameters(List<GenericParameter> parameters);
+    Builder addParameters(List<GenericParameter> parameters);
   }
 }

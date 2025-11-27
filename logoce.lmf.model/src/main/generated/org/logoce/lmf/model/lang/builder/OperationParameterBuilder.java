@@ -43,8 +43,7 @@ public final class OperationParameterBuilder implements Builder {
   }
 
   @Override
-  public OperationParameterBuilder parameters(final List<GenericParameter> parameters) {
-    this.parameters.clear();
+  public OperationParameterBuilder addParameters(final List<GenericParameter> parameters) {
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }

@@ -39,6 +39,6 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
     Builder<UnaryType, EffectiveType> concept(Supplier<Concept<UnaryType>> concept);
     Builder<UnaryType, EffectiveType> lazy(boolean lazy);
     Builder<UnaryType, EffectiveType> contains(boolean contains);
-    Builder<UnaryType, EffectiveType> parameters(List<GenericParameter> parameters);
+    Builder<UnaryType, EffectiveType> addParameters(List<GenericParameter> parameters);
   }
 }

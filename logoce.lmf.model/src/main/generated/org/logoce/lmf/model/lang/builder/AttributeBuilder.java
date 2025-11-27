@@ -62,9 +62,8 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> parameters(
+  public AttributeBuilder<UnaryType, EffectiveType> addParameters(
       final List<GenericParameter> parameters) {
-    this.parameters.clear();
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }

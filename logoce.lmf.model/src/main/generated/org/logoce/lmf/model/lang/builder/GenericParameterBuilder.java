@@ -49,8 +49,7 @@ public final class GenericParameterBuilder implements Builder {
   }
 
   @Override
-  public GenericParameterBuilder parameters(final List<GenericParameter> parameters) {
-    this.parameters.clear();
+  public GenericParameterBuilder addParameters(final List<GenericParameter> parameters) {
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }

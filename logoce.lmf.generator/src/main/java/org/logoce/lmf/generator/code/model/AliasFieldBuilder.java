@@ -3,6 +3,7 @@ package org.logoce.lmf.generator.code.model;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.builder.AliasBuilder;
 
@@ -16,16 +17,14 @@ public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 	{
 		final var name = input.name();
 		final var javaName = javify(name);
-		final var value = input.value();
-		final var initializer = CodeBlock.builder()
-										 .add("new $T()", ALIAS_BUILDER_TYPE)
-										 .add(".name($S)", name)
-										 .add(".value($S)", value)
-										 .add(".build()")
-										 .build();
+		final var initializer = CodeBlock.builder().add("new $T()", ALIAS_BUILDER_TYPE);
+
+		BuilderInitializerUtil.appendAttributes(input, initializer);
+
+		initializer.add(".build()");
 
 		return FieldSpec.builder(ALIAS_TYPE, javaName, modifiers)
-						.initializer(initializer)
+						.initializer(initializer.build())
 						.build();
 	}
 

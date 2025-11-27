@@ -43,8 +43,7 @@ public final class GenericExtensionBuilder implements Builder {
   }
 
   @Override
-  public GenericExtensionBuilder parameters(final List<GenericParameter> parameters) {
-    this.parameters.clear();
+  public GenericExtensionBuilder addParameters(final List<GenericParameter> parameters) {
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }

@@ -3,6 +3,7 @@ package org.logoce.lmf.generator.code.model;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.lang.Enum;
@@ -19,12 +20,10 @@ public final class EnumFieldBuilder implements DefinitionFieldBuilder<Enum<?>>
 		final var name = input.name();
 		final var primitiveClassName = ClassName.get("", name);
 		final var typedEnum = TypeParameter.of(ENUM_TYPE, primitiveClassName);
-		final var literals = input.literals();
 		final var initializerBuilder = CodeBlock.builder()
-											   .add("new $T<$T>()", ENUM_BUILDER_TYPE, primitiveClassName)
-											   .add(".name($S)", name);
+											   .add("new $T<$T>()", ENUM_BUILDER_TYPE, primitiveClassName);
 
-		literals.forEach(literal -> initializerBuilder.add(".addLiteral($S)", literal));
+		BuilderInitializerUtil.appendAttributes(input, initializerBuilder);
 		initializerBuilder.add(".build()");
 
 		final var constantName = GenUtils.toConstantCase(name);

@@ -7,9 +7,11 @@ import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.Attribute;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -50,13 +52,33 @@ public final class InterfaceMethodUtil
 	public static FeatureMethodBuilder builderManyRelationListMethodBuilder(TypeName typedBuilder, Group<?> owner)
 	{
 		return new FeatureMethodBuilder(BUILDER_METHOD_MODIFIERS,
-									   FeatureResolution::name,
+									   f -> "add" + GenUtils.capitalizeFirstLetter(f.name()),
 									   f -> typedBuilder,
 									   Optional.of(f ->
 											   {
 												   final var elementType = f.singleTypeFor(owner).parametrizedWildcard();
 												   final var listType = ParameterizedTypeName.get(ConstantTypes.LIST,
 																								   elementType.box());
+												   final var paramName = MethodUtil.validateParameterName(f.name());
+												   return ParameterSpec.builder(listType, paramName).build();
+											   }),
+									   Optional.empty(),
+									   List.of());
+	}
+
+	public static FeatureMethodBuilder builderManyAttributeListMethodBuilder(TypeName typedBuilder, Group<?> owner)
+	{
+		return new FeatureMethodBuilder(BUILDER_METHOD_MODIFIERS,
+									   f -> "add" + GenUtils.capitalizeFirstLetter(f.name()),
+									   f -> typedBuilder,
+									   Optional.of(f ->
+											   {
+												   final var elementType = f.singleTypeFor(owner).parametrized();
+												   final var paramType = elementType.isPrimitive()
+														   ? elementType.box()
+														   : elementType;
+												   final var listType = ParameterizedTypeName.get(ConstantTypes.LIST,
+																								   paramType.box());
 												   final var paramName = MethodUtil.validateParameterName(f.name());
 												   return ParameterSpec.builder(listType, paramName).build();
 											   }),

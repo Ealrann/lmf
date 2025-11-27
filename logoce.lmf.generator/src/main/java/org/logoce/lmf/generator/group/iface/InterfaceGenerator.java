@@ -12,6 +12,7 @@ import org.logoce.lmf.generator.code.type.InterfaceBuildMethodBuilder;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Relation;
@@ -96,6 +97,8 @@ public final class InterfaceGenerator
 		final var methodBuilder = InterfaceMethodUtil.builderMethodBuilder(typedBuilder, builderType.group);
 		final var manyRelationMethodBuilder = InterfaceMethodUtil.builderManyRelationListMethodBuilder(typedBuilder,
 																										 builderType.group);
+		final var manyAttributeMethodBuilder = InterfaceMethodUtil.builderManyAttributeListMethodBuilder(typedBuilder,
+																										 builderType.group);
 
 		final var builderTypeBuilder = builderType.interfaceSpecBuilder()
 												  .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
@@ -104,6 +107,10 @@ public final class InterfaceGenerator
 		featureResolutions.stream()
 						  .filter(f -> f.feature() instanceof Relation<?, ?> relation && relation.many())
 						  .map(manyRelationMethodBuilder::build)
+						  .forEach(builderTypeBuilder::addMethod);
+		featureResolutions.stream()
+						  .filter(f -> f.feature() instanceof Attribute<?, ?> attribute && attribute.many())
+						  .map(manyAttributeMethodBuilder::build)
 						  .forEach(builderTypeBuilder::addMethod);
 
 		return builderTypeBuilder.build();
