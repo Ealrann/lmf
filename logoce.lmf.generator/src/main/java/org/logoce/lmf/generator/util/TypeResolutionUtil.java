@@ -27,7 +27,7 @@ public class TypeResolutionUtil
 									 .toList();
 		final var refIncludeGroup = refInclude.group();
 		final var model = (MetaModel) refIncludeGroup.lmContainer();
-		final var className = ClassName.get(model.domain(), refIncludeGroup.name());
+		final var className = ClassName.get(TargetPathUtil.packageName(model), refIncludeGroup.name());
 		return TypeParameter.of(className, params);
 	}
 
@@ -47,7 +47,7 @@ public class TypeResolutionUtil
 	public static TypeParameter parametrizedType(Group<?> group, List<? extends GenericParameter> parameters)
 	{
 		final var model = (MetaModel) group.lmContainer();
-		final var className = ClassName.get(model.domain(), group.name());
+		final var className = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		if (!parameters.isEmpty())
 		{
 			final var params = parameters.stream()
@@ -82,7 +82,7 @@ public class TypeResolutionUtil
 			case Enum<?> enumeration ->
 			{
 				final var model = (MetaModel) enumeration.lmContainer();
-				final var className = ClassName.get(model.domain(), enumeration.name());
+				final var className = ClassName.get(TargetPathUtil.packageName(model), enumeration.name());
 				return TypeParameter.of(className);
 			}
 			case Unit<?> unit ->

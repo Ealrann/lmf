@@ -4,6 +4,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.MetaModel;
 
@@ -20,7 +21,7 @@ public class EnumGenerator
 	{
 		this.enumeration = enumeration;
 		final var model = (MetaModel) enumeration.lmContainer();
-		packageName = model.domain();
+		packageName = TargetPathUtil.packageName(model);
 	}
 
 	public void generate(final File target)

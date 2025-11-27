@@ -6,6 +6,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
@@ -76,7 +77,7 @@ public class InternalFeatureBuilder
 	{
 		final var model = (MetaModel) ModelUtils.root(owner);
 		final var definitionFile = model.name() + "Definition";
-		final var modelDefinition = ClassName.get(model.domain(), definitionFile);
+		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), definitionFile);
 		final var group = owner;
 		final var many = feature.many();
 		final var relation = feature instanceof Relation<?, ?>;
@@ -94,7 +95,7 @@ public class InternalFeatureBuilder
 	{
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtils.root(group);
-		final var groupClass = ClassName.get(model.domain(), group.name());
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		return CodeBlock.of("$T.Features.$N", groupClass, feature.name());
 	}
 }

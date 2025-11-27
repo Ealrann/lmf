@@ -9,6 +9,7 @@ import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.*;
@@ -133,14 +134,14 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 						throw new IllegalStateException("Generic " + generic.name() + " not found in container");
 					}
 					final var model = (MetaModel) ModelUtils.root(group);
-					final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+					final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
 					final var groupConstantName = GenUtils.toConstantCase(group.name());
 					return CodeBlock.of("$T.Generics.$N.ALL.get($L)", modelDefinition, groupConstantName, index);
 				}
 			}
 
 			final var model = (MetaModel) ModelUtils.root(type);
-			final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+			final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
 			final var typeConstantName = GenUtils.toConstantCase(type.name());
 			final var typeHolder = TypeResolutionUtil.resolveTypeHolder(type);
 			if (typeHolder == null)

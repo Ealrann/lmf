@@ -9,6 +9,7 @@ import org.logoce.lmf.generator.code.util.SubInterfaceBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.util.ModelUtils;
@@ -91,7 +92,7 @@ public class ModelDefinition
 		definitionInterface.addType(aliasBuilder.build(model));
 		definitionInterface.addType(javaWrapperBuilder.build(model));
 
-		final var javaFile = JavaFile.builder(model.domain(), definitionInterface.build()).build();
+		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), definitionInterface.build()).build();
 		FormattedJavaWriter.write(javaFile, target);
 	}
 

@@ -7,6 +7,7 @@ import org.logoce.lmf.adapter.api.Adapter;
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.ModelExtender;
 import org.logoce.lmf.generator.util.GenericParameter;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.lang.Group;
@@ -31,7 +32,8 @@ public final class GroupInterfaceType extends AbstractGroupType implements IAdap
 	private static Values bakeValues(final Group<?> group)
 	{
 		final var model = (MetaModel) group.lmContainer();
-		final var interfaceName = ClassName.get(model.domain(), group.name());
+		final var basePackage = TargetPathUtil.packageName(model);
+		final var interfaceName = ClassName.get(basePackage, group.name());
 		final var genericParameters = group.generics().stream().map(GenericParameter::fromGeneric).toList();
 		final var rawStream = genericParameters.stream().map(GenericParameter::raw);
 		final var includes = group.includes();
@@ -46,7 +48,7 @@ public final class GroupInterfaceType extends AbstractGroupType implements IAdap
 
 		final var groupType = TypeParameter.of(interfaceName, rawParameters);
 
-		return new Values(groupType, model.domain(), group, superInterfaces, typedParameters);
+		return new Values(groupType, basePackage, group, superInterfaces, typedParameters);
 	}
 
 	private static List<TypeName> resolveIncludes(final List<Include<?>> includes, final Group<?> group)

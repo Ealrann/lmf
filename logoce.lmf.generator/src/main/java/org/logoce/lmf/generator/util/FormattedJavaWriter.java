@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public final class FormattedJavaWriter
 {
@@ -145,9 +146,39 @@ public final class FormattedJavaWriter
 		final var packageName = javaFile.packageName;
 		final var typeName = javaFile.typeSpec.name + ".java";
 
-		final var directory = packageName == null || packageName.isEmpty()
-							  ? targetDirectory
-							  : targetDirectory.resolve(packageName.replace('.', File.separatorChar));
+		if (packageName == null || packageName.isEmpty()) return targetDirectory.resolve(typeName);
+
+		final var packageSegments = packageName.split("\\.");
+		final var targetSegments = targetDirectory.normalize()
+												  .toString()
+												  .split(File.separator.equals("\\") ? "\\\\" : File.separator);
+
+		int overlap = 0;
+		for (int k = Math.min(packageSegments.length, targetSegments.length); k >= 1; k--)
+		{
+			boolean match = true;
+			for (int i = 0; i < k; i++)
+			{
+				final var pkg = packageSegments[i];
+				final var targetSeg = targetSegments[targetSegments.length - k + i];
+				if (!pkg.equals(targetSeg))
+				{
+					match = false;
+					break;
+				}
+			}
+			if (match)
+			{
+				overlap = k;
+				break;
+			}
+		}
+
+		Path directory = targetDirectory.normalize();
+		for (int i = overlap; i < packageSegments.length; i++)
+		{
+			directory = directory.resolve(packageSegments[i]);
+		}
 
 		return directory.resolve(typeName);
 	}

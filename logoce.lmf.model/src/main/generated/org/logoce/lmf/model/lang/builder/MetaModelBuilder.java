@@ -33,7 +33,7 @@ public final class MetaModelBuilder implements Builder {
   private final List<Supplier<Alias>> aliases = new ArrayList<>();
   private final List<Supplier<JavaWrapper<?>>> javaWrappers = new ArrayList<>();
   private IModelPackage lmPackage;
-  private boolean genNamePackage;
+  private boolean genNamePackage = true;
   private String extraPackage;
 
   @Override

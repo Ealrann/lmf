@@ -13,10 +13,7 @@ public final class TargetPathUtil
 
 	public static File resolve(final File baseDir, final MetaModel model)
 	{
-		final var domainPath = model.domain().replace('.', File.separatorChar);
-		var target = baseDir.toPath().toString().endsWith(domainPath)
-						? baseDir
-						: new File(baseDir, domainPath);
+		var target = new File(baseDir, model.domain().replace('.', File.separatorChar));
 
 		final var extraPackage = model.extraPackage();
 		if (extraPackage != null && !extraPackage.isBlank())
@@ -30,5 +27,23 @@ public final class TargetPathUtil
 		}
 
 		return target;
+	}
+
+	public static String packageName(final MetaModel model)
+	{
+		final var base = new StringBuilder(model.domain());
+
+		final var extraPackage = model.extraPackage();
+		if (extraPackage != null && !extraPackage.isBlank())
+		{
+			base.append('.').append(extraPackage);
+		}
+
+		if (model.genNamePackage())
+		{
+			base.append('.').append(model.name().toLowerCase(Locale.ROOT));
+		}
+
+		return base.toString();
 	}
 }

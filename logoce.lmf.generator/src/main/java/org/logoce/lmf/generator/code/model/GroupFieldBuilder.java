@@ -7,10 +7,11 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
 import org.logoce.lmf.generator.adapter.GroupBuilderClassType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.CodeblockBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
-import org.logoce.lmf.generator.util.BuilderInitializerUtil;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
@@ -79,7 +80,8 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		}
 		else
 		{
-			final var modelDefinition = ClassName.get(targetModel.domain(), targetModel.name() + "Definition");
+			final var modelDefinition = ClassName.get(TargetPathUtil.packageName(targetModel),
+													  targetModel.name() + "Definition");
 			builder.add(".group(() -> $T.Groups.$N)", modelDefinition, groupConstantName);
 		}
 
@@ -100,7 +102,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 			{
 				final var group = (Group<?>) generic.lmContainer();
 				final var model = (MetaModel) ModelUtils.root(group);
-				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
 				final var constantName = GenUtils.toConstantCase(group.name());
 				final var index = group.generics().indexOf(generic);
 				yield CodeBlock.builder()
@@ -110,14 +112,14 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 			case Group<?> group ->
 			{
 				final var model = (MetaModel) ModelUtils.root(group);
-				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
 				final var constantName = GenUtils.toConstantCase(group.name());
 				yield CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
 			}
 			case JavaWrapper<?> javaWrapper ->
 			{
 				final var model = (MetaModel) ModelUtils.root(javaWrapper);
-				final var modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
 				final var constantName = GenUtils.toConstantCase(javaWrapper.name());
 				yield CodeBlock.builder().add("() -> $T.JavaWrappers.$N", modelDefinition, constantName).build();
 			}

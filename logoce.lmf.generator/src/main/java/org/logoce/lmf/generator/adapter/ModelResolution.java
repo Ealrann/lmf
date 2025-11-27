@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import org.logoce.lmf.adapter.api.Adapter;
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.ModelExtender;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.lang.MetaModel;
 
 @ModelExtender(scope = MetaModel.class)
@@ -14,6 +15,6 @@ public final class ModelResolution implements IAdapter
 
 	private ModelResolution(final MetaModel model)
 	{
-		this.modelDefinition = ClassName.get(model.domain(), model.name() + "Definition");
+		this.modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
 	}
 }

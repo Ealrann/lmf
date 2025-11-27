@@ -59,7 +59,7 @@ public interface LMCoreDefinition {
       Relation<Alias, List<Alias>> ALIASES = new RelationBuilder<Alias, List<Alias>>().name("aliases").immutable(true).many(true).contains(true).rawFeature(MetaModel.Features.aliases).concept(() -> LMCoreDefinition.Groups.ALIAS).build();
       Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationBuilder<JavaWrapper<?>, List<JavaWrapper<?>>>().name("javaWrappers").immutable(true).many(true).contains(true).rawFeature(MetaModel.Features.javaWrappers).concept(() -> LMCoreDefinition.Groups.JAVA_WRAPPER).build();
       Attribute<IModelPackage, IModelPackage> LM_PACKAGE = new AttributeBuilder<IModelPackage, IModelPackage>().name("lmPackage").immutable(true).mandatory(true).rawFeature(MetaModel.Features.lmPackage).datatype(() -> JavaWrappers.I_MODEL_PACKAGE).build();
-      Attribute<Boolean, Boolean> GEN_NAME_PACKAGE = new AttributeBuilder<Boolean, Boolean>().name("genNamePackage").immutable(true).rawFeature(MetaModel.Features.genNamePackage).datatype(() -> Units.BOOLEAN).build();
+      Attribute<Boolean, Boolean> GEN_NAME_PACKAGE = new AttributeBuilder<Boolean, Boolean>().name("genNamePackage").immutable(true).defaultValue("true").rawFeature(MetaModel.Features.genNamePackage).datatype(() -> Units.BOOLEAN).build();
       Attribute<String, String> EXTRA_PACKAGE = new AttributeBuilder<String, String>().name("extraPackage").immutable(true).rawFeature(MetaModel.Features.extraPackage).datatype(() -> Units.STRING).build();
       List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE, GEN_NAME_PACKAGE, EXTRA_PACKAGE);
     }

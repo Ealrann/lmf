@@ -5,6 +5,7 @@ import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.MetaModel;
@@ -31,7 +32,7 @@ public class ModelPackage
 
 	public void generate(final File target)
 	{
-		final var currentClass = ClassName.get(model.domain(), model.name() + "Package");
+		final var currentClass = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Package");
 		final var definitionName = model.name() + "Definition";
 
 		final var packageClass = TypeSpec.classBuilder(currentClass)
@@ -66,7 +67,7 @@ public class ModelPackage
 		packageClass.addMethod(buildBuilderResolver(definitionName));
 		packageClass.addMethod(buildEnumResolver(definitionName));
 
-		final var javaFile = JavaFile.builder(model.domain(), packageClass.build()).build();
+		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), packageClass.build()).build();
 		FormattedJavaWriter.write(javaFile, target);
 	}
 

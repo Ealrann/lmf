@@ -272,7 +272,7 @@ public final class FeatureResolution implements IAdapter
 					case Enum<?> enumeration ->
 					{
 						final var model = (MetaModel) enumeration.lmContainer();
-						final var className = ClassName.get(model.domain(), enumeration.name());
+						final var className = ClassName.get(org.logoce.lmf.generator.util.TargetPathUtil.packageName(model), enumeration.name());
 						final var typeParameter = TypeParameter.of(className);
 						return new PartialFeatureResolution(typeParameter, typeParameter, false);
 					}

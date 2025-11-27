@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.builder.MetaModelBuilder;
 public final class LMCorePackage implements IModelPackage {
   public static final LMCorePackage Instance = new LMCorePackage();
 
-  public static final MetaModel MODEL = new MetaModelBuilder().name("LMCore").domain("org.logoce.lmf.model.lang").lmPackage(Instance).addGroups(LMCoreDefinition.Groups.ALL).addEnums(LMCoreDefinition.Enums.ALL).addUnits(LMCoreDefinition.Units.ALL).addAliases(LMCoreDefinition.Aliases.ALL).addJavaWrappers(LMCoreDefinition.JavaWrappers.ALL).build();
+  public static final MetaModel MODEL = new MetaModelBuilder().name("LMCore").domain("org.logoce.lmf.model").extraPackage("lang").lmPackage(Instance).addGroups(LMCoreDefinition.Groups.ALL).addEnums(LMCoreDefinition.Enums.ALL).addUnits(LMCoreDefinition.Units.ALL).addAliases(LMCoreDefinition.Aliases.ALL).addJavaWrappers(LMCoreDefinition.JavaWrappers.ALL).build();
 
   private LMCorePackage() {
   }
