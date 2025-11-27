@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -12,13 +13,12 @@ import org.logoce.lmf.model.lang.Enum.Builder;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.EnumImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 
 public final class EnumBuilder<T> implements Builder<T> {
   private static final FeatureInserter<EnumBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder<?>>().add(Enum.Features.name, EnumBuilder::name).add(Enum.Features.literals, EnumBuilder::addLiteral).build();
   private static final RelationLazyInserter<EnumBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<EnumBuilder<?>>().build();
   private String name;
-  private final List<String> literals = new ObservableList<>((type, elements) -> {});
+  private final List<String> literals = new ArrayList<>();
 
   @Override
   public EnumBuilder<T> name(String name) {

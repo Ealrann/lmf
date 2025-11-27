@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -14,14 +15,13 @@ import org.logoce.lmf.model.lang.Include.Builder;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.IncludeImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<IncludeBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder<?>>().build();
   private static final RelationLazyInserter<IncludeBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder<?>>().add(Include.Features.group, IncludeBuilder::_group).add(Include.Features.parameters, IncludeBuilder::addParameter).build();
   private Supplier<Group<T>> group;
-  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
   @Override
   public IncludeBuilder<T> group(Supplier<Group<T>> group) {
@@ -41,6 +41,13 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
   @Override
   public IncludeBuilder<T> addParameter(Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public IncludeBuilder<T> parameters(final List<GenericParameter> parameters) {
+    this.parameters.clear();
+    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 

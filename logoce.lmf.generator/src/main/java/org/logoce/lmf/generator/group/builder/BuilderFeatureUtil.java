@@ -14,6 +14,7 @@ import org.logoce.lmf.generator.code.feature.FeatureParameter;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.code.type.*;
 import org.logoce.lmf.generator.code.util.CodeInstaller;
+import org.logoce.lmf.generator.code.type.RelationManyListMethodBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.DefaultValueUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
@@ -39,13 +40,17 @@ public final class BuilderFeatureUtil
 	{
 		final var setterBuilder = BuilderFeatureUtil.setterBuilder(builderType, ownerGroup);
 		final var rawSetterBuilder = BuilderFeatureUtil.rawSetterBuilder(builderType, ownerGroup);
+		final var relationManyListBuilder = new RelationManyListMethodBuilder(builderType, ownerGroup);
 		final var fieldBuilder = BuilderFeatureUtil.fieldBuilder(ownerGroup);
 
 		return CodeInstaller.compose(CodeInstaller.of(setterBuilder, classBuilder::addMethod),
 									 CodeInstaller.of(fieldBuilder, classBuilder::addField),
 									 CodeInstaller.of(rawSetterBuilder,
 													  classBuilder::addMethod,
-													  FeatureResolution::hasGeneric));
+													  FeatureResolution::hasGeneric),
+									 CodeInstaller.of(relationManyListBuilder,
+													  classBuilder::addMethod,
+													  RelationManyListMethodBuilder::isManyRelation));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,7 +85,7 @@ public final class BuilderFeatureUtil
 
 		if (many)
 		{
-			return Optional.of(CodeBlock.of("new $T<>((type, elements) -> {})", ConstantTypes.OBSERVABLE_LIST));
+			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
 		}
 		else if (immutable && !mandatory)
 		{

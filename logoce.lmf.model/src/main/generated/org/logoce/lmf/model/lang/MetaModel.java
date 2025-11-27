@@ -1,5 +1,6 @@
 package org.logoce.lmf.model.lang;
 
+import java.lang.Boolean;
 import java.lang.String;
 import java.util.List;
 import java.util.function.Supplier;
@@ -19,6 +20,8 @@ public interface MetaModel extends Model {
   List<Alias> aliases();
   List<JavaWrapper<?>> javaWrappers();
   IModelPackage lmPackage();
+  boolean genNamePackage();
+  String extraPackage();
 
   interface Features<T extends Features<T>> extends Model.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
@@ -30,6 +33,8 @@ public interface MetaModel extends Model {
     RawFeature<Alias, List<Alias>> aliases = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.ALIASES);
     RawFeature<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.JAVA_WRAPPERS);
     RawFeature<IModelPackage, IModelPackage> lmPackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.LM_PACKAGE);
+    RawFeature<Boolean, Boolean> genNamePackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.GEN_NAME_PACKAGE);
+    RawFeature<String, String> extraPackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.EXTRA_PACKAGE);
   }
 
   interface Builder extends IFeaturedObject.Builder<MetaModel> {
@@ -42,5 +47,12 @@ public interface MetaModel extends Model {
     Builder addAliase(Supplier<Alias> aliase);
     Builder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper);
     Builder lmPackage(IModelPackage lmPackage);
+    Builder genNamePackage(boolean genNamePackage);
+    Builder extraPackage(String extraPackage);
+    Builder groups(List<Group<?>> groups);
+    Builder enums(List<Enum<?>> enums);
+    Builder units(List<Unit<?>> units);
+    Builder aliases(List<Alias> aliases);
+    Builder javaWrappers(List<JavaWrapper<?>> javaWrappers);
   }
 }

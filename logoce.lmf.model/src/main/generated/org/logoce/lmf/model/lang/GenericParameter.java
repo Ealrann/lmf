@@ -29,5 +29,6 @@ public interface GenericParameter extends LMObject {
     Builder wildcardBoundType(BoundType wildcardBoundType);
     Builder type(Supplier<Type<?>> type);
     Builder addParameter(Supplier<GenericParameter> parameter);
+    Builder parameters(List<GenericParameter> parameters);
   }
 }

@@ -22,5 +22,6 @@ public interface Include<T extends LMObject> extends LMObject {
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Include<T>> {
     Builder<T> group(Supplier<Group<T>> group);
     Builder<T> addParameter(Supplier<GenericParameter> parameter);
+    Builder<T> parameters(List<GenericParameter> parameters);
   }
 }

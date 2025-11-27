@@ -39,5 +39,9 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     Builder<T> addGeneric(Supplier<Generic<?>> generic);
     Builder<T> addOperation(Supplier<Operation> operation);
     Builder<T> lmBuilder(BuilderSupplier<T> lmBuilder);
+    Builder<T> includes(List<Include<?>> includes);
+    Builder<T> features(List<Feature<?, ?>> features);
+    Builder<T> generics(List<Generic<?>> generics);
+    Builder<T> operations(List<Operation> operations);
   }
 }

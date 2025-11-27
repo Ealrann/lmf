@@ -1,11 +1,15 @@
 package org.logoce.lmf.generator.group.iface;
 
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
+import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Relation;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -41,6 +45,23 @@ public final class InterfaceMethodUtil
 										Optional.of(f -> f.builderParameterSpec(owner)),
 										Optional.empty(),
 										List.of());
+	}
+
+	public static FeatureMethodBuilder builderManyRelationListMethodBuilder(TypeName typedBuilder, Group<?> owner)
+	{
+		return new FeatureMethodBuilder(BUILDER_METHOD_MODIFIERS,
+									   FeatureResolution::name,
+									   f -> typedBuilder,
+									   Optional.of(f ->
+											   {
+												   final var elementType = f.singleTypeFor(owner).parametrizedWildcard();
+												   final var listType = ParameterizedTypeName.get(ConstantTypes.LIST,
+																								   elementType.box());
+												   final var paramName = MethodUtil.validateParameterName(f.name());
+												   return ParameterSpec.builder(listType, paramName).build();
+											   }),
+									   Optional.empty(),
+									   List.of());
 	}
 
 	public static boolean isMutableSingle(final FeatureResolution resolution)

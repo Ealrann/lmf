@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -14,7 +15,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Type;
 import org.logoce.lmf.model.lang.impl.GenericExtensionImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericExtensionBuilder implements Builder {
@@ -22,7 +22,7 @@ public final class GenericExtensionBuilder implements Builder {
   private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.type, GenericExtensionBuilder::type).add(GenericExtension.Features.parameters, GenericExtensionBuilder::addParameter).build();
   private Supplier<Type<?>> type = () -> null;
   private BoundType boundType;
-  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
   @Override
   public GenericExtensionBuilder type(Supplier<Type<?>> type) {
@@ -39,6 +39,13 @@ public final class GenericExtensionBuilder implements Builder {
   @Override
   public GenericExtensionBuilder addParameter(Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public GenericExtensionBuilder parameters(final List<GenericParameter> parameters) {
+    this.parameters.clear();
+    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 

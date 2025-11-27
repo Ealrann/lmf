@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -13,7 +14,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Type;
 import org.logoce.lmf.model.lang.impl.GenericParameterImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericParameterBuilder implements Builder {
@@ -22,7 +22,7 @@ public final class GenericParameterBuilder implements Builder {
   private boolean wildcard;
   private BoundType wildcardBoundType;
   private Supplier<Type<?>> type;
-  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
   @Override
   public GenericParameterBuilder wildcard(boolean wildcard) {
@@ -45,6 +45,13 @@ public final class GenericParameterBuilder implements Builder {
   @Override
   public GenericParameterBuilder addParameter(Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public GenericParameterBuilder parameters(final List<GenericParameter> parameters) {
+    this.parameters.clear();
+    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 

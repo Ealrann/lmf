@@ -3,16 +3,15 @@ package org.logoce.lmf.model.lang;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
-import java.util.List;
 import java.util.Optional;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.impl.MetaModelImpl;
+import org.logoce.lmf.model.lang.builder.MetaModelBuilder;
 
 public final class LMCorePackage implements IModelPackage {
   public static final LMCorePackage Instance = new LMCorePackage();
 
-  public static final MetaModel MODEL = new MetaModelImpl("LMCore", "org.logoce.lmf.model.lang", List.of(), LMCoreDefinition.Groups.ALL, LMCoreDefinition.Enums.ALL, LMCoreDefinition.Units.ALL, LMCoreDefinition.Aliases.ALL, LMCoreDefinition.JavaWrappers.ALL, Instance);
+  public static final MetaModel MODEL = new MetaModelBuilder().name("LMCore").domain("org.logoce.lmf.model.lang").lmPackage(Instance).groups(LMCoreDefinition.Groups.ALL).enums(LMCoreDefinition.Enums.ALL).units(LMCoreDefinition.Units.ALL).aliases(LMCoreDefinition.Aliases.ALL).javaWrappers(LMCoreDefinition.JavaWrappers.ALL).build();
 
   private LMCorePackage() {
   }

@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IModelPackage;
@@ -18,21 +19,22 @@ import org.logoce.lmf.model.lang.MetaModel.Builder;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.lang.impl.MetaModelImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class MetaModelBuilder implements Builder {
-  private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.name, MetaModelBuilder::name).add(MetaModel.Features.domain, MetaModelBuilder::domain).add(MetaModel.Features.imports, MetaModelBuilder::addImport).add(MetaModel.Features.lmPackage, MetaModelBuilder::lmPackage).build();
+  private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.name, MetaModelBuilder::name).add(MetaModel.Features.domain, MetaModelBuilder::domain).add(MetaModel.Features.imports, MetaModelBuilder::addImport).add(MetaModel.Features.lmPackage, MetaModelBuilder::lmPackage).add(MetaModel.Features.genNamePackage, MetaModelBuilder::genNamePackage).add(MetaModel.Features.extraPackage, MetaModelBuilder::extraPackage).build();
   private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.groups, MetaModelBuilder::addGroup).add(MetaModel.Features.enums, MetaModelBuilder::addEnum).add(MetaModel.Features.units, MetaModelBuilder::addUnit).add(MetaModel.Features.aliases, MetaModelBuilder::addAliase).add(MetaModel.Features.javaWrappers, MetaModelBuilder::addJavaWrapper).build();
   private String name;
   private String domain;
-  private final List<String> imports = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Group<?>>> groups = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Enum<?>>> enums = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Unit<?>>> units = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Alias>> aliases = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<JavaWrapper<?>>> javaWrappers = new ObservableList<>((type, elements) -> {});
+  private final List<String> imports = new ArrayList<>();
+  private final List<Supplier<Group<?>>> groups = new ArrayList<>();
+  private final List<Supplier<Enum<?>>> enums = new ArrayList<>();
+  private final List<Supplier<Unit<?>>> units = new ArrayList<>();
+  private final List<Supplier<Alias>> aliases = new ArrayList<>();
+  private final List<Supplier<JavaWrapper<?>>> javaWrappers = new ArrayList<>();
   private IModelPackage lmPackage;
+  private boolean genNamePackage;
+  private String extraPackage;
 
   @Override
   public MetaModelBuilder name(String name) {
@@ -59,8 +61,22 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
+  public MetaModelBuilder groups(final List<Group<?>> groups) {
+    this.groups.clear();
+    groups.stream().map(value -> (Supplier<Group<?>>) () -> value).forEach(this.groups::add);
+    return this;
+  }
+
+  @Override
   public MetaModelBuilder addEnum(Supplier<Enum<?>> _enum) {
     this.enums.add(_enum);
+    return this;
+  }
+
+  @Override
+  public MetaModelBuilder enums(final List<Enum<?>> enums) {
+    this.enums.clear();
+    enums.stream().map(value -> (Supplier<Enum<?>>) () -> value).forEach(this.enums::add);
     return this;
   }
 
@@ -71,8 +87,22 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
+  public MetaModelBuilder units(final List<Unit<?>> units) {
+    this.units.clear();
+    units.stream().map(value -> (Supplier<Unit<?>>) () -> value).forEach(this.units::add);
+    return this;
+  }
+
+  @Override
   public MetaModelBuilder addAliase(Supplier<Alias> aliase) {
     this.aliases.add(aliase);
+    return this;
+  }
+
+  @Override
+  public MetaModelBuilder aliases(final List<Alias> aliases) {
+    this.aliases.clear();
+    aliases.stream().map(value -> (Supplier<Alias>) () -> value).forEach(this.aliases::add);
     return this;
   }
 
@@ -83,8 +113,27 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
+  public MetaModelBuilder javaWrappers(final List<JavaWrapper<?>> javaWrappers) {
+    this.javaWrappers.clear();
+    javaWrappers.stream().map(value -> (Supplier<JavaWrapper<?>>) () -> value).forEach(this.javaWrappers::add);
+    return this;
+  }
+
+  @Override
   public MetaModelBuilder lmPackage(IModelPackage lmPackage) {
     this.lmPackage = lmPackage;
+    return this;
+  }
+
+  @Override
+  public MetaModelBuilder genNamePackage(boolean genNamePackage) {
+    this.genNamePackage = genNamePackage;
+    return this;
+  }
+
+  @Override
+  public MetaModelBuilder extraPackage(String extraPackage) {
+    this.extraPackage = extraPackage;
     return this;
   }
 
@@ -95,7 +144,7 @@ public final class MetaModelBuilder implements Builder {
     final var builtUnits = BuildUtils.collectSuppliers(units);
     final var builtAliases = BuildUtils.collectSuppliers(aliases);
     final var builtJavaWrappers = BuildUtils.collectSuppliers(javaWrappers);
-    final var built = new MetaModelImpl(name, domain, imports, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lmPackage);
+    final var built = new MetaModelImpl(name, domain, imports, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lmPackage, genNamePackage, extraPackage);
     return built;
   }
 

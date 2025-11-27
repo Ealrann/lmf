@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang.builder;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
@@ -18,7 +19,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.GroupImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GroupBuilder<T extends LMObject> implements Builder<T> {
@@ -26,10 +26,10 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.Features.includes, GroupBuilder::addInclude).add(Group.Features.features, GroupBuilder::addFeature).add(Group.Features.generics, GroupBuilder::addGeneric).add(Group.Features.operations, GroupBuilder::addOperation).build();
   private String name;
   private boolean concrete;
-  private final List<Supplier<Include<?>>> includes = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Feature<?, ?>>> features = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Generic<?>>> generics = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<Operation>> operations = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<Include<?>>> includes = new ArrayList<>();
+  private final List<Supplier<Feature<?, ?>>> features = new ArrayList<>();
+  private final List<Supplier<Generic<?>>> generics = new ArrayList<>();
+  private final List<Supplier<Operation>> operations = new ArrayList<>();
   private BuilderSupplier<T> lmBuilder;
 
   @Override
@@ -51,8 +51,22 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
+  public GroupBuilder<T> includes(final List<Include<?>> includes) {
+    this.includes.clear();
+    includes.stream().map(value -> (Supplier<Include<?>>) () -> value).forEach(this.includes::add);
+    return this;
+  }
+
+  @Override
   public GroupBuilder<T> addFeature(Supplier<Feature<?, ?>> feature) {
     this.features.add(feature);
+    return this;
+  }
+
+  @Override
+  public GroupBuilder<T> features(final List<Feature<?, ?>> features) {
+    this.features.clear();
+    features.stream().map(value -> (Supplier<Feature<?, ?>>) () -> value).forEach(this.features::add);
     return this;
   }
 
@@ -63,8 +77,22 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
+  public GroupBuilder<T> generics(final List<Generic<?>> generics) {
+    this.generics.clear();
+    generics.stream().map(value -> (Supplier<Generic<?>>) () -> value).forEach(this.generics::add);
+    return this;
+  }
+
+  @Override
   public GroupBuilder<T> addOperation(Supplier<Operation> operation) {
     this.operations.add(operation);
+    return this;
+  }
+
+  @Override
+  public GroupBuilder<T> operations(final List<Operation> operations) {
+    this.operations.clear();
+    operations.stream().map(value -> (Supplier<Operation>) () -> value).forEach(this.operations::add);
     return this;
   }
 

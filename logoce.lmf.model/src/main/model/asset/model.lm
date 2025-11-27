@@ -22,7 +22,9 @@
 		(-contains units [0..*] @Unit)
 		(-contains aliases [0..*] @Alias)
 		(-contains javaWrappers [0..*] @JavaWrapper)
-		(-att lmPackage /javaWrappers.1 [1..1]))
+		(-att lmPackage /javaWrappers.1 [1..1])
+		(-att genNamePackage @boolean)
+		(-att extraPackage @string))
 
 	(Definition Group
 		(includes group=@Type

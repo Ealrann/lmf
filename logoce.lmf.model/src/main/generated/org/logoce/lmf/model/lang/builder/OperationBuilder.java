@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -15,7 +16,6 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Type;
 import org.logoce.lmf.model.lang.impl.OperationImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class OperationBuilder implements Builder {
@@ -24,8 +24,8 @@ public final class OperationBuilder implements Builder {
   private String name;
   private String content;
   private Supplier<Type<?>> returnType = () -> null;
-  private final List<Supplier<GenericParameter>> returnTypeParameters = new ObservableList<>((type, elements) -> {});
-  private final List<Supplier<OperationParameter>> parameters = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<GenericParameter>> returnTypeParameters = new ArrayList<>();
+  private final List<Supplier<OperationParameter>> parameters = new ArrayList<>();
 
   @Override
   public OperationBuilder name(String name) {
@@ -52,8 +52,22 @@ public final class OperationBuilder implements Builder {
   }
 
   @Override
+  public OperationBuilder returnTypeParameters(final List<GenericParameter> returnTypeParameters) {
+    this.returnTypeParameters.clear();
+    returnTypeParameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.returnTypeParameters::add);
+    return this;
+  }
+
+  @Override
   public OperationBuilder addParameter(Supplier<OperationParameter> parameter) {
     this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public OperationBuilder parameters(final List<OperationParameter> parameters) {
+    this.parameters.clear();
+    parameters.stream().map(value -> (Supplier<OperationParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 

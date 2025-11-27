@@ -25,5 +25,6 @@ public interface GenericExtension extends LMObject {
     Builder type(Supplier<Type<?>> type);
     Builder boundType(BoundType boundType);
     Builder addParameter(Supplier<GenericParameter> parameter);
+    Builder parameters(List<GenericParameter> parameters);
   }
 }

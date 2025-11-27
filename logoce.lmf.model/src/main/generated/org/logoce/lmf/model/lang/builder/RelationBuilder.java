@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang.builder;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
@@ -15,7 +16,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Relation.Builder;
 import org.logoce.lmf.model.lang.impl.RelationImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Builder<UnaryType, EffectiveType> {
@@ -25,7 +25,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   private boolean immutable;
   private boolean many;
   private boolean mandatory;
-  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
   private RawFeature<UnaryType, EffectiveType> rawFeature;
   private Supplier<Concept<UnaryType>> concept;
   private boolean lazy;
@@ -59,6 +59,14 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   public RelationBuilder<UnaryType, EffectiveType> addParameter(
       Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public RelationBuilder<UnaryType, EffectiveType> parameters(
+      final List<GenericParameter> parameters) {
+    this.parameters.clear();
+    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 

@@ -29,7 +29,7 @@ public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 						.build();
 	}
 
-	private static String javify(String input)
+	public static String javify(String input)
 	{
 		return input.chars().mapToObj(AliasFieldBuilder::mapChar).reduce(CharConversion::join).orElseThrow().result;
 	}

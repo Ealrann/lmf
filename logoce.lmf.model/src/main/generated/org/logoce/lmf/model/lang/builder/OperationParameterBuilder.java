@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang.builder;
 
 import java.lang.Override;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
@@ -14,7 +15,6 @@ import org.logoce.lmf.model.lang.OperationParameter.Builder;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Type;
 import org.logoce.lmf.model.lang.impl.OperationParameterImpl;
-import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class OperationParameterBuilder implements Builder {
@@ -22,7 +22,7 @@ public final class OperationParameterBuilder implements Builder {
   private static final RelationLazyInserter<OperationParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationParameterBuilder>().add(OperationParameter.Features.type, OperationParameterBuilder::type).add(OperationParameter.Features.parameters, OperationParameterBuilder::addParameter).build();
   private String name;
   private Supplier<Type<?>> type;
-  private final List<Supplier<GenericParameter>> parameters = new ObservableList<>((type, elements) -> {});
+  private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
   @Override
   public OperationParameterBuilder name(String name) {
@@ -39,6 +39,13 @@ public final class OperationParameterBuilder implements Builder {
   @Override
   public OperationParameterBuilder addParameter(Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
+    return this;
+  }
+
+  @Override
+  public OperationParameterBuilder parameters(final List<GenericParameter> parameters) {
+    this.parameters.clear();
+    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 

@@ -1,6 +1,7 @@
 package org.logoce.lmf.generator.model;
 
 import com.squareup.javapoet.*;
+import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
@@ -37,38 +38,20 @@ public class ModelPackage
 										 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
 										 .addSuperinterface(ConstantTypes.IMODEL_PACKAGE);
 
-		final var imports = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST);
-		boolean first = true;
-		for (final var value : model.imports())
-		{
-			if (first) first = false;
-			else imports.add(", ");
-			imports.add("$S", value);
-		}
-		imports.add(")");
-
 		packageClass.addField(FieldSpec.builder(currentClass,
 												"Instance",
 												Modifier.PUBLIC,
 												Modifier.STATIC,
 												Modifier.FINAL).initializer("new $T()", currentClass).build());
 
+		final var modelInitializer = buildModelInitializer(definitionName);
+
 		packageClass.addField(FieldSpec.builder(ConstantTypes.MODEL,
 												"MODEL",
 												Modifier.PUBLIC,
 												Modifier.STATIC,
 												Modifier.FINAL)
-									   .initializer("new $T($S, $S, $L, $N.Groups.ALL, $N.Enums.ALL, $N.Units" +
-													".ALL, $N.Aliases.ALL, $N.JavaWrappers.ALL, Instance)",
-													ConstantTypes.MODEL_IMPL,
-													model.name(),
-													model.domain(),
-													imports.build(),
-													definitionName,
-													definitionName,
-													definitionName,
-													definitionName,
-													definitionName)
+									   .initializer("$L", modelInitializer)
 									   .build());
 
 		packageClass.addMethod(MethodSpec.methodBuilder("model")
@@ -158,5 +141,26 @@ public class ModelPackage
 			enumResolve.addStatement(build);
 		}
 		enumResolve.addStatement("return $T.empty()", ConstantTypes.OPTIONAL);
+	}
+
+	private CodeBlock buildModelInitializer(final String definitionName)
+	{
+		final var initializer = CodeBlock.builder()
+										 .add("new $T()", ConstantTypes.META_MODEL_BUILDER);
+
+		BuilderInitializerUtil.appendAttributes(model,
+												initializer,
+												attribute -> attribute.rawFeature() != MetaModel.Features.lmPackage);
+
+		initializer.add(".lmPackage(Instance)");
+
+		initializer.add(".groups($N.Groups.ALL)", definitionName);
+		initializer.add(".enums($N.Enums.ALL)", definitionName);
+		initializer.add(".units($N.Units.ALL)", definitionName);
+		initializer.add(".aliases($N.Aliases.ALL)", definitionName);
+		initializer.add(".javaWrappers($N.JavaWrappers.ALL)", definitionName);
+
+		initializer.add(".build()");
+		return initializer.build();
 	}
 }
