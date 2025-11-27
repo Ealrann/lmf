@@ -3,8 +3,8 @@ package org.logoce.lmf.model.functional;
 import org.logoce.lmf.adapter.api.Adapter;
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.ModelExtender;
-import test.model.Car;
-import test.model.Person;
+import test.model.carcompany.Car;
+import test.model.carcompany.Person;
 
 public final class ModelExplorerAdapters
 {

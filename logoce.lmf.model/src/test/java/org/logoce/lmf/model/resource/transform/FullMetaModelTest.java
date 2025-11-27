@@ -18,7 +18,7 @@ public class FullMetaModelTest
 	@Test
 	public void loadFullModel() throws IOException
 	{
-		final var inputStream = Files.newInputStream(Path.of("src/main/model/asset/model.lm"));
+		final var inputStream = Files.newInputStream(Path.of("src/main/model/asset/LMCore.lm"));
 		final var ptree = treeBuilder.read(inputStream);
 		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
 		final var roots = ptreeToJava.build(ptree);

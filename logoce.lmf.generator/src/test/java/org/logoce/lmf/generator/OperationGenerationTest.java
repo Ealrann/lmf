@@ -16,7 +16,26 @@ public final class OperationGenerationTest
 	@Test
 	public void generateOperationMethodWithContent() throws IOException
 	{
-		final var targetDir = Files.createTempDirectory("operations").toFile();
+		final var targetDir = new File("build/test-generated/operations");
+		if (targetDir.exists())
+		{
+			for (final var file : targetDir.listFiles())
+			{
+				if (file.isDirectory())
+				{
+					for (final var child : file.listFiles())
+					{
+						child.delete();
+					}
+				}
+				file.delete();
+			}
+		}
+		else
+		{
+			//noinspection ResultOfMethodCallIgnored
+			targetDir.mkdirs();
+		}
 
 		final var metaModel = buildMetaModelWithOperation();
 		final var generator = new ModelGenerator(metaModel);
@@ -40,7 +59,7 @@ public final class OperationGenerationTest
 	@Test
 	public void generateOperationWithGenericParameters() throws IOException
 	{
-		final var basePackageDir = new File("src/test/generated/test/operations/generics");
+		final var basePackageDir = new File("src/test/generated/test/operations/generics/opsgeneric");
 		final var interfaceFile = new File(basePackageDir, "Service.java");
 		final var implFile = new File(new File(basePackageDir, "impl"), "ServiceImpl.java");
 

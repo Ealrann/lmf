@@ -73,7 +73,7 @@ When modifying or adding code:
 
 ## Quick Orientation for Newcomers
 
-- **Where the language is defined**: LMCore’s own meta‑model lives in `logoce.lmf.model/src/main/model/asset/model.lm`. This file shows the authoritative shapes for Groups, Features, Generics, Operations, etc. If something in `.lm` feels unclear, look here first.
+- **Where the language is defined**: LMCore’s own meta‑model lives in `logoce.lmf.model/src/main/model/asset/LMCore.lm`. This file shows the authoritative shapes for Groups, Features, Generics, Operations, etc. If something in `.lm` feels unclear, look here first.
 - **Where generation logic lives**: `logoce.lmf.generator` consumes `.lm` models to emit Java. Generated sources for LMCore itself are under `logoce.lmf.model/src/main/generated`. Never hand‑edit generated files.
 - **.lm syntax cheat sheet**:
   - `+att/-att` = Attribute (mutable/immutable). `+contains/-contains` = Relation with `contains=true`. `+refers/-refers` = Relation with `contains=false`.
@@ -92,7 +92,7 @@ When modifying or adding code:
   - JavaWrappers do not contain `generics` in LMCore; placing generics under them will fail to link.
   - Relative generic paths must be exact; `../../generics.0` counts from the current node up through parents.
   - Operations must carry their return type arguments in `returnTypeParameters`; parameter type arguments go in each `OperationParameter`’s `parameters`.
-- **Debugging linker errors**: Messages like “Cannot find containment relation…” or “Cannot resolve named token …” indicate a missing feature on the parent group or a bad reference path. Compare against `model.lm` to ensure your structure matches LMCore’s containment layout. Use existing tests (`logoce.lmf.model/src/test/java/...` and generator tests in `logoce.lmf.generator/src/test/java`) as working patterns.
+- **Debugging linker errors**: Messages like “Cannot find containment relation…” or “Cannot resolve named token …” indicate a missing feature on the parent group or a bad reference path. Compare against `LMCore.lm` to ensure your structure matches LMCore’s containment layout. Use existing tests (`logoce.lmf.model/src/test/java/...` and generator tests in `logoce.lmf.generator/src/test/java`) as working patterns.
 
 ## Operator responsibilities
 

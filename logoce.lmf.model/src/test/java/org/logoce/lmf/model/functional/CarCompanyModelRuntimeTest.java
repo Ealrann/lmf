@@ -3,8 +3,8 @@ package org.logoce.lmf.model.functional;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.api.model.LilyBasicNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
-import test.model.*;
-import test.model.impl.PersonImpl;
+import test.model.carcompany.*;
+import test.model.carcompany.impl.PersonImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,4 +163,3 @@ public class CarCompanyModelRuntimeTest
 					 "Notifications should stop after sulk is called");
 	}
 }
-

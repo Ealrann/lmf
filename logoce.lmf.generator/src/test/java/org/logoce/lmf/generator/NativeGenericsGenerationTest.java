@@ -14,7 +14,7 @@ public final class NativeGenericsGenerationTest
 	@Test
 	public void generateGenericGroupWithNativeTypeBound() throws Exception
 	{
-		final var basePackageDir = new File("src/test/generated/test/nt");
+		final var basePackageDir = new File("src/test/generated/test/nt/nativegenerics");
 		final var interfaceFile = new File(basePackageDir, "NativeContainer.java");
 
 		assertTrue(interfaceFile.isFile(), "NativeContainer.java should be generated");

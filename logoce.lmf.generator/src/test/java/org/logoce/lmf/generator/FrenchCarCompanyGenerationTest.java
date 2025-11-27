@@ -11,7 +11,7 @@ public class FrenchCarCompanyGenerationTest
 	@Test
 	public void generateFrenchCarCompanyModel()
 	{
-		final var basePackageDir = new File("src/test/generated/test/model2");
+		final var basePackageDir = new File("src/test/generated/test/model2/frenchcarcompany");
 
 		assertTrue(basePackageDir.isDirectory(), "Base package directory should exist: " + basePackageDir);
 		assertTrue(new File(basePackageDir, "French.java").isFile(), "French.java should be generated");

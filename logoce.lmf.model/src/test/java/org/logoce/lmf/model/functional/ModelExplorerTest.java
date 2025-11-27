@@ -2,8 +2,8 @@ package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.util.ModelExplorer;
-import test.model.*;
-import test.model.impl.PersonImpl;
+import test.model.carcompany.*;
+import test.model.carcompany.impl.PersonImpl;
 
 import java.util.List;
 

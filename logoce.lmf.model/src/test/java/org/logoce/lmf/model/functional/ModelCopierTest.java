@@ -2,11 +2,11 @@ package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.util.ModelCopier;
-import test.model.Brand;
-import test.model.Car;
-import test.model.CarCompany;
-import test.model.Person;
-import test.model.impl.PersonImpl;
+import test.model.carcompany.Brand;
+import test.model.carcompany.Car;
+import test.model.carcompany.CarCompany;
+import test.model.carcompany.Person;
+import test.model.carcompany.impl.PersonImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -84,4 +84,3 @@ public class ModelCopierTest
 		assertSame(externalCar, copiedCeo.car());
 	}
 }
-

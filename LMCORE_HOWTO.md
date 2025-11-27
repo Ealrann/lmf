@@ -2,7 +2,7 @@
 
 This is a short, pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.model` and `logoce.lmf.generator`.
 
-The LMCore definition itself lives in `logoce.lmf.model/src/main/model/asset/model.lm`. The CarCompany example model is in `logoce.lmf.generator/src/test/model/CarCompany.lm`.
+The LMCore definition itself lives in `logoce.lmf.model/src/main/model/asset/LMCore.lm`. The CarCompany example model is in `logoce.lmf.generator/src/test/model/CarCompany.lm`.
 
 ## 1. File Skeleton
 
@@ -155,7 +155,7 @@ This model is used by tests in `logoce.lmf.generator` and is a good template for
 
 Generics in LMCore let you describe type‑parameterised concepts and have the generator produce Java generics for you.
 
-- In LMCore’s own model (`model.lm`), look at:
+- In LMCore’s own model (`LMCore.lm`), look at:
   - `Group Feature`:
     ```lm
     (Group Feature
@@ -174,9 +174,9 @@ For your own M2 models:
 - Add `(generics name=T)` or `(Generic T ...)` blocks to groups when you need a type parameter.
 - Pass those generics down through `includes ... parameters=...` so that features know the unary/effective types.
 - The generator will emit Java types that carry those generics; this is powerful for strongly‑typed APIs, but it’s easy to get wrong if parameter lists don’t line up, so it’s best to copy patterns from LMCore’s `Feature` / `Attribute` / `Relation` definitions.
-- Relative paths: `../` climbs one level in the current block, `/groups.N/generics.M` jumps by index. When in doubt, mirror LMCore’s patterns (e.g. `Attribute`/`Relation` in `model.lm`).
+- Relative paths: `../` climbs one level in the current block, `/groups.N/generics.M` jumps by index. When in doubt, mirror LMCore’s patterns (e.g. `Attribute`/`Relation` in `LMCore.lm`).
 
-**Common pitfall:** `Operation` now carries a `returnType` plus contained `returnTypeParameters` and `parameters` (each `OperationParameter` can itself have contained `parameters` for generics). When you need to refer to a group‑level generic from inside an operation parameter, you still have to walk back up with the right number of `../generics.N` hops. Example (pattern aligned with LMCore’s `model.lm`):
+**Common pitfall:** `Operation` now carries a `returnType` plus contained `returnTypeParameters` and `parameters` (each `OperationParameter` can itself have contained `parameters` for generics). When you need to refer to a group‑level generic from inside an operation parameter, you still have to walk back up with the right number of `../generics.N` hops. Example (pattern aligned with LMCore’s `LMCore.lm`):
 
 ```lm
 (Group NativeParameter
@@ -201,7 +201,7 @@ If you see linker errors about missing generics, double‑check the relative `pa
 - For cross‑model references, add `imports=OtherModel` on your `(MetaModel ...)` and reference with `#OtherModel@Type`. All imported models must be provided to the generator together (either in one invocation or via a build that passes all relevant .lm files to the generator).
 - Build wiring: put .lm files under `src/main/model`, apply the Gradle plugin `org.logoce.lmf.gradle-plugin`, and add `src/main/generated` to your `sourceSets`. The generator can process multiple .lm files at once; make sure upstream models are part of the `availableModels` input or imports will fail.
 
-If you need to express something that doesn’t fit these patterns, open `model.lm` (LMCore itself) and look for a similar construct; almost everything in the language is modeled there.
+If you need to express something that doesn’t fit these patterns, open `LMCore.lm` (LMCore itself) and look for a similar construct; almost everything in the language is modeled there.
 
 ## 8. JavaWrappers and Units
 
@@ -211,7 +211,7 @@ If you need to express something that doesn’t fit these patterns, open `model.
   (Group PositionParameter
       (+att name=position datatype=@Vector3f [0..1]))
   ```
-  Optional `(contains serializer @Serializer)` lets you attach string conversion hooks (see LMCore’s `model.lm` for the structure).
+  Optional `(contains serializer @Serializer)` lets you attach string conversion hooks (see LMCore’s `LMCore.lm` for the structure).
 - `Unit` is for custom scalars with matcher/primitive info (see LMCore’s own units for patterns). Parsing/formatting logic currently lives in runtime code; the `.lm` only declares the unit.
 
 ## 9. Migration cheatsheet (ecore → lm)

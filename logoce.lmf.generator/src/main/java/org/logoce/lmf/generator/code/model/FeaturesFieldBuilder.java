@@ -77,14 +77,15 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 							{
 								final var parentModel = (MetaModel) targetGroup.lmContainer();
 								if (typeModel != parentModel)
-								{
-									final var modelDefinition = ClassName.get(typeModel.domain(), typeModel.name() + "Definition");
-									datatypeBlock = CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeName);
-								}
-								else
-								{
-									datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
-								}
+							{
+								final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
+																		  typeModel.name() + "Definition");
+								datatypeBlock = CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeName);
+							}
+							else
+							{
+								datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
+							}
 							}
 							else
 							{
@@ -111,7 +112,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						final var parentModel = (MetaModel) parentGroup.lmContainer();
 						if (typeModel != parentModel)
 						{
-							final var modelDefinition = ClassName.get(typeModel.domain(), typeModel.name() + "Definition");
+							final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
+																	  typeModel.name() + "Definition");
 							datatypeBlock = CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeName);
 						}
 						else
