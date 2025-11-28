@@ -1,0 +1,235 @@
+package org.logoce.lmf.lsp.features;
+
+import org.eclipse.lsp4j.DocumentSymbol;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.SymbolKind;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.resource.parsing.PToken;
+import org.logoce.lmf.model.util.TextPositions;
+import org.logoce.lmf.model.util.tree.Tree;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public final class DocumentSymbols
+{
+	private DocumentSymbols()
+	{
+	}
+
+	public static List<Either<SymbolInformation, DocumentSymbol>> buildDocumentSymbols(final SyntaxSnapshot snapshot)
+	{
+		final List<DocumentSymbol> topLevel = new ArrayList<>();
+		for (final Tree<PNode> root : snapshot.roots())
+		{
+			collectSymbols(root, null, topLevel, snapshot.source());
+		}
+		return topLevel.stream()
+					   .map(ds -> Either.<SymbolInformation, DocumentSymbol>forRight(ds))
+					   .toList();
+	}
+
+	private static void collectSymbols(final Tree<PNode> node,
+									   final DocumentSymbol currentContainer,
+									   final List<DocumentSymbol> topLevel,
+									   final CharSequence source)
+	{
+		final var pnode = node.data();
+		final var tokens = pnode.tokens();
+		final String head = tokens.isEmpty() ? "" : tokens.getFirst().value();
+
+		final SymbolKind kind = mapKind(head);
+		DocumentSymbol nextContainer = currentContainer;
+
+		if (isContainerKind(kind))
+		{
+			final var nameToken = resolveNameToken(tokens);
+			final String name = nameToken != null ? nameToken.value() : head;
+			final Range range = rangeForNode(pnode, source);
+			final Range selectionRange = nameToken != null ? rangeForToken(nameToken, source) : range;
+
+			final var container = new DocumentSymbol(Objects.requireNonNullElse(name, head), kind, range, selectionRange);
+
+			if (currentContainer != null)
+			{
+				addChild(currentContainer, container);
+			}
+			else
+			{
+				topLevel.add(container);
+			}
+			nextContainer = container;
+		}
+		else if (isLeafKind(kind) && currentContainer != null)
+		{
+			final var nameToken = resolveNameToken(tokens);
+			final String name = nameToken != null ? nameToken.value() : head;
+			final Range range = rangeForNode(pnode, source);
+			final Range selectionRange = nameToken != null ? rangeForToken(nameToken, source) : range;
+
+			final var symbol = new DocumentSymbol(Objects.requireNonNullElse(name, head), kind, range, selectionRange);
+			addChild(currentContainer, symbol);
+		}
+
+		for (final Tree<PNode> child : node.children())
+		{
+			collectSymbols(child, nextContainer, topLevel, source);
+		}
+	}
+
+	private static boolean isContainerKind(final SymbolKind kind)
+	{
+		return kind == SymbolKind.Class ||
+			   kind == SymbolKind.Enum ||
+			   kind == SymbolKind.Struct ||
+			   kind == SymbolKind.Namespace;
+	}
+
+	private static boolean isLeafKind(final SymbolKind kind)
+	{
+		return kind == SymbolKind.Field ||
+			   kind == SymbolKind.Method ||
+			   kind == SymbolKind.TypeParameter ||
+			   kind == SymbolKind.Constant;
+	}
+
+	private static void addChild(final DocumentSymbol container, final DocumentSymbol child)
+	{
+		List<DocumentSymbol> children = container.getChildren();
+		if (children == null)
+		{
+			children = new ArrayList<>();
+		}
+		children.add(child);
+		container.setChildren(children);
+	}
+
+	private static SymbolKind mapKind(final String head)
+	{
+		if (head == null) return null;
+		final String trimmed = head.trim();
+		return switch (trimmed)
+		{
+			case "MetaModel" -> SymbolKind.Namespace;
+			case "Group" -> SymbolKind.Class;
+			case "Definition" -> SymbolKind.Class;
+			case "Enum" -> SymbolKind.Enum;
+			case "Unit" -> SymbolKind.Struct;
+			case "JavaWrapper" -> SymbolKind.Class;
+			case "Alias" -> SymbolKind.Constant;
+			case "Generic" -> SymbolKind.TypeParameter;
+			case "Operation" -> SymbolKind.Method;
+			default ->
+			{
+				if (trimmed.startsWith("+") || trimmed.startsWith("-") || "reference".equals(trimmed))
+				{
+					yield SymbolKind.Field;
+				}
+				yield null;
+			}
+		};
+	}
+
+	private static PToken resolveNameToken(final List<PToken> tokens)
+	{
+		for (int i = 1; i < tokens.size(); i++)
+		{
+			final PToken tok = tokens.get(i);
+			final String val = tok.value();
+
+			if (val.startsWith("name=") && val.length() > "name=".length())
+			{
+				return new PToken(val.substring("name=".length()), tok.type(), tok.offset(), tok.length());
+			}
+
+			if ("name".equals(val))
+			{
+				if (i + 2 < tokens.size() && "=".equals(tokens.get(i + 1).value()))
+				{
+					final PToken candidate = tokens.get(i + 2);
+					return new PToken(candidate.value(), candidate.type(), candidate.offset(), candidate.length());
+				}
+				if (i + 1 < tokens.size())
+				{
+					final PToken candidate = tokens.get(i + 1);
+					return new PToken(candidate.value(), candidate.type(), candidate.offset(), candidate.length());
+				}
+			}
+
+			final int eq = val.indexOf('=');
+			if (eq > 0 && eq + 1 < val.length())
+			{
+				return new PToken(val.substring(eq + 1), tok.type(), tok.offset() + eq + 1, tok.length() - eq - 1);
+			}
+		}
+
+		for (int i = 1; i < tokens.size(); i++)
+		{
+			final PToken tok = tokens.get(i);
+			final String val = tok.value();
+			if (val.isEmpty()) continue;
+			if (!Character.isJavaIdentifierStart(val.charAt(0))) continue;
+			if (val.startsWith("+") || val.startsWith("-")) continue;
+			if (val.contains("=")) continue;
+			if ("MetaModel".equals(val) ||
+				"Group".equals(val) ||
+				"Definition".equals(val) ||
+				"Enum".equals(val) ||
+				"Unit".equals(val) ||
+				"Generic".equals(val) ||
+				"Alias".equals(val) ||
+				"JavaWrapper".equals(val) ||
+				"includes".equals(val))
+			{
+				continue;
+			}
+			return tok;
+		}
+
+		return null;
+	}
+
+	private static Range rangeForNode(final PNode node, final CharSequence source)
+	{
+		final List<PToken> tokens = node.tokens();
+		if (tokens.isEmpty())
+		{
+			final var pos = new Position(0, 0);
+			return new Range(pos, pos);
+		}
+
+		int start = Integer.MAX_VALUE;
+		int end = Integer.MIN_VALUE;
+		for (final var tok : tokens)
+		{
+			start = Math.min(start, tok.offset());
+			end = Math.max(end, tok.offset() + tok.length());
+		}
+
+		return rangeForOffsets(start, end, source);
+	}
+
+	private static Range rangeForToken(final PToken token, final CharSequence source)
+	{
+		final int start = token.offset();
+		final int end = start + Math.max(1, token.length());
+		return rangeForOffsets(start, end, source);
+	}
+
+	private static Range rangeForOffsets(final int startOffset, final int endOffset, final CharSequence source)
+	{
+		final int startLine = Math.max(0, TextPositions.lineFor(source, startOffset) - 1);
+		final int startChar = Math.max(0, TextPositions.columnFor(source, startOffset) - 1);
+		final int endLine = Math.max(0, TextPositions.lineFor(source, endOffset) - 1);
+		final int endChar = Math.max(0, TextPositions.columnFor(source, endOffset) - 1);
+
+		final var start = new Position(startLine, startChar);
+		final var end = new Position(endLine, endChar);
+		return new Range(start, end);
+	}
+}

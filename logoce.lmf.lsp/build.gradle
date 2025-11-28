@@ -1,0 +1,24 @@
+plugins {
+	id 'application'
+}
+
+application {
+	mainClass = 'org.logoce.lmf.lsp.Main'
+}
+
+dependencies {
+	implementation project(':logoce.lmf.model')
+
+	implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0'
+	implementation 'org.slf4j:slf4j-api:2.0.13'
+
+	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
+
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
+}
+
+test {
+	useJUnitPlatform()
+}

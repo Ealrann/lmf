@@ -1,0 +1,121 @@
+ Step 1 – Advertise server capabilities and implement semantic completion (using current ModelRegistry)
+
+  Goal: Make IntelliJ actually use our def/ref/hover/rename/documentSymbol handlers, and make completion draw from the current document’s MetaModel + LMCore +
+  imported M2 models that are already in ModelRegistry (LMCore + models from open documents).
+
+  1. Advertise LSP capabilities in initialize
+      - File: logoce.lmf.lsp/src/main/java/org/logoce/lmf/lsp/LmLanguageServer.java
+      - In initialize(InitializeParams params):
+          - After capabilities.setTextDocumentSync(TextDocumentSyncKind.Incremental);, add:
+              - capabilities.setCompletionProvider(new CompletionOptions());
+              - capabilities.setDefinitionProvider(true);
+              - capabilities.setReferencesProvider(true);
+              - capabilities.setHoverProvider(true);
+              - capabilities.setDocumentSymbolProvider(true);
+              - capabilities.setRenameProvider(true);
+          - Optionally set more (codeAction, formatting, etc.) as we implement them.
+      - This lets IntelliJ actually send those requests instead of relying only on generic editor features.
+  2. Wire completion to semantic model + ModelRegistry
+      - File: logoce.lmf.lsp/src/main/java/org/logoce/lmf/lsp/LmTextDocumentService.java
+      - Replace the current static completion(...) implementation with a semantic one:
+          - For a given CompletionParams:
+              - Extract URI uri = ...; Position pos = ...;.
+              - Look up LmDocumentState from workspaceIndex().getDocument(uri).
+              - Get SyntaxSnapshot + SemanticSnapshot:
+                  - syntax = state.syntaxSnapshot()
+                  - semantic = state.semanticSnapshot()
+                  - If either is null, return empty completion list.
+              - Check semantic.model():
+                  - If it’s a MetaModel mm, proceed. If not, return early (we only focus on M2 for now).
+          - Determine basic context (coarse first pass):
+              - Using SyntaxSnapshot.roots() and source, find the PNode / PToken that covers pos (approximate: scan tokens for matching line/column via
+                TextPositions).
+              - For this first step, we can ignore fine‑grained context and just always offer type names when we’re in a value position; later we can refine
+                (datatype, @, #).
+          - Collect candidate types:
+              - From the current meta‑model mm:
+                  - mm.groups(), mm.enums(), mm.units(), mm.javaWrappers().
+                  - Add their names as simple type candidates (TypeName, @TypeName, or #Model@TypeName depending on context later).
+              - From imports:
+                  - For each String imp : mm.imports():
+                      - Use workspaceIndex().modelRegistry().getModel(imp) to get the imported model (should be a MetaModel if loaded).
+                      - If found, add its groups/definitions/enums/units/wrappers as candidates, prefixing with #ImportedModel@Type for cross‑model contexts.
+              - From LMCore:
+                  - LMCore is already in ModelRegistry.empty(); we can get it from workspaceIndex().modelRegistry().models():
+                      - Find the LMCore MetaModel (domain/name known from LMCorePackage).
+                      - Add its units/wrappers/primitives as candidates (e.g. #LMCore@string, #LMCore@int).
+                  - Important: we will not register LMCore into symbolIndex, so Ctrl+Click still doesn’t go to LMCore text; completion is purely semantic.
+          - Build CompletionItems:
+              - For now, simple items:
+                  - label = display name (Brand, Car, #LMCore@string, #CarCompany@Car, etc.).
+                  - Optionally set detail (enum, unit, group, definition).
+              - Return Either.forLeft(listOfItems).
+      - Leave context‑sensitive shapes (plain name vs @Type vs #Model@Type) for step 2; step 1 can offer raw identifiers and LMCore names to prove the pipeline works.
+  3. Quick verification
+      - Rebuild LSP server: ./gradlew :logoce.lmf.lsp:installDist.
+      - Ensure logoce.lmf.lsp launcher is on PATH.
+      - Restart IntelliJ, reopen an .lm file like CarCompany.lm:
+          - You should see:
+              - Diagnostics, def/ref, rename, and document symbols working (due to capabilities being advertised).
+              - Completion offering:
+                  - Local types (Brand, Car, etc.).
+                  - Imported types (if models are loaded).
+                  - LMCore types (primitive/units/wrappers), even though LMCore.lm is not in the workspace.
+
+  ———
+
+  Step 2 – Improve project coverage for imports (beyond open files) and context‑aware completions
+
+  Goal: Let completion see all relevant M2 meta‑models, not just open files, and shape suggestions to the context (datatype vs @Type vs #Model@Type).
+
+  1. Make ModelRegistry aware of all workspace M2 models (first pass: project root)
+      - Currently rebuildModelRegistry() only adds models parsed from documents we’ve loaded via LSP; this is typically just the open files.
+      - We need to give the server a better view of the project:
+          - The IntelliJ plugin knows the project base path; the LSP server doesn’t.
+      - Simple, incremental approach:
+          - Modify LmLspServerDescriptor.createCommandLine() in logoce.lmf.intellij:
+              - Append a --project-root argument with project.getBasePath() (or equivalent) when building the command line:
+
+                new GeneralCommandLine(List.of("logoce.lmf.lsp", "--project-root", project.getBasePath()));
+          - In org.logoce.lmf.lsp.Main:
+              - Parse args for --project-root and store it (e.g. in LmLanguageServer or a small configuration object).
+          - In LmLanguageServer.rebuildModelRegistry():
+              - If projectRoot is known:
+                  - Recursively scan projectRoot for .lm files (e.g. everything under **/src/**/model/**/*.lm or simply **/*.lm for the first version).
+                  - Use LmLoader.loadModels on these files (NOT just open docs) to build a baseline list of Model instances.
+                  - Build ModelRegistry from ModelRegistry.empty() plus all loaded models.
+              - This ensures:
+                  - Imports between all project .lm files are visible.
+                  - Completion and linking see all types in the project, not just open files.
+          - For Gradle dependencies:
+              - This step can initially ignore .lm coming from external projects/JARs.
+              - Later we can let the plugin compute additional model roots (e.g. from Gradle SourceSets and classpath) and pass them via extra CLI args or a custom
+                LSP config request.
+  2. Context‑aware shaping of completion items
+      - Extend the completion logic from Step 1 to shape suggestions based on cursor context:
+          - If the cursor is:
+              - Inside a datatype= value → suggest type names (Brand, #LMCore@string, etc.).
+              - Inside a token starting with @ → suggest local type names (no model prefix).
+              - Inside a token starting with # or after # → suggest model names and #Model@Type pairs.
+          - Implementation hints:
+              - From CompletionParams.position, find the enclosing PNode/PToken using SyntaxSnapshot.roots() and TextPositions.
+              - Inspect the token text prefix (@, #) or surrounding tokens (datatype=).
+      - Use ModelRegistry and the current MetaModel as in Step 1 to provide the right type set; just adjust the string shape of each CompletionItem.label /
+        insertText.
+  3. Verify imports and LMCore completions
+      - With the new ModelRegistry build and context‑aware completion:
+          - In a project with multiple .lm files and imports, confirm you see:
+              - Types from:
+                  - Current meta‑model.
+                  - Imported meta‑models.
+                  - LMCore (even if LMCore.lm is not present).
+          - And that they’re shaped appropriately for:
+              - datatype=...
+              - @Type
+              - #Model@Type
+
+  This 2‑step plan keeps responsibilities clean:
+
+  - Step 1: tighten the core LSP implementation in the server (capabilities + semantic completion using the registry it already has).
+  - Step 2: feed the server a better ModelRegistry (via --project-root from the plugin) and refine how completions are presented based on context.
+

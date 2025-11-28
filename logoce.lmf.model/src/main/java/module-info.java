@@ -20,6 +20,10 @@ module logoce.lmf.model
 	exports org.logoce.lmf.model.loader;
 	exports org.logoce.lmf.model.loader.diagnostic;
 	exports org.logoce.lmf.model.loader.model;
+	exports org.logoce.lmf.model.loader.linking;
+	exports org.logoce.lmf.model.loader.linking.feature;
+	exports org.logoce.lmf.model.loader.linking.feature.reference;
+	exports org.logoce.lmf.model.loader.linking.tree;
 	exports org.logoce.lmf.model.api.notification;
 	exports org.logoce.lmf.model.notification.impl;
 	exports org.logoce.lmf.model.api.feature;

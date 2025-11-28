@@ -1,0 +1,24 @@
+<idea-plugin>
+    <id>org.logoce.lmf.intellij</id>
+    <name>LMF .lm Support (LSP)</name>
+    <version>0.0.1</version>
+    <vendor email="dev@logoce.org" url="https://github.com/">LMF</vendor>
+
+    <description>
+        Basic IntelliJ integration for LMF .lm files via the external LMF LSP server.
+        This plugin registers the .lm file type and is intended to be combined with
+        IntelliJ's built-in LSP support to start the LMF LSP server.
+    </description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <!-- Load LSP-related extensions from lsp.xml when the LSP module is present -->
+    <depends optional="true" config-file="lsp.xml">com.intellij.modules.lsp</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="LMF"
+                  language="LMF"
+                  implementationClass="org.logoce.lmf.intellij.LmFileType"
+                  fieldName="INSTANCE"
+                  extensions="lm"/>
+    </extensions>
+</idea-plugin>

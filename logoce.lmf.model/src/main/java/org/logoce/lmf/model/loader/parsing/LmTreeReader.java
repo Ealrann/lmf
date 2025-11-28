@@ -6,6 +6,7 @@ import org.logoce.lmf.model.resource.parsing.LexerException;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PNodeBuilder;
 import org.logoce.lmf.model.resource.parsing.PToken;
+import org.logoce.lmf.model.util.TextPositions;
 import org.logoce.lmf.model.util.tree.Tree;
 
 import java.util.ArrayList;
@@ -45,8 +46,8 @@ public final class LmTreeReader
 		catch (LexerException e)
 		{
 			final int offset = Math.min(source.length(), Math.max(0, lastOffset));
-			final int line = lineFor(source, offset);
-			final int col = columnFor(source, offset);
+			final int line = TextPositions.lineFor(source, offset);
+			final int col = TextPositions.columnFor(source, offset);
 			diagnostics.add(new LmDiagnostic(
 				line,
 				col,
@@ -67,26 +68,4 @@ public final class LmTreeReader
 	public record ReadResult(List<Tree<PNode>> roots, CharSequence source)
 	{
 	}
-
-	private static int lineFor(final CharSequence text, final int offset)
-	{
-		int line = 1;
-		for (int i = 0; i < offset && i < text.length(); i++)
-		{
-			if (text.charAt(i) == '\n') line++;
-		}
-		return line;
-	}
-
-	private static int columnFor(final CharSequence text, final int offset)
-	{
-		int col = 1;
-		for (int i = offset - 1; i >= 0 && i < text.length(); i--)
-		{
-			if (text.charAt(i) == '\n') break;
-			col++;
-		}
-		return col;
-	}
 }
-

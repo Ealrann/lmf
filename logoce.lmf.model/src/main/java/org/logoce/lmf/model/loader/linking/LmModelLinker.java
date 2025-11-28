@@ -14,6 +14,7 @@ import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.Functional;
 import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.model.util.TextPositions;
 import org.logoce.lmf.model.util.tree.BasicTree;
 import org.logoce.lmf.model.util.tree.Tree;
 
@@ -58,11 +59,11 @@ public final class LmModelLinker<I extends PNode>
 
 			if (result.model() == null && !result.roots().isEmpty())
 			{
-				final var span = spanOf(roots.getFirst().data(), source);
-				diagnostics.add(new LmDiagnostic(span.line,
-												 span.column,
-												 span.length,
-												 span.offset,
+				final var span = TextPositions.spanOf(roots.getFirst().data(), source);
+				diagnostics.add(new LmDiagnostic(span.line(),
+												 span.column(),
+												 span.length(),
+												 span.offset(),
 												 LmDiagnostic.Severity.ERROR,
 												 "Root element is not a Model; use loadObject() for generic roots"));
 			}
@@ -71,7 +72,7 @@ public final class LmModelLinker<I extends PNode>
 		}
 		catch (LinkException e)
 		{
-			final var span = spanOf(e.pNode(), source);
+			final var span = TextPositions.spanOf(e.pNode(), source);
 			diagnostics.add(new LmDiagnostic(span.line(),
 											 span.column(),
 											 span.length(),
@@ -165,36 +166,5 @@ public final class LmModelLinker<I extends PNode>
 											  List<? extends LinkNode<?, I>> trees,
 											  List<? extends LMObject> roots)
 	{
-	}
-
-	private record Span(int line, int column, int length, int offset)
-	{
-	}
-
-	private static Span spanOf(final PNode node, final CharSequence source)
-	{
-		return node.tokens()
-				   .stream()
-				   .findFirst()
-				   .map(tok -> {
-					   final int offset = tok.offset();
-					   final int length = Math.max(1, tok.length());
-					   int line = 1;
-					   int col = 1;
-					   for (int i = 0; i < offset && i < source.length(); i++)
-					   {
-						   if (source.charAt(i) == '\n')
-						   {
-							   line++;
-							   col = 1;
-						   }
-						   else
-						   {
-							   col++;
-						   }
-					   }
-					   return new Span(line, col, length, offset);
-				   })
-				   .orElse(new Span(1, 1, 1, 0));
 	}
 }

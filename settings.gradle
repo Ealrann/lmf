@@ -18,3 +18,5 @@ include ':logoce.lmf.gradle'
 
 // include ':logoce.lmf.editor'
 include ':logoce.lmf.editorfx'
+include ':logoce.lmf.lsp'
+include ':logoce.lmf.intellij'

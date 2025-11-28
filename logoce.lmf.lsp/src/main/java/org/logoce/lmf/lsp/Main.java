@@ -1,0 +1,86 @@
+package org.logoce.lmf.lsp;
+
+import org.eclipse.lsp4j.launch.LSPLauncher;
+import org.eclipse.lsp4j.services.LanguageClient;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+public final class Main
+{
+	private Main()
+	{
+	}
+
+	public static void main(final String[] args) throws Exception
+	{
+		if (args.length >= 2 && "--analyze".equals(args[0]))
+		{
+			runAnalyze(List.of(args).subList(1, args.length));
+		}
+		else
+		{
+			startServer(System.in, System.out);
+		}
+	}
+
+	public static void startServer(final InputStream in, final OutputStream out) throws Exception
+	{
+		final var server = new LmLanguageServer();
+		final var launcher = LSPLauncher.createServerLauncher(server, in, out);
+		final LanguageClient client = launcher.getRemoteProxy();
+		server.connect(client);
+		launcher.startListening().get();
+	}
+
+	private static void runAnalyze(final List<String> paths) throws Exception
+	{
+		if (paths.isEmpty())
+		{
+			System.err.println("Usage: Main --analyze <file1.lm> [file2.lm ...]");
+			return;
+		}
+
+		for (final String pathString : paths)
+		{
+			final Path path = Path.of(pathString);
+			final String text = Files.readString(path, StandardCharsets.UTF_8);
+
+			final var diagnostics = new ArrayList<org.logoce.lmf.model.loader.diagnostic.LmDiagnostic>();
+			final var treeReader = new org.logoce.lmf.model.loader.parsing.LmTreeReader();
+			final var readResult = treeReader.read(text, diagnostics);
+
+			final var roots = readResult.roots();
+			final var source = readResult.source();
+
+			if (!roots.isEmpty())
+			{
+				final var linker = new org.logoce.lmf.model.loader.linking.LmModelLinker<org.logoce.lmf.model.resource.parsing.PNode>(
+					org.logoce.lmf.model.util.ModelRegistry.empty());
+				linker.linkModel(roots, diagnostics, source);
+			}
+
+			if (diagnostics.isEmpty())
+			{
+				System.out.println(path + ": OK");
+			}
+			else
+			{
+				System.out.println(path + ":");
+				for (final var d : diagnostics)
+				{
+					System.out.printf("  %d:%d [%s] %s%n",
+									  d.line(),
+									  d.column(),
+									  d.severity(),
+									  d.message());
+				}
+			}
+		}
+	}
+}
