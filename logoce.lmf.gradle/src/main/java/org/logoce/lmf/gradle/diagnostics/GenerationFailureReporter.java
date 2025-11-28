@@ -2,7 +2,7 @@ package org.logoce.lmf.gradle.diagnostics;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 
 import java.io.File;
 import java.nio.file.Path;

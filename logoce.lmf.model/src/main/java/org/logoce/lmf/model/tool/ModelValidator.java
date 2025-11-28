@@ -1,15 +1,11 @@
 package org.logoce.lmf.model.tool;
 
-import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.resource.ResourceUtil;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

@@ -2,8 +2,8 @@ package org.logoce.lmf.gradle.diagnostics;
 
 import org.logoce.lmf.model.lexer.ELMTokenType;
 import org.logoce.lmf.model.resource.ResourceUtil;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic.Severity;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic.Severity;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 import org.logoce.lmf.model.util.ModelRegistry;

@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.resource.parsing;
 
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
 import org.logoce.lmf.model.util.tree.Tree;
 
 import java.io.BufferedReader;
@@ -58,7 +57,7 @@ public final class PTreeReader
 
 	public record ReadResult(List<Tree<PNode>> model, List<ParseDiagnostic> diagnostics, CharSequence source) {}
 
-	private int lineFor(CharSequence text, int offset) {
+	private static int lineFor(CharSequence text, int offset) {
 		int line = 1;
 		for (int i = 0; i < offset && i < text.length(); i++) {
 			if (text.charAt(i) == '\n') line++;
@@ -66,7 +65,7 @@ public final class PTreeReader
 		return line;
 	}
 
-	private int columnFor(CharSequence text, int offset) {
+	private static int columnFor(CharSequence text, int offset) {
 		int col = 1;
 		for (int i = offset - 1; i >= 0 && i < text.length(); i--) {
 			if (text.charAt(i) == '\n') break;

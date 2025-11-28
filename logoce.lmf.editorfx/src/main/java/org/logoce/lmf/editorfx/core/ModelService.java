@@ -8,7 +8,7 @@ import org.logoce.lmf.editorfx.semantic.SemanticModel;
 import org.logoce.lmf.editorfx.semantic.SemanticModelBuilder;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.resource.ResourceUtil;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;

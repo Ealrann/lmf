@@ -1,6 +1,6 @@
 package org.logoce.lmf.gradle.diagnostics;
 
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 
 import java.io.File;
 import java.util.ArrayList;

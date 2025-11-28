@@ -1,7 +1,7 @@
 package org.logoce.lmf.gradle.diagnostics;
 
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic.Severity;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic.Severity;
 import org.logoce.lmf.model.resource.parsing.LMIterableLexer;
 import org.logoce.lmf.model.resource.parsing.PToken;
 

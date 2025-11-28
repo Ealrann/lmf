@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource;
 
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.resource.diagnostic.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
 import org.logoce.lmf.model.resource.transform.PModelLinker;
 import org.logoce.lmf.model.resource.transform.multi.MultiModelLoader;
