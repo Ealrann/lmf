@@ -40,10 +40,13 @@ public final class LmLspServerSupportProvider implements LspServerSupportProvide
 		@Override
 		public @NotNull GeneralCommandLine createCommandLine()
 		{
-			// For now, assume the LSP server binary is available on PATH as 'logoce.lmf.lsp'.
-			// You can adjust this to a configurable path or wrapper script as needed.
+			final String basePath = getProject().getBasePath();
+			if (basePath != null && !basePath.isBlank())
+			{
+				return new GeneralCommandLine(List.of("logoce.lmf.lsp", "--project-root", basePath));
+			}
+
 			return new GeneralCommandLine(List.of("logoce.lmf.lsp"));
 		}
 	}
 }
-

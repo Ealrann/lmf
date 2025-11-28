@@ -25,13 +25,30 @@ public final class Main
 		}
 		else
 		{
-			startServer(System.in, System.out);
+			startServer(System.in, System.out, args);
 		}
 	}
 
 	public static void startServer(final InputStream in, final OutputStream out) throws Exception
 	{
-		final var server = new LmLanguageServer();
+		startServer(in, out, new String[0]);
+	}
+
+	public static void startServer(final InputStream in,
+								   final OutputStream out,
+								   final String[] args) throws Exception
+	{
+		java.nio.file.Path projectRoot = null;
+		for (int i = 0; i < args.length; i++)
+		{
+			if ("--project-root".equals(args[i]) && i + 1 < args.length)
+			{
+				projectRoot = Path.of(args[i + 1]);
+				break;
+			}
+		}
+
+		final var server = new LmLanguageServer(projectRoot);
 		final var launcher = LSPLauncher.createServerLauncher(server, in, out);
 		final LanguageClient client = launcher.getRemoteProxy();
 		server.connect(client);

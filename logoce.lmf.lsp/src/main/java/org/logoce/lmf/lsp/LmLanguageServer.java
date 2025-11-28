@@ -1,13 +1,14 @@
 package org.logoce.lmf.lsp;
 
+import org.eclipse.lsp4j.CompletionOptions;
+import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -24,6 +25,7 @@ import org.logoce.lmf.lsp.state.SymbolId;
 import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.lsp.state.ReferenceOccurrence;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
+import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
@@ -39,6 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -54,11 +58,17 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	private final WorkspaceIndex workspaceIndex;
 	private final LmTextDocumentService textDocumentService;
 	private final LmWorkspaceService workspaceService;
+	private final Path projectRoot;
 
 	private volatile LanguageClient client;
 	private volatile Settings settings = Settings.defaults();
 
 	public LmLanguageServer()
+	{
+		this(null);
+	}
+
+	public LmLanguageServer(final Path projectRoot)
 	{
 		this.worker = Executors.newSingleThreadExecutor(r -> {
 			final Thread t = new Thread(r, "lm-lsp-worker");
@@ -68,6 +78,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		this.workspaceIndex = new WorkspaceIndex();
 		this.textDocumentService = new LmTextDocumentService(this);
 		this.workspaceService = new LmWorkspaceService(this);
+		this.projectRoot = projectRoot;
 	}
 
 	@Override
@@ -179,6 +190,27 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 	private void rebuildModelRegistry()
 	{
+		if (projectRoot != null)
+		{
+			try
+			{
+				final var models = loadModelsFromProjectRoot(projectRoot);
+				final var builder = new ModelRegistry.Builder(ModelRegistry.empty());
+				for (final var model : models)
+				{
+					builder.register(model);
+				}
+				workspaceIndex.setModelRegistry(builder.build());
+				LOG.info("LMF LSP rebuildModelRegistry: projectRoot={}, models={}", projectRoot, models.size());
+			}
+			catch (Exception e)
+			{
+				LOG.warn("LMF LSP rebuildModelRegistry: error with projectRoot {}, falling back to empty", projectRoot, e);
+				workspaceIndex.setModelRegistry(ModelRegistry.empty());
+			}
+			return;
+		}
+
 		final var docs = workspaceIndex.documents().values();
 		if (docs.isEmpty())
 		{
@@ -204,12 +236,42 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 				builder.register(model);
 			}
 			workspaceIndex.setModelRegistry(builder.build());
+			LOG.info("LMF LSP rebuildModelRegistry: from open documents, models={}", models.size());
 		}
 		catch (Exception e)
 		{
-			LOG.warn("Failed to rebuild model registry, falling back to empty", e);
+			LOG.warn("Failed to rebuild model registry from open documents, falling back to empty", e);
 			workspaceIndex.setModelRegistry(ModelRegistry.empty());
 		}
+	}
+
+	private List<Model> loadModelsFromProjectRoot(final Path root) throws Exception
+	{
+		final var inputs = new ArrayList<java.io.InputStream>();
+		try (final var paths = Files.walk(root))
+		{
+			paths.filter(Files::isRegularFile)
+				 .filter(p -> p.getFileName().toString().endsWith(".lm"))
+				 .forEach(p -> {
+					 try
+					 {
+						 final byte[] bytes = Files.readAllBytes(p);
+						 inputs.add(new ByteArrayInputStream(bytes));
+					 }
+					 catch (Exception e)
+					 {
+						 LOG.warn("LMF LSP rebuildModelRegistry: cannot read model file {}", p, e);
+					 }
+				 });
+		}
+
+		if (inputs.isEmpty())
+		{
+			return List.of();
+		}
+
+		final var loader = LmLoader.withEmptyRegistry();
+		return loader.loadModels(inputs);
 	}
 
 	/**
@@ -220,6 +282,8 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	{
 		try
 		{
+			LOG.info("LMF LSP analyzeDocument start: uri={}, textLength={}", state.uri(), state.text().length());
+
 			final var text = state.text();
 
 			final var syntaxDiagnostics = new ArrayList<LmDiagnostic>();
@@ -254,6 +318,12 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 			rebuildIndicesForDocument(state);
 
 			publishDiagnostics(state);
+
+			final int syntaxCount = syntaxDiagnostics.size();
+			final int semanticCount = semanticDiagnostics.size();
+			final String modelKind = model == null ? "null" : model.getClass().getSimpleName();
+			LOG.info("LMF LSP analyzeDocument done: uri={}, model={}, syntaxDiag={}, semanticDiag={}",
+					 state.uri(), modelKind, syntaxCount, semanticCount);
 		}
 		catch (Exception e)
 		{
@@ -300,7 +370,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 		workspaceIndex.registerSymbols(state.uri(), symbolEntries);
 
-		final var references = buildReferences(modelKey, syntax, state.uri());
+		final var references = buildReferences(modelKey, mm, syntax, state.uri());
 		workspaceIndex.registerReferences(state.uri(), references);
 	}
 
@@ -327,6 +397,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	}
 
 	private List<ReferenceOccurrence> buildReferences(final ModelKey modelKey,
+													  final MetaModel model,
 													  final SyntaxSnapshot syntax,
 													  final java.net.URI uri)
 	{
@@ -336,7 +407,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 		for (final var root : syntax.roots())
 		{
-			collectReferencesInNode(root, modelKey, source, uri, registry, references);
+			collectReferencesInNode(root, modelKey, model, source, uri, registry, references);
 		}
 
 		return List.copyOf(references);
@@ -344,6 +415,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 	private void collectReferencesInNode(final org.logoce.lmf.model.util.tree.Tree<PNode> node,
 										 final ModelKey modelKey,
+										 final MetaModel currentModel,
 										 final CharSequence source,
 										 final java.net.URI uri,
 										 final ModelRegistry registry,
@@ -391,15 +463,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 				if (modelName != null && targetType != null)
 				{
-					ModelKey targetKey = null;
-					for (final var model : (Iterable<Model>) registry.models()::iterator)
-					{
-						if (model instanceof MetaModel mm && mm.name().equals(modelName))
-						{
-							targetKey = new ModelKey(mm.domain(), mm.name());
-							break;
-						}
-					}
+					ModelKey targetKey = resolveModelAlias(currentModel, modelName, registry);
 					if (targetKey == null)
 					{
 						targetKey = new ModelKey("", modelName);
@@ -417,8 +481,50 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 		for (final var child : node.children())
 		{
-			collectReferencesInNode(child, modelKey, source, uri, registry, out);
+			collectReferencesInNode(child, modelKey, currentModel, source, uri, registry, out);
 		}
+	}
+
+	private static ModelKey resolveModelAlias(final MetaModel currentModel,
+											  final String alias,
+											  final ModelRegistry registry)
+	{
+		if (alias == null || alias.isEmpty())
+		{
+			return null;
+		}
+
+		// LMCore is implicitly available for all M2 models.
+		if (alias.equals(LMCorePackage.MODEL.name()))
+		{
+			return new ModelKey(LMCorePackage.MODEL.domain(), LMCorePackage.MODEL.name());
+		}
+
+		// First, resolve via imports on the current meta-model.
+		for (final String imp : currentModel.imports())
+		{
+			final int lastDot = imp.lastIndexOf('.');
+			final String simpleName = lastDot >= 0 ? imp.substring(lastDot + 1) : imp;
+			if (simpleName.equals(alias))
+			{
+				final Model imported = registry.getModel(imp);
+				if (imported instanceof MetaModel mm)
+				{
+					return new ModelKey(mm.domain(), mm.name());
+				}
+			}
+		}
+
+		// Fallback: scan the registry for the first meta-model with matching simple name.
+		for (final var model : (Iterable<Model>) registry.models()::iterator)
+		{
+			if (model instanceof MetaModel mm && mm.name().equals(alias))
+			{
+				return new ModelKey(mm.domain(), mm.name());
+			}
+		}
+
+		return null;
 	}
 
 	private static org.eclipse.lsp4j.Range rangeForToken(final PToken token, final CharSequence source)
@@ -499,10 +605,22 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	@Override
 	public CompletableFuture<InitializeResult> initialize(final InitializeParams params)
 	{
-		LOG.info("Initializing LMF LSP server");
+		LOG.info("LMF LSP initialize: clientId={}, rootUri={}, projectRoot={}",
+				 params.getClientInfo() != null ? params.getClientInfo().getName() : "unknown",
+				 params.getRootUri(),
+				 projectRoot);
 
 		final var capabilities = new ServerCapabilities();
-		capabilities.setTextDocumentSync(TextDocumentSyncKind.Incremental);
+		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+		capabilities.setCompletionProvider(new CompletionOptions());
+		capabilities.setDefinitionProvider(true);
+		capabilities.setReferencesProvider(true);
+		capabilities.setHoverProvider(true);
+		capabilities.setDocumentSymbolProvider(true);
+		capabilities.setRenameProvider(true);
+
+		LOG.info("LMF LSP capabilities: textSync=Full, completion=true, definition=true, "
+				 + "references=true, hover=true, documentSymbol=true, rename=true");
 
 		final var result = new InitializeResult(capabilities);
 		return CompletableFuture.completedFuture(result);
