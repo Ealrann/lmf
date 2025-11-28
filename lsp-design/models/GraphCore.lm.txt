@@ -1,0 +1,11 @@
+(MetaModel domain=test.multi name=GraphCore
+	(Group Node
+		(+att name=name datatype=#LMCore@string [1..1]))
+
+	(Enum Color Red,Green,Blue)
+
+	(Definition ColoredNode
+		(includes group=@Node)
+		(+att name=color datatype=@Color [0..1]))
+)
+

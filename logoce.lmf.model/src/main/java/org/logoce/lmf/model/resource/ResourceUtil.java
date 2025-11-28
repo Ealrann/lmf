@@ -2,8 +2,10 @@ package org.logoce.lmf.model.resource;
 
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.model.LmDocument;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 import org.logoce.lmf.model.resource.transform.PModelLinker;
 import org.logoce.lmf.model.resource.transform.multi.MultiModelLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
@@ -11,6 +13,7 @@ import org.logoce.lmf.model.util.tree.Tree;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,28 +23,47 @@ public final class ResourceUtil
 {
 	public static List<? extends LMObject> loadObject(final InputStream inputStream, final ModelRegistry modelRegistry)
 	{
-		final var ptreeReader = new PTreeReader();
-		final var roots = ptreeReader.read(inputStream);
-		final var linker = new PModelLinker<>(modelRegistry);
-		return linker.build(roots);
+		try
+		{
+			final var loader = new LmLoader(modelRegistry);
+			return loader.loadObjects(inputStream);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Failed to read LM model", e);
+		}
 	}
 
 	public static Model loadModel(final InputStream inputStream, final ModelRegistry modelRegistry)
 	{
-		final var ptreeReader = new PTreeReader();
-		final var roots = ptreeReader.read(inputStream);
-		final var linker = new PModelLinker<>(modelRegistry);
-		final var root = linker.build(roots).get(0);
-		if (root instanceof Model model) return model;
-		else throw new IllegalArgumentException("This input doesn't define a valid model. Use loadObject() instead.");
+		try
+		{
+			final var loader = new LmLoader(modelRegistry);
+			final LmDocument doc = loader.loadModel(inputStream);
+			final var model = doc.model();
+			if (model instanceof Model m)
+			{
+				return m;
+			}
+			throw new IllegalArgumentException("This input doesn't define a valid model. Use loadObject() instead.");
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Failed to read LM model", e);
+		}
 	}
 
 	public static List<Model> loadModels(final List<InputStream> inputStreams, final ModelRegistry modelRegistry)
 	{
-		final var ptreeReader = new PTreeReader();
-		final var pTress = inputStreams.stream().map(ptreeReader::read).flatMap(Collection::stream).toList();
-		final var modelLoader = new MultiModelLoader(pTress, modelRegistry);
-		return modelLoader.build();
+		try
+		{
+			final var loader = new LmLoader(modelRegistry);
+			return loader.loadModels(inputStreams);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Failed to read LM models", e);
+		}
 	}
 
 	public static ParseResult loadModelWithDiagnostics(final InputStream inputStream, final ModelRegistry modelRegistry)

@@ -1,33 +1,8 @@
 # LMCore `.lm` How‑To (M2 Meta‑Models)
 
-This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.model` and `logoce.lmf.generator`.
-
-If you are new to this repo, read this file together with:
-
-- `logoce.lmf.model/src/main/model/asset/LMCore.lm` – the LMCore meta‑model (M3), which defines the language itself.
-- `logoce.lmf.generator/src/test/model/CarCompany.lm` – a minimal but complete M2 example.
-- The `lsp-design/` folder (optional, for tooling work) – contains copied `.lm` examples and LSP design notes.
+This is a short, pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.model` and `logoce.lmf.generator`.
 
 The LMCore definition itself lives in `logoce.lmf.model/src/main/model/asset/LMCore.lm`. The CarCompany example model is in `logoce.lmf.generator/src/test/model/CarCompany.lm`.
-
-## 0. Orientation: what you are writing
-
-- **M3 (LMCore)**  
-  LMCore (`LMCore.lm`) is the meta‑model of the language: it defines what a `MetaModel`, `Group`, `Definition`, `Enum`, `Relation`, `Generic`, `Operation`, etc. are. The Java API in `org.logoce.lmf.model.lang.*` is generated from LMCore.
-
-- **M2 (your `.lm` files)**  
-  When you write a new `.lm` file (e.g. `CarCompany.lm`), you are defining an M2 meta‑model *in terms of* LMCore. From that M2 meta‑model:
-  - `logoce.lmf.generator` generates Java types in your `domain` package.
-  - The runtime (`LmLoader` / `ResourceUtil`) can load and link your `.lm` into `MetaModel` and related LMCore objects.
-
-- **Loading `.lm` programmatically**
-  - For simple experiments:
-    ```java
-    var loader = new org.logoce.lmf.model.loader.LmLoader(ModelRegistry.empty());
-    var doc    = loader.loadModel(Files.newInputStream(path));
-    MetaModel mm = (MetaModel) doc.model();
-    ```
-  - The older `ResourceUtil.loadModel/loadModels` APIs now delegate to this loader; you can keep using them if you prefer.
 
 ## 1. File Skeleton
 
@@ -43,9 +18,8 @@ The LMCore definition itself lives in `logoce.lmf.model/src/main/model/asset/LMC
 - `name` is the model name; the generator will produce e.g. `MyModelDefinition`, `MyModelPackage`, etc.
 
 ### Quick start for new `.lm` authors
-- Start from a small working model (e.g. `logoce.lmf.generator/src/test/model/CarCompany.lm`) and tweak `domain` and `name` first.
+- Start from a small working model (e.g. `logoce.lmf.generator/src/test/model/CarCompany.lm`) and tweak names/domain first.
 - Use `Group` for abstract concepts, `Definition` for concrete ones. `includes group=@Base` sets inheritance.
-- Keep one logical domain per file: one `MetaModel` per `.lm`.
 - Generics live under the group/definition that owns them; pass them down via `includes ... (parameters ../../generics.N)`.
 - Operations need explicit type arguments: use `returnTypeParameters` for the return type and `OperationParameter ... (parameters ...)` for arguments.
 - Cross‑model refs: add `imports=Other.Domain.Model` on `(MetaModel ...)`, then reference with `#OtherModel@Type`.
@@ -218,48 +192,16 @@ If you see linker errors about missing generics, double‑check the relative `pa
 
 ## 7. Practical Tips
 
-### 7.1 Folder layout and Gradle
-
 - Keep `.lm` files in a dedicated `src/.../model` folder and generate Java into a sibling `generated` folder for that source set.
-- Typical layout for a new project:
-  - `src/main/model/MyModel.lm`
-  - `src/main/generated/` – generator output (add this as a Java source directory).
-- Apply the Gradle plugin `org.logoce.lmf.gradle-plugin` and configure:
-  - The `.lm` source directory.
-  - The generated sources directory.
-
-The generator can process multiple `.lm` files at once; make sure upstream models are part of the `availableModels` input or imports will fail.
-
-### 7.2 Modelling guidelines
-
 - Start from CarCompany:
-  - Copy `logoce.lmf.generator/src/test/model/CarCompany.lm`.
-  - Adjust `domain` and `name`.
+  - Copy the file, adjust `domain` and `name`.
   - Rename groups/definitions and tweak attributes/relations.
 - Use `+contains` for ownership/containment relationships (where moving/removing elements should propagate container changes); use `+refers` for pure references.
 - For primitive attributes, prefer `#LMCore@string`, `#LMCore@int`, etc., instead of re‑declaring units.
-- For cross‑model references, add `imports=Other.Domain.Model` on your `(MetaModel ...)` and reference with `#OtherModel@Type`. All imported models must be provided to the generator together (either in a single run, or wired through Gradle so that all relevant `.lm` files are loaded into the `ModelRegistry`).
+- For cross‑model references, add `imports=OtherModel` on your `(MetaModel ...)` and reference with `#OtherModel@Type`. All imported models must be provided to the generator together (either in one invocation or via a build that passes all relevant .lm files to the generator).
+- Build wiring: put .lm files under `src/main/model`, apply the Gradle plugin `org.logoce.lmf.gradle-plugin`, and add `src/main/generated` to your `sourceSets`. The generator can process multiple .lm files at once; make sure upstream models are part of the `availableModels` input or imports will fail.
 
 If you need to express something that doesn’t fit these patterns, open `LMCore.lm` (LMCore itself) and look for a similar construct; almost everything in the language is modeled there.
-
-### 7.3 Loading models at runtime
-
-For small tools, tests, or REPL‑style experiments, the easiest entry point is the new loader:
-
-```java
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.loader.LmLoader;
-import org.logoce.lmf.model.util.ModelRegistry;
-
-var loader = new LmLoader(ModelRegistry.empty());
-try (var in = Files.newInputStream(Path.of("src/main/model/MyModel.lm"))) {
-    var doc = loader.loadModel(in);
-    MetaModel mm = (MetaModel) doc.model();
-    // use mm.groups(), mm.enums(), ...
-}
-```
-
-If you need detailed diagnostics while editing, look at `ResourceUtil.loadModelWithDiagnostics(...)`, which returns a `ParseResult` with both the `Model` (if any) and a list of `ParseDiagnostic`s.
 
 ## 8. JavaWrappers and Units
 
@@ -295,20 +237,3 @@ If you need detailed diagnostics while editing, look at `ResourceUtil.loadModelW
 )
 ```
 Generates `Thing`, `Kind`, builders, and feature constants; containment of `children` triggers structure notifications.
-
-## 11. Where to look in the code
-
-To relate the `.lm` syntax and this how‑to to the Java implementation:
-
-- **LMCore meta‑model (M3)**  
-  `logoce.lmf.model/src/main/model/asset/LMCore.lm` and the generated API under `logoce.lmf.model/src/main/generated/org/logoce/lmf/model/lang`.
-
-- **Loading and linking `.lm`**  
-  - High‑level loader: `org.logoce.lmf.model.loader.LmLoader` (recommended entry point for tools and an LSP).
-  - Legacy façade: `org.logoce.lmf.model.resource.ResourceUtil` (used by the generator and editorfx; now delegates to the loader).
-  - Interpretation and linking internals:
-    - `org.logoce.lmf.model.resource.parsing.*` – lexing and parse trees (`PNode`, `PToken`).
-    - `org.logoce.lmf.model.resource.interpretation.*` – `PGroup`, `PFeature`, alias expansion.
-    - `org.logoce.lmf.model.resource.linking.*` – feature resolution and reference handling.
-
-If you intend to build advanced tooling (e.g. an LSP server), also check the `lsp-design/` folder at the repo root for additional notes and example models.

@@ -8,7 +8,7 @@ If you plan to touch `.lm` meta‑models or generator behaviour, read `LMCORE_HO
 
 - `logoce.lmf.model`  
   - Core **M3 meta‑model** definition (Meta‑Object‑Facility style).  
-  - Can parse and interpret `.lm` files into in‑memory models via `ResourceUtil`, `PModelLinker`, and `ModelRegistry`.  
+  - Can parse and interpret `.lm` files into in‑memory models via the new loader API (`org.logoce.lmf.model.loader.LmLoader`) or the legacy façade `ResourceUtil` (which now delegates to the loader).  
   - Provides generated Java API for the LMCore meta‑model under `org.logoce.lmf.model.lang` (in `src/main/generated`).  
   - Intended as the foundation to **load any `.lm` meta‑model (M2)** and, together with the generator, **produce Java code** for it.
 
@@ -59,7 +59,9 @@ When modifying or adding code:
 - **Model / generator specifics**
   - `logoce.lmf.model` is the reference for the language semantics; align new behavior with existing tests under `src/test/java`.  
   - Use `ModelRegistry.empty()` when you need a baseline registry that includes LMCore.  
-  - For multi‑model scenarios, prefer the existing `ResourceUtil.loadModel/loadModels` and `PModelLinker` instead of rolling custom loaders.
+  - For programmatic loading in tools or an LSP, prefer `org.logoce.lmf.model.loader.LmLoader` (single‑model, multi‑model, and generic object loading).  
+  - For existing code paths (generator, editorfx), you can keep using `ResourceUtil.loadObject/loadModel/loadModels`; these delegate to the new loader and preserve behavior and ordering.  
+  - Avoid calling `PModelLinker` directly unless you have a very specific need; the loader wraps the recommended lex/interpret/link pipeline for you.
 
 - **Modules and visibility**
   - Respect JPMS module boundaries; if you need access across modules, prefer adding targeted `exports`/`requires` rather than using raw/classpath tricks.  
@@ -75,6 +77,8 @@ When modifying or adding code:
 
 - **Where the language is defined**: LMCore’s own meta‑model lives in `logoce.lmf.model/src/main/model/asset/LMCore.lm`. This file shows the authoritative shapes for Groups, Features, Generics, Operations, etc. If something in `.lm` feels unclear, look here first.
 - **Where generation logic lives**: `logoce.lmf.generator` consumes `.lm` models to emit Java. Generated sources for LMCore itself are under `logoce.lmf.model/src/main/generated`. Never hand‑edit generated files.
+ - **How to load models in Java**: use `new org.logoce.lmf.model.loader.LmLoader(ModelRegistry.empty())` and call `loadModel(...)`, `loadModels(...)`, or `loadObjects(...)` depending on your needs. For diagnostics‑oriented flows, see `ResourceUtil.loadModelWithDiagnostics(...)`.
+ - **Where LSP design notes live**: the `lsp-design/` folder at the root contains copied `.lm` examples, the LMCore how‑to, and several design docs explaining the language, editor challenges, and desired LSP features.
 - **.lm syntax cheat sheet**:
   - `+att/-att` = Attribute (mutable/immutable). `+contains/-contains` = Relation with `contains=true`. `+refers/-refers` = Relation with `contains=false`.
   - `Group` is an abstract concept; `Definition` is a concrete group. `includes group=@Base` sets inheritance; pass generics via `(parameters ../../generics.0)` style hops.
