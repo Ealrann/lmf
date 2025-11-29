@@ -13,10 +13,17 @@ import org.logoce.lmf.model.lang.Serializer.Builder;
 import org.logoce.lmf.model.lang.impl.SerializerImpl;
 
 public final class SerializerBuilder implements Builder {
-  private static final FeatureInserter<SerializerBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<SerializerBuilder>().add(Serializer.Features.create, SerializerBuilder::create).add(Serializer.Features.convert, SerializerBuilder::convert).build();
+  private static final FeatureInserter<SerializerBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<SerializerBuilder>().add(Serializer.Features.defaultValue, SerializerBuilder::defaultValue).add(Serializer.Features.create, SerializerBuilder::create).add(Serializer.Features.convert, SerializerBuilder::convert).build();
   private static final RelationLazyInserter<SerializerBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<SerializerBuilder>().build();
+  private String defaultValue;
   private String create;
   private String convert;
+
+  @Override
+  public SerializerBuilder defaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+    return this;
+  }
 
   @Override
   public SerializerBuilder create(String create) {
@@ -32,7 +39,7 @@ public final class SerializerBuilder implements Builder {
 
   @Override
   public Serializer build() {
-    final var built = new SerializerImpl(create, convert);
+    final var built = new SerializerImpl(defaultValue, create, convert);
     return built;
   }
 

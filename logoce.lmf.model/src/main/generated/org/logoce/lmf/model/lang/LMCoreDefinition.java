@@ -192,9 +192,10 @@ public interface LMCoreDefinition {
     }
 
     interface SERIALIZER {
+      Attribute<String, String> DEFAULT_VALUE = new AttributeBuilder<String, String>().name("defaultValue").immutable(true).rawFeature(Serializer.Features.defaultValue).datatype(() -> Units.STRING).build();
       Attribute<String, String> CREATE = new AttributeBuilder<String, String>().name("create").immutable(true).mandatory(true).rawFeature(Serializer.Features.create).datatype(() -> Units.STRING).build();
       Attribute<String, String> CONVERT = new AttributeBuilder<String, String>().name("convert").immutable(true).mandatory(true).rawFeature(Serializer.Features.convert).datatype(() -> Units.STRING).build();
-      List<Feature<?, ?>> ALL = List.of(CREATE, CONVERT);
+      List<Feature<?, ?>> ALL = List.of(DEFAULT_VALUE, CREATE, CONVERT);
     }
   }
 

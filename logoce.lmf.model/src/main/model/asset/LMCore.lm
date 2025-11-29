@@ -151,6 +151,7 @@
 
 	(Definition Serializer
 		(includes group=@LMObject)
+		(-att name=defaultValue @string [0..1])
 		(-att create @string [1..1])
 		(-att convert @string [1..1]))
 
