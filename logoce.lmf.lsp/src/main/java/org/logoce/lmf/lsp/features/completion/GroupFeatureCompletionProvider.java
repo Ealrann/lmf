@@ -66,6 +66,8 @@ final class GroupFeatureCompletionProvider
 		final var headerNode = SyntaxNavigation.findEnclosingGroupHeader(syntax, pos);
 		if (headerNode == null)
 		{
+			LOG.debug("LMF LSP completion: resolveGroupFromModelAndSyntax, no header node at line={}, character={}",
+					  pos.getLine(), pos.getCharacter());
 			return null;
 		}
 
@@ -74,9 +76,13 @@ final class GroupFeatureCompletionProvider
 		final var typeNameOpt = interpreted.type().value();
 		if (typeNameOpt.isEmpty())
 		{
+			LOG.debug("LMF LSP completion: resolveGroupFromModelAndSyntax, header type has no value at line={}, character={}",
+					  pos.getLine(), pos.getCharacter());
 			return null;
 		}
 		final String typeName = typeNameOpt.get();
+		LOG.debug("LMF LSP completion: resolveGroupFromModelAndSyntax, header type='{}' at line={}, character={}",
+				  typeName, pos.getLine(), pos.getCharacter());
 
 		for (final Group<?> g : lmCore.groups())
 		{

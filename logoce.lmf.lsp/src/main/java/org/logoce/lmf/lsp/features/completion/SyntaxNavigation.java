@@ -117,51 +117,45 @@ final class SyntaxNavigation
 	static PNode findPNodeAtPosition(final SyntaxSnapshot syntax, final Position pos)
 	{
 		final CharSequence source = syntax.source();
-		PNode found = null;
+		final var best = new BestPNode();
 
 		for (final Tree<PNode> root : syntax.roots())
 		{
-			final PNode candidate = findPNodeInTree(root, source, pos);
-			if (candidate != null)
-			{
-				found = candidate;
-			}
+			findPNodeInTree(root, source, pos, best);
 		}
 
-		return found;
+		return best.node;
 	}
 
-	private static PNode findPNodeInTree(final Tree<PNode> node,
-										 final CharSequence source,
-										 final Position pos)
+	private static void findPNodeInTree(final Tree<PNode> node,
+										final CharSequence source,
+										final Position pos,
+										final BestPNode best)
 	{
 		final var tokens = node.data().tokens();
-		if (tokens.isEmpty())
+		if (!tokens.isEmpty())
 		{
-			return null;
-		}
+			final var first = tokens.getFirst();
+			final var last = tokens.getLast();
+			final var nodeRange = new Range(
+				rangeForToken(first, source).getStart(),
+				rangeForToken(last, source).getEnd());
 
-		final var first = tokens.getFirst();
-		final var last = tokens.getLast();
-		final var nodeRange = new Range(
-			rangeForToken(first, source).getStart(),
-			rangeForToken(last, source).getEnd());
-
-		if (!rangeContains(nodeRange, pos))
-		{
-			return null;
+			if (rangeContains(nodeRange, pos))
+			{
+				final int span = spanLength(nodeRange);
+				if (span < best.span)
+				{
+					best.node = node.data();
+					best.span = span;
+				}
+			}
 		}
 
 		for (final Tree<PNode> child : node.children())
 		{
-			final PNode childCandidate = findPNodeInTree(child, source, pos);
-			if (childCandidate != null)
-			{
-				return childCandidate;
-			}
+			findPNodeInTree(child, source, pos, best);
 		}
-
-		return node.data();
 	}
 
 	static PNode findEnclosingGroupHeader(final SyntaxSnapshot syntax, final Position pos)
@@ -428,5 +422,26 @@ final class SyntaxNavigation
 			case "MetaModel", "Group", "Definition", "Enum", "Unit", "Generic", "Alias", "JavaWrapper", "includes" -> true;
 			default -> false;
 		};
+	}
+
+	private static int spanLength(final Range range)
+	{
+		final var start = range.getStart();
+		final var end = range.getEnd();
+
+		if (start.getLine() == end.getLine())
+		{
+			return Math.max(1, end.getCharacter() - start.getCharacter());
+		}
+
+		final int lineSpan = end.getLine() - start.getLine();
+		final int charSpan = Math.max(0, end.getCharacter() - start.getCharacter());
+		return lineSpan * 1_000_000 + charSpan;
+	}
+
+	private static final class BestPNode
+	{
+		private PNode node;
+		private int span = Integer.MAX_VALUE;
 	}
 }
