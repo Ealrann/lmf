@@ -22,6 +22,9 @@ public final class UnitBuilder<T> implements Builder<T> {
   private Primitive primitive = Primitive.String;
   private String extractor;
 
+  public UnitBuilder() {
+  }
+
   @Override
   public UnitBuilder<T> name(String name) {
     this.name = name;

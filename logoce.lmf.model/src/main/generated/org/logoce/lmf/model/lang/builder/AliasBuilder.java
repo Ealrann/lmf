@@ -18,6 +18,9 @@ public final class AliasBuilder implements Builder {
   private String name;
   private String value;
 
+  public AliasBuilder() {
+  }
+
   @Override
   public AliasBuilder name(String name) {
     this.name = name;

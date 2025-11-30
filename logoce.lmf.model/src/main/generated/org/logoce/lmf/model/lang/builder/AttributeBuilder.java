@@ -30,6 +30,9 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   private Supplier<Datatype<UnaryType>> datatype;
   private String defaultValue;
 
+  public AttributeBuilder() {
+  }
+
   @Override
   public AttributeBuilder<UnaryType, EffectiveType> name(String name) {
     this.name = name;

@@ -68,7 +68,22 @@ public final class ModelCopier
 	{
 		final var typedAttribute = (Attribute<Object, ?>) attribute;
 		final var value = source.get(typedAttribute);
-		builder.push(typedAttribute, value);
+		if (value == null)
+		{
+			return;
+		}
+
+		if (attribute.many())
+		{
+			for (final var element : (Iterable<?>) value)
+			{
+				builder.push(typedAttribute, element);
+			}
+		}
+		else
+		{
+			builder.push(typedAttribute, value);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

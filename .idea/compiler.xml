@@ -9,9 +9,30 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="LMF.logoce.lmf.model" options="-Xlint:-module" />
-      <module name="LMF.logoce.lmf.model.main" options="-Xlint:-module" />
-      <module name="LMF.logoce.lmf.model.test" options="-Xlint:-module" />
+      <module name="LMF.logoce.lmf.adapter" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.adapter.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.adapter.test" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.extender" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.extender.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.extender.test" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.generator" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.generator.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.generator.test" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.gradle" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.gradle.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.gradle.test" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.intellij" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.intellij.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.intellij.test" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.lsp" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.lsp.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.lsp.test" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.model" options="-Xlint:all -Xlint:-module" />
+      <module name="LMF.logoce.lmf.model.main" options="-Xlint:all -Xlint:-module" />
+      <module name="LMF.logoce.lmf.model.test" options="-Xlint:all -Xlint:-module" />
+      <module name="LMF.logoce.lmf.notification" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.notification.main" options="-Xlint:all" />
+      <module name="LMF.logoce.lmf.notification.test" options="-Xlint:all" />
     </option>
   </component>
 </project>

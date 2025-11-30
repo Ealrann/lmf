@@ -24,6 +24,9 @@ public final class GenericParameterBuilder implements Builder {
   private Supplier<Type<?>> type;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
+  public GenericParameterBuilder() {
+  }
+
   @Override
   public GenericParameterBuilder wildcard(boolean wildcard) {
     this.wildcard = wildcard;

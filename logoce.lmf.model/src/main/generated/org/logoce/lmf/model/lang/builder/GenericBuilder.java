@@ -19,6 +19,9 @@ public final class GenericBuilder<T> implements Builder<T> {
   private String name;
   private Supplier<GenericExtension> extension = () -> null;
 
+  public GenericBuilder() {
+  }
+
   @Override
   public GenericBuilder<T> name(String name) {
     this.name = name;

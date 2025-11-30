@@ -1,0 +1,53 @@
+package org.logoce.lmf.model.loader;
+
+import org.junit.jupiter.api.Test;
+import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.model.loader.model.LmDocument;
+import org.logoce.lmf.model.util.ModelRegistry;
+import test.model.carcompany.CarCompanyPackage;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public final class M1LoaderTest
+{
+	@Test
+	void loadPeugeotM1Model_usesCarCompanyAsMetamodel() throws IOException
+	{
+		final var registryBuilder = new ModelRegistry.Builder();
+		registryBuilder.register(LMCorePackage.MODEL);
+		registryBuilder.register(CarCompanyPackage.MODEL);
+		final var registry = registryBuilder.build();
+
+		final var loader = new LmLoader(registry);
+
+		final var source = Files.readString(
+			Path.of("src/test/model/Peugeot.lm"), StandardCharsets.UTF_8);
+
+		final LmDocument doc = loader.loadModel(source);
+
+		System.out.println("Peugeot.lm diagnostics:");
+		doc.diagnostics().forEach(d ->
+			System.out.printf("  %s %d:%d %s%n", d.severity(), d.line(), d.column(), d.message()));
+
+		assertEquals(1, doc.roots().size(), "Peugeot.lm should have a single root");
+		assertNotNull(doc.source(), "Document source should not be null");
+
+		assertTrue(doc.diagnostics()
+					  .stream()
+					  .noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+				   "Diagnostics should not contain errors for Peugeot.lm");
+
+		final var objects = loader.loadObjects(source);
+		assertEquals(1, objects.size(), "Peugeot.lm should produce a single root object");
+		assertTrue(objects.getFirst() instanceof test.model.carcompany.CarCompany,
+				   "Root object should be a CarCompany instance");
+	}
+}

@@ -32,8 +32,13 @@ public final class LmModelLinker<I extends PNode>
 
 	public LmModelLinker(final ModelRegistry modelRegistry)
 	{
-		final var metaModels = List.of(LMCorePackage.Instance);
-		final var metaGroups = collectGroups(metaModels);
+		this(modelRegistry, List.of(LMCorePackage.Instance));
+	}
+
+	public LmModelLinker(final ModelRegistry modelRegistry,
+						 final List<? extends IModelPackage> metaModelPackages)
+	{
+		final var metaGroups = collectGroups(metaModelPackages);
 		final var metaResolvers = buildResolvers(metaGroups, modelRegistry);
 
 		this.interpreter = new LMInterpreter<>(MetaModelRegistry.Instance.getAliasMap());
@@ -155,7 +160,7 @@ public final class LmModelLinker<I extends PNode>
 					.map(group -> new ModelGroup<>(model, group));
 	}
 
-	private static Map<String, ModelGroup<?>> collectGroups(final List<LMCorePackage> metaModels)
+	private static Map<String, ModelGroup<?>> collectGroups(final List<? extends IModelPackage> metaModels)
 	{
 		return metaModels.stream()
 						 .flatMap(LmModelLinker::modelGroups)

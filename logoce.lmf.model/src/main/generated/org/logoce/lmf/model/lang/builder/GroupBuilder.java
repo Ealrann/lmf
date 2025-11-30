@@ -32,6 +32,9 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   private final List<Supplier<Operation>> operations = new ArrayList<>();
   private BuilderSupplier<T> lmBuilder;
 
+  public GroupBuilder() {
+  }
+
   @Override
   public GroupBuilder<T> name(String name) {
     this.name = name;

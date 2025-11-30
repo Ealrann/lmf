@@ -49,7 +49,7 @@ public final class BuilderFeatureUtil
 									 CodeInstaller.of(fieldBuilder, classBuilder::addField),
 									 CodeInstaller.of(rawSetterBuilder,
 													  classBuilder::addMethod,
-													  FeatureResolution::hasGeneric),
+													  f -> needsRawSetter(f, ownerGroup)),
 									 CodeInstaller.of(relationManyListBuilder,
 													  classBuilder::addMethod,
 													  RelationManyListMethodBuilder::isManyRelation),
@@ -92,6 +92,10 @@ public final class BuilderFeatureUtil
 		{
 			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
 		}
+		else if (feature instanceof Relation<?, ?> && !mandatory)
+		{
+			return Optional.of(CodeBlock.of("() -> null"));
+		}
 		else if (immutable && !mandatory)
 		{
 			if (feature instanceof Relation<?, ?>)
@@ -126,10 +130,7 @@ public final class BuilderFeatureUtil
 										f -> returnType,
 										Optional.of(f ->
 												{
-													final var baseType = f.rawSingleTypeFor(ownerGroup);
-													final var paramType = f.feature() instanceof Relation<?, ?>
-																		 ? ParameterizedTypeName.get(ConstantTypes.SUPPLIER, baseType.parametrizedWildcard().box())
-																		 : baseType.parametrizedWildcard();
+													final var paramType = rawSetterParameterType(f, ownerGroup);
 													return ParameterSpec.builder(paramType,
 																				 MethodUtil.builderSingleParameterName(f),
 																				 Modifier.FINAL)
@@ -137,6 +138,34 @@ public final class BuilderFeatureUtil
 												}),
 										Optional.of(p -> featureChangeStatement(p, true, ownerGroup)),
 										List.of(ConstantTypes.SUPPRESS_RAW_UNCHECKED));
+	}
+
+	public static boolean needsRawSetter(final FeatureResolution resolution, final Group<?> ownerGroup)
+	{
+		if (!resolution.hasGeneric())
+		{
+			return false;
+		}
+
+		final var normalParamType = resolution.builderParameterSpec(ownerGroup).type;
+		final var rawParamType = rawSetterParameterType(resolution, ownerGroup);
+		return !normalParamType.equals(rawParamType);
+	}
+
+	private static TypeName rawSetterParameterType(final FeatureResolution resolution, final Group<?> ownerGroup)
+	{
+		final var baseType = resolution.rawSingleTypeFor(ownerGroup);
+		final var feature = resolution.feature();
+		final var isRelation = feature instanceof Relation<?, ?>;
+
+		if (isRelation)
+		{
+			return ParameterizedTypeName.get(ConstantTypes.SUPPLIER, baseType.parametrizedWildcard().box());
+		}
+		else
+		{
+			return baseType.parametrizedWildcard();
+		}
 	}
 
 	private static List<CodeBlock> featureChangeStatement(final FeatureParameter parameter,

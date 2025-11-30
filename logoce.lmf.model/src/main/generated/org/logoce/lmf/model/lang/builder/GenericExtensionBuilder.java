@@ -24,6 +24,9 @@ public final class GenericExtensionBuilder implements Builder {
   private BoundType boundType;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
+  public GenericExtensionBuilder() {
+  }
+
   @Override
   public GenericExtensionBuilder type(Supplier<Type<?>> type) {
     this.type = type;

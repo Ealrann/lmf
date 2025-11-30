@@ -20,6 +20,9 @@ public final class EnumBuilder<T> implements Builder<T> {
   private String name;
   private final List<String> literals = new ArrayList<>();
 
+  public EnumBuilder() {
+  }
+
   @Override
   public EnumBuilder<T> name(String name) {
     this.name = name;

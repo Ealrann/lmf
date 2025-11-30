@@ -1,6 +1,7 @@
 package org.logoce.lmf.generator.group.builder;
 
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupBuilderClassType;
 import org.logoce.lmf.generator.util.FeatureStreams;
@@ -29,6 +30,11 @@ public final class BuilderGenerator
 		final var typedInterface = builderType.parametrized();
 
 		final var classBuilder = builderType.classSpecBuilder().addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+		final var defaultConstructor = MethodSpec.constructorBuilder()
+												 .addModifiers(Modifier.PUBLIC)
+												 .build();
+		classBuilder.addMethod(defaultConstructor);
+
 		final var featureInstallers = BuilderFeatureUtil.buildFeatureInstallers(classBuilder, typedInterface, group);
 		final var typeInstallers = BuilderFeatureUtil.buildTypeInstallers(classBuilder, group);
 

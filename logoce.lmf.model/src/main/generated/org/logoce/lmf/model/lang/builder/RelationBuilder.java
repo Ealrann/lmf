@@ -31,6 +31,9 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   private boolean lazy;
   private boolean contains;
 
+  public RelationBuilder() {
+  }
+
   @Override
   public RelationBuilder<UnaryType, EffectiveType> name(String name) {
     this.name = name;

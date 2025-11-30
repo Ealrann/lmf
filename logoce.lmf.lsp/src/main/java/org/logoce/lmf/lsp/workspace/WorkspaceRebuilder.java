@@ -208,7 +208,7 @@ public final class WorkspaceRebuilder
 			state.setSemanticSnapshot(semanticSnapshot);
 
 			final var previousGood = state.lastGoodSemanticSnapshot();
-			final var newGood = model instanceof MetaModel ? semanticSnapshot : previousGood;
+			final var newGood = model != null ? semanticSnapshot : previousGood;
 			state.setLastGoodSemanticSnapshot(newGood);
 
 			symbolIndexer.rebuildIndicesForDocument(state);

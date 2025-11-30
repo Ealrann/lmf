@@ -1,5 +1,6 @@
 package org.logoce.lmf.model.loader;
 
+import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
@@ -21,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -65,8 +67,19 @@ public final class LmLoader
 									  ? ensureLmCore(modelRegistry)
 									  : modelRegistry;
 
-		final var linker = new LmModelLinker<PNode>(effectiveRegistry);
+		final var metaPackages = isMetaModelRoot(roots)
+								 ? List.<IModelPackage>of(LMCorePackage.Instance)
+								 : resolveMetamodelPackages(roots, effectiveRegistry);
+
+		final var linker = new LmModelLinker<PNode>(effectiveRegistry, metaPackages);
 		final var linkResult = linker.linkModel(roots, diagnostics, readResult.source());
+
+		if (!isMetaModelRoot(roots) && !resolveMetamodelNames(roots.getFirst().data()).isEmpty())
+		{
+			diagnostics.removeIf(d -> d.severity() == LmDiagnostic.Severity.ERROR &&
+									  "Root element is not a Model; use loadObject() for generic roots".equals(
+										  d.message()));
+		}
 
 		return new LmDocument(linkResult.model(), List.copyOf(diagnostics), roots, readResult.source());
 	}
@@ -93,7 +106,11 @@ public final class LmLoader
 			return List.of();
 		}
 
-		final var linker = new LmModelLinker<PNode>(modelRegistry);
+		final var metaPackages = isMetaModelRoot(roots)
+								 ? List.<IModelPackage>of(LMCorePackage.Instance)
+								 : resolveMetamodelPackages(roots, modelRegistry);
+
+		final var linker = new LmModelLinker<PNode>(modelRegistry, metaPackages);
 		final var linkResult = linker.linkModelStrict(roots);
 		return linkResult.roots();
 	}
@@ -151,6 +168,34 @@ public final class LmLoader
 		return builder.build();
 	}
 
+	private List<IModelPackage> resolveMetamodelPackages(final List<Tree<PNode>> roots,
+														 final ModelRegistry registry)
+	{
+		if (roots.isEmpty())
+		{
+			return List.of(LMCorePackage.Instance);
+		}
+
+		final var rootNode = roots.getFirst().data();
+		final var metamodelNames = resolveMetamodelNames(rootNode);
+		if (metamodelNames.isEmpty())
+		{
+			return List.of(LMCorePackage.Instance);
+		}
+
+		final var packages = new ArrayList<IModelPackage>();
+		for (final var name : metamodelNames)
+		{
+			final Model model = registry.getModel(name);
+			if (model instanceof MetaModel metaModel)
+			{
+				packages.add(resolveModelPackage(metaModel));
+			}
+		}
+
+		return packages.isEmpty() ? List.of(LMCorePackage.Instance) : List.copyOf(packages);
+	}
+
 	private static boolean isMetaModelRoot(final List<Tree<PNode>> roots)
 	{
 		if (roots.isEmpty())
@@ -169,6 +214,87 @@ public final class LmLoader
 			return "MetaModel".equals(value);
 		}
 		return false;
+	}
+
+	private static List<String> resolveMetamodelNames(final PNode node)
+	{
+		final var it = node.tokens().iterator();
+		while (it.hasNext())
+		{
+			final var token = it.next();
+			if (token.type() == ELMTokenType.VALUE_NAME && "metamodels".equals(token.value()))
+			{
+				if (it.hasNext()) it.next(); // skip ASSIGN
+
+				final var values = new ArrayList<String>();
+				while (it.hasNext())
+				{
+					final var next = it.next();
+					if (next.type() == ELMTokenType.VALUE)
+					{
+						for (final var part : next.value().split(","))
+						{
+							final var trimmed = part.trim();
+							if (!trimmed.isEmpty())
+							{
+								values.add(trimmed);
+							}
+						}
+					}
+					else if (next.type() != ELMTokenType.LIST_SEPARATOR && next.type() != ELMTokenType.WHITE_SPACE)
+					{
+						break;
+					}
+				}
+				return values;
+			}
+		}
+		return List.of();
+	}
+
+	private static IModelPackage resolveModelPackage(final MetaModel metaModel)
+	{
+		final StringBuilder pkg = new StringBuilder(metaModel.domain());
+
+		final String extra = metaModel.extraPackage();
+		if (extra != null && !extra.isBlank())
+		{
+			pkg.append('.').append(extra);
+		}
+
+		if (metaModel.genNamePackage())
+		{
+			pkg.append('.').append(metaModel.name().toLowerCase(Locale.ROOT));
+		}
+
+		final String className = pkg + "." + metaModel.name() + "Package";
+
+		try
+		{
+			final Class<?> clazz = Class.forName(className);
+			if (!IModelPackage.class.isAssignableFrom(clazz))
+			{
+				throw new IllegalStateException("Class " + className + " does not implement IModelPackage");
+			}
+
+			@SuppressWarnings("unchecked")
+			final Class<? extends IModelPackage> typed = (Class<? extends IModelPackage>) clazz;
+
+			try
+			{
+				final var instanceField = typed.getField("Instance");
+				return (IModelPackage) instanceField.get(null);
+			}
+			catch (NoSuchFieldException e)
+			{
+				return typed.getDeclaredConstructor().newInstance();
+			}
+		}
+		catch (Exception e)
+		{
+			throw new IllegalStateException(
+				"Cannot resolve model package for metamodel " + metaModel.domain() + "." + metaModel.name(), e);
+		}
 	}
 
 	private static String readAll(final InputStream in) throws IOException

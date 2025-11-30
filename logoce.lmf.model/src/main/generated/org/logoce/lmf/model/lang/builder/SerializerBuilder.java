@@ -19,6 +19,9 @@ public final class SerializerBuilder implements Builder {
   private String create;
   private String convert;
 
+  public SerializerBuilder() {
+  }
+
   @Override
   public SerializerBuilder defaultValue(String defaultValue) {
     this.defaultValue = defaultValue;

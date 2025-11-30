@@ -27,6 +27,9 @@ public final class OperationBuilder implements Builder {
   private final List<Supplier<GenericParameter>> returnTypeParameters = new ArrayList<>();
   private final List<Supplier<OperationParameter>> parameters = new ArrayList<>();
 
+  public OperationBuilder() {
+  }
+
   @Override
   public OperationBuilder name(String name) {
     this.name = name;

@@ -20,6 +20,9 @@ public final class JavaWrapperBuilder<T> implements Builder<T> {
   private String qualifiedClassName;
   private Supplier<Serializer> serializer = () -> null;
 
+  public JavaWrapperBuilder() {
+  }
+
   @Override
   public JavaWrapperBuilder<T> name(String name) {
     this.name = name;

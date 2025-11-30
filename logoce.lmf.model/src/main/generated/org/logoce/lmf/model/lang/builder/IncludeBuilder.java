@@ -23,6 +23,9 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
   private Supplier<Group<T>> group;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
+  public IncludeBuilder() {
+  }
+
   @Override
   public IncludeBuilder<T> group(Supplier<Group<T>> group) {
     this.group = group;

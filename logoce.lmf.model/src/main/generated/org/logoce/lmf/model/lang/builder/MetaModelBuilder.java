@@ -37,6 +37,9 @@ public final class MetaModelBuilder implements Builder {
   private boolean genNamePackage = true;
   private String extraPackage;
 
+  public MetaModelBuilder() {
+  }
+
   @Override
   public MetaModelBuilder name(String name) {
     this.name = name;

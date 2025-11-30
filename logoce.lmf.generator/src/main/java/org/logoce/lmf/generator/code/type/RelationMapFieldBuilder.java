@@ -11,6 +11,7 @@ import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
+import org.logoce.lmf.generator.group.builder.BuilderFeatureUtil;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
@@ -66,10 +67,10 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 
 	private CodeBlock buildStatement(final FeatureResolution resolution)
 	{
-		final var hasGenerics = resolution.hasGeneric();
 		final var methodName = MethodUtil.builderMethodName(resolution);
-		final var usedMethod = hasGenerics ? '_' + methodName : methodName;
-		final var group = hasGenerics && resolution.feature().lmContainer() != ownerGroup
+		final var usesRawSetter = BuilderFeatureUtil.needsRawSetter(resolution, ownerGroup);
+		final var usedMethod = usesRawSetter ? '_' + methodName : methodName;
+		final var group = resolution.hasGeneric() && resolution.feature().lmContainer() != ownerGroup
 						  ? ownerGroup
 						  : (Group<?>) resolution.feature().lmContainer();
 		final var featureName = resolution.name();
