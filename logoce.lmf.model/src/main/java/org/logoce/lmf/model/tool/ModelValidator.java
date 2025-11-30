@@ -1,11 +1,14 @@
 package org.logoce.lmf.model.tool;
 
-import org.logoce.lmf.model.resource.ResourceUtil;
+import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +25,7 @@ import java.util.Map;
  */
 public final class ModelValidator
 {
-	public static void main(String[] args) throws Exception
+	public static void main(final String[] args) throws Exception
 	{
 		if (args.length < 1)
 		{
@@ -52,7 +55,7 @@ public final class ModelValidator
 			return 1;
 		}
 
-		final Map<File, ResourceUtil.ParseResult> parsed = new HashMap<>();
+		final Map<File, ValidationResult> parsed = new HashMap<>();
 		final var registry = new ModelRegistry.Builder(ModelRegistry.empty());
 
 		// load imports first; collect their diagnostics but continue if they succeed
@@ -102,18 +105,30 @@ public final class ModelValidator
 		return hasErrors(errors) ? 1 : 0;
 	}
 
-	private ResourceUtil.ParseResult loadWithDiagnostics(final File file, final ModelRegistry registry)
+	private ValidationResult loadWithDiagnostics(final File file, final ModelRegistry registry)
 	{
-		try (final var is = new FileInputStream(file))
+		try (final var inputStream = Files.newInputStream(file.toPath()))
 		{
-			return ResourceUtil.loadModelWithDiagnostics(is, registry);
+			final var loader = new LmLoader(registry);
+			final var document = loader.loadModel(inputStream);
+
+			final Model model = document.model();
+			final List<ParseDiagnostic> diagnostics = document.diagnostics()
+															  .stream()
+															  .map(ModelValidator::toParseDiagnostic)
+															  .toList();
+			return new ValidationResult(model, diagnostics);
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			final var message = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
-			final var diag = new ParseDiagnostic(1, 1, 1, 0, ParseDiagnostic.Severity.ERROR,
+			final var diag = new ParseDiagnostic(1,
+												 1,
+												 1,
+												 0,
+												 ParseDiagnostic.Severity.ERROR,
 												 "Failed to load " + file.getPath() + ": " + message);
-			return new ResourceUtil.ParseResult(null, List.of(diag), List.of(), "");
+			return new ValidationResult(null, List.of(diag));
 		}
 	}
 
@@ -130,5 +145,26 @@ public final class ModelValidator
 						  diag.column(),
 						  diag.severity(),
 						  diag.message());
+	}
+
+	private static ParseDiagnostic toParseDiagnostic(final LmDiagnostic diagnostic)
+	{
+		final ParseDiagnostic.Severity severity = switch (diagnostic.severity())
+		{
+			case INFO -> ParseDiagnostic.Severity.INFO;
+			case WARNING -> ParseDiagnostic.Severity.WARNING;
+			case ERROR -> ParseDiagnostic.Severity.ERROR;
+		};
+
+		return new ParseDiagnostic(diagnostic.line(),
+								   diagnostic.column(),
+								   diagnostic.length(),
+								   diagnostic.offset(),
+								   severity,
+								   diagnostic.message());
+	}
+
+	private record ValidationResult(Model model, List<ParseDiagnostic> diagnostics)
+	{
 	}
 }

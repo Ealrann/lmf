@@ -221,16 +221,14 @@ For an LSP:
 
 The existing tooling primarily uses a “fail fast” approach in some places and “diagnostic + partial model” in others:
 
-- `ResourceUtil.loadModelWithDiagnostics`:
-  - Always returns a `ParseResult` with:
-    - `Model` (possibly null).
-    - Diagnostics list.
-    - `roots` (parse trees).
-    - `source` text.
-  - Linking errors are reported as diagnostics, and building stops at the first irrecoverable error.
-- The new loader:
-  - `LmModelLinker.linkModel(...)` swallows `LinkException`s and reports them as `LmDiagnostic`s.
-  - `LmModelLinker.linkModelStrict(...)` propagates exceptions (used by `loadObjects`).
+- The loader:
+  - `LmLoader.loadModel(...)` returns an `LmDocument` with:
+    - `model()` (possibly `null`).
+    - `diagnostics()` (list of `LmDiagnostic`s).
+    - `roots()` (parse trees).
+    - `source()` text.
+  - Internally, `LmModelLinker.linkModel(...)` swallows `LinkException`s and reports them as `LmDiagnostic`s.
+  - `LmModelLinker.linkModelStrict(...)` still propagates exceptions (used by `loadObjects`).
 
 For an LSP:
 

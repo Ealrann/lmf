@@ -8,6 +8,9 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.DocumentHighlight;
+import org.eclipse.lsp4j.DocumentHighlightKind;
+import org.eclipse.lsp4j.DocumentHighlightParams;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
@@ -17,6 +20,8 @@ import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
+import org.eclipse.lsp4j.SemanticTokens;
+import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -28,6 +33,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
 import org.logoce.lmf.lsp.state.LmDocumentState;
+import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,11 +152,230 @@ public final class LmTextDocumentService implements TextDocumentService
 	}
 
 	@Override
+	public CompletableFuture<List<? extends DocumentHighlight>> documentHighlight(final DocumentHighlightParams params)
+	{
+		final URI uri = URI.create(params.getTextDocument().getUri());
+		final Position pos = params.getPosition();
+
+		return CompletableFuture.supplyAsync(() -> {
+			final var state = server.workspaceIndex().getDocument(uri);
+			final var syntax = state != null ? state.syntaxSnapshot() : null;
+
+			// 1) Brace matching when caret is on a parenthesis.
+			if (syntax != null)
+			{
+				final var parenHighlights = tryMatchParenthesis(syntax.source(), pos);
+				if (!parenHighlights.isEmpty())
+				{
+					return parenHighlights;
+				}
+			}
+
+			// 2) Fallback: symbol-based highlights (types only).
+			final var id = server.findTargetSymbol(uri, pos);
+			if (id == null || id.kind() != LmSymbolKind.TYPE)
+			{
+				return List.<DocumentHighlight>of();
+			}
+
+			final var index = server.workspaceIndex();
+			final var result = new ArrayList<DocumentHighlight>();
+
+			// Declaration in this file (if any).
+			final var decl = index.symbolIndex().get(id);
+			if (decl != null && uri.equals(decl.uri()))
+			{
+				final var dh = new DocumentHighlight(decl.range(), DocumentHighlightKind.Text);
+				result.add(dh);
+			}
+
+			// References in this file.
+			final var refs = index.referenceIndex().getOrDefault(id, List.of());
+			for (final var ref : refs)
+			{
+				if (uri.equals(ref.uri()))
+				{
+					final var dh = new DocumentHighlight(ref.range(), DocumentHighlightKind.Text);
+					result.add(dh);
+				}
+			}
+
+			return List.copyOf(result);
+		}, server.worker());
+	}
+
+	private static List<DocumentHighlight> tryMatchParenthesis(final CharSequence source, final Position pos)
+	{
+		int offset = offsetForPosition(source, pos);
+		if (offset < 0 || offset > source.length())
+		{
+			return List.of();
+		}
+
+		char ch = offset < source.length() ? source.charAt(offset) : '\0';
+		if (ch != '(' && ch != ')')
+		{
+			// Caret is often just after the parenthesis; try the previous character on the same line.
+			final int prev = offset - 1;
+			if (prev >= 0)
+			{
+				final char prevCh = source.charAt(prev);
+				if (prevCh == '(' || prevCh == ')')
+				{
+					offset = prev;
+					ch = prevCh;
+				}
+			}
+		}
+
+		if (ch != '(' && ch != ')')
+		{
+			return List.of();
+		}
+
+		final int mateOffset;
+		if (ch == '(')
+		{
+			mateOffset = findMatchingParenForward(source, offset);
+		}
+		else if (ch == ')')
+		{
+			mateOffset = findMatchingParenBackward(source, offset);
+		}
+		else
+		{
+			return List.of();
+		}
+
+		if (mateOffset < 0)
+		{
+			return List.of();
+		}
+
+		final var firstRange = rangeForOffset(source, offset);
+		final var secondRange = rangeForOffset(source, mateOffset);
+
+		final var first = new DocumentHighlight(firstRange, DocumentHighlightKind.Text);
+		final var second = new DocumentHighlight(secondRange, DocumentHighlightKind.Text);
+		return List.of(first, second);
+	}
+
+	private static int offsetForPosition(final CharSequence source, final Position pos)
+	{
+		final int targetLine = pos.getLine();
+		final int targetChar = pos.getCharacter();
+
+		int line = 0;
+		int lineStartOffset = -1;
+		for (int i = 0; i < source.length(); i++)
+		{
+			final char c = source.charAt(i);
+			if (line == targetLine)
+			{
+				lineStartOffset = i;
+				break;
+			}
+			if (c == '\n')
+			{
+				line++;
+			}
+		}
+
+		if (lineStartOffset == -1)
+		{
+			return -1;
+		}
+
+		return lineStartOffset + targetChar;
+	}
+
+	private static int findMatchingParenForward(final CharSequence source, final int startOffset)
+	{
+		int depth = 0;
+		for (int i = startOffset; i < source.length(); i++)
+		{
+			final char c = source.charAt(i);
+			if (c == '(')
+			{
+				depth++;
+			}
+			else if (c == ')')
+			{
+				depth--;
+				if (depth == 0)
+				{
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+
+	private static int findMatchingParenBackward(final CharSequence source, final int startOffset)
+	{
+		int depth = 0;
+		for (int i = startOffset; i >= 0; i--)
+		{
+			final char c = source.charAt(i);
+			if (c == ')')
+			{
+				depth++;
+			}
+			else if (c == '(')
+			{
+				depth--;
+				if (depth == 0)
+				{
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+
+	private static org.eclipse.lsp4j.Range rangeForOffset(final CharSequence source, final int offset)
+	{
+		final int line = Math.max(0, org.logoce.lmf.model.util.TextPositions.lineFor(source, offset) - 1);
+		final int col = Math.max(0, org.logoce.lmf.model.util.TextPositions.columnFor(source, offset) - 1);
+		final var start = new Position(line, col);
+		final var end = new Position(line, col + 1);
+		return new org.eclipse.lsp4j.Range(start, end);
+	}
+
+	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(final CompletionParams params)
 	{
 		final URI uri = URI.create(params.getTextDocument().getUri());
 		final Position pos = params.getPosition();
-		return CompletableFuture.supplyAsync(() -> LmCompletionEngine.complete(server, uri, pos), server.worker());
+		return CompletableFuture.supplyAsync(() -> {
+			final var result = LmCompletionEngine.complete(server, uri, pos);
+			if (result.isLeft())
+			{
+				final List<CompletionItem> items = result.getLeft();
+				LOG.info("LMF LSP completion: server returned {} items at uri={}, line={}, character={}",
+						 items.size(), uri, pos.getLine(), pos.getCharacter());
+				if (!items.isEmpty())
+				{
+					final var first = items.getFirst();
+					LOG.info("LMF LSP completion: first item label='{}', detail='{}'",
+							 first.getLabel(), first.getDetail());
+				}
+			}
+			else
+			{
+				final CompletionList list = result.getRight();
+				final List<CompletionItem> items = list.getItems();
+				LOG.info("LMF LSP completion: server returned CompletionList with {} items at uri={}, line={}, character={}",
+						 items.size(), uri, pos.getLine(), pos.getCharacter());
+				if (!items.isEmpty())
+				{
+					final var first = items.getFirst();
+					LOG.info("LMF LSP completion: first list item label='{}', detail='{}'",
+							 first.getLabel(), first.getDetail());
+				}
+			}
+			return result;
+		}, server.worker());
 	}
 
 	@Override
@@ -281,4 +506,113 @@ public final class LmTextDocumentService implements TextDocumentService
 		final var edits = changes.computeIfAbsent(key, k -> new ArrayList<>());
 		edits.add(new TextEdit(range, newText));
 	}
+
+	@Override
+	public CompletableFuture<SemanticTokens> semanticTokensFull(final SemanticTokensParams params)
+	{
+		final URI uri = URI.create(params.getTextDocument().getUri());
+
+		return CompletableFuture.supplyAsync(() -> {
+			final var state = server.workspaceIndex().getDocument(uri);
+			if (state == null)
+			{
+				return new SemanticTokens(java.util.List.of());
+			}
+
+			final var syntax = state.syntaxSnapshot();
+			if (syntax == null)
+			{
+				return new SemanticTokens(java.util.List.of());
+			}
+
+			final java.util.List<Integer> data = new java.util.ArrayList<>();
+
+			// Legend is ["keyword"], no modifiers.
+			final int tokenTypeIndex = 0;
+			final int modifiers = 0;
+
+			final CharSequence source = syntax.source();
+
+			// Collect the first non-whitespace token after '(' in each header node,
+			// regardless of the specific keyword. This corresponds to the header
+			// kind in LM headers, e.g. MetaModel, Group, Definition, Enum, etc.
+			final var headerTokens = new java.util.ArrayList<int[]>();
+			for (final var root : syntax.roots())
+			{
+				for (final var node : root.streamTree().toList())
+				{
+					final var pnode = node.data();
+					final var tokens = pnode.tokens();
+					if (tokens.isEmpty())
+					{
+						continue;
+					}
+
+					// Find first non-blank, non-"(" token.
+					var headerToken = (org.logoce.lmf.model.resource.parsing.PToken) null;
+					for (final var tok : tokens)
+					{
+						final String value = tok.value();
+						if (value == null || value.isBlank() || "(".equals(value))
+						{
+							continue;
+						}
+
+						headerToken = tok;
+						break;
+					}
+
+					if (headerToken == null)
+					{
+						continue;
+					}
+
+					final int offset = headerToken.offset();
+					final int line = Math.max(0, org.logoce.lmf.model.util.TextPositions.lineFor(source, offset) - 1);
+					final int character = Math.max(0, org.logoce.lmf.model.util.TextPositions.columnFor(source, offset) - 1);
+					final int length = Math.max(1, headerToken.length());
+
+					headerTokens.add(new int[]{line, character, length});
+				}
+			}
+
+			if (headerTokens.isEmpty())
+			{
+				return new SemanticTokens(java.util.List.of());
+			}
+
+			headerTokens.sort((a, b) -> {
+				final int cmpLine = Integer.compare(a[0], b[0]);
+				if (cmpLine != 0) return cmpLine;
+				return Integer.compare(a[1], b[1]);
+			});
+
+			int prevLine = 0;
+			int prevChar = 0;
+
+			for (final var token : headerTokens)
+			{
+				final int line = token[0];
+				final int character = token[1];
+				final int length = token[2];
+
+				final int deltaLine = line - prevLine;
+				final int deltaStart = deltaLine == 0 ? character - prevChar : character;
+
+				data.add(deltaLine);
+				data.add(deltaStart);
+				data.add(length);
+				data.add(tokenTypeIndex);
+				data.add(modifiers);
+
+				prevLine = line;
+				prevChar = character;
+			}
+
+			final var tokens = new SemanticTokens(data);
+			LOG.info("LMF LSP semanticTokensFull: uri={}, tokens={}", uri, data.size() / 5);
+			return tokens;
+		}, server.worker());
+	}
+
 }

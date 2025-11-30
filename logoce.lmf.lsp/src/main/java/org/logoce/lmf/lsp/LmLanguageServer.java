@@ -4,6 +4,10 @@ import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.SemanticTokenTypes;
+import org.eclipse.lsp4j.SemanticTokensLegend;
+import org.eclipse.lsp4j.SemanticTokensServerFull;
+import org.eclipse.lsp4j.SemanticTokensWithRegistrationOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -164,9 +168,22 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		capabilities.setCompletionProvider(new CompletionOptions());
 		capabilities.setDefinitionProvider(true);
 		capabilities.setReferencesProvider(true);
+		capabilities.setDocumentHighlightProvider(true);
 		capabilities.setHoverProvider(true);
 		capabilities.setDocumentSymbolProvider(true);
 		capabilities.setRenameProvider(true);
+
+		// Semantic tokens: use a minimal legend for now where type-like names (groups, definitions)
+		// are reported as 'keyword'. This is very visible in most themes and helps
+		// confirm that semantic tokens are correctly wired end-to-end.
+		final var legend = new SemanticTokensLegend(
+			java.util.List.of(SemanticTokenTypes.Keyword),
+			java.util.List.of()
+		);
+		final var full = new SemanticTokensServerFull();
+		full.setDelta(false);
+		final var semanticOptions = new SemanticTokensWithRegistrationOptions(legend, full, false);
+		capabilities.setSemanticTokensProvider(semanticOptions);
 
 		LOG.info("LMF LSP capabilities: textSync=Full, completion=true, definition=true, "
 				 + "references=true, hover=true, documentSymbol=true, rename=true");

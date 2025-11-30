@@ -249,17 +249,24 @@ For small tools, tests, or REPL‑style experiments, the easiest entry point is 
 ```java
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.model.LmDocument;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 var loader = new LmLoader(ModelRegistry.empty());
 try (var in = Files.newInputStream(Path.of("src/main/model/MyModel.lm"))) {
-    var doc = loader.loadModel(in);
+    LmDocument doc = loader.loadModel(in);
     MetaModel mm = (MetaModel) doc.model();
     // use mm.groups(), mm.enums(), ...
 }
 ```
 
-If you need detailed diagnostics while editing, look at `ResourceUtil.loadModelWithDiagnostics(...)`, which returns a `ParseResult` with both the `Model` (if any) and a list of `ParseDiagnostic`s.
+`LmDocument` carries:
+
+- `model()` – the linked `Model` (or `null` on failure).
+- `diagnostics()` – a list of `LmDiagnostic` entries (syntax and linking).
+- `roots()` / `source()` – the underlying parse trees and text.
+
+Use this for detailed diagnostics while editing or validating models; the legacy `ResourceUtil.loadModelWithDiagnostics(...)` façade has been removed.
 
 ## 8. JavaWrappers and Units
 

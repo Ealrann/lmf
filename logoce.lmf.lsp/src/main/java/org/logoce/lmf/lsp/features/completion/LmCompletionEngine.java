@@ -41,8 +41,8 @@ public final class LmCompletionEngine
 										  : state.semanticSnapshot();
 		if (syntax == null || semantic == null)
 		{
-			LOG.info("LMF LSP completion: missing snapshots for uri={}, syntaxNull={}, semanticNull={}",
-					 uri, syntax == null, semantic == null);
+			LOG.debug("LMF LSP completion: missing snapshots for uri={}, syntaxNull={}, semanticNull={}",
+					  uri, syntax == null, semantic == null);
 			return Either.forLeft(List.of());
 		}
 
@@ -69,8 +69,8 @@ public final class LmCompletionEngine
 			// In default context, if we have no group feature completions,
 			// do not fall back to type-oriented completions; keep expectations
 			// focused on feature names here.
-			LOG.info("LMF LSP completion: no completions in DEFAULT context for uri={}, line={}, character={}",
-					 uri, pos.getLine(), pos.getCharacter());
+			LOG.debug("LMF LSP completion: no completions in DEFAULT context for uri={}, line={}, character={}",
+					  uri, pos.getLine(), pos.getCharacter());
 			return Either.forLeft(List.of());
 		}
 
@@ -78,8 +78,8 @@ public final class LmCompletionEngine
 		final Model model = semantic.model();
 		if (!(model instanceof MetaModel mm))
 		{
-			LOG.info("LMF LSP completion: semantic model is not MetaModel for uri={}, modelClass={}, type completions skipped",
-					 uri, model != null ? model.getClass().getName() : "null");
+			LOG.debug("LMF LSP completion: semantic model is not MetaModel for uri={}, modelClass={}, type completions skipped",
+					  uri, model != null ? model.getClass().getName() : "null");
 			return Either.forLeft(List.of());
 		}
 

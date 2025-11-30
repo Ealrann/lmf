@@ -3,6 +3,8 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="21">
       <module name="LMF.logoce.lmf.editorfx" target="25" />
+      <module name="LMF.logoce.lmf.editorfx.main" target="25" />
+      <module name="LMF.logoce.lmf.editorfx.test" target="25" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

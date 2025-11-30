@@ -28,7 +28,7 @@ The Gradle workspace contains several modules; the ones most relevant to LSP wor
 
 - `logoce.lmf.editorfx`
   - A JavaFX editor that integrates the current lexer/interpreter/linker to provide a basic IDE‑like experience.
-  - Uses `ResourceUtil.loadModelWithDiagnostics` and builds its own symbol/semantic structures from `PNode` trees.
+  - Uses the new loader stack (`LmLoader` / `LmTreeReader` / `LmModelLinker`) and builds its own symbol/semantic structures from `PNode` trees.
   - Serves as a reference for what is already possible, and what is currently missing (incrementality, advanced refactorings, etc.).
 
 The other modules (`adapter`, `extender`, `notification`, `gradle`) provide infrastructure (adapters, extensibility, notifications, Gradle plugin) and are less central to LSP semantics, but will matter when we think about packaging and integration.
@@ -129,4 +129,3 @@ The new loader layer in `org.logoce.lmf.model.loader` is the intended integratio
     - `linkModelStrict(...)` – throws on link errors (legacy behavior used by `loadObjects`).
 
 Current `ResourceUtil.loadObject/loadModel/loadModels` now delegate to `LmLoader`, so existing tools (generator, tests, editorfx) run through this pipeline as well.
-

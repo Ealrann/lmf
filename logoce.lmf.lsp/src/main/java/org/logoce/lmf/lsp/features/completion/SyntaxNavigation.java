@@ -8,8 +8,11 @@ import org.logoce.lmf.model.resource.parsing.PToken;
 import org.logoce.lmf.model.util.TextPositions;
 import org.logoce.lmf.model.util.tree.Tree;
 
+import java.util.List;
+
 final class SyntaxNavigation
 {
+
 	private SyntaxNavigation()
 	{
 	}
@@ -75,6 +78,17 @@ final class SyntaxNavigation
 		final int startChar = Math.max(0, TextPositions.columnFor(source, start) - 1);
 		final int endLine = Math.max(0, TextPositions.lineFor(source, end) - 1);
 		final int endChar = Math.max(0, TextPositions.columnFor(source, end) - 1);
+		final var startPos = new Position(startLine, startChar);
+		final var endPos = new Position(endLine, endChar);
+		return new Range(startPos, endPos);
+	}
+
+	private static Range rangeForOffsets(final int startOffset, final int endOffset, final CharSequence source)
+	{
+		final int startLine = Math.max(0, TextPositions.lineFor(source, startOffset) - 1);
+		final int startChar = Math.max(0, TextPositions.columnFor(source, startOffset) - 1);
+		final int endLine = Math.max(0, TextPositions.lineFor(source, endOffset) - 1);
+		final int endChar = Math.max(0, TextPositions.columnFor(source, endOffset) - 1);
 		final var startPos = new Position(startLine, startChar);
 		final var endPos = new Position(endLine, endChar);
 		return new Range(startPos, endPos);
@@ -179,9 +193,28 @@ final class SyntaxNavigation
 
 		final var first = tokens.getFirst();
 		final var last = tokens.getLast();
-		final var nodeRange = new Range(
-			rangeForToken(first, source).getStart(),
-			rangeForToken(last, source).getEnd());
+
+		int startOffset = first.offset();
+		int endOffset = last.offset() + Math.max(1, last.length());
+
+		// Extend the header range up to the closing ')' on the same line, so that
+		// positions after the last header token (e.g. after '=') still count as
+		// being inside the header for completion purposes.
+		for (int i = endOffset; i < source.length(); i++)
+		{
+			final char c = source.charAt(i);
+			if (c == ')')
+			{
+				endOffset = i + 1;
+				break;
+			}
+			if (c == '\n')
+			{
+				break;
+			}
+		}
+
+		final var nodeRange = rangeForOffsets(startOffset, endOffset, source);
 
 		if (!rangeContains(nodeRange, pos))
 		{
@@ -264,8 +297,13 @@ final class SyntaxNavigation
 												 final CharSequence source,
 												 final Position pos)
 	{
-		final var tokens = node.tokens();
-		String currentName = null;
+		final List<PToken> tokens = node.tokens();
+		if (tokens.isEmpty())
+		{
+			return null;
+		}
+
+		int anchorIndex = -1;
 
 		for (int i = 0; i < tokens.size(); i++)
 		{
@@ -278,8 +316,51 @@ final class SyntaxNavigation
 			{
 				break;
 			}
+			anchorIndex = i;
+		}
 
+		if (anchorIndex == -1)
+		{
+			return null;
+		}
+
+		// Determine header span: first non-blank token is the keyword, second is the header name.
+		int firstNonBlank = -1;
+		int secondNonBlank = -1;
+		for (int i = 0; i <= anchorIndex; i++)
+		{
+			final String v = tokens.get(i).value();
+			if (v == null || v.isBlank() || "(".equals(v))
+			{
+				continue;
+			}
+			if (firstNonBlank == -1)
+			{
+				firstNonBlank = i;
+			}
+			else if (secondNonBlank == -1)
+			{
+				secondNonBlank = i;
+				break;
+			}
+		}
+
+		// Start scanning features after the header name if present,
+		// otherwise after the keyword.
+		final int featuresStart = secondNonBlank != -1
+								  ? secondNonBlank + 1
+								  : (firstNonBlank != -1 ? firstNonBlank + 1 : 0);
+
+		String candidate = null;
+
+		// Walk backwards from the token at or before the caret to find the
+		// nearest 'name=' style feature assignment, falling back to the last
+		// identifier-like token when '=' is absent (e.g. boolean flags like 'concrete').
+		for (int i = anchorIndex; i >= featuresStart; i--)
+		{
+			final PToken tok = tokens.get(i);
 			final String val = tok.value();
+
 			if (val == null || val.isEmpty())
 			{
 				continue;
@@ -288,20 +369,64 @@ final class SyntaxNavigation
 			final int eq = val.indexOf('=');
 			if (eq > 0)
 			{
-				currentName = val.substring(0, eq);
+				return val.substring(0, eq);
+			}
+
+			if ("=".equals(val))
+			{
+				// Look for an identifier immediately before the '=' (skipping whitespace).
+				for (int j = i - 1; j >= 0; j--)
+				{
+					final String prevVal = tokens.get(j).value();
+					if (prevVal == null || prevVal.isBlank())
+					{
+						continue;
+					}
+
+					final int prevEq = prevVal.indexOf('=');
+					if (prevEq > 0)
+					{
+						return prevVal.substring(0, prevEq);
+					}
+
+					if (Character.isJavaIdentifierStart(prevVal.charAt(0)))
+					{
+						return prevVal;
+					}
+				}
 				continue;
 			}
 
-			if (Character.isJavaIdentifierStart(val.charAt(0)) && i + 1 < tokens.size())
+			// Fallback: remember the last identifier-like token before the caret.
+			if (Character.isJavaIdentifierStart(val.charAt(0)) && val.indexOf('=') < 0)
 			{
-				final PToken eqTok = tokens.get(i + 1);
-				if ("=".equals(eqTok.value()))
-				{
-					currentName = val;
-				}
+				candidate = val;
 			}
 		}
 
-		return currentName;
+		return candidate;
+	}
+
+	private static int findNextNonWhitespaceTokenIndex(final List<PToken> tokens, final int startIndex)
+	{
+		for (int i = startIndex; i < tokens.size(); i++)
+		{
+			final String value = tokens.get(i).value();
+			if (value == null || value.isBlank())
+			{
+				continue;
+			}
+			return i;
+		}
+		return -1;
+	}
+
+	private static boolean isHeaderKeyword(final String value)
+	{
+		return switch (value)
+		{
+			case "MetaModel", "Group", "Definition", "Enum", "Unit", "Generic", "Alias", "JavaWrapper", "includes" -> true;
+			default -> false;
+		};
 	}
 }

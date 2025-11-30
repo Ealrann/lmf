@@ -77,7 +77,7 @@ When modifying or adding code:
 
 - **Where the language is defined**: LMCore’s own meta‑model lives in `logoce.lmf.model/src/main/model/asset/LMCore.lm`. This file shows the authoritative shapes for Groups, Features, Generics, Operations, etc. If something in `.lm` feels unclear, look here first.
 - **Where generation logic lives**: `logoce.lmf.generator` consumes `.lm` models to emit Java. Generated sources for LMCore itself are under `logoce.lmf.model/src/main/generated`. Never hand‑edit generated files.
- - **How to load models in Java**: use `new org.logoce.lmf.model.loader.LmLoader(ModelRegistry.empty())` and call `loadModel(...)`, `loadModels(...)`, or `loadObjects(...)` depending on your needs. For diagnostics‑oriented flows, see `ResourceUtil.loadModelWithDiagnostics(...)`.
+ - **How to load models in Java**: use `new org.logoce.lmf.model.loader.LmLoader(ModelRegistry.empty())` and call `loadModel(...)`, `loadModels(...)`, or `loadObjects(...)` depending on your needs. For diagnostics‑oriented flows, use `LmLoader.loadModel(...)` which returns an `LmDocument` carrying both the `Model` (if any) and a list of `LmDiagnostic`s.
  - **Where LSP design notes live**: the `lsp-design/` folder at the root contains copied `.lm` examples, the LMCore how‑to, and several design docs explaining the language, editor challenges, and desired LSP features.
 - **.lm syntax cheat sheet**:
   - `+att/-att` = Attribute (mutable/immutable). `+contains/-contains` = Relation with `contains=true`. `+refers/-refers` = Relation with `contains=false`.

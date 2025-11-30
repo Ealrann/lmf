@@ -4,8 +4,6 @@
 
 	(Enum Brand Renault,Peugeot)
 
-	(Group test concrete)
-
 	(Definition Car
 		(includes group=@Entity)
 		(-att name=brand datatype=@Brand [1..1] defaultValue="Peugeot")

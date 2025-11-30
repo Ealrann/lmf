@@ -10,6 +10,10 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.resource.interpretation.LMInterpreter;
+import org.logoce.lmf.model.resource.interpretation.PGroup;
+import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.logoce.lmf.model.lang.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +58,9 @@ final class GroupFeatureCompletionProvider
 														   final SyntaxSnapshot syntax,
 														   final Position pos)
 	{
-		// For now, use LMCore as the authoritative meta-model for header keywords.
+		// Use LMCore as the authoritative meta-model and mirror the linker logic:
+		// interpret the header node with alias expansion, then resolve its type name
+		// against LMCore groups (e.g. 'Definition' -> 'Group' via the Definition alias).
 		final MetaModel lmCore = LMCorePackage.MODEL;
 
 		final var headerNode = SyntaxNavigation.findEnclosingGroupHeader(syntax, pos);
@@ -63,15 +69,18 @@ final class GroupFeatureCompletionProvider
 			return null;
 		}
 
-		final String keyword = SyntaxNavigation.headerKeyword(headerNode);
-		if (keyword == null || keyword.isEmpty())
+		final var interpreter = new LMInterpreter<PNode>(MetaModelRegistry.Instance.getAliasMap());
+		final PGroup<PNode> interpreted = interpreter.interpret(headerNode);
+		final var typeNameOpt = interpreted.type().value();
+		if (typeNameOpt.isEmpty())
 		{
 			return null;
 		}
+		final String typeName = typeNameOpt.get();
 
 		for (final Group<?> g : lmCore.groups())
 		{
-			if (keyword.equals(g.name()))
+			if (typeName.equals(g.name()))
 			{
 				return g;
 			}

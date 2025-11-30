@@ -1,11 +1,12 @@
 package org.logoce.lmf.gradle.diagnostics;
 
 import org.logoce.lmf.model.lexer.ELMTokenType;
-import org.logoce.lmf.model.resource.ResourceUtil;
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic.Severity;
+import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.resource.parsing.ParseDiagnostic.Severity;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.tree.Tree;
 
@@ -38,12 +39,18 @@ final class ModelInspector
 	{
 		try (final var inputStream = new FileInputStream(file))
 		{
-			final var parseResult = ResourceUtil.loadModelWithDiagnostics(inputStream, ModelRegistry.empty());
-			final var roots = parseResult.roots();
+			final var loader = new LmLoader(ModelRegistry.empty());
+			final var document = loader.loadModel(inputStream);
+
+			final List<Tree<PNode>> roots = document.roots();
 			final var qualifiedName = extractQualifiedName(roots);
 			final var imports = extractImports(roots);
 
-			final var filteredDiagnostics = filterDiagnostics(parseResult.diagnostics());
+			final var parsedDiagnostics = document.diagnostics()
+												  .stream()
+												  .map(ModelInspector::toParseDiagnostic)
+												  .toList();
+			final var filteredDiagnostics = filterDiagnostics(parsedDiagnostics);
 
 			return new ModelInspectionResult(file,
 											 qualifiedName,
@@ -239,4 +246,21 @@ final class ModelInspector
 
 	private record Span(int line, int column)
 	{}
+
+	private static ParseDiagnostic toParseDiagnostic(final LmDiagnostic diagnostic)
+	{
+		final Severity severity = switch (diagnostic.severity())
+		{
+			case INFO -> Severity.INFO;
+			case WARNING -> Severity.WARNING;
+			case ERROR -> Severity.ERROR;
+		};
+
+		return new ParseDiagnostic(diagnostic.line(),
+								   diagnostic.column(),
+								   diagnostic.length(),
+								   diagnostic.offset(),
+								   severity,
+								   diagnostic.message());
+	}
 }
