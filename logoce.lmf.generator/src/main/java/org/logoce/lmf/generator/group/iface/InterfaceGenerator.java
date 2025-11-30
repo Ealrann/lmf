@@ -9,6 +9,7 @@ import org.logoce.lmf.generator.adapter.GroupBuilderInterfaceType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.type.InterfaceBuildMethodBuilder;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.model.lang.Group;
@@ -16,7 +17,6 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -47,9 +47,9 @@ public final class InterfaceGenerator
 		final var notificationFeaturesGenerator = new NotificationFeaturesGenerator(group);
 		final var internalFeatures = internalFeaturesGenerator.build();
 		final var notificationFeatures = notificationFeaturesGenerator.build();
-		final var featureResolutions = ModelUtils.streamAllFeatures(group)
-												 .map(f -> f.adapt(FeatureResolution.class))
-												 .toList();
+		final var featureResolutions = FeatureStreams.distinctFeatures(group)
+													 .map(f -> f.adapt(FeatureResolution.class))
+													 .toList();
 
 		final var interfaceBuilder = groupType.interfaceSpecBuilder()
 											  .addModifiers(Modifier.PUBLIC)

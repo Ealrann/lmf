@@ -51,17 +51,25 @@ public class CarCompanyModelRuntimeTest
 							.addPassenger(() -> new PersonImpl("Passenger 2"))
 							.build();
 
-		companyA.parcs().add(car1);
-		companyA.parcs().add(car2);
+		final var parcA = CarParc.builder()
+								 .addCar(() -> car1)
+								 .addCar(() -> car2)
+								 .build();
+		companyA.parcs().add(parcA);
 
-		assertSame(companyA, car1.lmContainer(), "Car 1 container should be company A");
-		assertSame(companyA, car2.lmContainer(), "Car 2 container should be company A");
+		assertSame(companyA, parcA.lmContainer(), "Parc A container should be company A");
 		assertSame(CarCompanyDefinition.Features.CAR_COMPANY.PARCS,
+				   parcA.lmContainingFeature(),
+				   "Parc A containing feature should be CarCompany.parcs");
+
+		assertSame(parcA, car1.lmContainer(), "Car 1 container should be parc A");
+		assertSame(parcA, car2.lmContainer(), "Car 2 container should be parc A");
+		assertSame(CarCompanyDefinition.Features.CAR_PARC.CARS,
 				   car1.lmContainingFeature(),
-				   "Car 1 containing feature should be CarCompany.parcs");
-		assertSame(CarCompanyDefinition.Features.CAR_COMPANY.PARCS,
+				   "Car 1 containing feature should be CarParc.cars");
+		assertSame(CarCompanyDefinition.Features.CAR_PARC.CARS,
 				   car2.lmContainingFeature(),
-				   "Car 2 containing feature should be CarCompany.parcs");
+				   "Car 2 containing feature should be CarParc.cars");
 
 		final var passenger1 = car1.passengers().getFirst();
 		final var passenger2 = car2.passengers().getFirst();
@@ -122,24 +130,7 @@ public class CarCompanyModelRuntimeTest
 		final Consumer<Notification> carListener = carNotifications::add;
 
 		company.listen(companyListener, CarCompany.Features.parcs);
-		car.listen(carListener, Car.Features.name);
 		car.listen(carListener, Car.Features.passengers);
-
-		car.name("Renamed Car");
-
-		assertTrue(carNotifications.stream()
-								   .anyMatch(n -> n.feature() == Car.Features.name &&
-												  n.type() == Notification.EventType.SET &&
-												  "Renamed Car".equals(n.newValue())),
-				   "Renaming car should produce a SET notification on Car.name");
-
-		company.parcs().add(car);
-
-		assertTrue(companyNotifications.stream()
-									   .anyMatch(n -> n.feature() == CarCompany.Features.parcs &&
-													  n.type() == Notification.EventType.ADD &&
-													  n.newValue() == car),
-				   "Adding a car to parcs should produce an ADD notification on CarCompany.parcs");
 
 		final var newPassenger = new PersonImpl("Passenger");
 		car.passengers().add(newPassenger);
@@ -150,12 +141,19 @@ public class CarCompanyModelRuntimeTest
 												  n.newValue() == newPassenger),
 				   "Adding a passenger should produce an ADD notification on Car.passengers");
 
+		final var parc = CarParc.builder().build();
+		company.parcs().add(parc);
+
+		assertTrue(companyNotifications.stream()
+									   .anyMatch(n -> n.feature() == CarCompany.Features.parcs &&
+													  n.type() == Notification.EventType.ADD &&
+													  n.newValue() == parc),
+				   "Adding a parc should produce an ADD notification on CarCompany.parcs");
+
 		final var previousCarNotificationCount = carNotifications.size();
 
-		car.sulk(carListener, Car.Features.name);
 		car.sulk(carListener, Car.Features.passengers);
 
-		car.name("Renamed Again");
 		car.passengers().add(new PersonImpl("Another Passenger"));
 
 		assertEquals(previousCarNotificationCount,

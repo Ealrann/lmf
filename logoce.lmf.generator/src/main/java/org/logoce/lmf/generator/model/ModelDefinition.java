@@ -8,6 +8,7 @@ import org.logoce.lmf.generator.code.util.InterfaceBuilder;
 import org.logoce.lmf.generator.code.util.SubInterfaceBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.lang.Group;
@@ -57,7 +58,7 @@ public class ModelDefinition
 
 	private final InterfaceBuilder<Group<?>> groupInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
 																						FeaturesFieldBuilder::new,
-																						ModelUtils::streamAllFeatures,
+																						FeatureStreams::distinctFeatures,
 																						ConstantTypes.FEATURE_ALL_BUILDER);
 
 	private final InterfaceBuilder<MetaModel> featureInterfacesBuilder = new SubInterfaceBuilder<>("Features",

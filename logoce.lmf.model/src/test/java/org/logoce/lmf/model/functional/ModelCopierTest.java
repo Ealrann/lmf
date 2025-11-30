@@ -5,6 +5,7 @@ import org.logoce.lmf.model.util.ModelCopier;
 import test.model.carcompany.Brand;
 import test.model.carcompany.Car;
 import test.model.carcompany.CarCompany;
+import test.model.carcompany.CarParc;
 import test.model.carcompany.Person;
 import test.model.carcompany.impl.PersonImpl;
 
@@ -25,10 +26,14 @@ public class ModelCopierTest
 		final var ceo = new PersonImpl("CEO");
 		ceo.car(car);
 
+		final var parc = CarParc.builder()
+								.addCar(() -> car)
+								.build();
+
 		final var company = CarCompany.builder()
 									  .name("Company")
 									  .ceo(() -> ceo)
-									  .addParc(() -> car)
+									  .addParc(() -> parc)
 									  .build();
 
 		final var copier = new ModelCopier();
@@ -43,12 +48,16 @@ public class ModelCopierTest
 		assertSame(company, originalCeo.lmContainer());
 		assertSame(copiedCompany, copiedCeo.lmContainer());
 
-		final var originalCar = company.parcs().getFirst();
-		final var copiedCar = copiedCompany.parcs().getFirst();
+		final var originalParc = company.parcs().getFirst();
+		final var copiedParc = copiedCompany.parcs().getFirst();
+
+		final var originalCar = originalParc.cars().getFirst();
+		final var copiedCar = copiedParc.cars().getFirst();
 		assertNotSame(originalCar, copiedCar);
 		assertEquals(originalCar.name(), copiedCar.name());
 		assertEquals(originalCar.brand(), copiedCar.brand());
-		assertSame(copiedCompany, copiedCar.lmContainer());
+		assertSame(copiedCompany, copiedParc.lmContainer());
+		assertSame(copiedParc, copiedCar.lmContainer());
 
 		final var originalPassenger = originalCar.passengers().getFirst();
 		final var copiedPassenger = copiedCar.passengers().getFirst();

@@ -6,10 +6,10 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.code.feature.NotificationFeatureBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.model.api.feature.INotificationFeature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -58,9 +58,9 @@ public class NotificationFeaturesGenerator
 													.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 													.addSuperinterface(featureInterfaceType);
 			final var notificationFeatureBuilder = new NotificationFeatureBuilder(group);
-			final var enumConstantSpecs = ModelUtils.streamAllFeatures(group)
-													.map(notificationFeatureBuilder::buildSpec)
-													.toList();
+			final var enumConstantSpecs = FeatureStreams.distinctFeatures(group)
+														.map(notificationFeatureBuilder::buildSpec)
+														.toList();
 
 			final var anyLocal = enumConstantSpecs.stream().anyMatch(NotificationFeatureBuilder.EnumSpec::local);
 			final var allLocal = enumConstantSpecs.stream().allMatch(NotificationFeatureBuilder.EnumSpec::local);

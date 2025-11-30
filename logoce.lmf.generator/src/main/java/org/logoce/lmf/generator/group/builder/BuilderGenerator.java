@@ -3,9 +3,9 @@ package org.logoce.lmf.generator.group.builder;
 import com.squareup.javapoet.JavaFile;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupBuilderClassType;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -32,9 +32,9 @@ public final class BuilderGenerator
 		final var featureInstallers = BuilderFeatureUtil.buildFeatureInstallers(classBuilder, typedInterface, group);
 		final var typeInstallers = BuilderFeatureUtil.buildTypeInstallers(classBuilder, group);
 
-		final var featureResolutions = ModelUtils.streamAllFeatures(group)
-												 .map(f -> f.adapt(FeatureResolution.class))
-												 .toList();
+		final var featureResolutions = FeatureStreams.distinctFeatures(group)
+													 .map(f -> f.adapt(FeatureResolution.class))
+													 .toList();
 
 		featureResolutions.forEach(featureInstallers::install);
 

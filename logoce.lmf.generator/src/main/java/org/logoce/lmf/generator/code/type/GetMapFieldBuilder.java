@@ -6,6 +6,7 @@ import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.feature.FeatureGetter;
@@ -36,10 +37,10 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var statementBuilder = new StringBuilder();
 		statementBuilder.append("new $T()");
 
-		ModelUtils.streamAllFeatures(group)
-				  .map(f -> f.adapt(FeatureResolution.class))
-				  .map(this::buildStatement)
-				  .forEach(statementBuilder::append);
+		FeatureStreams.distinctFeatures(group)
+					  .map(f -> f.adapt(FeatureResolution.class))
+					  .map(this::buildStatement)
+					  .forEach(statementBuilder::append);
 		statementBuilder.append(".build()");
 
 		return FieldSpec.builder(type.parametrized(), "GET_MAP")

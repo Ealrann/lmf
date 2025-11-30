@@ -13,7 +13,8 @@
 	(Group Model
 		(includes group=@Named)
 		(-att name=domain datatype=@string [1..1])
-		(-att name=imports datatype=@string [0..*]))
+		(-att name=imports datatype=@string [0..*])
+		(-att name=metamodels datatype=@string [0..*]))
 
 	(Definition MetaModel
 		(includes group=@Model)

@@ -40,18 +40,24 @@ public class ModelExplorerTest
 		final var company = CarCompany.builder()
 									  .name("Company")
 									  .ceo(() -> new PersonImpl("CEO"))
-									  .addParc(() -> Car.builder()
-														.name("Car 1")
-														.brand(Brand.Peugeot)
-														.addPassenger(() -> new PersonImpl("Passenger 1"))
-														.build())
-									  .addParc(() -> Car.builder()
-														.name("Car 2")
-														.brand(Brand.Renault)
-														.addPassenger(() -> new PersonImpl("Passenger 2"))
-														.build())
+									  .addParc(() -> CarParc.builder()
+														   .addCar(() -> Car.builder()
+																			 .name("Car 1")
+																			 .brand(Brand.Peugeot)
+																			 .addPassenger(() -> new PersonImpl("Passenger 1"))
+																			 .build())
+														   .build())
+									  .addParc(() -> CarParc.builder()
+														   .addCar(() -> Car.builder()
+																			 .name("Car 2")
+																			 .brand(Brand.Renault)
+																			 .addPassenger(() -> new PersonImpl("Passenger 2"))
+																			 .build())
+														   .build())
 									  .build();
-		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs, Car.Features.passengers));
+		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs,
+													   CarParc.Features.cars,
+													   Car.Features.passengers));
 		final var passengers = explorer.explore(company, Person.class);
 
 		assertEquals(2, passengers.size());
@@ -90,14 +96,17 @@ public class ModelExplorerTest
 							.brand(Brand.Renault)
 							.addPassenger(() -> new PersonImpl("Passenger 2"))
 							.build();
+		final var parc1 = CarParc.builder().addCar(() -> car1).build();
+		final var parc2 = CarParc.builder().addCar(() -> car2).build();
 		final var company = CarCompany.builder()
 									  .name("Company")
 									  .ceo(() -> new PersonImpl("CEO"))
-									  .addParc(() -> car1)
-									  .addParc(() -> car2)
+									  .addParc(() -> parc1)
+									  .addParc(() -> parc2)
 									  .build();
 		final var passenger = car1.passengers().getFirst();
-		final var explorer = new ModelExplorer(2, List.of(CarCompany.Features.parcs));
+		final var explorer = new ModelExplorer(3, List.of(CarCompany.Features.parcs,
+														  CarParc.Features.cars));
 		final var cars = explorer.explore(passenger, Car.class);
 
 		assertEquals(2, cars.size());
@@ -112,16 +121,21 @@ public class ModelExplorerTest
 		final var company = CarCompany.builder()
 									  .name("Company")
 									  .ceo(() -> new PersonImpl("CEO"))
-									  .addParc(() -> Car.builder()
-														.name("Car 1")
-														.brand(Brand.Peugeot)
-														.build())
-									  .addParc(() -> Car.builder()
-														.name("Car 2")
-														.brand(Brand.Renault)
-														.build())
+									  .addParc(() -> CarParc.builder()
+														   .addCar(() -> Car.builder()
+																			 .name("Car 1")
+																			 .brand(Brand.Peugeot)
+																			 .build())
+														   .build())
+									  .addParc(() -> CarParc.builder()
+														   .addCar(() -> Car.builder()
+																			 .name("Car 2")
+																			 .brand(Brand.Renault)
+																			 .build())
+														   .build())
 									  .build();
-		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs));
+		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs,
+													   CarParc.Features.cars));
 		final var adapters = explorer.exploreAdapt(company, ModelExplorerAdapters.CarAdapter.class);
 
 		assertEquals(2, adapters.size());
@@ -140,13 +154,17 @@ public class ModelExplorerTest
 		final var company = CarCompany.builder()
 									  .name("Company")
 									  .ceo(() -> new PersonImpl("CEO"))
-									  .addParc(() -> Car.builder()
-														.name("Car 1")
-														.brand(Brand.Peugeot)
-														.addPassenger(() -> new PersonImpl("Passenger 1"))
-														.build())
+									  .addParc(() -> CarParc.builder()
+														   .addCar(() -> Car.builder()
+																			 .name("Car 1")
+																			 .brand(Brand.Peugeot)
+																			 .addPassenger(() -> new PersonImpl("Passenger 1"))
+																			 .build())
+														   .build())
 									  .build();
-		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs, Car.Features.passengers));
+		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs,
+													   CarParc.Features.cars,
+													   Car.Features.passengers));
 		final var adapters = explorer.exploreAdaptNotNull(company,
 														  ModelExplorerAdapters.PersonAdapter.class);
 

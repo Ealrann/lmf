@@ -22,11 +22,12 @@ import org.logoce.lmf.model.lang.impl.MetaModelImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class MetaModelBuilder implements Builder {
-  private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.name, MetaModelBuilder::name).add(MetaModel.Features.domain, MetaModelBuilder::domain).add(MetaModel.Features.imports, MetaModelBuilder::addImport).add(MetaModel.Features.lmPackage, MetaModelBuilder::lmPackage).add(MetaModel.Features.genNamePackage, MetaModelBuilder::genNamePackage).add(MetaModel.Features.extraPackage, MetaModelBuilder::extraPackage).build();
+  private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.name, MetaModelBuilder::name).add(MetaModel.Features.domain, MetaModelBuilder::domain).add(MetaModel.Features.imports, MetaModelBuilder::addImport).add(MetaModel.Features.metamodels, MetaModelBuilder::addMetamodel).add(MetaModel.Features.lmPackage, MetaModelBuilder::lmPackage).add(MetaModel.Features.genNamePackage, MetaModelBuilder::genNamePackage).add(MetaModel.Features.extraPackage, MetaModelBuilder::extraPackage).build();
   private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>().add(MetaModel.Features.groups, MetaModelBuilder::addGroup).add(MetaModel.Features.enums, MetaModelBuilder::addEnum).add(MetaModel.Features.units, MetaModelBuilder::addUnit).add(MetaModel.Features.aliases, MetaModelBuilder::addAliase).add(MetaModel.Features.javaWrappers, MetaModelBuilder::addJavaWrapper).build();
   private String name;
   private String domain;
   private final List<String> imports = new ArrayList<>();
+  private final List<String> metamodels = new ArrayList<>();
   private final List<Supplier<Group<?>>> groups = new ArrayList<>();
   private final List<Supplier<Enum<?>>> enums = new ArrayList<>();
   private final List<Supplier<Unit<?>>> units = new ArrayList<>();
@@ -57,6 +58,18 @@ public final class MetaModelBuilder implements Builder {
   @Override
   public MetaModelBuilder addImports(final List<String> imports) {
     this.imports.addAll(imports);
+    return this;
+  }
+
+  @Override
+  public MetaModelBuilder addMetamodel(String metamodel) {
+    this.metamodels.add(metamodel);
+    return this;
+  }
+
+  @Override
+  public MetaModelBuilder addMetamodels(final List<String> metamodels) {
+    this.metamodels.addAll(metamodels);
     return this;
   }
 
@@ -145,7 +158,7 @@ public final class MetaModelBuilder implements Builder {
     final var builtUnits = BuildUtils.collectSuppliers(units);
     final var builtAliases = BuildUtils.collectSuppliers(aliases);
     final var builtJavaWrappers = BuildUtils.collectSuppliers(javaWrappers);
-    final var built = new MetaModelImpl(name, domain, imports, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lmPackage, genNamePackage, extraPackage);
+    final var built = new MetaModelImpl(name, domain, imports, metamodels, builtGroups, builtEnums, builtUnits, builtAliases, builtJavaWrappers, lmPackage, genNamePackage, extraPackage);
     return built;
   }
 

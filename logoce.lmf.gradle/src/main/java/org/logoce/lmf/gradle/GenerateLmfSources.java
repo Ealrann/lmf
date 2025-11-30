@@ -3,6 +3,7 @@ package org.logoce.lmf.gradle;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
@@ -10,8 +11,13 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.logoce.lmf.gradle.diagnostics.GenerationFailureReporter;
+import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +53,7 @@ public abstract class GenerateLmfSources extends DefaultTask
 		logger.lifecycle("Generating LMF sources from {}", modelFiles);
 		try
 		{
-			runGenerator(modelFiles, outputDir);
+			runGenerator(modelFiles, outputDir, logger);
 		}
 		catch (Exception e)
 		{
@@ -55,8 +61,31 @@ public abstract class GenerateLmfSources extends DefaultTask
 		}
 	}
 
-	private static void runGenerator(final List<File> modelFiles, final File outputDir)
+	private static void runGenerator(final List<File> modelFiles,
+									 final File outputDir,
+									 final Logger logger) throws IOException
 	{
-		org.logoce.lmf.generator.Main.generate(outputDir, modelFiles, modelFiles);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final List<File> metaModelFiles = new ArrayList<>();
+
+		for (final var file : modelFiles)
+		{
+			try (final var in = new FileInputStream(file))
+			{
+				final var document = loader.loadModel(in);
+				if (document.model() instanceof MetaModel)
+				{
+					metaModelFiles.add(file);
+				}
+			}
+		}
+
+		if (metaModelFiles.isEmpty())
+		{
+			logger.lifecycle("No MetaModel roots found in LMF model files; skipping LMF code generation.");
+			return;
+		}
+
+		org.logoce.lmf.generator.Main.generate(outputDir, metaModelFiles, metaModelFiles);
 	}
 }

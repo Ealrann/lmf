@@ -1,16 +1,17 @@
 package org.logoce.lmf.model.loader;
 
+import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lexer.ELMTokenType;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LmModelLinker;
 import org.logoce.lmf.model.loader.model.LmDocument;
+import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.tree.Tree;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -60,7 +61,11 @@ public final class LmLoader
 			return new LmDocument(null, List.copyOf(diagnostics), roots, readResult.source());
 		}
 
-		final var linker = new LmModelLinker<>(modelRegistry);
+		final var effectiveRegistry = isMetaModelRoot(roots)
+									  ? ensureLmCore(modelRegistry)
+									  : modelRegistry;
+
+		final var linker = new LmModelLinker<PNode>(effectiveRegistry);
 		final var linkResult = linker.linkModel(roots, diagnostics, readResult.source());
 
 		return new LmDocument(linkResult.model(), List.copyOf(diagnostics), roots, readResult.source());
@@ -131,6 +136,39 @@ public final class LmLoader
 		}
 
 		return MultiModelSupport.buildAll(parsedModels, modelRegistry);
+	}
+
+	private static ModelRegistry ensureLmCore(final ModelRegistry registry)
+	{
+		final var existing = registry.getModel(LMCorePackage.MODEL.domain(), LMCorePackage.MODEL.name());
+		if (existing != null)
+		{
+			return registry;
+		}
+
+		final var builder = new ModelRegistry.Builder(registry);
+		builder.register(LMCorePackage.MODEL);
+		return builder.build();
+	}
+
+	private static boolean isMetaModelRoot(final List<Tree<PNode>> roots)
+	{
+		if (roots.isEmpty())
+		{
+			return false;
+		}
+
+		final var tokens = roots.getFirst().data().tokens();
+		for (final var token : tokens)
+		{
+			final String value = token.value();
+			if (value == null || value.isBlank() || "(".equals(value))
+			{
+				continue;
+			}
+			return "MetaModel".equals(value);
+		}
+		return false;
 	}
 
 	private static String readAll(final InputStream in) throws IOException

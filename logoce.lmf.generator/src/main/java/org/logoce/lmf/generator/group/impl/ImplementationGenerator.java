@@ -7,13 +7,13 @@ import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
-import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -40,9 +40,9 @@ public final class ImplementationGenerator
 		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder, group);
 		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(interfaceType, classBuilder);
 
-		ModelUtils.streamAllFeatures(group)
-				  .map(f -> f.adapt(FeatureResolution.class))
-				  .forEach(featureInstallers::install);
+		FeatureStreams.distinctFeatures(group)
+					  .map(f -> f.adapt(FeatureResolution.class))
+					  .forEach(featureInstallers::install);
 		typeInstallers.install(group);
 
 		installOperationStubs(classBuilder);

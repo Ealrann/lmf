@@ -7,6 +7,7 @@ import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -39,11 +40,11 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var statementBuilder = new StringBuilder();
 		statementBuilder.append("new $T()");
 
-		ModelUtils.streamAllFeatures(group)
-				  .filter(SetMapFieldBuilder::isSingleMutable)
-				  .map(f -> f.adapt(FeatureResolution.class))
-				  .map(resolution -> buildStatement(resolution, implementationType))
-				  .forEach(statementBuilder::append);
+		FeatureStreams.distinctFeatures(group)
+					  .filter(SetMapFieldBuilder::isSingleMutable)
+					  .map(f -> f.adapt(FeatureResolution.class))
+					  .map(resolution -> buildStatement(resolution, implementationType))
+					  .forEach(statementBuilder::append);
 
 		statementBuilder.append(".build()");
 

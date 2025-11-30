@@ -8,12 +8,13 @@ import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
+import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtils;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -28,11 +29,11 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 	public MethodSpec build(Group<?> group)
 	{
 		final var constructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-		final var codeList = ModelUtils.streamAllFeatures(group)
-									   .map(g -> g.adapt(FeatureResolution.class))
-									   .filter(ConstructorBuilder::mandatoryOrImmutable)
-									   .map(ConstructorBuilder::bakeCode)
-									   .toList();
+		final var codeList = FeatureStreams.distinctFeatures(group)
+										   .map(g -> g.adapt(FeatureResolution.class))
+										   .filter(ConstructorBuilder::mandatoryOrImmutable)
+										   .map(ConstructorBuilder::bakeCode)
+										   .toList();
 
 		codeList.forEach(c -> c.installStep1(constructor));
 

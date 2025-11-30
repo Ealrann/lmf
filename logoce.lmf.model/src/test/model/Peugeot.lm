@@ -1,0 +1,3 @@
+(CarCompany domain=test.model name=PeugeotCompany metamodels=test.model.CarCompany
+	(CarParc
+		(Car name=peugeot1)))

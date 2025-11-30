@@ -46,13 +46,15 @@ public interface LMCoreDefinition {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
       Attribute<String, String> DOMAIN = new AttributeBuilder<String, String>().name("domain").immutable(true).mandatory(true).rawFeature(Model.Features.domain).datatype(() -> Units.STRING).build();
       Attribute<String, List<String>> IMPORTS = new AttributeBuilder<String, List<String>>().name("imports").immutable(true).many(true).rawFeature(Model.Features.imports).datatype(() -> Units.STRING).build();
-      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS);
+      Attribute<String, List<String>> METAMODELS = new AttributeBuilder<String, List<String>>().name("metamodels").immutable(true).many(true).rawFeature(Model.Features.metamodels).datatype(() -> Units.STRING).build();
+      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, METAMODELS);
     }
 
     interface META_MODEL {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
       Attribute<String, String> DOMAIN = LMCoreDefinition.Features.MODEL.DOMAIN;
       Attribute<String, List<String>> IMPORTS = LMCoreDefinition.Features.MODEL.IMPORTS;
+      Attribute<String, List<String>> METAMODELS = LMCoreDefinition.Features.MODEL.METAMODELS;
       Relation<Group<?>, List<Group<?>>> GROUPS = new RelationBuilder<Group<?>, List<Group<?>>>().name("groups").immutable(true).many(true).contains(true).rawFeature(MetaModel.Features.groups).concept(() -> LMCoreDefinition.Groups.GROUP).build();
       Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationBuilder<Enum<?>, List<Enum<?>>>().name("enums").immutable(true).many(true).contains(true).rawFeature(MetaModel.Features.enums).concept(() -> LMCoreDefinition.Groups.ENUM).build();
       Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationBuilder<Unit<?>, List<Unit<?>>>().name("units").immutable(true).many(true).contains(true).rawFeature(MetaModel.Features.units).concept(() -> LMCoreDefinition.Groups.UNIT).build();
@@ -61,7 +63,7 @@ public interface LMCoreDefinition {
       Attribute<IModelPackage, IModelPackage> LM_PACKAGE = new AttributeBuilder<IModelPackage, IModelPackage>().name("lmPackage").immutable(true).mandatory(true).rawFeature(MetaModel.Features.lmPackage).datatype(() -> JavaWrappers.I_MODEL_PACKAGE).build();
       Attribute<Boolean, Boolean> GEN_NAME_PACKAGE = new AttributeBuilder<Boolean, Boolean>().name("genNamePackage").immutable(true).defaultValue("true").rawFeature(MetaModel.Features.genNamePackage).datatype(() -> Units.BOOLEAN).build();
       Attribute<String, String> EXTRA_PACKAGE = new AttributeBuilder<String, String>().name("extraPackage").immutable(true).rawFeature(MetaModel.Features.extraPackage).datatype(() -> Units.STRING).build();
-      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE, GEN_NAME_PACKAGE, EXTRA_PACKAGE);
+      List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, METAMODELS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE, GEN_NAME_PACKAGE, EXTRA_PACKAGE);
     }
 
     interface CONCEPT {

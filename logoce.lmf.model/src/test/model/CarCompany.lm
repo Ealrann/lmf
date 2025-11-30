@@ -1,6 +1,6 @@
 (MetaModel domain=test.model name=CarCompany
 	(Group Entity
-		(+att name=name datatype=#LMCore@string [1..1]))
+		(includes group=#LMCore@Named))
 
 	(Enum Brand Renault,Peugeot)
 
@@ -20,6 +20,7 @@
 
 	(Definition CarCompany
 	    (includes group=@Entity)
+	    (includes group=#LMCore@Model)
 	    (+contains ceo @Person [1..1])
-	    (+contains name=parcs @Car [0..*]))
+	    (+contains name=parcs @CarParc [0..*]))
 )

@@ -27,6 +27,7 @@ public interface MetaModel extends Model {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<String, String> domain = Model.Features.domain;
     RawFeature<String, List<String>> imports = Model.Features.imports;
+    RawFeature<String, List<String>> metamodels = Model.Features.metamodels;
     RawFeature<Group<?>, List<Group<?>>> groups = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.GROUPS);
     RawFeature<Enum<?>, List<Enum<?>>> enums = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.ENUMS);
     RawFeature<Unit<?>, List<Unit<?>>> units = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.UNITS);
@@ -41,6 +42,7 @@ public interface MetaModel extends Model {
     Builder name(String name);
     Builder domain(String domain);
     Builder addImport(String _import);
+    Builder addMetamodel(String metamodel);
     Builder addGroup(Supplier<Group<?>> group);
     Builder addEnum(Supplier<Enum<?>> _enum);
     Builder addUnit(Supplier<Unit<?>> unit);
@@ -55,5 +57,6 @@ public interface MetaModel extends Model {
     Builder addAliases(List<Alias> aliases);
     Builder addJavaWrappers(List<JavaWrapper<?>> javaWrappers);
     Builder addImports(List<String> imports);
+    Builder addMetamodels(List<String> metamodels);
   }
 }

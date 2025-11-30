@@ -6,10 +6,10 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.InternalFeatureBuilder;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.notification.api.IFeatures;
 
 import javax.lang.model.element.Modifier;
@@ -59,10 +59,10 @@ public class InternalFeaturesGenerator
 
 		final var internalFeatureBuilder = new InternalFeatureBuilder(group);
 
-		ModelUtils.streamAllFeatures(group)
-				  .map(f -> f.adapt(FeatureResolution.class))
-				  .map(internalFeatureBuilder::toConstantFeature)
-				  .forEach(internalFeaturesInterfaceBuilder::addField);
+		FeatureStreams.distinctFeatures(group)
+					  .map(f -> f.adapt(FeatureResolution.class))
+					  .map(internalFeatureBuilder::toConstantFeature)
+					  .forEach(internalFeaturesInterfaceBuilder::addField);
 
 		return internalFeaturesInterfaceBuilder.build();
 	}
