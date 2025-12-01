@@ -1,10 +1,10 @@
 package org.logoce.lmf.model.resource.linking.feature;
 
-import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.linking.exception.LinkException;
 import org.logoce.lmf.model.resource.linking.tree.LinkNodeInternal;
+import org.logoce.lmf.model.util.ModelImports;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.util.List;
@@ -38,31 +38,25 @@ public final class ImportResolver
 									  final String modelName,
 									  final String context)
 	{
+		// Preserve legacy resolution order: fully-qualified first, then LMCore,
+		// then imports/self using header information.
 		if (modelName.contains("."))
 		{
 			return modelName;
 		}
-		if (LMCorePackage.MODEL.name().equals(modelName))
+
+		if (org.logoce.lmf.model.lang.LMCorePackage.MODEL.name().equals(modelName))
 		{
-			return qualifiedName(LMCorePackage.MODEL);
+			final var lmCore = org.logoce.lmf.model.lang.LMCorePackage.MODEL;
+			return lmCore.domain() + "." + lmCore.name();
 		}
 
 		final var model = owningModel(node, context);
-		for (final var imported : model.imports())
-		{
-			if (simpleName(imported).equals(modelName))
-			{
-				return imported;
-			}
-		}
-
-		if (model.name().equals(modelName))
-		{
-			return model.qualifiedName();
-		}
-
-		throw new LinkException("Cannot resolve imported model '" + modelName + "' in " + model.qualifiedName() +
-								". Available imports: " + model.imports(), node.pNode());
+		return ModelImports.resolveQualifiedName(model.domain(), model.name(), model.imports(), modelName)
+						   .orElseThrow(() -> new LinkException("Cannot resolve imported model '" + modelName +
+																"' in " + model.qualifiedName() +
+																". Available imports: " + model.imports(),
+																node.pNode()));
 	}
 
 	private ModelContext owningModel(final LinkNodeInternal<?, ?, ?> node, final String context)

@@ -11,15 +11,10 @@ import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolTable;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
-import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.linking.LmModelLinker;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
-import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.lsp4j.Position;
@@ -88,14 +83,10 @@ public final class WorkspaceRebuilder
 		{
 			try
 			{
-				final List<Model> models = loadModelsFromProjectRoot(projectRoot);
-				final var builder = new ModelRegistry.Builder(workspaceIndex.modelRegistry());
-				for (final Model model : models)
-				{
-					builder.register(model);
-				}
-				workspaceIndex.setModelRegistry(builder.build());
-				LOG.info("LMF LSP rebuildModelRegistry: projectRoot={}, models={}", projectRoot, models.size());
+				final List<org.logoce.lmf.model.loader.model.LmDocument> documents = loadDocumentsFromProjectRoot(projectRoot);
+				final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
+				workspaceIndex.setModelRegistry(newRegistry);
+				LOG.info("LMF LSP rebuildModelRegistry: projectRoot={}, documents={}", projectRoot, documents.size());
 			}
 			catch (Exception e)
 			{
@@ -111,25 +102,34 @@ public final class WorkspaceRebuilder
 			return;
 		}
 
-		final var inputs = new ArrayList<InputStream>();
-		for (final LmDocumentState doc : docs)
-		{
-			final byte[] bytes = doc.text().getBytes(StandardCharsets.UTF_8);
-			inputs.add(new ByteArrayInputStream(bytes));
-		}
-
 		try
 		{
 			final var loader = LmLoader.withEmptyRegistry();
-			final List<Model> models = loader.loadModels(inputs);
-
-			final var builder = new ModelRegistry.Builder(workspaceIndex.modelRegistry());
-			for (final Model model : models)
+			final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
+			for (final LmDocumentState docState : docs)
 			{
-				builder.register(model);
+				final var text = docState.text();
+				final var doc = loader.loadModel(text);
+				if (doc.roots().isEmpty())
+				{
+					final var error = doc.diagnostics().stream()
+										 .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
+										 .findFirst();
+					if (error.isPresent())
+					{
+						final var d = error.get();
+						throw new IllegalArgumentException("Failed to parse model at " +
+														   d.line() + ":" + d.column() +
+														   " - " + d.message());
+					}
+					continue;
+				}
+				documents.add(doc);
 			}
-			workspaceIndex.setModelRegistry(builder.build());
-			LOG.info("LMF LSP rebuildModelRegistry: from open documents, models={}", models.size());
+
+			final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
+			workspaceIndex.setModelRegistry(newRegistry);
+			LOG.info("LMF LSP rebuildModelRegistry: from open documents, documents={}", documents.size());
 		}
 		catch (Exception e)
 		{
@@ -137,9 +137,10 @@ public final class WorkspaceRebuilder
 		}
 	}
 
-	private List<Model> loadModelsFromProjectRoot(final Path root) throws Exception
+	private List<org.logoce.lmf.model.loader.model.LmDocument> loadDocumentsFromProjectRoot(final Path root) throws Exception
 	{
-		final var inputs = new ArrayList<InputStream>();
+		final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
+		final var loader = LmLoader.withEmptyRegistry();
 		try (final var paths = Files.walk(root))
 		{
 			paths.filter(Files::isRegularFile)
@@ -148,7 +149,23 @@ public final class WorkspaceRebuilder
 					 try
 					 {
 						 final byte[] bytes = Files.readAllBytes(p);
-						 inputs.add(new ByteArrayInputStream(bytes));
+						 final var text = new String(bytes, StandardCharsets.UTF_8);
+						 final var doc = loader.loadModel(text);
+						 if (doc.roots().isEmpty())
+						 {
+							 final var error = doc.diagnostics().stream()
+												  .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
+												  .findFirst();
+							 if (error.isPresent())
+							 {
+								 final var d = error.get();
+								 throw new IllegalArgumentException("Failed to parse model " + p + " at " +
+																	d.line() + ":" + d.column() +
+																	" - " + d.message());
+							 }
+							 return;
+						 }
+						 documents.add(doc);
 					 }
 					 catch (Exception e)
 					 {
@@ -157,13 +174,7 @@ public final class WorkspaceRebuilder
 				 });
 		}
 
-		if (inputs.isEmpty())
-		{
-			return List.of();
-		}
-
-		final var loader = LmLoader.withEmptyRegistry();
-		return loader.loadModels(inputs);
+		return List.copyOf(documents);
 	}
 
 	/**
@@ -175,49 +186,37 @@ public final class WorkspaceRebuilder
 		try
 		{
 			LOG.info("LMF LSP analyzeDocument start: uri={}, textLength={}", state.uri(), state.text().length());
-
 			final String text = state.text();
 
-			final var syntaxDiagnostics = new ArrayList<LmDiagnostic>();
-			final var treeReader = new LmTreeReader();
-			final var readResult = treeReader.read(text, syntaxDiagnostics);
-			final var roots = readResult.roots();
-			final CharSequence source = readResult.source();
+			final var loader = new LmLoader(workspaceIndex.modelRegistry());
+			final var doc = loader.loadModel(text);
 
-			// Tokens are optional for now; they can be populated later if needed.
-			final var syntaxSnapshot = new SyntaxSnapshot(List.of(), roots, syntaxDiagnostics, source);
+			final var syntaxSnapshot = new SyntaxSnapshot(
+				List.of(),
+				doc.roots(),
+				doc.diagnostics(),
+				doc.source());
 			state.setSyntaxSnapshot(syntaxSnapshot);
 
-			final var semanticDiagnostics = new ArrayList<LmDiagnostic>();
-			Model model = null;
-			List<? extends org.logoce.lmf.model.loader.linking.LinkNode<?, PNode>> linkTrees = List.of();
-
-			if (roots.isEmpty() == false)
-			{
-				final var linker = new LmModelLinker<PNode>(workspaceIndex.modelRegistry());
-				final var linkResult = linker.linkModel(roots, semanticDiagnostics, source);
-				model = linkResult.model();
-				linkTrees = linkResult.trees();
-			}
-
-			final var semanticSnapshot = new SemanticSnapshot(model,
-															  linkTrees,
-															  semanticDiagnostics,
-															  SymbolTable.EMPTY,
-															  List.of());
+			final var semanticSnapshot = new SemanticSnapshot(
+				doc.model(),
+				doc.linkTrees(),
+				List.of(),
+				SymbolTable.EMPTY,
+				List.of());
 			state.setSemanticSnapshot(semanticSnapshot);
 
 			final var previousGood = state.lastGoodSemanticSnapshot();
-			final var newGood = model != null ? semanticSnapshot : previousGood;
+			final var newGood = doc.model() != null ? semanticSnapshot : previousGood;
 			state.setLastGoodSemanticSnapshot(newGood);
 
 			symbolIndexer.rebuildIndicesForDocument(state);
 
 			publishDiagnostics(state);
 
-			final int syntaxCount = syntaxDiagnostics.size();
-			final int semanticCount = semanticDiagnostics.size();
-			final String modelKind = model == null ? "null" : model.getClass().getSimpleName();
+			final int syntaxCount = syntaxSnapshot.diagnostics().size();
+			final int semanticCount = semanticSnapshot.diagnostics().size();
+			final String modelKind = doc.model() == null ? "null" : doc.model().getClass().getSimpleName();
 			LOG.debug("LMF LSP analyzeDocument done: uri={}, model={}, syntaxDiag={}, semanticDiag={}",
 					  state.uri(), modelKind, syntaxCount, semanticCount);
 		}

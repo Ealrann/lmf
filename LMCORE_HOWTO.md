@@ -265,6 +265,7 @@ try (var in = Files.newInputStream(Path.of("src/main/model/MyModel.lm"))) {
 - `model()` – the linked `Model` (or `null` on failure).
 - `diagnostics()` – a list of `LmDiagnostic` entries (syntax and linking).
 - `roots()` / `source()` – the underlying parse trees and text.
+- `linkTrees()` – the linker trees (`LinkNode<?, PNode>`) that connect `PNode`s to LMCore objects (useful for advanced tools like an LSP).
 
 Use this for detailed diagnostics while editing or validating models; the legacy `ResourceUtil.loadModelWithDiagnostics(...)` façade has been removed.
 

@@ -14,7 +14,7 @@ public final class ListenerMap<Type extends IFeatures<?>> implements INotifier.I
 	private final Deque<Object>[] listenerMap;
 	private final List<IFeature<?, ? super Type>> features;
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public ListenerMap(final List<IFeature<?, ? super Type>> features)
 	{
 		this.listenerMap = new Deque[features.size()];

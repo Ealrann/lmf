@@ -1,5 +1,0 @@
-(MetaModel domain=test.multi name=GraphExtensions imports=test.multi.GraphCore
-	(Definition Graph
-		(+contains name=nodes #GraphCore@Node [0..*])
-		(+contains name=coloredNodes #GraphCore@ColoredNode [0..*]))
-)

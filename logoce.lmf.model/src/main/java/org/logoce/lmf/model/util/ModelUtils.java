@@ -47,20 +47,17 @@ public class ModelUtils
 		return false;
 	}
 
-	public static Stream<Feature<?, ?>> streamAllFeatures(Group<?> group)
+	public static Stream<Feature<?, ?>> streamAllFeatures(final Group<?> group)
 	{
 		return streamHierarchy(group).map(Group::features).flatMap(Collection::stream);
 	}
 
-	public static Stream<RawFeature<?, ?>> streamContainmentFeatures(Group<?> group)
+	public static Stream<RawFeature<?, ?>> streamContainmentFeatures(final Group<?> group)
 	{
 		return group.features()
 					.stream()
-					.filter(Relation.class::isInstance)
-					.map(Relation.class::cast)
-					.filter(Relation::contains)
-					.map(Feature::rawFeature)
-					.map(r -> (RawFeature<?, ?>) r);
+					.filter(feature -> feature instanceof Relation<?, ?> relation && relation.contains())
+					.map(feature -> (RawFeature<?, ?>) feature.rawFeature());
 	}
 
 	public static Stream<Group<?>> streamHierarchy(Group<?> group)
@@ -95,10 +92,8 @@ public class ModelUtils
 		final var childStream = root.lmGroup()
 									.features()
 									.stream()
-									.filter(Relation.class::isInstance)
-									.map(Relation.class::cast)
-									.filter(Relation::contains)
-									.flatMap(r -> streamChildren(root, r));
+									.filter(feature -> feature instanceof Relation<?, ?> relation && relation.contains())
+									.flatMap(feature -> streamChildren(root, (Relation<LMObject, ?>) feature));
 
 		return Stream.concat(Stream.of(root), childStream);
 	}

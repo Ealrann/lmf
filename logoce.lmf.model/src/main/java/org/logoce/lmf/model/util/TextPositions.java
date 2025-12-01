@@ -42,6 +42,38 @@ public final class TextPositions
 		return col;
 	}
 
+	/**
+	 * Compute the 0-based character offset for the given 1-based line and column.
+	 * Returns -1 when the requested line is beyond the end of the text.
+	 */
+	public static int offsetFor(final CharSequence text, final int line, final int column)
+	{
+		if (line < 1 || column < 1)
+		{
+			return -1;
+		}
+
+		int currentLine = 1;
+		int i = 0;
+		final int length = text.length();
+		while (i < length && currentLine < line)
+		{
+			if (text.charAt(i) == '\n')
+			{
+				currentLine++;
+			}
+			i++;
+		}
+
+		if (currentLine != line)
+		{
+			return -1;
+		}
+
+		final int offset = i + (column - 1);
+		return Math.min(offset, length);
+	}
+
 	public static Span spanOf(final PNode node, final CharSequence source)
 	{
 		final Optional<PToken> firstToken = node.tokens().stream().findFirst();
@@ -57,5 +89,18 @@ public final class TextPositions
 		final int column = columnFor(source, offset);
 		return new Span(line, column, length, offset);
 	}
-}
 
+	public static Span spanOf(final PToken token, final CharSequence source)
+	{
+		if (token == null)
+		{
+			return new Span(1, 1, 1, 0);
+		}
+
+		final int offset = token.offset();
+		final int length = Math.max(1, token.length());
+		final int line = lineFor(source, offset);
+		final int column = columnFor(source, offset);
+		return new Span(line, column, length, offset);
+	}
+}

@@ -147,7 +147,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			{
 				return List.<Either<SymbolInformation, DocumentSymbol>>of();
 			}
-			return DocumentSymbols.buildDocumentSymbols(syntax);
+			return DocumentSymbols.buildDocumentSymbols(syntax, state.semanticSnapshot());
 		}, server.worker());
 	}
 
@@ -262,31 +262,9 @@ public final class LmTextDocumentService implements TextDocumentService
 
 	private static int offsetForPosition(final CharSequence source, final Position pos)
 	{
-		final int targetLine = pos.getLine();
-		final int targetChar = pos.getCharacter();
-
-		int line = 0;
-		int lineStartOffset = -1;
-		for (int i = 0; i < source.length(); i++)
-		{
-			final char c = source.charAt(i);
-			if (line == targetLine)
-			{
-				lineStartOffset = i;
-				break;
-			}
-			if (c == '\n')
-			{
-				line++;
-			}
-		}
-
-		if (lineStartOffset == -1)
-		{
-			return -1;
-		}
-
-		return lineStartOffset + targetChar;
+		final int line = pos.getLine() + 1;
+		final int column = pos.getCharacter() + 1;
+		return org.logoce.lmf.model.util.TextPositions.offsetFor(source, line, column);
 	}
 
 	private static int findMatchingParenForward(final CharSequence source, final int startOffset)

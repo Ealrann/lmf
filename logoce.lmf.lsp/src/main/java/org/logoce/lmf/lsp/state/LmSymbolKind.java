@@ -6,4 +6,3 @@ public enum LmSymbolKind
 	TYPE,          // Group, Definition, JavaWrapper, Enum, Unit
 	FEATURE        // Attribute, Relation, Operation
 }
-

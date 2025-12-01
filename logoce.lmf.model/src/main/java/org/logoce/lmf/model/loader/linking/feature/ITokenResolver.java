@@ -41,7 +41,7 @@ public interface ITokenResolver
 			}
 			else if (attribute.datatype() instanceof Unit<?>)
 			{
-				return Optional.of(new UnitResolver(attribute));
+				return Optional.of(new UnitResolver<>(attribute));
 			}
 			else
 			{
@@ -50,4 +50,3 @@ public interface ITokenResolver
 		}
 	}
 }
-

@@ -27,7 +27,7 @@ public final class ParentObservatory<T extends LMObject> extends AbstractEObject
 	@Override
 	public void observe(final LMObject source)
 	{
-		final var parent = (LMObject) source.lmContainer();
+		final var parent = source.lmContainer();
 		register(List.of(parent));
 		parentObserver.startObserve(source);
 	}
@@ -36,7 +36,7 @@ public final class ParentObservatory<T extends LMObject> extends AbstractEObject
 	public void shut(final LMObject source)
 	{
 		parentObserver.stopObserve(source);
-		final var parent = (LMObject) source.lmContainer();
+		final var parent = source.lmContainer();
 		if (parent != null) unregister(List.of(parent));
 	}
 

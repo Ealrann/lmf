@@ -48,7 +48,7 @@ public final class ParentObserver
 
 		public void install(LMObject source)
 		{
-			final var container = (LMObject) source.lmContainer();
+			final var container = source.lmContainer();
 			assert container !=
 				   null; // cannot deal with this case. Please stop listen parent before removing an object.
 			container.listen(containerListener, source.lmContainingFeature().rawFeature());
@@ -56,7 +56,7 @@ public final class ParentObserver
 
 		public void uninstall()
 		{
-			final var container = (LMObject) source.lmContainer();
+			final var container = source.lmContainer();
 			if (container != null)
 			{
 				container.sulk(containerListener, source.lmContainingFeature().rawFeature());
@@ -65,8 +65,8 @@ public final class ParentObserver
 
 		private void containerChange(Notification notification)
 		{
-			final var oldParent = (LMObject) notification.notifier();
-			final var newParent = (LMObject) source.lmContainer();
+			final var oldParent = notification.notifier();
+			final var newParent = source.lmContainer();
 
 			if (oldParent != newParent)
 			{

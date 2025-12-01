@@ -56,7 +56,7 @@ public final class ModelCopier
 			}
 		}
 
-		final var copy = (LMObject) builder.build();
+		final var copy = builder.build();
 		copies.put(source, copy);
 		return copy;
 	}

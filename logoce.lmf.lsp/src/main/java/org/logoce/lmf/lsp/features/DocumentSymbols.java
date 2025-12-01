@@ -6,7 +6,11 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.model.loader.model.LmSymbolIndex;
+import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
+import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
 import org.logoce.lmf.model.util.TextPositions;
@@ -20,6 +24,73 @@ public final class DocumentSymbols
 {
 	private DocumentSymbols()
 	{
+	}
+
+	public static List<Either<SymbolInformation, DocumentSymbol>> buildDocumentSymbols(final SyntaxSnapshot syntax,
+																					   final SemanticSnapshot semantic)
+	{
+		if (semantic == null || semantic.model() == null)
+		{
+			return buildDocumentSymbols(syntax);
+		}
+
+		final var index = LmSymbolIndexBuilder.buildIndex(
+			semantic.model(),
+			syntax.roots(),
+			syntax.source(),
+			org.logoce.lmf.model.util.ModelRegistry.empty());
+
+		final var byId = new java.util.LinkedHashMap<LmSymbolIndex.SymbolId, DocumentSymbol>();
+
+		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		{
+			final var id = decl.id();
+			final SymbolKind kind = switch (id.kind())
+			{
+				case META_MODEL -> SymbolKind.Namespace;
+				case TYPE -> SymbolKind.Class;
+				case FEATURE -> SymbolKind.Field;
+			};
+
+			final var range = spanToRange(decl.span(), syntax.source());
+			final var symbol = new DocumentSymbol(id.name(), kind, range, range);
+			byId.put(id, symbol);
+		}
+
+		// Attach children to their containers using the container id from the index.
+		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		{
+			final var containerId = decl.container();
+			if (containerId == null)
+			{
+				continue;
+			}
+			final var child = byId.get(decl.id());
+			final var container = byId.get(containerId);
+			if (child == null || container == null)
+			{
+				continue;
+			}
+			addChild(container, child);
+		}
+
+		// Top-level symbols are those without a container.
+		final var topLevel = new ArrayList<DocumentSymbol>();
+		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		{
+			if (decl.container() == null)
+			{
+				final var symbol = byId.get(decl.id());
+				if (symbol != null)
+				{
+					topLevel.add(symbol);
+				}
+			}
+		}
+
+		return topLevel.stream()
+					  .map(ds -> Either.<SymbolInformation, DocumentSymbol>forRight(ds))
+					  .toList();
 	}
 
 	public static List<Either<SymbolInformation, DocumentSymbol>> buildDocumentSymbols(final SyntaxSnapshot snapshot)
@@ -49,7 +120,25 @@ public final class DocumentSymbols
 		if (isContainerKind(kind))
 		{
 			final var nameToken = resolveNameToken(tokens);
-			final String name = nameToken != null ? nameToken.value() : head;
+			String name = nameToken != null ? nameToken.value() : head;
+
+			// For model-level MetaModel headers, prefer the semantic model name
+			// parsed via ModelHeaderUtil over the raw token heuristics.
+			if (kind == SymbolKind.Namespace && "MetaModel".equals(head))
+			{
+				try
+				{
+					final String modelName = ModelHeaderUtil.resolveName(pnode);
+					if (modelName != null && !modelName.isEmpty())
+					{
+						name = modelName;
+					}
+				}
+				catch (IllegalStateException ignored)
+				{
+					// Fall back to the token-derived name.
+				}
+			}
 			final Range range = rangeForNode(pnode, source);
 			final Range selectionRange = nameToken != null ? rangeForToken(nameToken, source) : range;
 
@@ -216,9 +305,15 @@ public final class DocumentSymbols
 
 	private static Range rangeForToken(final PToken token, final CharSequence source)
 	{
-		final int start = token.offset();
-		final int end = start + Math.max(1, token.length());
-		return rangeForOffsets(start, end, source);
+		final var span = TextPositions.spanOf(token, source);
+		final int startLine = Math.max(0, span.line() - 1);
+		final int startChar = Math.max(0, span.column() - 1);
+		final int endLine = startLine;
+		final int endChar = startChar + Math.max(1, span.length());
+
+		final var start = new Position(startLine, startChar);
+		final var end = new Position(endLine, endChar);
+		return new Range(start, end);
 	}
 
 	private static Range rangeForOffsets(final int startOffset, final int endOffset, final CharSequence source)
@@ -231,5 +326,12 @@ public final class DocumentSymbols
 		final var start = new Position(startLine, startChar);
 		final var end = new Position(endLine, endChar);
 		return new Range(start, end);
+	}
+
+	private static Range spanToRange(final TextPositions.Span span, final CharSequence source)
+	{
+		final int startOffset = span.offset();
+		final int endOffset = startOffset + Math.max(1, span.length());
+		return rangeForOffsets(startOffset, endOffset, source);
 	}
 }

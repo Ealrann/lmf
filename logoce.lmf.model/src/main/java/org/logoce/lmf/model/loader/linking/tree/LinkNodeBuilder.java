@@ -96,10 +96,9 @@ public final class LinkNodeBuilder<I extends PNode>
 		final var containmentName = node.type().firstToken();
 		final var groupFromParent = parentGroup.features()
 											   .stream()
-											   .filter(Relation.class::isInstance)
-											   .map(Relation.class::cast)
-											   .filter(r -> r.name().equals(containmentName))
-											   .map(Relation::concept)
+											   .filter(feature -> feature instanceof Relation<?, ?> relation &&
+																  relation.name().equals(containmentName))
+											   .map(feature -> ((Relation<?, ?>) feature).concept())
 											   .findAny()
 											   .orElseThrow(() -> buildException(node, containmentName, parentGroup));
 
@@ -165,4 +164,3 @@ public final class LinkNodeBuilder<I extends PNode>
 		return new LinkException("Cannot find Group: " + nodeType.value(), node.pnode());
 	}
 }
-
