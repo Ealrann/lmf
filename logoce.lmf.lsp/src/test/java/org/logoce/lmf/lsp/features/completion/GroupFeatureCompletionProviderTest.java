@@ -25,7 +25,7 @@ final class GroupFeatureCompletionProviderTest
 	@Test
 	void completesOperationAndParameterFeaturesInNativeGenerics() throws Exception
 	{
-		final var path = Path.of("..", "lsp-design", "models", "NativeGenerics.lm.txt");
+		final var path = Path.of("..", "logoce.lmf.generator", "src", "test", "model", "NativeGenerics.lm");
 		final var text = Files.readString(path, StandardCharsets.UTF_8);
 
 		final var syntaxDiagnostics = new ArrayList<LmDiagnostic>();
@@ -66,4 +66,3 @@ final class GroupFeatureCompletionProviderTest
 		assertEquals("Feature of OperationParameter", parameterItems.getFirst().getDetail());
 	}
 }
-

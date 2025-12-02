@@ -2,11 +2,14 @@ package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.logoce.lmf.lsp.LmLanguageServer;
+import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Unit;
+import org.logoce.lmf.model.loader.model.LmSymbolIndex;
+import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +43,10 @@ final class TypeCompletionProvider
 		final LmLanguageServer server = context.server();
 		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
 		final MetaModel mm = context.metaModel();
+		final SyntaxSnapshot syntax = context.syntax();
 
-		addMetaModelTypes(mm, null, false, items, seenLabels);
+		// Local types from the current model via the shared symbol index.
+		addLocalTypesFromIndex(mm, syntax, registry, items, seenLabels);
 
 		for (final String imp : mm.imports())
 		{
@@ -195,6 +200,50 @@ final class TypeCompletionProvider
 		}
 	}
 
+	private static void addLocalTypesFromIndex(final MetaModel mm,
+											   final SyntaxSnapshot syntax,
+											   final ModelRegistry registry,
+											   final List<CompletionItem> items,
+											   final Set<String> seenLabels)
+	{
+		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(
+			mm,
+			syntax.roots(),
+			syntax.source(),
+			registry);
+
+		final String modelQualifiedName = mm.domain() + "." + mm.name();
+
+		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		{
+			final var id = decl.id();
+			if (id.kind() != LmSymbolIndex.SymbolKind.TYPE)
+			{
+				continue;
+			}
+			if (!mm.domain().equals(id.modelDomain()) || !mm.name().equals(id.modelName()))
+			{
+				continue;
+			}
+
+			final String typeName = id.name();
+			if (typeName == null || typeName.isEmpty())
+			{
+				continue;
+			}
+
+			final String label = typeName;
+			if (!seenLabels.add(label))
+			{
+				continue;
+			}
+
+			final var item = new CompletionItem(label);
+			item.setDetail("Type in " + modelQualifiedName);
+			items.add(item);
+		}
+	}
+
 	private static MetaModel findLmCoreMetaModel(final ModelRegistry registry)
 	{
 		for (final Model model : (Iterable<Model>) registry.models()::iterator)
@@ -209,4 +258,3 @@ final class TypeCompletionProvider
 		return LMCorePackage.MODEL;
 	}
 }
-

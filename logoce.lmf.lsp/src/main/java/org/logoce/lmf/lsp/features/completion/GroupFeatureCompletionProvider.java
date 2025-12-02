@@ -8,13 +8,6 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.LMCorePackage;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.resource.interpretation.LMInterpreter;
-import org.logoce.lmf.model.resource.interpretation.PGroup;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.MetaModelRegistry;
-import org.logoce.lmf.model.lang.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +26,7 @@ final class GroupFeatureCompletionProvider
 										 final SyntaxSnapshot syntax,
 										 final Position pos)
 	{
-		Group<?> group = SemanticNavigation.findGroupAtPosition(semantic, syntax, pos);
-		if (group == null)
-		{
-			group = resolveGroupFromModelAndSyntax(semantic, syntax, pos);
-		}
+		final Group<?> group = SemanticNavigation.findGroupAtPosition(semantic, syntax, pos);
 		if (group == null)
 		{
 			LOG.info("LMF LSP completion: no group resolved at position line={}, character={}",
@@ -52,47 +41,6 @@ final class GroupFeatureCompletionProvider
 					 group.name(), items.size());
 		}
 		return items;
-	}
-
-	private static Group<?> resolveGroupFromModelAndSyntax(final SemanticSnapshot semantic,
-														   final SyntaxSnapshot syntax,
-														   final Position pos)
-	{
-		// Use LMCore as the authoritative meta-model and mirror the linker logic:
-		// interpret the header node with alias expansion, then resolve its type name
-		// against LMCore groups (e.g. 'Definition' -> 'Group' via the Definition alias).
-		final MetaModel lmCore = LMCorePackage.MODEL;
-
-		final var headerNode = SyntaxNavigation.findEnclosingGroupHeader(syntax, pos);
-		if (headerNode == null)
-		{
-			LOG.debug("LMF LSP completion: resolveGroupFromModelAndSyntax, no header node at line={}, character={}",
-					  pos.getLine(), pos.getCharacter());
-			return null;
-		}
-
-		final var interpreter = new LMInterpreter<PNode>(MetaModelRegistry.Instance.getAliasMap());
-		final PGroup<PNode> interpreted = interpreter.interpret(headerNode);
-		final var typeNameOpt = interpreted.type().value();
-		if (typeNameOpt.isEmpty())
-		{
-			LOG.debug("LMF LSP completion: resolveGroupFromModelAndSyntax, header type has no value at line={}, character={}",
-					  pos.getLine(), pos.getCharacter());
-			return null;
-		}
-		final String typeName = typeNameOpt.get();
-		LOG.debug("LMF LSP completion: resolveGroupFromModelAndSyntax, header type='{}' at line={}, character={}",
-				  typeName, pos.getLine(), pos.getCharacter());
-
-		for (final Group<?> g : lmCore.groups())
-		{
-			if (typeName.equals(g.name()))
-			{
-				return g;
-			}
-		}
-
-		return null;
 	}
 
 	private static List<CompletionItem> buildGroupFeatureCompletions(final Group<?> group)
