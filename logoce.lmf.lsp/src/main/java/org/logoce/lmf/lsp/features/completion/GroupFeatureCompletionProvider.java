@@ -7,6 +7,9 @@ import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Concept;
 import org.logoce.lmf.model.lang.Feature;
+import org.logoce.lmf.model.loader.linking.FeatureResolution;
+import org.logoce.lmf.model.loader.linking.LinkNode;
+import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMCorePackage;
@@ -57,8 +60,10 @@ final class GroupFeatureCompletionProvider
 			return List.of();
 		}
 
+		final var usedFeatures = findUsedFeaturesAtPosition(semantic, syntax, pos);
+
 		final List<CompletionItem> items = new ArrayList<>();
-		items.addAll(buildGroupFeatureCompletions(group));
+		items.addAll(buildGroupFeatureCompletions(group, usedFeatures));
 		items.addAll(buildContainmentChildCompletions(context, group));
 
 		if (!items.isEmpty())
@@ -75,7 +80,8 @@ final class GroupFeatureCompletionProvider
 		return items;
 	}
 
-	private static List<CompletionItem> buildGroupFeatureCompletions(final Group<?> group)
+	private static List<CompletionItem> buildGroupFeatureCompletions(final Group<?> group,
+																	 final Set<Feature<?, ?>> usedFeatures)
 	{
 		final var items = new ArrayList<CompletionItem>();
 
@@ -86,6 +92,12 @@ final class GroupFeatureCompletionProvider
 			{
 				continue;
 			}
+
+			if (usedFeatures != null && usedFeatures.contains(feature))
+			{
+				continue;
+			}
+
 			final var item = new CompletionItem(name);
 
 			final boolean isBooleanAttribute =
@@ -101,6 +113,58 @@ final class GroupFeatureCompletionProvider
 		}
 
 		return items;
+	}
+
+	private static Set<Feature<?, ?>> findUsedFeaturesAtPosition(final SemanticSnapshot semantic,
+																 final SyntaxSnapshot syntax,
+																 final Position pos)
+	{
+		if (semantic == null || syntax == null)
+		{
+			return Set.of();
+		}
+
+		final PNode headerNode = SyntaxNavigation.findPNodeAtOrBeforePosition(syntax, pos);
+		if (headerNode == null)
+		{
+			return Set.of();
+		}
+
+		final LinkNode<?, PNode> linkNode = SemanticNavigation.findLinkNodeForNode(semantic, headerNode);
+		if (linkNode == null)
+		{
+			return Set.of();
+		}
+
+		final Set<Feature<?, ?>> used = new HashSet<>();
+
+		for (final ResolutionAttempt<Attribute<?, ?>> attempt : linkNode.attributeResolutions())
+		{
+			final FeatureResolution<Attribute<?, ?>> resolution = attempt.resolution();
+			if (resolution != null)
+			{
+				final Feature<?, ?> feature = resolution.feature();
+				if (feature != null)
+				{
+					used.add(feature);
+				}
+			}
+		}
+
+		for (final ResolutionAttempt<Relation<?, ?>> attempt : linkNode.relationResolutions())
+		{
+			final FeatureResolution<Relation<?, ?>> resolution = attempt.resolution();
+			if (resolution != null)
+			{
+				final Feature<?, ?> feature = resolution.feature();
+				if (feature != null)
+				{
+					used.add(feature);
+				}
+			}
+		}
+
+		return used;
 	}
 
 	private static List<CompletionItem> buildContainmentChildCompletions(final CompletionContext context,
