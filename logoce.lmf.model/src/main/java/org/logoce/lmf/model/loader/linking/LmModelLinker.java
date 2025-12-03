@@ -58,44 +58,20 @@ public final class LmModelLinker<I extends PNode>
 			return new LinkResult<>(null, List.of(), List.of());
 		}
 
-		try
-		{
-			final var result = linkModelInternal(roots);
+		final var result = linkModelTolerant(roots, diagnostics, source);
 
-			if (result.model() == null && !result.roots().isEmpty())
-			{
-				final var span = TextPositions.spanOf(roots.getFirst().data(), source);
-				diagnostics.add(new LmDiagnostic(span.line(),
-												 span.column(),
-												 span.length(),
-												 span.offset(),
-												 LmDiagnostic.Severity.ERROR,
-												 "Root element is not a Model; use loadObject() for generic roots"));
-			}
-
-			return result;
-		}
-		catch (LinkException e)
+		if (result.model() == null && !result.roots().isEmpty())
 		{
-			final var span = TextPositions.spanOf(e.pNode(), source);
+			final var span = TextPositions.spanOf(roots.getFirst().data(), source);
 			diagnostics.add(new LmDiagnostic(span.line(),
 											 span.column(),
 											 span.length(),
 											 span.offset(),
 											 LmDiagnostic.Severity.ERROR,
-											 e.getMessage() == null ? "Link error" : e.getMessage()));
-			return new LinkResult<>(null, List.of(), List.of());
+											 "Root element is not a Model; use loadObject() for generic roots"));
 		}
-		catch (Exception e)
-		{
-			diagnostics.add(new LmDiagnostic(1,
-											 1,
-											 1,
-											 0,
-											 LmDiagnostic.Severity.ERROR,
-											 e.getMessage() == null ? "Link error" : e.getMessage()));
-			return new LinkResult<>(null, List.of(), List.of());
-		}
+
+		return result;
 	}
 
 	/**
@@ -109,6 +85,54 @@ public final class LmModelLinker<I extends PNode>
 			return new LinkResult<>(null, List.of(), List.of());
 		}
 		return linkModelInternal(roots);
+	}
+
+	private LinkResult<I> linkModelTolerant(final List<? extends BasicTree<I, ?>> roots,
+											final List<LmDiagnostic> diagnostics,
+											final CharSequence source)
+	{
+		final var linkerTrees = roots.stream()
+									 .map(this::interpretTree)
+									 .map(linker::mapTree)
+									 .toList();
+
+		linkerTrees.stream().flatMap(LinkNodeFull::streamTree).forEach(linker::resolve);
+
+		final var builtObjects = new ArrayList<LMObject>();
+		for (final var node : linkerTrees)
+		{
+			try
+			{
+				builtObjects.add(node.build());
+			}
+			catch (LinkException e)
+			{
+				final var span = TextPositions.spanOf(e.pNode(), source);
+				diagnostics.add(new LmDiagnostic(span.line(),
+												 span.column(),
+												 span.length(),
+												 span.offset(),
+												 LmDiagnostic.Severity.ERROR,
+												 e.getMessage() == null ? "Link error" : e.getMessage()));
+			}
+			catch (Exception e)
+			{
+				diagnostics.add(new LmDiagnostic(1,
+												 1,
+												 1,
+												 0,
+												 LmDiagnostic.Severity.ERROR,
+												 e.getMessage() == null ? "Link error" : e.getMessage()));
+			}
+		}
+
+		final var model = builtObjects.stream()
+									  .filter(o -> o instanceof Model)
+									  .map(o -> (Model) o)
+									  .findFirst()
+									  .orElse(null);
+
+		return new LinkResult<>(model, List.copyOf(linkerTrees), List.copyOf(builtObjects));
 	}
 
 	private LinkResult<I> linkModelInternal(final List<? extends BasicTree<I, ?>> roots)

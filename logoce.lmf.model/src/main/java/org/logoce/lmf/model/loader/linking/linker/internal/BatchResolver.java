@@ -98,4 +98,3 @@ public final class BatchResolver<T extends Feature<?, ?>>
 		return runner.findOptional(r -> r.match(token.firstToken()), List.of("true"));
 	}
 }
-

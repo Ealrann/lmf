@@ -87,15 +87,48 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 			}
 			stack.add(this);
 
-			streamChildren().forEach(this::injectContainment);
-			attributeResolutions.forEach(this::install);
-			relationResolutions.forEach(this::install);
-
-			builtObject = builder.build();
-			stack.remove(this);
-			if (stack.isEmpty())
+			try
 			{
-				BUILD_STACK.remove();
+				streamChildren().forEach(this::injectContainment);
+				attributeResolutions.forEach(this::install);
+				relationResolutions.forEach(this::install);
+
+				builtObject = builder.build();
+			}
+			catch (LinkException e)
+			{
+				throw e;
+			}
+			catch (Exception e)
+			{
+				final String message;
+				final var baseMessage = e.getMessage();
+
+				// Provide a more user-friendly message when a mandatory feature
+				// is missing and the underlying builder fails with a null-based
+				// error (for example, AttributeBuilder missing its 'datatype').
+				if (e instanceof NullPointerException &&
+					baseMessage != null &&
+					baseMessage.contains("this.datatype"))
+				{
+					message = "Mandatory feature \"datatype\" is not defined";
+				}
+				else
+				{
+					message = (baseMessage == null || baseMessage.isBlank())
+							  ? "Link error while building group '" + group().name() + "'"
+							  : baseMessage;
+				}
+
+				throw new LinkException(message, pNode());
+			}
+			finally
+			{
+				stack.remove(this);
+				if (stack.isEmpty())
+				{
+					BUILD_STACK.remove();
+				}
 			}
 		}
 		return builtObject;
@@ -164,4 +197,3 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 		return tokens.isEmpty() ? group().name() : tokens.getFirst().value();
 	}
 }
-

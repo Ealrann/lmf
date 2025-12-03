@@ -16,12 +16,14 @@ import java.util.function.Supplier;
 public final class TokenResolver<T extends Feature<?, ?>, R extends AbstractResolver<T>>
 {
 	private final LinkedList<R> availableResolvers;
+	private final List<R> allResolvers;
 	private final BiFunction<R, List<String>, Optional<FeatureResolution<T>>> resolverUsage;
 
 	public TokenResolver(final List<R> resolvers,
 						 final BiFunction<R, List<String>, Optional<FeatureResolution<T>>> resolverUsage)
 	{
 		this.availableResolvers = new LinkedList<>(resolvers);
+		this.allResolvers = List.copyOf(resolvers);
 		this.resolverUsage = resolverUsage;
 	}
 
@@ -29,7 +31,30 @@ public final class TokenResolver<T extends Feature<?, ?>, R extends AbstractReso
 											  final List<String> values,
 											  final Supplier<NoSuchElementException> message)
 	{
-		return findOptional(filter, values).orElseThrow(message);
+		final var optional = findOptional(filter, values);
+		if (optional.isPresent())
+		{
+			return optional.get();
+		}
+
+		final var e = message.get();
+		final var baseMessage = e.getMessage();
+
+		// If a resolver matching the filter used to exist but is no longer
+		// available, interpret this as a duplicate usage of the same feature
+		// (for example, an alias that already consumed the resolver plus an
+		// explicit assignment such as 'immutable=true').
+		final boolean existed = allResolvers.stream().anyMatch(filter::test);
+		if (existed && baseMessage != null && !baseMessage.isBlank())
+		{
+			final int lastSpace = baseMessage.lastIndexOf(' ');
+			final String tokenName = lastSpace >= 0 && lastSpace + 1 < baseMessage.length()
+									 ? baseMessage.substring(lastSpace + 1)
+									 : baseMessage;
+			throw new NoSuchElementException("Feature \"" + tokenName + "\" is already defined");
+		}
+
+		throw e;
 	}
 
 	public Optional<FeatureResolution<T>> findOptional(final Predicate<ITokenResolver> filter,
@@ -53,4 +78,3 @@ public final class TokenResolver<T extends Feature<?, ?>, R extends AbstractReso
 		return Optional.empty();
 	}
 }
-

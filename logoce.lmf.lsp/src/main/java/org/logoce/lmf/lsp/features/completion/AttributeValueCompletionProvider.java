@@ -5,38 +5,34 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Attribute value completion.
  * <p>
- * This intentionally works off the raw line text plus the LMCore meta-model instead of PNode trees so that it remains
- * robust while the user is editing syntactically incomplete headers such as {@code (Group X concrete=)}.
+ * Completions are offered when the caret is positioned after an '=' inside a header, e.g.
+ * {@code (Group X concrete=)}.
  * <ul>
  *   <li>We first require an '=' to exist before the caret on the current line.</li>
- *   <li>We then parse the header keyword (e.g. {@code Group}) and the feature name immediately before '='
- *       directly from the line text.</li>
- *   <li>We resolve the LMCore meta-group for that keyword via {@link LMCorePackage#MODEL} and look up the matching
- *       {@link Attribute} by name.</li>
- *   <li>If found, we propose value completions (boolean, enum literals, JavaWrapper default) with explicit
+ *   <li>We use the link trees from {@code SemanticSnapshot} and the LMCore meta-model to resolve the
+ *       {@link Attribute} being edited.</li>
+ *   <li>If found, we propose value completions (boolean literals, enum literals, JavaWrapper default) with explicit
  *       {@link TextEdit}s anchored at the caret.</li>
  * </ul>
- * This line-based strategy is the intended pattern for value completion in headers and should be preferred over
- * PNode-based navigation for similar cases.
  */
 final class AttributeValueCompletionProvider
 {
@@ -46,31 +42,39 @@ final class AttributeValueCompletionProvider
 	{
 	}
 
-	static List<CompletionItem> complete(final URI uri,
-										 final SemanticSnapshot semantic,
-										 final SyntaxSnapshot syntax,
-										 final Position pos)
+	static List<CompletionItem> complete(final CompletionContext context)
 	{
-		if (!hasEqualsBeforePosition(syntax.source(), pos))
+		final SyntaxSnapshot syntax = context.syntax();
+
+		if (syntax == null)
 		{
+			LOG.info("LMF LSP completion: attribute value – missing syntax snapshot, uri={}, line={}, character={}",
+					 context.uri(), context.position().getLine(), context.position().getCharacter());
 			return List.of();
 		}
 
-		final Attribute<?, ?> attribute = findAttributeAtValuePosition(uri, semantic, syntax, pos);
+		if (!SyntaxNavigation.hasEqualsBeforePosition(syntax, context.position()))
+		{
+			LOG.info("LMF LSP completion: attribute value – no '=' before caret, uri={}, line={}, character={}",
+					 context.uri(), context.position().getLine(), context.position().getCharacter());
+			return List.of();
+		}
+
+		final Attribute<?, ?> attribute = findAttributeAtValuePosition(syntax, context.position());
 		if (attribute == null)
 		{
+			LOG.info("LMF LSP completion: attribute value – no attribute resolved from header text at uri={}, line={}, character={}",
+					 context.uri(), context.position().getLine(), context.position().getCharacter());
 			return List.of();
 		}
 
-		final List<CompletionItem> items = buildAttributeValueCompletions(attribute, pos);
+		final List<CompletionItem> items = buildAttributeValueCompletions(attribute, context.position());
 		LOG.info("LMF LSP completion: attribute value completions, attribute={}, items={}",
 				 attribute.name(), items.size());
 		return items;
 	}
 
-	private static Attribute<?, ?> findAttributeAtValuePosition(final URI uri,
-																final SemanticSnapshot semantic,
-																final SyntaxSnapshot syntax,
+	private static Attribute<?, ?> findAttributeAtValuePosition(final SyntaxSnapshot syntax,
 																final Position pos)
 	{
 		final CharSequence source = syntax.source();
@@ -110,64 +114,68 @@ final class AttributeValueCompletionProvider
 
 		final String lineText = source.subSequence(lineStartOffset, lineEndOffset).toString();
 
-		final int eqIndex = lineText.lastIndexOf('=', targetChar);
-		if (eqIndex < 0) return null;
-
-		// Header keyword: first non-whitespace token after '('.
-		final int parenIndex = lineText.indexOf('(');
-		if (parenIndex < 0) return null;
-
-		int kwStart = parenIndex + 1;
-		while (kwStart < lineText.length() && Character.isWhitespace(lineText.charAt(kwStart)))
+		final int openIdx = lineText.indexOf('(');
+		if (openIdx < 0)
 		{
-			kwStart++;
-		}
-		int kwEnd = kwStart;
-		while (kwEnd < lineText.length() && !Character.isWhitespace(lineText.charAt(kwEnd)))
-		{
-			kwEnd++;
+			return null;
 		}
 
-		if (kwStart >= kwEnd) return null;
-
-		final String keyword = lineText.substring(kwStart, kwEnd);
-
-		// Feature name: token immediately before '='.
-		int featureEnd = eqIndex - 1;
-		while (featureEnd >= 0 && Character.isWhitespace(lineText.charAt(featureEnd)))
+		int closeIdx = lineText.indexOf(')', openIdx + 1);
+		if (closeIdx < 0)
 		{
-			featureEnd--;
+			closeIdx = lineText.length();
 		}
-		if (featureEnd < 0) return null;
 
-		int featureStart = featureEnd;
-		while (featureStart >= 0)
+		final int headerStart = openIdx + 1;
+		final int headerEnd = closeIdx;
+		if (headerStart >= headerEnd)
 		{
-			final char c = lineText.charAt(featureStart);
-			if (Character.isWhitespace(c) || c == '(')
-			{
-				featureStart++;
-				break;
-			}
-			featureStart--;
+			return null;
 		}
-		if (featureStart < 0) featureStart = 0;
 
-		final String featureName = lineText.substring(featureStart, featureEnd + 1);
+		final String header = lineText.substring(headerStart, headerEnd);
+		final int headerCaret = Math.min(Math.max(0, targetChar - headerStart), header.length());
 
-		// Use LMCore meta-model as authoritative source for header concepts (MetaModel, Group, Definition, ...).
+		final var tokens = tokenizeHeader(header);
+		if (tokens.isEmpty())
+		{
+			return null;
+		}
+
+		// First token is the header keyword (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, ...).
+		final String keyword = tokens.getFirst().text();
+		if (keyword == null || keyword.isBlank())
+		{
+			return null;
+		}
+
+		final String featureName = resolveFeatureNameAtCaret(tokens, headerCaret);
+		if (featureName == null || featureName.isBlank())
+		{
+			return null;
+		}
+
+		final String groupName = resolveGroupNameForHeaderKeyword(keyword);
+		if (groupName == null || groupName.isBlank())
+		{
+			return null;
+		}
+
 		final MetaModel lmCore = LMCorePackage.MODEL;
 		Group<?> group = null;
 		for (final Group<?> g : lmCore.groups())
 		{
-			if (keyword.equals(g.name()))
+			if (groupName.equals(g.name()))
 			{
 				group = g;
 				break;
 			}
 		}
 
-		if (group == null) return null;
+		if (group == null)
+		{
+			return null;
+		}
 
 		for (final Feature<?, ?> feature : group.features())
 		{
@@ -177,8 +185,6 @@ final class AttributeValueCompletionProvider
 			}
 		}
 
-		LOG.info("LMF LSP completion: attribute value, feature '{}' not found in group '{}', uri={}, line={}, character={}",
-				 featureName, group.name(), uri, pos.getLine(), pos.getCharacter());
 		return null;
 	}
 
@@ -252,52 +258,151 @@ final class AttributeValueCompletionProvider
 		return items;
 	}
 
-	private static boolean hasEqualsBeforePosition(final CharSequence source, final Position pos)
+	record HeaderToken(String text, int start, int end)
 	{
-		final int targetLine = pos.getLine();
-		final int targetChar = pos.getCharacter();
+	}
 
-		int line = 0;
-		int lineStartOffset = -1;
-		for (int i = 0; i < source.length(); i++)
+	static java.util.List<HeaderToken> tokenizeHeader(final String header)
+	{
+		final var out = new java.util.ArrayList<HeaderToken>();
+		final int length = header.length();
+		int i = 0;
+
+		while (i < length)
 		{
-			final char c = source.charAt(i);
-			if (line == targetLine)
+			final char c = header.charAt(i);
+			if (Character.isWhitespace(c))
 			{
-				lineStartOffset = i;
+				i++;
+				continue;
+			}
+
+			if (c == '=')
+			{
+				out.add(new HeaderToken("=", i, i + 1));
+				i++;
+				continue;
+			}
+
+			int start = i;
+			while (i < length)
+			{
+				final char ch = header.charAt(i);
+				if (Character.isWhitespace(ch) || ch == '=')
+				{
+					break;
+				}
+				i++;
+			}
+			final int end = i;
+			if (start < end)
+			{
+				out.add(new HeaderToken(header.substring(start, end), start, end));
+			}
+		}
+
+		return java.util.List.copyOf(out);
+	}
+
+	static String resolveFeatureNameAtCaret(final java.util.List<HeaderToken> tokens,
+											final int headerCaret)
+	{
+		if (tokens.isEmpty())
+		{
+			return null;
+		}
+
+		// Find the last token that starts at or before the caret.
+		int caretTokenIndex = -1;
+		for (int i = 0; i < tokens.size(); i++)
+		{
+			final HeaderToken tok = tokens.get(i);
+			if (tok.start() <= headerCaret)
+			{
+				caretTokenIndex = i;
+			}
+			else
+			{
 				break;
 			}
-			if (c == '\n')
+		}
+
+		if (caretTokenIndex <= 0)
+		{
+			return null;
+		}
+
+		// Walk backwards from the caret to find the nearest '=',
+		// then, if the caret is still within the value for that assignment,
+		// pick the token immediately before '=' as the feature name.
+		for (int i = caretTokenIndex; i >= 1; i--)
+		{
+			final HeaderToken tok = tokens.get(i);
+			if ("=".equals(tok.text()))
 			{
-				line++;
+				final HeaderToken prev = tokens.get(i - 1);
+				HeaderToken valueTok = (i + 1) < tokens.size() ? tokens.get(i + 1) : null;
+
+				if (valueTok != null)
+				{
+					final int valueEnd = valueTok.end();
+					if (headerCaret > valueEnd)
+					{
+						// Caret is past the end of the value; treat this as no longer being
+						// in a value position for this feature.
+						return null;
+					}
+				}
+
+				return prev.text();
 			}
 		}
 
-		if (lineStartOffset == -1)
+		return null;
+	}
+
+	static String resolveGroupNameForHeaderKeyword(final String keyword)
+	{
+		if (keyword == null || keyword.isBlank())
 		{
-			return false;
+			return null;
 		}
 
-		final int caretOffsetLimit = lineStartOffset + targetChar;
-		int lineEndOffset = source.length();
-		for (int i = lineStartOffset; i < source.length(); i++)
+		// Direct group name (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Attribute, Relation, ...)
+		final MetaModel lmCore = LMCorePackage.MODEL;
+		for (final Group<?> g : lmCore.groups())
 		{
-			if (source.charAt(i) == '\n')
+			if (keyword.equals(g.name()))
 			{
-				lineEndOffset = i;
-				break;
+				return g.name();
 			}
 		}
 
-		for (int i = lineStartOffset; i < lineEndOffset && i < caretOffsetLimit; i++)
+		// Alias-based header, e.g. +att / -att / +contains / -contains.
+		final Alias alias = MetaModelRegistry.Instance.getAliasMap().get(keyword);
+		if (alias == null)
 		{
-			if (source.charAt(i) == '=')
-			{
-				return true;
-			}
+			return null;
 		}
 
-		return false;
+		final String value = alias.value();
+		if (value == null || value.isBlank())
+		{
+			return null;
+		}
+
+		int i = 0;
+		final int len = value.length();
+		while (i < len && Character.isWhitespace(value.charAt(i)))
+		{
+			i++;
+		}
+		final int start = i;
+		while (i < len && !Character.isWhitespace(value.charAt(i)))
+		{
+			i++;
+		}
+		return start < i ? value.substring(start, i) : null;
 	}
 
 }

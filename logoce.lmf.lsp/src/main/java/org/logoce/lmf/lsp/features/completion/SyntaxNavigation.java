@@ -83,6 +83,55 @@ final class SyntaxNavigation
 		return new Range(startPos, endPos);
 	}
 
+	static boolean hasEqualsBeforePosition(final SyntaxSnapshot syntax, final Position pos)
+	{
+		final CharSequence source = syntax.source();
+		final int targetLine = pos.getLine();
+		final int targetChar = pos.getCharacter();
+
+		int line = 0;
+		int lineStartOffset = -1;
+		for (int i = 0; i < source.length(); i++)
+		{
+			final char c = source.charAt(i);
+			if (line == targetLine)
+			{
+				lineStartOffset = i;
+				break;
+			}
+			if (c == '\n')
+			{
+				line++;
+			}
+		}
+
+		if (lineStartOffset == -1)
+		{
+			return false;
+		}
+
+		final int caretOffsetLimit = lineStartOffset + targetChar;
+		int lineEndOffset = source.length();
+		for (int i = lineStartOffset; i < source.length(); i++)
+		{
+			if (source.charAt(i) == '\n')
+			{
+				lineEndOffset = i;
+				break;
+			}
+		}
+
+		for (int i = lineStartOffset; i < lineEndOffset && i < caretOffsetLimit; i++)
+		{
+			if (source.charAt(i) == '=')
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private static Range rangeForOffsets(final int startOffset, final int endOffset, final CharSequence source)
 	{
 		final int startLine = Math.max(0, TextPositions.lineFor(source, startOffset) - 1);
@@ -125,6 +174,17 @@ final class SyntaxNavigation
 		}
 
 		return best.node;
+	}
+
+	static PNode findPNodeAtOrBeforePosition(final SyntaxSnapshot syntax, final Position pos)
+	{
+		PNode node = findPNodeAtPosition(syntax, pos);
+		if (node == null && pos.getCharacter() > 0)
+		{
+			final var prev = new Position(pos.getLine(), pos.getCharacter() - 1);
+			node = findPNodeAtPosition(syntax, prev);
+		}
+		return node;
 	}
 
 	private static void findPNodeInTree(final Tree<PNode> node,
@@ -399,29 +459,6 @@ final class SyntaxNavigation
 		}
 
 		return candidate;
-	}
-
-	private static int findNextNonWhitespaceTokenIndex(final List<PToken> tokens, final int startIndex)
-	{
-		for (int i = startIndex; i < tokens.size(); i++)
-		{
-			final String value = tokens.get(i).value();
-			if (value == null || value.isBlank())
-			{
-				continue;
-			}
-			return i;
-		}
-		return -1;
-	}
-
-	private static boolean isHeaderKeyword(final String value)
-	{
-		return switch (value)
-		{
-			case "MetaModel", "Group", "Definition", "Enum", "Unit", "Generic", "Alias", "JavaWrapper", "includes" -> true;
-			default -> false;
-		};
 	}
 
 	private static int spanLength(final Range range)

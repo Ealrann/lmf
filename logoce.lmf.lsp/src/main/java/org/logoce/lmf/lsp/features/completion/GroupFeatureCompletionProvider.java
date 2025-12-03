@@ -8,6 +8,11 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.lang.Alias;
+import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +27,24 @@ final class GroupFeatureCompletionProvider
 	{
 	}
 
-	static List<CompletionItem> complete(final SemanticSnapshot semantic,
-										 final SyntaxSnapshot syntax,
-										 final Position pos)
+	static List<CompletionItem> complete(final CompletionContext context)
 	{
-		final Group<?> group = SemanticNavigation.findGroupAtPosition(semantic, syntax, pos);
+		final SemanticSnapshot semantic = context.semantic();
+		final SyntaxSnapshot syntax = context.syntax();
+		final Position pos = context.position();
+
+		if (syntax == null)
+		{
+			return List.of();
+		}
+
+		final Group<?> semanticGroup = semantic != null
+									   ? SemanticNavigation.findGroupAtPosition(semantic, syntax, pos)
+									   : null;
+		final Group<?> group = semanticGroup != null
+							   ? semanticGroup
+							   : fallbackGroupFromSyntax(syntax, pos);
+
 		if (group == null)
 		{
 			LOG.info("LMF LSP completion: no group resolved at position line={}, character={}",
@@ -69,5 +87,80 @@ final class GroupFeatureCompletionProvider
 		}
 
 		return items;
+	}
+
+	private static Group<?> fallbackGroupFromSyntax(final SyntaxSnapshot syntax, final Position pos)
+	{
+		final PNode node = SyntaxNavigation.findPNodeAtPosition(syntax, pos);
+		if (node == null)
+		{
+			return null;
+		}
+
+		final String keyword = SyntaxNavigation.headerKeyword(node);
+		if (keyword == null || keyword.isBlank())
+		{
+			return null;
+		}
+
+		final String groupName = resolveGroupNameForHeaderKeyword(keyword);
+		if (groupName == null || groupName.isBlank())
+		{
+			return null;
+		}
+
+		final MetaModel lmCore = LMCorePackage.MODEL;
+		for (final Group<?> g : lmCore.groups())
+		{
+			if (groupName.equals(g.name()))
+			{
+				return g;
+			}
+		}
+		return null;
+	}
+
+	private static String resolveGroupNameForHeaderKeyword(final String keyword)
+	{
+		if (keyword == null || keyword.isBlank())
+		{
+			return null;
+		}
+
+		// Direct group name (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Attribute, Relation, ...)
+		final MetaModel lmCore = LMCorePackage.MODEL;
+		for (final Group<?> g : lmCore.groups())
+		{
+			if (keyword.equals(g.name()))
+			{
+				return g.name();
+			}
+		}
+
+		// Alias-based header, e.g. +att / -att / +contains / -contains.
+		final Alias alias = MetaModelRegistry.Instance.getAliasMap().get(keyword);
+		if (alias == null)
+		{
+			return null;
+		}
+
+		final String value = alias.value();
+		if (value == null || value.isBlank())
+		{
+			return null;
+		}
+
+		int i = 0;
+		final int len = value.length();
+		while (i < len && Character.isWhitespace(value.charAt(i)))
+		{
+			i++;
+		}
+		final int start = i;
+		while (i < len && !Character.isWhitespace(value.charAt(i)))
+		{
+			i++;
+		}
+		return start < i ? value.substring(start, i) : null;
 	}
 }
