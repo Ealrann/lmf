@@ -497,10 +497,17 @@ public final class LmTextDocumentService implements TextDocumentService
 				return new SemanticTokens(java.util.List.of());
 			}
 
-			final var syntax = state.syntaxSnapshot();
+			var syntax = state.syntaxSnapshot();
 			if (syntax == null)
 			{
-				return new SemanticTokens(java.util.List.of());
+				LOG.debug("LMF LSP semanticTokensFull: uri={} has no syntax snapshot yet, analyzing document", uri);
+				server.analyzeDocument(state);
+				syntax = state.syntaxSnapshot();
+				if (syntax == null)
+				{
+					LOG.debug("LMF LSP semanticTokensFull: uri={} still has no syntax snapshot after analysis", uri);
+					return new SemanticTokens(java.util.List.of());
+				}
 			}
 
 			final java.util.List<Integer> data = new java.util.ArrayList<>();

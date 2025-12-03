@@ -5,19 +5,24 @@ import org.eclipse.lsp4j.Position;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Concept;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Alias;
+import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.MetaModelRegistry;
+import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.model.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 final class GroupFeatureCompletionProvider
 {
@@ -52,11 +57,20 @@ final class GroupFeatureCompletionProvider
 			return List.of();
 		}
 
-		final List<CompletionItem> items = buildGroupFeatureCompletions(group);
+		final List<CompletionItem> items = new ArrayList<>();
+		items.addAll(buildGroupFeatureCompletions(group));
+		items.addAll(buildContainmentChildCompletions(context, group));
+
 		if (!items.isEmpty())
 		{
-			LOG.info("LMF LSP completion: group feature completions, group={}, items={}",
-					 group.name(), items.size());
+			if (LOG.isInfoEnabled())
+			{
+				final var labels = items.stream()
+										.map(CompletionItem::getLabel)
+										.toList();
+				LOG.info("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
+						 group.name(), items.size(), labels);
+			}
 		}
 		return items;
 	}
@@ -89,6 +103,122 @@ final class GroupFeatureCompletionProvider
 		return items;
 	}
 
+	private static List<CompletionItem> buildContainmentChildCompletions(final CompletionContext context,
+																		 final Group<?> group)
+	{
+		final var conceptGroups = new ArrayList<Group<?>>();
+
+		for (final Feature<?, ?> feature : group.features())
+		{
+			if (!(feature instanceof Relation<?, ?> relation))
+			{
+				continue;
+			}
+
+			if (!relation.contains())
+			{
+				continue;
+			}
+
+			final Concept<?> concept = relation.concept();
+			if (concept == null)
+			{
+				continue;
+			}
+
+			final Group<?> conceptGroup =
+				(concept instanceof Group<?> g) ? g : concept.lmGroup();
+			if (conceptGroup == null)
+			{
+				continue;
+			}
+
+			conceptGroups.add(conceptGroup);
+		}
+
+		if (conceptGroups.isEmpty())
+		{
+			return List.of();
+		}
+
+		if (context.server() == null)
+		{
+			return List.of();
+		}
+
+		final var server = context.server();
+		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
+		final MetaModel currentMetaModel = context.metaModel();
+
+		final Set<String> seenCandidateNames = new HashSet<>();
+		final var candidates = new ArrayList<Group<?>>();
+
+		final java.util.function.Consumer<MetaModel> collectFromMetaModel = mm -> {
+			if (mm == null)
+			{
+				return;
+			}
+			for (final Group<?> candidate : mm.groups())
+			{
+				if (!candidate.concrete())
+				{
+					continue;
+				}
+
+				for (final Group<?> conceptGroup : conceptGroups)
+				{
+					if (ModelUtils.isSubGroup(conceptGroup, candidate))
+					{
+						if (seenCandidateNames.add(candidate.name()))
+						{
+							candidates.add(candidate);
+						}
+						break;
+					}
+				}
+			}
+		};
+
+		if (currentMetaModel != null)
+		{
+			collectFromMetaModel.accept(currentMetaModel);
+			for (final String imp : currentMetaModel.imports())
+			{
+				final Model imported = registry.getModel(imp);
+				if (imported instanceof MetaModel importedMm)
+				{
+					collectFromMetaModel.accept(importedMm);
+				}
+			}
+		}
+
+		// Always include LMCore groups as baseline candidates (Attribute, Relation, ...).
+		collectFromMetaModel.accept(LMCorePackage.MODEL);
+
+		if (candidates.isEmpty())
+		{
+			return List.of();
+		}
+
+		final var items = new ArrayList<CompletionItem>();
+		for (final Group<?> candidate : candidates)
+		{
+			final String name = candidate.name();
+			if (name == null || name.isEmpty())
+			{
+				continue;
+			}
+
+			final String snippet = "(" + name + " )";
+			final var item = new CompletionItem(snippet);
+			item.setInsertText(snippet);
+			item.setDetail("Child of " + group.name());
+			items.add(item);
+		}
+
+		return items;
+	}
+
 	private static Group<?> fallbackGroupFromSyntax(final SyntaxSnapshot syntax, final Position pos)
 	{
 		final PNode node = SyntaxNavigation.findPNodeAtPosition(syntax, pos);
@@ -103,7 +233,7 @@ final class GroupFeatureCompletionProvider
 			return null;
 		}
 
-		final String groupName = resolveGroupNameForHeaderKeyword(keyword);
+		final String groupName = AttributeValueCompletionProvider.resolveGroupNameForHeaderKeyword(keyword);
 		if (groupName == null || groupName.isBlank())
 		{
 			return null;
@@ -118,49 +248,5 @@ final class GroupFeatureCompletionProvider
 			}
 		}
 		return null;
-	}
-
-	private static String resolveGroupNameForHeaderKeyword(final String keyword)
-	{
-		if (keyword == null || keyword.isBlank())
-		{
-			return null;
-		}
-
-		// Direct group name (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Attribute, Relation, ...)
-		final MetaModel lmCore = LMCorePackage.MODEL;
-		for (final Group<?> g : lmCore.groups())
-		{
-			if (keyword.equals(g.name()))
-			{
-				return g.name();
-			}
-		}
-
-		// Alias-based header, e.g. +att / -att / +contains / -contains.
-		final Alias alias = MetaModelRegistry.Instance.getAliasMap().get(keyword);
-		if (alias == null)
-		{
-			return null;
-		}
-
-		final String value = alias.value();
-		if (value == null || value.isBlank())
-		{
-			return null;
-		}
-
-		int i = 0;
-		final int len = value.length();
-		while (i < len && Character.isWhitespace(value.charAt(i)))
-		{
-			i++;
-		}
-		final int start = i;
-		while (i < len && !Character.isWhitespace(value.charAt(i)))
-		{
-			i++;
-		}
-		return start < i ? value.substring(start, i) : null;
 	}
 }

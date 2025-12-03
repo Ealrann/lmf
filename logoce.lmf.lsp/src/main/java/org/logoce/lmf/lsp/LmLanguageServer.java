@@ -87,6 +87,11 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		return workspaceIndex;
 	}
 
+	public void analyzeDocument(final org.logoce.lmf.lsp.state.LmDocumentState state)
+	{
+		workspaceRebuilder.analyzeDocument(state);
+	}
+
 	public Settings settings()
 	{
 		return settings;

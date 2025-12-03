@@ -53,14 +53,7 @@ final class AttributeValueCompletionProvider
 			return List.of();
 		}
 
-		if (!SyntaxNavigation.hasEqualsBeforePosition(syntax, context.position()))
-		{
-			LOG.info("LMF LSP completion: attribute value – no '=' before caret, uri={}, line={}, character={}",
-					 context.uri(), context.position().getLine(), context.position().getCharacter());
-			return List.of();
-		}
-
-		final Attribute<?, ?> attribute = findAttributeAtValuePosition(syntax, context.position());
+		final Attribute<?, ?> attribute = context.value() != null ? context.value().attribute() : null;
 		if (attribute == null)
 		{
 			LOG.info("LMF LSP completion: attribute value – no attribute resolved from header text at uri={}, line={}, character={}",
@@ -72,120 +65,6 @@ final class AttributeValueCompletionProvider
 		LOG.info("LMF LSP completion: attribute value completions, attribute={}, items={}",
 				 attribute.name(), items.size());
 		return items;
-	}
-
-	private static Attribute<?, ?> findAttributeAtValuePosition(final SyntaxSnapshot syntax,
-																final Position pos)
-	{
-		final CharSequence source = syntax.source();
-		final int targetLine = pos.getLine();
-		final int targetChar = pos.getCharacter();
-
-		int line = 0;
-		int lineStartOffset = -1;
-		for (int i = 0; i < source.length(); i++)
-		{
-			final char c = source.charAt(i);
-			if (line == targetLine)
-			{
-				lineStartOffset = i;
-				break;
-			}
-			if (c == '\n')
-			{
-				line++;
-			}
-		}
-
-		if (lineStartOffset == -1)
-		{
-			return null;
-		}
-
-		int lineEndOffset = source.length();
-		for (int i = lineStartOffset; i < source.length(); i++)
-		{
-			if (source.charAt(i) == '\n')
-			{
-				lineEndOffset = i;
-				break;
-			}
-		}
-
-		final String lineText = source.subSequence(lineStartOffset, lineEndOffset).toString();
-
-		final int openIdx = lineText.indexOf('(');
-		if (openIdx < 0)
-		{
-			return null;
-		}
-
-		int closeIdx = lineText.indexOf(')', openIdx + 1);
-		if (closeIdx < 0)
-		{
-			closeIdx = lineText.length();
-		}
-
-		final int headerStart = openIdx + 1;
-		final int headerEnd = closeIdx;
-		if (headerStart >= headerEnd)
-		{
-			return null;
-		}
-
-		final String header = lineText.substring(headerStart, headerEnd);
-		final int headerCaret = Math.min(Math.max(0, targetChar - headerStart), header.length());
-
-		final var tokens = tokenizeHeader(header);
-		if (tokens.isEmpty())
-		{
-			return null;
-		}
-
-		// First token is the header keyword (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, ...).
-		final String keyword = tokens.getFirst().text();
-		if (keyword == null || keyword.isBlank())
-		{
-			return null;
-		}
-
-		final String featureName = resolveFeatureNameAtCaret(tokens, headerCaret);
-		if (featureName == null || featureName.isBlank())
-		{
-			return null;
-		}
-
-		final String groupName = resolveGroupNameForHeaderKeyword(keyword);
-		if (groupName == null || groupName.isBlank())
-		{
-			return null;
-		}
-
-		final MetaModel lmCore = LMCorePackage.MODEL;
-		Group<?> group = null;
-		for (final Group<?> g : lmCore.groups())
-		{
-			if (groupName.equals(g.name()))
-			{
-				group = g;
-				break;
-			}
-		}
-
-		if (group == null)
-		{
-			return null;
-		}
-
-		for (final Feature<?, ?> feature : group.features())
-		{
-			if (feature instanceof Attribute<?, ?> attr && featureName.equals(feature.name()))
-			{
-				return attr;
-			}
-		}
-
-		return null;
 	}
 
 	private static List<CompletionItem> buildAttributeValueCompletions(final Attribute<?, ?> attribute,

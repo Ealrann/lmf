@@ -8,6 +8,7 @@
 			(OperationParameter name=items type=@JavaList
 				(parameters type=/groups.0/generics.0))))
 
-	(Group test
-	    (-att name=tt ))
+	(Group Test
+
+		(-att testAtt datatype=#LMCore@boolean))
 )

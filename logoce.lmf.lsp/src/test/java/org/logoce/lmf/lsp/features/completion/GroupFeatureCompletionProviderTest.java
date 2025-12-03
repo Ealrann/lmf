@@ -53,15 +53,48 @@ final class GroupFeatureCompletionProviderTest
 		final var secondOperationPos = new Position(13, 13);
 		final var parameterPos = new Position(14, 23);
 
-		final var firstOpItems = GroupFeatureCompletionProvider.complete(semanticSnapshot, syntaxSnapshot, firstOperationPos);
+		final var firstContext = new CompletionContext(
+			null,
+			java.net.URI.create("file:///test"),
+			firstOperationPos,
+			null,
+			syntaxSnapshot,
+			semanticSnapshot,
+			null,
+			CompletionContextKind.DEFAULT,
+			null,
+			null);
+		final var firstOpItems = GroupFeatureCompletionProvider.complete(firstContext);
 		assertFalse(firstOpItems.isEmpty(), "First operation should produce feature completions");
 		assertEquals("Feature of Operation", firstOpItems.getFirst().getDetail());
 
-		final var secondOpItems = GroupFeatureCompletionProvider.complete(semanticSnapshot, syntaxSnapshot, secondOperationPos);
+		final var secondContext = new CompletionContext(
+			null,
+			java.net.URI.create("file:///test"),
+			secondOperationPos,
+			null,
+			syntaxSnapshot,
+			semanticSnapshot,
+			null,
+			CompletionContextKind.DEFAULT,
+			null,
+			null);
+		final var secondOpItems = GroupFeatureCompletionProvider.complete(secondContext);
 		assertFalse(secondOpItems.isEmpty(), "Second operation should produce feature completions");
 		assertEquals("Feature of Operation", secondOpItems.getFirst().getDetail());
 
-		final var parameterItems = GroupFeatureCompletionProvider.complete(semanticSnapshot, syntaxSnapshot, parameterPos);
+		final var parameterContext = new CompletionContext(
+			null,
+			java.net.URI.create("file:///test"),
+			parameterPos,
+			null,
+			syntaxSnapshot,
+			semanticSnapshot,
+			null,
+			CompletionContextKind.DEFAULT,
+			null,
+			null);
+		final var parameterItems = GroupFeatureCompletionProvider.complete(parameterContext);
 		assertFalse(parameterItems.isEmpty(), "OperationParameter should produce feature completions");
 		assertEquals("Feature of OperationParameter", parameterItems.getFirst().getDetail());
 	}

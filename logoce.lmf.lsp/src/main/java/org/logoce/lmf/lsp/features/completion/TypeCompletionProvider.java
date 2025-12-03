@@ -1,10 +1,12 @@
 package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.Position;
 import org.logoce.lmf.lsp.LmLanguageServer;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Alias;
+import org.logoce.lmf.lsp.state.LmSymbolKind;
+import org.logoce.lmf.lsp.state.ModelKey;
+import org.logoce.lmf.lsp.state.SymbolEntry;
+import org.logoce.lmf.model.lang.Enum;
+import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
@@ -12,10 +14,7 @@ import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.loader.model.LmSymbolIndex;
 import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
-import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.MetaModelRegistry;
-import org.logoce.lmf.model.util.tree.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +27,6 @@ final class TypeCompletionProvider
 {
 	private static final Logger LOG = LoggerFactory.getLogger(TypeCompletionProvider.class);
 
-	private enum TypeUsageKind
-	{
-		ANY,
-		DATATYPE,
-		CONCEPT
-	}
-
 	private TypeCompletionProvider()
 	{
 	}
@@ -45,48 +37,6 @@ final class TypeCompletionProvider
 		final var shaped = shapeCompletionItems(items, context.contextKind());
 		LOG.info("LMF LSP completion: type completions (semantic), uri={}, items={}, context={}",
 				 context.uri(), shaped.size(), context.contextKind());
-		return shaped;
-	}
-
-	static List<CompletionItem> completeFromSyntax(final ModelRegistry registry,
-												   final SyntaxSnapshot syntax,
-												   final Position pos,
-												   final CompletionContextKind contextKind)
-	{
-		final List<CompletionItem> items = new ArrayList<>();
-		final Set<String> seenLabels = new HashSet<>();
-
-		for (final CompletionItem item : basicCompletions())
-		{
-			if (seenLabels.add(item.getLabel()))
-			{
-				items.add(item);
-			}
-		}
-		final TypeUsageKind usageKind = resolveTypeUsageKind(syntax, pos);
-
-		final var localTypes = extractLocalTypesFromSyntax(syntax, usageKind);
-		for (final var typeName : localTypes)
-		{
-			addTypeCompletion(items,
-							  seenLabels,
-							  false,
-							  null,
-							  typeName,
-							  "Type in local document");
-		}
-
-		for (final Model model : (Iterable<Model>) registry.models()::iterator)
-		{
-			if (model instanceof MetaModel mm)
-			{
-				addMetaModelTypes(mm, mm.name(), true, items, seenLabels, usageKind);
-			}
-		}
-
-		final var shaped = shapeCompletionItems(items, contextKind);
-		LOG.info("LMF LSP completion: type completions (fallback), usageKind={}, context={}, rawItems={}, shapedItems={}",
-				 usageKind, contextKind, items.size(), shaped.size());
 		return shaped;
 	}
 
@@ -106,28 +56,29 @@ final class TypeCompletionProvider
 		final LmLanguageServer server = context.server();
 		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
 		final MetaModel mm = context.metaModel();
-		final SyntaxSnapshot syntax = context.syntax();
-		final TypeUsageKind usageKind = resolveTypeUsageKind(syntax, context.position());
+		final TypeUsageKind usageKind = context.value() != null ? context.value().typeUsageKind() : TypeUsageKind.ANY;
 		LOG.info("LMF LSP completion: buildTypeCompletions, uri={}, usageKind={}, context={}, line={}, character={}",
 				 context.uri(), usageKind, context.contextKind(),
 				 context.position().getLine(), context.position().getCharacter());
 
-		// Local types from the current model.
-		addMetaModelTypes(mm, null, false, items, seenLabels, usageKind);
+		// Local types from the current document via the symbol index.
+		addLocalTypesFromSymbolIndex(context, mm, usageKind, items, seenLabels);
 
+		// Types from imported meta-models – prefer workspace symbol index, fall back to the model registry.
 		for (final String imp : mm.imports())
 		{
 			final Model imported = registry.getModel(imp);
 			if (imported instanceof MetaModel importedMm)
 			{
-				addMetaModelTypes(importedMm, importedMm.name(), true, items, seenLabels, usageKind);
+				addCrossModelTypes(context, importedMm, importedMm.name(), usageKind, items, seenLabels);
 			}
 		}
 
+		// LMCore types.
 		final MetaModel lmCore = findLmCoreMetaModel(registry);
 		if (lmCore != null)
 		{
-			addMetaModelTypes(lmCore, lmCore.name(), true, items, seenLabels, usageKind);
+			addCrossModelTypes(context, lmCore, lmCore.name(), usageKind, items, seenLabels);
 		}
 
 		return items;
@@ -286,6 +237,161 @@ final class TypeCompletionProvider
 		}
 	}
 
+	private static void addLocalTypesFromSymbolIndex(final CompletionContext context,
+													 final MetaModel mm,
+													 final TypeUsageKind usageKind,
+													 final List<CompletionItem> items,
+													 final Set<String> seenLabels)
+	{
+		final var semantic = context.semantic();
+		final var syntax = context.syntax();
+		if (semantic == null || syntax == null || semantic.model() == null)
+		{
+			return;
+		}
+
+		final Model model = semantic.model();
+		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(
+			model,
+			syntax.roots(),
+			syntax.source(),
+			ModelRegistry.empty());
+
+		int added = 0;
+		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		{
+			if (decl.id().kind() != LmSymbolIndex.SymbolKind.TYPE)
+			{
+				continue;
+			}
+
+			final String typeName = decl.id().name();
+			final boolean conceptLike = isConceptLikeType(mm, typeName);
+			final boolean datatypeLike = isDatatypeLikeType(mm, typeName);
+
+			if (!isAllowedByUsage(usageKind, conceptLike, datatypeLike))
+			{
+				continue;
+			}
+
+			addTypeCompletion(items,
+							  seenLabels,
+							  false,
+							  null,
+							  typeName,
+							  "Type in " + mm.domain() + "." + mm.name());
+			added++;
+		}
+
+		if (added > 0)
+		{
+			LOG.info("LMF LSP completion: addLocalTypesFromSymbolIndex model={} types={}",
+					 mm.domain() + "." + mm.name(),
+					 added);
+		}
+	}
+
+	private static void addCrossModelTypes(final CompletionContext context,
+										   final MetaModel importedMm,
+										   final String modelAlias,
+										   final TypeUsageKind usageKind,
+										   final List<CompletionItem> items,
+										   final Set<String> seenLabels)
+	{
+		final var workspaceIndex = context.server().workspaceIndex();
+		final var targetKey = new ModelKey(importedMm.domain(), importedMm.name());
+
+		int added = 0;
+		for (final SymbolEntry entry : workspaceIndex.symbolIndex().values())
+		{
+			final var id = entry.id();
+			if (id.kind() != LmSymbolKind.TYPE)
+			{
+				continue;
+			}
+			if (!targetKey.equals(id.modelKey()))
+			{
+				continue;
+			}
+
+			final String typeName = id.name();
+			final boolean conceptLike = isConceptLikeType(importedMm, typeName);
+			final boolean datatypeLike = isDatatypeLikeType(importedMm, typeName);
+			if (!isAllowedByUsage(usageKind, conceptLike, datatypeLike))
+			{
+				continue;
+			}
+
+			addTypeCompletion(items,
+							  seenLabels,
+							  true,
+							  modelAlias,
+							  typeName,
+							  "Type in " + importedMm.domain() + "." + importedMm.name());
+			added++;
+		}
+
+		if (added > 0)
+		{
+			LOG.info("LMF LSP completion: addCrossModelTypes model={} alias={} types={}",
+					 importedMm.domain() + "." + importedMm.name(),
+					 modelAlias,
+					 added);
+			return;
+		}
+
+		// Fallback when no symbol index entries exist for the imported model.
+		addMetaModelTypes(importedMm, modelAlias, true, items, seenLabels, usageKind);
+	}
+
+	private static boolean isConceptLikeType(final MetaModel mm, final String typeName)
+	{
+		if (typeName == null || typeName.isEmpty())
+		{
+			return false;
+		}
+
+		for (final Group<?> g : mm.groups())
+		{
+			if (typeName.equals(g.name()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean isDatatypeLikeType(final MetaModel mm, final String typeName)
+	{
+		if (typeName == null || typeName.isEmpty())
+		{
+			return false;
+		}
+
+		for (final Enum<?> _enum : mm.enums())
+		{
+			if (typeName.equals(_enum.name()))
+			{
+				return true;
+			}
+		}
+		for (final Unit<?> unit : mm.units())
+		{
+			if (typeName.equals(unit.name()))
+			{
+				return true;
+			}
+		}
+		for (final JavaWrapper<?> wrapper : mm.javaWrappers())
+		{
+			if (typeName.equals(wrapper.name()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static void addTypeCompletion(final List<CompletionItem> items,
 										  final Set<String> seenLabels,
 										  final boolean crossModel,
@@ -316,149 +422,6 @@ final class TypeCompletionProvider
 		}
 	}
 
-	private static void addLocalTypesFromIndex(final MetaModel mm,
-											   final SyntaxSnapshot syntax,
-											   final ModelRegistry registry,
-											   final List<CompletionItem> items,
-											   final Set<String> seenLabels)
-	{
-		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(
-			mm,
-			syntax.roots(),
-			syntax.source(),
-			registry);
-
-		final String modelQualifiedName = mm.domain() + "." + mm.name();
-
-		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
-		{
-			final var id = decl.id();
-			if (id.kind() != LmSymbolIndex.SymbolKind.TYPE)
-			{
-				continue;
-			}
-			if (!mm.domain().equals(id.modelDomain()) || !mm.name().equals(id.modelName()))
-			{
-				continue;
-			}
-
-			final String typeName = id.name();
-			if (typeName == null || typeName.isEmpty())
-			{
-				continue;
-			}
-
-			final String label = typeName;
-			if (!seenLabels.add(label))
-			{
-				continue;
-			}
-
-			final var item = new CompletionItem(label);
-			item.setDetail("Type in " + modelQualifiedName);
-			items.add(item);
-		}
-	}
-
-	private static TypeUsageKind resolveTypeUsageKind(final SyntaxSnapshot syntax, final Position pos)
-	{
-		final PNode node = SyntaxNavigation.findPNodeAtOrBeforePosition(syntax, pos);
-		if (node == null)
-		{
-			LOG.info("LMF LSP completion: resolveTypeUsageKind -> ANY (no enclosing node) at line={}, character={}",
-					 pos.getLine(), pos.getCharacter());
-			return TypeUsageKind.ANY;
-		}
-
-		final String keyword = SyntaxNavigation.headerKeyword(node);
-		if (keyword == null || keyword.isBlank())
-		{
-			LOG.info("LMF LSP completion: resolveTypeUsageKind -> ANY (no header keyword) at line={}, character={}",
-					 pos.getLine(), pos.getCharacter());
-			return TypeUsageKind.ANY;
-		}
-
-		final String featureName = SyntaxNavigation.findFeatureNameAtValuePosition(node,
-																				   syntax.source(),
-																				   pos);
-		if (featureName == null || featureName.isBlank())
-		{
-			LOG.info("LMF LSP completion: resolveTypeUsageKind -> ANY (no feature name) keyword={} at line={}, character={}",
-					 keyword, pos.getLine(), pos.getCharacter());
-			return TypeUsageKind.ANY;
-		}
-
-		final String groupName = resolveGroupNameForHeaderKeyword(keyword);
-		if (groupName == null || groupName.isBlank())
-		{
-			LOG.info("LMF LSP completion: resolveTypeUsageKind -> ANY (no groupName) keyword={} featureName={} at line={}, character={}",
-					 keyword, featureName, pos.getLine(), pos.getCharacter());
-			return TypeUsageKind.ANY;
-		}
-
-		final TypeUsageKind result;
-		if ("Attribute".equals(groupName) && "datatype".equals(featureName))
-		{
-			result = TypeUsageKind.DATATYPE;
-		}
-		else if ("Relation".equals(groupName) && "concept".equals(featureName))
-		{
-			result = TypeUsageKind.CONCEPT;
-		}
-		else
-		{
-			result = TypeUsageKind.ANY;
-		}
-
-		LOG.info("LMF LSP completion: resolveTypeUsageKind result={} keyword={} featureName={} groupName={} line={} character={}",
-				 result, keyword, featureName, groupName, pos.getLine(), pos.getCharacter());
-		return result;
-	}
-
-	private static String resolveGroupNameForHeaderKeyword(final String keyword)
-	{
-		if (keyword == null || keyword.isBlank())
-		{
-			return null;
-		}
-
-		// Direct group name (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Attribute, Relation, ...)
-		final MetaModel lmCore = LMCorePackage.MODEL;
-		for (final org.logoce.lmf.model.lang.Group<?> g : lmCore.groups())
-		{
-			if (keyword.equals(g.name()))
-			{
-				return g.name();
-			}
-		}
-
-		// Alias-based header, e.g. +att / -att / +contains / -contains.
-		final Alias alias = MetaModelRegistry.Instance.getAliasMap().get(keyword);
-		if (alias == null)
-		{
-			return null;
-		}
-
-		final String value = alias.value();
-		if (value == null || value.isBlank())
-		{
-			return null;
-		}
-
-		int i = 0;
-		final int len = value.length();
-		while (i < len && Character.isWhitespace(value.charAt(i)))
-		{
-			i++;
-		}
-		final int start = i;
-		while (i < len && !Character.isWhitespace(value.charAt(i)))
-		{
-			i++;
-		}
-		return start < i ? value.substring(start, i) : null;
-	}
-
 	private static boolean isAllowedByUsage(final TypeUsageKind usageKind,
 											final boolean conceptLike,
 											final boolean datatypeLike)
@@ -469,59 +432,6 @@ final class TypeCompletionProvider
 			case CONCEPT -> conceptLike;
 			case ANY -> true;
 		};
-	}
-
-	private static java.util.Set<String> extractLocalTypesFromSyntax(final SyntaxSnapshot syntax,
-																	 final TypeUsageKind usageKind)
-	{
-		final var result = new java.util.HashSet<String>();
-		for (final Tree<PNode> root : syntax.roots())
-		{
-			collectLocalTypes(root, usageKind, result);
-		}
-		if (!result.isEmpty())
-		{
-			LOG.info("LMF LSP completion: local types from syntax, usageKind={}, count={}", usageKind, result.size());
-		}
-		return result;
-	}
-
-	private static void collectLocalTypes(final Tree<PNode> node,
-										  final TypeUsageKind usageKind,
-										  final java.util.Set<String> out)
-	{
-		final var pnode = node.data();
-		final var tokens = pnode.tokens();
-		if (!tokens.isEmpty())
-		{
-			final String head = tokens.getFirst().value();
-			if (head != null)
-			{
-				final String trimmed = head.trim();
-				final boolean isGroup = "Group".equals(trimmed) || "Definition".equals(trimmed);
-				final boolean isEnum = "Enum".equals(trimmed);
-				final boolean isUnit = "Unit".equals(trimmed);
-				final boolean isJavaWrapper = "JavaWrapper".equals(trimmed);
-
-				final boolean conceptLike = isGroup;
-				final boolean datatypeLike = isEnum || isUnit || isJavaWrapper;
-
-				if ((isGroup || isEnum || isUnit || isJavaWrapper) &&
-					isAllowedByUsage(usageKind, conceptLike, datatypeLike))
-				{
-					final String name = SyntaxNavigation.headerName(pnode);
-					if (name != null && !name.isEmpty())
-					{
-						out.add(name);
-					}
-				}
-			}
-		}
-
-		for (final Tree<PNode> child : node.children())
-		{
-			collectLocalTypes(child, usageKind, out);
-		}
 	}
 
 	private static MetaModel findLmCoreMetaModel(final ModelRegistry registry)

@@ -5,11 +5,8 @@ import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.logoce.lmf.lsp.LmLanguageServer;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,83 +25,80 @@ public final class LmCompletionEngine
 																		final URI uri,
 																		final Position pos)
 	{
-		final LmDocumentState state = server.workspaceIndex().getDocument(uri);
-		if (state == null)
+		final var resolvedContext = CompletionContextResolver.resolve(server, uri, pos);
+		if (resolvedContext.isEmpty())
 		{
-			LOG.info("LMF LSP completion: no document state for uri={}", uri);
 			return Either.forLeft(List.of());
 		}
 
-		final SyntaxSnapshot syntax = state.syntaxSnapshot();
-		final SemanticSnapshot semantic = state.lastGoodSemanticSnapshot() != null
-										  ? state.lastGoodSemanticSnapshot()
-										  : state.semanticSnapshot();
-		if (syntax == null || semantic == null)
+		final CompletionContext context = resolvedContext.get();
+		final SyntaxSnapshot syntax = context.syntax();
+		final MetaModel metaModel = context.metaModel();
+		final CompletionContextKind contextKind = context.contextKind();
+		final CompletionContext.HeaderContext header = context.header();
+		final CompletionContext.ValueContext value = context.value();
+		final CompletionContext.HeaderPositionKind headerPosKind = header != null
+																   ? header.positionKind()
+																   : CompletionContext.HeaderPositionKind.OTHER;
+
+		// 1) Value position inside a header: prefer attribute/relation-specific completions.
+		if (headerPosKind == CompletionContext.HeaderPositionKind.FEATURE_VALUE && value != null)
 		{
-			LOG.debug("LMF LSP completion: missing snapshots for uri={}, syntaxNull={}, semanticNull={}",
-					  uri, syntax == null, semantic == null);
+			if (value.attribute() != null)
+			{
+				final var items = AttributeValueCompletionProvider.complete(context);
+				if (!items.isEmpty())
+				{
+					LOG.info("LMF LSP completion: attribute completion, uri={}, line={}, character={}, items={}",
+							 uri, pos.getLine(), pos.getCharacter(), items.size());
+					return Either.forLeft(List.copyOf(items));
+				}
+				LOG.debug("LMF LSP completion: attribute completion produced no items at uri={}, line={}, character={}",
+						  uri, pos.getLine(), pos.getCharacter());
+			}
+
+			if (value.relation() != null)
+			{
+				final var items = RelationValueCompletionProvider.complete(context);
+				if (!items.isEmpty())
+				{
+					LOG.info("LMF LSP completion: relation completion, uri={}, line={}, character={}, items={}",
+							 uri, pos.getLine(), pos.getCharacter(), items.size());
+					return Either.forLeft(List.copyOf(items));
+				}
+				LOG.debug("LMF LSP completion: relation completion produced no items at uri={}, line={}, character={}",
+						  uri, pos.getLine(), pos.getCharacter());
+			}
+		}
+
+		// 2) Header keyword, name or feature name position: propose header features only.
+		if (headerPosKind == CompletionContext.HeaderPositionKind.HEADER_KEYWORD ||
+			headerPosKind == CompletionContext.HeaderPositionKind.HEADER_NAME ||
+			headerPosKind == CompletionContext.HeaderPositionKind.FEATURE_NAME)
+		{
+			final var featureItems = GroupFeatureCompletionProvider.complete(context);
+			if (!featureItems.isEmpty())
+			{
+				LOG.info("LMF LSP completion: feature completion, uri={}, line={}, character={}, items={}",
+						 uri, pos.getLine(), pos.getCharacter(), featureItems.size());
+				return Either.forLeft(List.copyOf(featureItems));
+			}
+			LOG.debug("LMF LSP completion: feature completion produced no items at uri={}, line={}, character={}",
+					  uri, pos.getLine(), pos.getCharacter());
 			return Either.forLeft(List.of());
 		}
 
-		final Model model = semantic.model();
-		final MetaModel metaModel = model instanceof MetaModel mm ? mm : null;
-		final CompletionContextKind contextKind = SyntaxNavigation.detectCompletionContext(syntax, pos);
-		final var context = new CompletionContext(server,
-												 uri,
-												 pos,
-												 state,
-												 syntax,
-												 semantic,
-												 metaModel,
-												 contextKind);
-
-		// 1) Attribute value completions, based on datatype.
-		final var valueItems = AttributeValueCompletionProvider.complete(context);
-		if (!valueItems.isEmpty())
-		{
-			LOG.info("LMF LSP completion: attribute completion, uri={}, line={}, character={}, items={}",
-					 uri, pos.getLine(), pos.getCharacter(), valueItems.size());
-			return Either.forLeft(List.copyOf(valueItems));
-		}
-		else
-		{
-			LOG.debug("LMF LSP completion: attribute completion produced no items at uri={}, line={}, character={}",
-					  uri, pos.getLine(), pos.getCharacter());
-		}
-
-		// 1b) Relation value completions, based on relation concept.
-		final var relationItems = RelationValueCompletionProvider.complete(context);
-		if (!relationItems.isEmpty())
-		{
-			LOG.info("LMF LSP completion: relation completion, uri={}, line={}, character={}, items={}",
-					 uri, pos.getLine(), pos.getCharacter(), relationItems.size());
-			return Either.forLeft(List.copyOf(relationItems));
-		}
-		else
-		{
-			LOG.debug("LMF LSP completion: relation completion produced no items at uri={}, line={}, character={}",
-					  uri, pos.getLine(), pos.getCharacter());
-		}
-
-		// 1c) Type completions (Attribute.datatype, Relation.concept, etc.) are only
-		// relevant when the user is explicitly typing a local ('@') or cross-model
-		// ('#') reference. In all other contexts (header feature names, plain values),
-		// attribute/relation-specific completions or group feature completions should
-		// take precedence.
+		// 3) Explicit local ('@') or cross-model ('#') reference: type completions only.
 		if (contextKind == CompletionContextKind.LOCAL_AT || contextKind == CompletionContextKind.CROSS_MODEL_HASH)
 		{
-			final List<CompletionItem> typeItems;
-			if (metaModel != null)
+			if (metaModel == null)
 			{
-				typeItems = TypeCompletionProvider.complete(context);
+				LOG.debug("LMF LSP completion: type completion skipped (no metaModel) at uri={}, line={}, character={}",
+						  uri, pos.getLine(), pos.getCharacter());
+				return Either.forLeft(List.of());
 			}
-			else
-			{
-				typeItems = TypeCompletionProvider.completeFromSyntax(server.workspaceIndex().modelRegistry(),
-																	  syntax,
-																	  pos,
-																	  contextKind);
-			}
+
+			final List<CompletionItem> typeItems = TypeCompletionProvider.complete(context);
 
 			if (!typeItems.isEmpty())
 			{
@@ -112,20 +106,17 @@ public final class LmCompletionEngine
 						 uri, pos.getLine(), pos.getCharacter(), typeItems.size());
 				return Either.forLeft(List.copyOf(typeItems));
 			}
-			else
-			{
-				LOG.debug("LMF LSP completion: type completion produced no items at uri={}, line={}, character={}",
-						  uri, pos.getLine(), pos.getCharacter());
-			}
+			LOG.debug("LMF LSP completion: type completion produced no items at uri={}, line={}, character={}",
+					  uri, pos.getLine(), pos.getCharacter());
 		}
 
-		// 2) Group feature completions (attributes of headers, etc.).
-		final var featureItems = GroupFeatureCompletionProvider.complete(context);
-		if (!featureItems.isEmpty())
+		// 4) Fallback inside a group: header features and containment children.
+		final var groupItems = GroupFeatureCompletionProvider.complete(context);
+		if (!groupItems.isEmpty())
 		{
-			LOG.info("LMF LSP completion: feature completion, uri={}, line={}, character={}, items={}",
-					 uri, pos.getLine(), pos.getCharacter(), featureItems.size());
-			return Either.forLeft(List.copyOf(featureItems));
+			LOG.info("LMF LSP completion: group context completion, uri={}, line={}, character={}, items={}",
+					 uri, pos.getLine(), pos.getCharacter(), groupItems.size());
+			return Either.forLeft(List.copyOf(groupItems));
 		}
 
 		LOG.debug("LMF LSP completion: no completions for uri={}, line={}, character={}",

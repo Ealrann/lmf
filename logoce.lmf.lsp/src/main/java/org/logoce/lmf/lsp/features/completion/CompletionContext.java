@@ -5,7 +5,12 @@ import org.logoce.lmf.lsp.LmLanguageServer;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Concept;
+import org.logoce.lmf.model.lang.Feature;
+import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.lang.Relation;
 
 import java.net.URI;
 
@@ -17,7 +22,33 @@ public record CompletionContext(
 	SyntaxSnapshot syntax,
 	SemanticSnapshot semantic,
 	MetaModel metaModel,
-	CompletionContextKind contextKind)
+	CompletionContextKind contextKind,
+	HeaderContext header,
+	ValueContext value)
 {
-}
+	public enum HeaderPositionKind
+	{
+		OTHER,
+		HEADER_KEYWORD,
+		HEADER_NAME,
+		FEATURE_NAME,
+		FEATURE_VALUE
+	}
 
+	public record HeaderContext(String keyword,
+								String groupName,
+								Group<?> lmCoreGroup,
+								HeaderPositionKind positionKind,
+								Group<?> semanticGroup,
+								Feature<?, ?> semanticFeature,
+								String featureName)
+	{
+	}
+
+	public record ValueContext(Attribute<?, ?> attribute,
+							   Relation<?, ?> relation,
+							   Concept<?> relationConcept,
+							   TypeUsageKind typeUsageKind)
+	{
+	}
+}

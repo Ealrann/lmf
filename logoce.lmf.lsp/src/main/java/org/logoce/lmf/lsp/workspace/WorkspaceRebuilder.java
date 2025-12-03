@@ -14,7 +14,10 @@ import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.model.loader.linking.LinkException;
+import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.model.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.lsp4j.Position;
@@ -220,16 +223,86 @@ public final class WorkspaceRebuilder
 			LOG.debug("LMF LSP analyzeDocument done: uri={}, model={}, syntaxDiag={}, semanticDiag={}",
 					  state.uri(), modelKind, syntaxCount, semanticCount);
 		}
+		catch (LinkException e)
+		{
+			// Link errors (for example unresolved imported models) are expected in
+			// partially-loaded workspaces. Treat them as document diagnostics instead
+			// of hard LSP errors to avoid flooding the client notification view.
+			LOG.warn("LMF LSP analyzeDocument link error for uri={}: {}",
+					 state.uri(), e.getMessage());
+
+			final String text = state.text();
+			final var diagnostics = new ArrayList<LmDiagnostic>();
+			final var reader = new LmTreeReader();
+			final var readResult = reader.read(text, diagnostics);
+
+			if (e.pNode() != null)
+			{
+				final var span = TextPositions.spanOf(e.pNode(), readResult.source());
+				diagnostics.add(new LmDiagnostic(
+					span.line(),
+					span.column(),
+					span.length(),
+					span.offset(),
+					LmDiagnostic.Severity.ERROR,
+					e.getMessage() == null ? "Link error" : e.getMessage()));
+			}
+
+			final var syntaxSnapshot = new SyntaxSnapshot(
+				List.of(),
+				readResult.roots(),
+				List.copyOf(diagnostics),
+				readResult.source());
+			state.setSyntaxSnapshot(syntaxSnapshot);
+
+			final var semanticSnapshot = new SemanticSnapshot(
+				null,
+				List.of(),
+				List.of(),
+				SymbolTable.EMPTY,
+				List.of());
+			state.setSemanticSnapshot(semanticSnapshot);
+
+			// Keep lastGoodSemanticSnapshot unchanged: we don't have a new good model.
+
+			publishDiagnostics(state);
+		}
 		catch (Exception e)
 		{
-			LOG.error("Error while analyzing document {}", state.uri(), e);
-			final LanguageClient client = clientSupplier.get();
-			if (client != null)
-			{
-				client.logMessage(new MessageParams(
-					MessageType.Error,
-					"LMF LSP: error while analyzing " + state.uri() + ": " + e.getMessage()));
-			}
+			// Any other unexpected errors are also surfaced as document diagnostics
+			// rather than global client errors, to avoid flooding the notification view.
+			LOG.warn("LMF LSP analyzeDocument unexpected error for uri={}: {}",
+					 state.uri(), e.getMessage(), e);
+
+			final String text = state.text();
+			final var diagnostics = new ArrayList<LmDiagnostic>();
+			final var reader = new LmTreeReader();
+			final var readResult = reader.read(text, diagnostics);
+
+			diagnostics.add(new LmDiagnostic(
+				1,
+				1,
+				1,
+				0,
+				LmDiagnostic.Severity.ERROR,
+				e.getMessage() == null ? "Error while analyzing document" : e.getMessage()));
+
+			final var syntaxSnapshot = new SyntaxSnapshot(
+				List.of(),
+				readResult.roots(),
+				List.copyOf(diagnostics),
+				readResult.source());
+			state.setSyntaxSnapshot(syntaxSnapshot);
+
+			final var semanticSnapshot = new SemanticSnapshot(
+				null,
+				List.of(),
+				List.of(),
+				SymbolTable.EMPTY,
+				List.of());
+			state.setSemanticSnapshot(semanticSnapshot);
+
+			publishDiagnostics(state);
 		}
 	}
 

@@ -41,20 +41,6 @@ final class SemanticNavigation
 		return null;
 	}
 
-	static Group<?> findContainingGroupForNode(final SemanticSnapshot semantic,
-											   final PNode target)
-	{
-		for (final LinkNode<?, PNode> root : semantic.linkTrees())
-		{
-			final Group<?> group = findContainingGroupInLinkTree(root, target);
-			if (group != null)
-			{
-				return group;
-			}
-		}
-		return null;
-	}
-
 	static LinkNode<?, PNode> findLinkNodeForNode(final SemanticSnapshot semantic,
 												  final PNode target)
 	{
@@ -99,9 +85,8 @@ final class SemanticNavigation
 			return null;
 		}
 
-		final String featureName = SyntaxNavigation.findFeatureNameAtValuePosition(headerNode,
-																				   syntax.source(),
-																				   pos);
+		final var headerInfo = CompletionContextResolver.HeaderInfo.from(syntax, pos);
+		final String featureName = headerInfo != null ? headerInfo.featureName() : null;
 		if (featureName == null || featureName.isBlank())
 		{
 			LOG.debug("LMF LSP completion: SemanticNavigation.findFeatureAtValuePosition – no feature name at line={}, character={}, group={}",
@@ -140,33 +125,6 @@ final class SemanticNavigation
 				if (g != null)
 				{
 					return g;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	private static Group<?> findContainingGroupInLinkTree(final LinkNode<?, PNode> node,
-														  final PNode target)
-	{
-		if (node.pNode() == target)
-		{
-			return node.group();
-		}
-
-		if (node instanceof LinkNodeFull<?, PNode> full)
-		{
-			for (final var child : full.streamChildren().toList())
-			{
-				if (child.pNode() == target)
-				{
-					return node.group();
-				}
-				final Group<?> nested = findContainingGroupInLinkTree(child, target);
-				if (nested != null)
-				{
-					return nested;
 				}
 			}
 		}
