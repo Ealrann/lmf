@@ -2,12 +2,14 @@ package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.resource.ResourceUtil;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FunctionalTest
@@ -43,12 +45,20 @@ public class FunctionalTest
 		final var inputStream4 = new ByteArrayInputStream(TEXTMODEL_4.getBytes());
 
 		final var registry = new ModelRegistry.Builder(ModelRegistry.empty());
-		final var model1 = (MetaModel) ResourceUtil.loadModel(inputStream1, registry.build());
+		final var loader1 = new LmLoader(registry.build());
+		final var document1 = assertDoesNotThrow(() -> loader1.loadModel(inputStream1));
+		final var model1 = (MetaModel) document1.model();
 		registry.register(model1);
-		final var model2 = (MetaModel) ResourceUtil.loadModel(inputStream2, registry.build());
+		final var loader2 = new LmLoader(registry.build());
+		final var document2 = assertDoesNotThrow(() -> loader2.loadModel(inputStream2));
+		final var model2 = (MetaModel) document2.model();
 		registry.register(model2);
-		final var model3 = (MetaModel) ResourceUtil.loadModel(inputStream3, registry.build());
-		final var model4 = (MetaModel) ResourceUtil.loadModel(inputStream4, registry.build());
+		final var loader3 = new LmLoader(registry.build());
+		final var document3 = assertDoesNotThrow(() -> loader3.loadModel(inputStream3));
+		final var model3 = (MetaModel) document3.model();
+		final var loader4 = new LmLoader(registry.build());
+		final var document4 = assertDoesNotThrow(() -> loader4.loadModel(inputStream4));
+		final var model4 = (MetaModel) document4.model();
 
 		check(model1, model2, model3, model4);
 	}
@@ -60,8 +70,9 @@ public class FunctionalTest
 		final var inputStream2 = new ByteArrayInputStream(TEXTMODEL_2.getBytes());
 		final var inputStream3 = new ByteArrayInputStream(TEXTMODEL_3.getBytes());
 		final var inputStream4 = new ByteArrayInputStream(TEXTMODEL_4.getBytes());
-		final var models = ResourceUtil.loadModels(List.of(inputStream1, inputStream2, inputStream3, inputStream4),
-												   ModelRegistry.empty());
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var models = assertDoesNotThrow(
+			() -> loader.loadModels(List.of(inputStream1, inputStream2, inputStream3, inputStream4)));
 
 		final var model1 = (MetaModel) models.get(0);
 		final var model2 = (MetaModel) models.get(1);
@@ -78,8 +89,9 @@ public class FunctionalTest
 		final var inputStream2 = new ByteArrayInputStream(TEXTMODEL_2.getBytes());
 		final var inputStream3 = new ByteArrayInputStream(TEXTMODEL_3.getBytes());
 		final var inputStream4 = new ByteArrayInputStream(TEXTMODEL_4.getBytes());
-		final var models = ResourceUtil.loadModels(List.of(inputStream4, inputStream2, inputStream3, inputStream1),
-												   ModelRegistry.empty());
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var models = assertDoesNotThrow(
+			() -> loader.loadModels(List.of(inputStream4, inputStream2, inputStream3, inputStream1)));
 
 		final var model1 = (MetaModel) models.get(3);
 		final var model2 = (MetaModel) models.get(1);

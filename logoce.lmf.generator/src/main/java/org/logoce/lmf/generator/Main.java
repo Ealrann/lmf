@@ -4,7 +4,6 @@ import org.logoce.lmf.generator.model.ModelGenerator;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.resource.ResourceUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
@@ -142,6 +141,7 @@ public final class Main
 		final List<InputStream> inputStreams = new ArrayList<>();
 		try
 		{
+			final var loader = new LmLoader(ModelRegistry.empty());
 			for (final var file : allFiles)
 			{
 				if (file.isFile() == false)
@@ -151,7 +151,7 @@ public final class Main
 				inputStreams.add(new FileInputStream(file));
 			}
 
-			final var models = ResourceUtil.loadModels(inputStreams, ModelRegistry.empty());
+			final var models = loader.loadModels(inputStreams);
 			if (models.size() != allFiles.size())
 			{
 				throw new IllegalStateException("Unexpected number of models loaded; expected " + allFiles.size() +

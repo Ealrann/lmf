@@ -1,16 +1,15 @@
-package org.logoce.lmf.model.resource.ptree;
+package org.logoce.lmf.model.loader.parsing;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lexer.ELMTokenType;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 
-public class PTreeReaderTest
+public class LmTreeReaderTest
 {
 	private static final LmTreeReader treeReader = new LmTreeReader();
 
 	@Test
-	public void testrootsBuilder_singleElement()
+	public void roots_singleElement()
 	{
 		final var model = "(model)";
 		final var result = treeReader.read(model);
@@ -26,7 +25,7 @@ public class PTreeReaderTest
 	}
 
 	@Test
-	public void testrootsBuilder_twoRoots()
+	public void roots_twoRoots()
 	{
 		final var model = "(model1)(model2)";
 		final var result = treeReader.read(model);
@@ -41,7 +40,7 @@ public class PTreeReaderTest
 	}
 
 	@Test
-	public void testrootsBuilder_depth3()
+	public void roots_depth3()
 	{
 		final var model = "(model (car (-int count) (-string name)))";
 		final var result = treeReader.read(model);
@@ -67,7 +66,7 @@ public class PTreeReaderTest
 	}
 
 	@Test
-	public void testrootsBuilder_matcher()
+	public void roots_matcher()
 	{
 		final var model = "(model (-matcher \"\\b(true|false)\\b\") (+int count) (-string name))";
 		final var result = treeReader.read(model);
@@ -89,3 +88,4 @@ public class PTreeReaderTest
 		Assertions.assertEquals("name", name.data().tokens().get(2).value());
 	}
 }
+

@@ -59,9 +59,8 @@ When modifying or adding code:
 - **Model / generator specifics**
   - `logoce.lmf.model` is the reference for the language semantics; align new behavior with existing tests under `src/test/java`.  
   - Use `ModelRegistry.empty()` when you need a baseline registry that includes LMCore.  
-  - For programmatic loading in tools or an LSP, prefer `org.logoce.lmf.model.loader.LmLoader` (single‑model, multi‑model, and generic object loading).  
-  - For existing code paths (generator, editorfx), you can keep using `ResourceUtil.loadObject/loadModel/loadModels`; these delegate to the new loader and preserve behavior and ordering.  
-  - Avoid calling legacy parsing/linking helpers directly; prefer going through `LmLoader` so that lex/interpret/link and diagnostics all stay consistent.
+  - For programmatic loading in tools, tests, or an LSP, use `org.logoce.lmf.model.loader.LmLoader` (`loadModel(...)`, `loadModels(...)`, `loadObjects(...)`).  
+  - Avoid calling legacy parsing/linking helpers directly; always go through `LmLoader` so that lex/interpret/link and diagnostics all stay consistent.
 
 - **Modules and visibility**
   - Respect JPMS module boundaries; if you need access across modules, prefer adding targeted `exports`/`requires` rather than using raw/classpath tricks.  

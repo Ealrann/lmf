@@ -4,13 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.ResourceUtil;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,8 +66,9 @@ public class MaintainerMultiModelTest
 		final var typesStream = toStream(TYPES_MODEL);
 		final var actionStream = toStream(ACTION_MODEL);
 
-		final var models = ResourceUtil.loadModels(List.of(maintainerStream, typesStream, actionStream),
-												   ModelRegistry.empty());
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var models = assertDoesNotThrow(
+			() -> loader.loadModels(List.of(maintainerStream, typesStream, actionStream)));
 
 		assertEquals(3, models.size());
 		assertTrue(models.stream().allMatch(MetaModel.class::isInstance));

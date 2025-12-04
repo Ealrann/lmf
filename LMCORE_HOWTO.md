@@ -312,8 +312,7 @@ To relate the `.lm` syntax and this how‑to to the Java implementation:
   `logoce.lmf.model/src/main/model/asset/LMCore.lm` and the generated API under `logoce.lmf.model/src/main/generated/org/logoce/lmf/model/lang`.
 
 - **Loading and linking `.lm`**  
-  - High‑level loader: `org.logoce.lmf.model.loader.LmLoader` (recommended entry point for tools and an LSP).
-  - Legacy façade: `org.logoce.lmf.model.resource.ResourceUtil` (used by the generator and editorfx; now delegates to the loader).
+  - High‑level loader: `org.logoce.lmf.model.loader.LmLoader` (recommended entry point for tools, tests, and the LSP).
   - Interpretation and linking internals:
     - `org.logoce.lmf.model.resource.parsing.*` – lexing and parse trees (`PNode`, `PToken`).
     - `org.logoce.lmf.model.resource.interpretation.*` – `PGroup`, `PFeature`, alias expansion.
