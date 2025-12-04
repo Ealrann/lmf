@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("ExtractMethodRecommender")
 public class UnitTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void simpleUnit()
 	{
@@ -23,10 +21,8 @@ public class UnitTest
 							  "      matcher=\"rgx_match:<(true|false)>\" " +
 							  "      defaultValue=false " +
 							  "      primitive=boolean )";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Unit<?>);
@@ -43,10 +39,8 @@ public class UnitTest
 	public void matcherOnly()
 	{
 		final var textModel = "(Unit matcher=\"rgx_match:<(true|false)>\") ";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Unit<?>);
@@ -72,10 +66,8 @@ public class UnitTest
 					(Unit name=double  matcher="rgx_match:<[0-9.]+>"      defaultValue=0.    primitive=double  )
 					(Unit name=string) )
 				""";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);

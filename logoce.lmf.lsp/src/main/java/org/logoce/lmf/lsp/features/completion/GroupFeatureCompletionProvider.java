@@ -37,7 +37,6 @@ final class GroupFeatureCompletionProvider
 
 	static List<CompletionItem> complete(final CompletionContext context)
 	{
-		final SemanticSnapshot semantic = context.semantic();
 		final SyntaxSnapshot syntax = context.syntax();
 		final Position pos = context.position();
 
@@ -46,6 +45,7 @@ final class GroupFeatureCompletionProvider
 			return List.of();
 		}
 
+		final SemanticSnapshot semantic = context.semantic();
 		final Group<?> semanticGroup = semantic != null
 									   ? SemanticNavigation.findGroupAtPosition(semantic, syntax, pos)
 									   : null;
@@ -66,16 +66,13 @@ final class GroupFeatureCompletionProvider
 		items.addAll(buildGroupFeatureCompletions(group, usedFeatures));
 		items.addAll(buildContainmentChildCompletions(context, group));
 
-		if (!items.isEmpty())
+		if (!items.isEmpty() && LOG.isDebugEnabled())
 		{
-			if (LOG.isInfoEnabled())
-			{
-				final var labels = items.stream()
-										.map(CompletionItem::getLabel)
-										.toList();
-				LOG.info("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
-						 group.name(), items.size(), labels);
-			}
+			final var labels = items.stream()
+									.map(CompletionItem::getLabel)
+									.toList();
+			LOG.debug("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
+					  group.name(), items.size(), labels);
 		}
 		return items;
 	}
@@ -124,13 +121,7 @@ final class GroupFeatureCompletionProvider
 			return Set.of();
 		}
 
-		final PNode headerNode = SyntaxNavigation.findPNodeAtOrBeforePosition(syntax, pos);
-		if (headerNode == null)
-		{
-			return Set.of();
-		}
-
-		final LinkNode<?, PNode> linkNode = SemanticNavigation.findLinkNodeForNode(semantic, headerNode);
+		final LinkNode<?, PNode> linkNode = LinkTreeNavigation.findLinkNodeAtOrBeforePosition(semantic, syntax, pos);
 		if (linkNode == null)
 		{
 			return Set.of();
@@ -285,32 +276,11 @@ final class GroupFeatureCompletionProvider
 
 	private static Group<?> fallbackGroupFromSyntax(final SyntaxSnapshot syntax, final Position pos)
 	{
-		final PNode node = SyntaxNavigation.findPNodeAtPosition(syntax, pos);
-		if (node == null)
+		final var headerInfo = CompletionContextResolver.HeaderInfo.from(syntax, pos);
+		if (headerInfo == null)
 		{
 			return null;
 		}
-
-		final String keyword = SyntaxNavigation.headerKeyword(node);
-		if (keyword == null || keyword.isBlank())
-		{
-			return null;
-		}
-
-		final String groupName = AttributeValueCompletionProvider.resolveGroupNameForHeaderKeyword(keyword);
-		if (groupName == null || groupName.isBlank())
-		{
-			return null;
-		}
-
-		final MetaModel lmCore = LMCorePackage.MODEL;
-		for (final Group<?> g : lmCore.groups())
-		{
-			if (groupName.equals(g.name()))
-			{
-				return g;
-			}
-		}
-		return null;
+		return headerInfo.lmCoreGroup();
 	}
 }

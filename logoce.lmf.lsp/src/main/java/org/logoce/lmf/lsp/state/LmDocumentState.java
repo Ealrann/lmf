@@ -10,6 +10,7 @@ public final class LmDocumentState
 	private SyntaxSnapshot syntaxSnapshot;
 	private SemanticSnapshot semanticSnapshot;
 	private SemanticSnapshot lastGoodSemanticSnapshot;
+	private SyntaxSnapshot lastGoodSyntaxSnapshot;
 
 	public LmDocumentState(final URI uri, final int version, final String text)
 	{
@@ -71,5 +72,15 @@ public final class LmDocumentState
 	public void setLastGoodSemanticSnapshot(final SemanticSnapshot lastGoodSemanticSnapshot)
 	{
 		this.lastGoodSemanticSnapshot = lastGoodSemanticSnapshot;
+	}
+
+	public SyntaxSnapshot lastGoodSyntaxSnapshot()
+	{
+		return lastGoodSyntaxSnapshot;
+	}
+
+	public void setLastGoodSyntaxSnapshot(final SyntaxSnapshot lastGoodSyntaxSnapshot)
+	{
+		this.lastGoodSyntaxSnapshot = lastGoodSyntaxSnapshot;
 	}
 }

@@ -2,7 +2,7 @@ package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
@@ -11,16 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AliasTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void simpleAlias()
 	{
 		final var textModel = "(Alias name=Definition value=\"Group concrete\") ";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Alias);
@@ -34,10 +30,8 @@ public class AliasTest
 	public void simpleAssignAlias()
 	{
 		final var textModel = "(Alias name=Definition \"Group concrete=false contains=true\")";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Alias);
@@ -51,10 +45,8 @@ public class AliasTest
 	public void simpleAliasResolution()
 	{
 		final var textModel = "(-att [1..*] name=count datatype=#LMCore/units.3)";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Attribute<?, ?>);
@@ -78,10 +70,8 @@ public class AliasTest
 							  "        (+att [1..*] name=exists datatype=#LMCore/units.2)" +
 							  "    )" +
 							  ") ";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);

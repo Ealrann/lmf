@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.resource.linking;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.resource.linking.feature.reference.PathParser;
+import org.logoce.lmf.model.loader.linking.feature.reference.PathParser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

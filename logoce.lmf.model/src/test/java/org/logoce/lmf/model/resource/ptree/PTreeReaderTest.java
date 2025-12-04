@@ -3,22 +3,19 @@ package org.logoce.lmf.model.resource.ptree;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lexer.ELMTokenType;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
-
-import java.io.ByteArrayInputStream;
+import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 
 public class PTreeReaderTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
+	private static final LmTreeReader treeReader = new LmTreeReader();
 
 	@Test
 	public void testrootsBuilder_singleElement()
 	{
 		final var model = "(model)";
-		final var inputStream = new ByteArrayInputStream(model.getBytes());
+		final var result = treeReader.read(model);
 
-		final var roots = treeBuilder.read(inputStream);
-
+		final var roots = result.roots();
 		Assertions.assertEquals(1, roots.size());
 
 		final var root = roots.get(0);
@@ -32,8 +29,8 @@ public class PTreeReaderTest
 	public void testrootsBuilder_twoRoots()
 	{
 		final var model = "(model1)(model2)";
-		final var inputStream = new ByteArrayInputStream(model.getBytes());
-		final var roots = treeBuilder.read(inputStream);
+		final var result = treeReader.read(model);
+		final var roots = result.roots();
 
 		Assertions.assertEquals(2, roots.size());
 
@@ -47,8 +44,8 @@ public class PTreeReaderTest
 	public void testrootsBuilder_depth3()
 	{
 		final var model = "(model (car (-int count) (-string name)))";
-		final var inputStream = new ByteArrayInputStream(model.getBytes());
-		final var roots = treeBuilder.read(inputStream);
+		final var result = treeReader.read(model);
+		final var roots = result.roots();
 
 		Assertions.assertEquals(1, roots.size());
 
@@ -73,8 +70,8 @@ public class PTreeReaderTest
 	public void testrootsBuilder_matcher()
 	{
 		final var model = "(model (-matcher \"\\b(true|false)\\b\") (+int count) (-string name))";
-		final var inputStream = new ByteArrayInputStream(model.getBytes());
-		final var roots = treeBuilder.read(inputStream);
+		final var result = treeReader.read(model);
+		final var roots = result.roots();
 
 		final var root = roots.get(0);
 		Assertions.assertEquals("model", root.data().tokens().get(0).value());

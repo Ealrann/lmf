@@ -2,7 +2,7 @@ package org.logoce.lmf.gradle.diagnostics;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -127,7 +127,7 @@ public final class GenerationFailureReporter
 									   final ModelInspectionResult inspection,
 									   final Path base)
 	{
-		for (final ParseDiagnostic diagnostic : filterDiagnostics(inspection.diagnostics()))
+		for (final LmDiagnostic diagnostic : filterDiagnostics(inspection.diagnostics()))
 		{
 			logger.error("   {}:{}:{} [{}] {}",
 						 toRelative(base, inspection.file()),
@@ -143,7 +143,7 @@ public final class GenerationFailureReporter
 		return imports.isEmpty() ? "[none]" : imports.toString();
 	}
 
-	private static List<ParseDiagnostic> filterDiagnostics(final List<ParseDiagnostic> diagnostics)
+	private static List<LmDiagnostic> filterDiagnostics(final List<LmDiagnostic> diagnostics)
 	{
 		if (diagnostics.isEmpty()) return diagnostics;
 
@@ -151,7 +151,7 @@ public final class GenerationFailureReporter
 													   .anyMatch(d -> d.line() > 1 || d.column() > 1);
 		if (hasSpecificLocation == false) return diagnostics;
 
-		final List<ParseDiagnostic> filtered = new ArrayList<>(diagnostics.size());
+		final List<LmDiagnostic> filtered = new ArrayList<>(diagnostics.size());
 		for (final var diagnostic : diagnostics)
 		{
 			final boolean isGenericLinkError = diagnostic.line() == 1 &&

@@ -3,7 +3,6 @@ package org.logoce.lmf.model.tool;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
@@ -113,31 +112,28 @@ public final class ModelValidator
 			final var document = loader.loadModel(inputStream);
 
 			final Model model = document.model();
-			final List<ParseDiagnostic> diagnostics = document.diagnostics()
-															  .stream()
-															  .map(ModelValidator::toParseDiagnostic)
-															  .toList();
+			final List<LmDiagnostic> diagnostics = List.copyOf(document.diagnostics());
 			return new ValidationResult(model, diagnostics);
 		}
 		catch (IOException e)
 		{
 			final var message = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
-			final var diag = new ParseDiagnostic(1,
-												 1,
-												 1,
-												 0,
-												 ParseDiagnostic.Severity.ERROR,
-												 "Failed to load " + file.getPath() + ": " + message);
+			final var diag = new LmDiagnostic(1,
+											  1,
+											  1,
+											  0,
+											  LmDiagnostic.Severity.ERROR,
+											  "Failed to load " + file.getPath() + ": " + message);
 			return new ValidationResult(null, List.of(diag));
 		}
 	}
 
-	private static boolean hasErrors(final List<ParseDiagnostic> diagnostics)
+	private static boolean hasErrors(final List<LmDiagnostic> diagnostics)
 	{
-		return diagnostics.stream().anyMatch(d -> d.severity() == ParseDiagnostic.Severity.ERROR);
+		return diagnostics.stream().anyMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR);
 	}
 
-	private static void printDiagnostic(final String source, final ParseDiagnostic diag)
+	private static void printDiagnostic(final String source, final LmDiagnostic diag)
 	{
 		System.err.printf("%s:%d:%d [%s] %s%n",
 						  source,
@@ -147,24 +143,7 @@ public final class ModelValidator
 						  diag.message());
 	}
 
-	private static ParseDiagnostic toParseDiagnostic(final LmDiagnostic diagnostic)
-	{
-		final ParseDiagnostic.Severity severity = switch (diagnostic.severity())
-		{
-			case INFO -> ParseDiagnostic.Severity.INFO;
-			case WARNING -> ParseDiagnostic.Severity.WARNING;
-			case ERROR -> ParseDiagnostic.Severity.ERROR;
-		};
-
-		return new ParseDiagnostic(diagnostic.line(),
-								   diagnostic.column(),
-								   diagnostic.length(),
-								   diagnostic.offset(),
-								   severity,
-								   diagnostic.message());
-	}
-
-	private record ValidationResult(Model model, List<ParseDiagnostic> diagnostics)
+	private record ValidationResult(Model model, List<LmDiagnostic> diagnostics)
 	{
 	}
 }

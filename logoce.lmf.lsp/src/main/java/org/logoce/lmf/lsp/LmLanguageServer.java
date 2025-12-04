@@ -169,7 +169,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 				 projectRoot);
 
 		final var capabilities = new ServerCapabilities();
-		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+		capabilities.setTextDocumentSync(TextDocumentSyncKind.Incremental);
 		capabilities.setCompletionProvider(new CompletionOptions());
 		capabilities.setDefinitionProvider(true);
 		capabilities.setReferencesProvider(true);
@@ -191,7 +191,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		capabilities.setSemanticTokensProvider(semanticOptions);
 
 		LOG.info("LMF LSP capabilities: textSync=Full, completion=true, definition=true, "
-				 + "references=true, hover=true, documentSymbol=true, rename=true");
+				 + "references=true, hover=true, documentSymbol=true, rename=true, semanticTokens=true");
 
 		final var result = new InitializeResult(capabilities);
 		return CompletableFuture.completedFuture(result);

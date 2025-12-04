@@ -1,8 +1,12 @@
 package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.lang.BoundType;
+import org.logoce.lmf.model.lang.Generic;
+import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
@@ -13,16 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GenericTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void simpleGeneric()
 	{
 		final var textModel = "(Generic name=UnaryType (GenericExtension boundType=Extends type=#LMCore/groups.0))";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof Generic);
@@ -41,10 +41,8 @@ public class GenericTest
 							  "  (Group name=GenericGroup" +
 							  "    (Generic name=T (GenericExtension boundType=Super type=/groups.1)))" +
 							  "  (Group name=ICategory))";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		assertTrue(roots.get(0) instanceof MetaModel);
 
@@ -73,10 +71,8 @@ public class GenericTest
 				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
 				)
 				""";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);
@@ -114,10 +110,8 @@ public class GenericTest
 				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
 				)
 				""";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);

@@ -4,20 +4,16 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.resource.linking.exception.LinkException;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GroupTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void simpleGroup()
 	{
@@ -25,10 +21,8 @@ public class GroupTest
 				(Group name=Container)
 				(Definition name=Car)
 				""";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		assertTrue(roots.get(0) instanceof Group);
 		assertTrue(roots.get(1) instanceof Group);
@@ -54,10 +48,8 @@ public class GroupTest
 				    (Group name=CarContainer (includes group=/groups.0 (parameters type=/groups.1)))
 				)
 				""";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);
@@ -99,10 +91,8 @@ public class GroupTest
 				)
 				""";
 
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);
@@ -147,9 +137,7 @@ public class GroupTest
 				)
 				""";
 
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var linker = new PModelLinker<>(ModelRegistry.empty());
-		linker.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		loader.loadObjects(textModel);
 	}
 }

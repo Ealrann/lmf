@@ -5,7 +5,7 @@ import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AttributeTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void attributes()
 	{
@@ -26,10 +24,8 @@ public class AttributeTest
 							  "        datatype=#LMCore/units.2)" +
 							  "    )" +
 							  ") ";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
 		assertTrue(root instanceof MetaModel);

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
@@ -14,21 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BasicTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void singleElement()
 	{
 		final var textModel = "(MetaModel domain=test.model name=World)";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
-		final var root = roots.get(0);
-		assertTrue(root instanceof MetaModel);
-
-		final var model = (MetaModel) root;
+		final var model = (MetaModel) roots.get(0);
 		assertEquals("World", model.name());
 		assertEquals("test.model", model.domain());
 	}
@@ -37,10 +30,8 @@ public class BasicTest
 	public void twoClasses()
 	{
 		final var textModel = "(Group Car) (Group Chair)";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var car = roots.get(0);
 		assertTrue(car instanceof Group);
@@ -55,10 +46,8 @@ public class BasicTest
 	public void groupWithAttributes()
 	{
 		final var textModel = "(Group Car concrete)";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var car = roots.get(0);
 		assertTrue(car instanceof Group);
@@ -70,10 +59,8 @@ public class BasicTest
 	public void twoEmptyEnums()
 	{
 		final var textModel = "(Enum EColor) (Enum ESize)";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var color = roots.get(0);
 		assertTrue(color instanceof Enum<?>);

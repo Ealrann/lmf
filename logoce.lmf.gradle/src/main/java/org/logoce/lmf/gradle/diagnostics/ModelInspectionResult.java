@@ -1,6 +1,6 @@
 package org.logoce.lmf.gradle.diagnostics;
 
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 
 import java.io.File;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Optional;
 public record ModelInspectionResult(File file,
 									Optional<String> qualifiedName,
 									List<String> imports,
-									List<ParseDiagnostic> diagnostics)
+									List<LmDiagnostic> diagnostics)
 {
 	public boolean hasMetaModel()
 	{

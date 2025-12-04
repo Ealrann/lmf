@@ -41,6 +41,27 @@ final class LmCompletionEngineTest
 	}
 
 	@Test
+	void groupHeaderDoesNotOfferAlreadyDefinedFeatures()
+	{
+		final var text = """
+			(MetaModel domain=test.model3 name=TestDefined
+			    (Group LMObject)
+			    (Group Entity concrete=true
+			        (includes group=@LMObject))
+			)
+			""";
+
+		final var uri = URI.create("file:///test/GroupDefinedFeatures.lm");
+		final var position = positionAfter(text, "Group Entity ");
+
+		final var items = complete(uri, text, position);
+
+		assertFalse(items.isEmpty(), "Expected some completion items for Group header with existing features");
+		assertTrue(items.stream().noneMatch(i -> "concrete".equals(i.getLabel())),
+				   "Expected 'concrete' to be filtered out from Group header completions once defined");
+	}
+
+	@Test
 	void groupHeaderAfterNameOffersGroupFeatures()
 	{
 		final var text = """

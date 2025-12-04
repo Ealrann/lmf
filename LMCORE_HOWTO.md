@@ -317,6 +317,6 @@ To relate the `.lm` syntax and this how‑to to the Java implementation:
   - Interpretation and linking internals:
     - `org.logoce.lmf.model.resource.parsing.*` – lexing and parse trees (`PNode`, `PToken`).
     - `org.logoce.lmf.model.resource.interpretation.*` – `PGroup`, `PFeature`, alias expansion.
-    - `org.logoce.lmf.model.resource.linking.*` – feature resolution and reference handling.
+    - `org.logoce.lmf.model.loader.linking.*` – feature resolution, reference handling, and link tree construction.
 
 If you intend to build advanced tooling (e.g. an LSP server), also check the `lsp-design/` folder at the repo root for additional notes and example models.

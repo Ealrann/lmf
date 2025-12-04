@@ -107,7 +107,47 @@ public final class LmTextDocumentService implements TextDocumentService
 			if (existing != null)
 			{
 				existing.setVersion(version);
-				existing.setText(newText);
+				final var oldText = existing.text();
+				final String effectiveText;
+
+				if (hasRange && oldText != null)
+				{
+					final var range = lastChange.getRange();
+					final int startOffset =
+						org.logoce.lmf.model.util.TextPositions.offsetFor(
+							oldText,
+							range.getStart().getLine() + 1,
+							range.getStart().getCharacter() + 1);
+					final int endOffset =
+						org.logoce.lmf.model.util.TextPositions.offsetFor(
+							oldText,
+							range.getEnd().getLine() + 1,
+							range.getEnd().getCharacter() + 1);
+
+					if (startOffset >= 0 && endOffset >= startOffset &&
+						endOffset <= oldText.length())
+					{
+						final var sb = new StringBuilder();
+						sb.append(oldText, 0, startOffset);
+						sb.append(newText);
+						if (endOffset < oldText.length())
+						{
+							sb.append(oldText, endOffset, oldText.length());
+						}
+						effectiveText = sb.toString();
+					}
+					else
+					{
+						// Fallback: if offsets cannot be computed, treat change text as full document.
+						effectiveText = newText;
+					}
+				}
+				else
+				{
+					effectiveText = newText;
+				}
+
+				existing.setText(effectiveText);
 			}
 			else
 			{
@@ -330,27 +370,15 @@ public final class LmTextDocumentService implements TextDocumentService
 			if (result.isLeft())
 			{
 				final List<CompletionItem> items = result.getLeft();
-				LOG.info("LMF LSP completion: server returned {} items at uri={}, line={}, character={}",
-						 items.size(), uri, pos.getLine(), pos.getCharacter());
-				if (!items.isEmpty())
-				{
-					final var first = items.getFirst();
-					LOG.info("LMF LSP completion: first item label='{}', detail='{}'",
-							 first.getLabel(), first.getDetail());
-				}
+				LOG.debug("LMF LSP completion: server returned {} items at uri={}, line={}, character={}",
+						  items.size(), uri, pos.getLine(), pos.getCharacter());
 			}
 			else
 			{
 				final CompletionList list = result.getRight();
 				final List<CompletionItem> items = list.getItems();
-				LOG.info("LMF LSP completion: server returned CompletionList with {} items at uri={}, line={}, character={}",
-						 items.size(), uri, pos.getLine(), pos.getCharacter());
-				if (!items.isEmpty())
-				{
-					final var first = items.getFirst();
-					LOG.info("LMF LSP completion: first list item label='{}', detail='{}'",
-							 first.getLabel(), first.getDetail());
-				}
+				LOG.debug("LMF LSP completion: server returned CompletionList with {} items at uri={}, line={}, character={}",
+						  items.size(), uri, pos.getLine(), pos.getCharacter());
 			}
 			return result;
 		}, server.worker());
@@ -494,6 +522,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			final var state = server.workspaceIndex().getDocument(uri);
 			if (state == null)
 			{
+				LOG.debug("LMF LSP semanticTokensFull: uri={} no document state, tokens=0", uri);
 				return new SemanticTokens(java.util.List.of());
 			}
 
@@ -505,7 +534,17 @@ public final class LmTextDocumentService implements TextDocumentService
 				syntax = state.syntaxSnapshot();
 				if (syntax == null)
 				{
-					LOG.debug("LMF LSP semanticTokensFull: uri={} still has no syntax snapshot after analysis", uri);
+					final var lastGood = state.lastGoodSyntaxSnapshot();
+					if (lastGood != null)
+					{
+						LOG.debug("LMF LSP semanticTokensFull: uri={} using lastGoodSyntaxSnapshot", uri);
+						syntax = lastGood;
+					}
+				}
+
+				if (syntax == null)
+				{
+					LOG.debug("LMF LSP semanticTokensFull: uri={} no syntax available, tokens=0", uri);
 					return new SemanticTokens(java.util.List.of());
 				}
 			}
@@ -563,6 +602,7 @@ public final class LmTextDocumentService implements TextDocumentService
 
 			if (headerTokens.isEmpty())
 			{
+				LOG.debug("LMF LSP semanticTokensFull: uri={} no header tokens, tokens=0", uri);
 				return new SemanticTokens(java.util.List.of());
 			}
 
@@ -595,7 +635,8 @@ public final class LmTextDocumentService implements TextDocumentService
 			}
 
 			final var tokens = new SemanticTokens(data);
-			LOG.info("LMF LSP semanticTokensFull: uri={}, tokens={}", uri, data.size() / 5);
+			LOG.debug("LMF LSP semanticTokensFull: uri={}, version={}, sourceLength={}, tokens={}",
+					  uri, state.version(), source.length(), data.size() / 5);
 			return tokens;
 		}, server.worker());
 	}

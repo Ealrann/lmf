@@ -1,6 +1,6 @@
 package org.logoce.lmf.gradle.diagnostics;
 
-import org.logoce.lmf.model.resource.parsing.ParseDiagnostic;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 final class PrimaryErrorSelector
 {
-	record Entry(File file, ParseDiagnostic diagnostic)
+	record Entry(File file, LmDiagnostic diagnostic)
 	{}
 
 	private PrimaryErrorSelector()
@@ -28,7 +28,7 @@ final class PrimaryErrorSelector
 		{
 			for (final var diagnostic : inspection.diagnostics())
 			{
-				if (diagnostic.severity() == ParseDiagnostic.Severity.ERROR)
+				if (diagnostic.severity() == LmDiagnostic.Severity.ERROR)
 				{
 					errors.add(new Entry(inspection.file(), diagnostic));
 				}
@@ -67,4 +67,3 @@ final class PrimaryErrorSelector
 		return penalty;
 	}
 }
-

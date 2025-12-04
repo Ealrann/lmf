@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.resource.parsing.PTreeReader;
+import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
@@ -13,8 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JavaWrapperTest
 {
-	private static final PTreeReader treeBuilder = new PTreeReader();
-
 	@Test
 	public void group()
 	{
@@ -25,10 +23,8 @@ public class JavaWrapperTest
 				    )
 				)
 				""";
-		final var inputStream = new ByteArrayInputStream(textModel.getBytes());
-		final var ptree = treeBuilder.read(inputStream);
-		final var ptreeToJava = new PModelLinker<>(ModelRegistry.empty());
-		final var roots = ptreeToJava.build(ptree);
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
 
 		final var model = (MetaModel) roots.get(0);
 

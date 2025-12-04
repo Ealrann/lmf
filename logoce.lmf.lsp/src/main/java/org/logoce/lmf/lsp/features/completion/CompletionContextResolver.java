@@ -55,9 +55,9 @@ final class CompletionContextResolver
 		}
 
 		final SyntaxSnapshot syntax = state.syntaxSnapshot();
-		final SemanticSnapshot semantic = state.lastGoodSemanticSnapshot() != null
-										  ? state.lastGoodSemanticSnapshot()
-										  : state.semanticSnapshot();
+		final SemanticSnapshot semantic = state.semanticSnapshot() != null
+										  ? state.semanticSnapshot()
+										  : state.lastGoodSemanticSnapshot();
 		if (syntax == null || semantic == null)
 		{
 			LOG.debug("LMF LSP completion: missing snapshots for uri={}, syntaxNull={}, semanticNull={}",

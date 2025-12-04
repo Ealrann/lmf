@@ -2,6 +2,8 @@ package org.logoce.lmf.generator;
 
 import org.logoce.lmf.generator.model.ModelGenerator;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.resource.ResourceUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
 
@@ -62,18 +64,32 @@ public final class Main
 
 		try (final var modelInputStream = new FileInputStream(modelFile))
 		{
-			final var roots = ResourceUtil.loadObject(modelInputStream, ModelRegistry.empty());
+			final var loader = new LmLoader(ModelRegistry.empty());
+			final var document = loader.loadModel(modelInputStream);
+			final var diagnostics = document.diagnostics();
 
-			for (final var root : roots)
+			if (diagnostics.isEmpty() == false)
 			{
-				if (root instanceof MetaModel model)
+				System.err.println("Diagnostics for " + modelFile.getAbsolutePath() + ":");
+				for (final var diagnostic : diagnostics)
 				{
-					final var generator = new ModelGenerator(model);
-					System.out.printf("Generating = %1$s...%n", model.name());
-					generator.generateJava(targetDir);
-					final var end = System.currentTimeMillis();
-					System.out.printf("Generation done in %1$d ms%n", end - start);
+					printDiagnostic(modelFile, diagnostic);
 				}
+			}
+
+			if (hasErrors(diagnostics))
+			{
+				throw new RuntimeException("Failed to generate Java sources from " + modelFile +
+										   " due to model errors.");
+			}
+
+			if (document.model() instanceof MetaModel model)
+			{
+				final var generator = new ModelGenerator(model);
+				System.out.printf("Generating = %1$s...%n", model.name());
+				generator.generateJava(targetDir);
+				final var end = System.currentTimeMillis();
+				System.out.printf("Generation done in %1$d ms%n", end - start);
 			}
 		}
 		catch (IOException e)
@@ -192,6 +208,28 @@ public final class Main
 				}
 			}
 		}
+	}
+
+	private static boolean hasErrors(final List<LmDiagnostic> diagnostics)
+	{
+		for (final var diagnostic : diagnostics)
+		{
+			if (diagnostic.severity() == LmDiagnostic.Severity.ERROR)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void printDiagnostic(final File source, final LmDiagnostic diagnostic)
+	{
+		System.err.printf("%s:%d:%d [%s] %s%n",
+						  source.getAbsolutePath(),
+						  diagnostic.line(),
+						  diagnostic.column(),
+						  diagnostic.severity(),
+						  diagnostic.message());
 	}
 
 	private static boolean containsFlag(final String[] args, final String flag)

@@ -49,8 +49,8 @@ public final class LmCompletionEngine
 				final var items = AttributeValueCompletionProvider.complete(context);
 				if (!items.isEmpty())
 				{
-					LOG.info("LMF LSP completion: attribute completion, uri={}, line={}, character={}, items={}",
-							 uri, pos.getLine(), pos.getCharacter(), items.size());
+					LOG.debug("LMF LSP completion: attribute completion, uri={}, line={}, character={}, items={}",
+							  uri, pos.getLine(), pos.getCharacter(), items.size());
 					return Either.forLeft(List.copyOf(items));
 				}
 				LOG.debug("LMF LSP completion: attribute completion produced no items at uri={}, line={}, character={}",
@@ -62,8 +62,8 @@ public final class LmCompletionEngine
 				final var items = RelationValueCompletionProvider.complete(context);
 				if (!items.isEmpty())
 				{
-					LOG.info("LMF LSP completion: relation completion, uri={}, line={}, character={}, items={}",
-							 uri, pos.getLine(), pos.getCharacter(), items.size());
+					LOG.debug("LMF LSP completion: relation completion, uri={}, line={}, character={}, items={}",
+							  uri, pos.getLine(), pos.getCharacter(), items.size());
 					return Either.forLeft(List.copyOf(items));
 				}
 				LOG.debug("LMF LSP completion: relation completion produced no items at uri={}, line={}, character={}",
@@ -79,8 +79,8 @@ public final class LmCompletionEngine
 			final var featureItems = GroupFeatureCompletionProvider.complete(context);
 			if (!featureItems.isEmpty())
 			{
-				LOG.info("LMF LSP completion: feature completion, uri={}, line={}, character={}, items={}",
-						 uri, pos.getLine(), pos.getCharacter(), featureItems.size());
+				LOG.debug("LMF LSP completion: feature completion, uri={}, line={}, character={}, items={}",
+						  uri, pos.getLine(), pos.getCharacter(), featureItems.size());
 				return Either.forLeft(List.copyOf(featureItems));
 			}
 			LOG.debug("LMF LSP completion: feature completion produced no items at uri={}, line={}, character={}",
@@ -102,8 +102,8 @@ public final class LmCompletionEngine
 
 			if (!typeItems.isEmpty())
 			{
-				LOG.info("LMF LSP completion: type completion, uri={}, line={}, character={}, items={}",
-						 uri, pos.getLine(), pos.getCharacter(), typeItems.size());
+				LOG.debug("LMF LSP completion: type completion, uri={}, line={}, character={}, items={}",
+						  uri, pos.getLine(), pos.getCharacter(), typeItems.size());
 				return Either.forLeft(List.copyOf(typeItems));
 			}
 			LOG.debug("LMF LSP completion: type completion produced no items at uri={}, line={}, character={}",
@@ -114,8 +114,8 @@ public final class LmCompletionEngine
 		final var groupItems = GroupFeatureCompletionProvider.complete(context);
 		if (!groupItems.isEmpty())
 		{
-			LOG.info("LMF LSP completion: group context completion, uri={}, line={}, character={}, items={}",
-					 uri, pos.getLine(), pos.getCharacter(), groupItems.size());
+			LOG.debug("LMF LSP completion: group context completion, uri={}, line={}, character={}, items={}",
+					  uri, pos.getLine(), pos.getCharacter(), groupItems.size());
 			return Either.forLeft(List.copyOf(groupItems));
 		}
 

@@ -69,14 +69,10 @@ public final class WorkspaceRebuilder
 		}
 		catch (Exception e)
 		{
-			LOG.error("Error while rebuilding workspace", e);
-			final LanguageClient client = clientSupplier.get();
-			if (client != null)
-			{
-				client.logMessage(new MessageParams(
-					MessageType.Error,
-					"LMF LSP: error while rebuilding workspace: " + e.getMessage()));
-			}
+			// Treat workspace rebuild issues as internal warnings; per-file
+			// diagnostics are surfaced via analyzeDocument instead of global
+			// client notifications.
+			LOG.warn("Error while rebuilding workspace: {}", e.getMessage(), e);
 		}
 	}
 
@@ -89,7 +85,7 @@ public final class WorkspaceRebuilder
 				final List<org.logoce.lmf.model.loader.model.LmDocument> documents = loadDocumentsFromProjectRoot(projectRoot);
 				final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
 				workspaceIndex.setModelRegistry(newRegistry);
-				LOG.info("LMF LSP rebuildModelRegistry: projectRoot={}, documents={}", projectRoot, documents.size());
+				LOG.debug("LMF LSP rebuildModelRegistry: projectRoot={}, documents={}", projectRoot, documents.size());
 			}
 			catch (Exception e)
 			{
@@ -132,11 +128,12 @@ public final class WorkspaceRebuilder
 
 			final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
 			workspaceIndex.setModelRegistry(newRegistry);
-			LOG.info("LMF LSP rebuildModelRegistry: from open documents, documents={}", documents.size());
+			LOG.debug("LMF LSP rebuildModelRegistry: from open documents, documents={}", documents.size());
 		}
 		catch (Exception e)
 		{
-			LOG.warn("Failed to rebuild model registry from open documents, keeping previous registry", e);
+			LOG.debug("Failed to rebuild model registry from open documents, keeping previous registry: {}",
+					  e.getMessage(), e);
 		}
 	}
 
@@ -213,6 +210,11 @@ public final class WorkspaceRebuilder
 			final var newGood = doc.model() != null ? semanticSnapshot : previousGood;
 			state.setLastGoodSemanticSnapshot(newGood);
 
+			// Syntax is considered "good" whenever parsing succeeds, even if
+			// linking fails later. This snapshot can be reused for semantic
+			// tokens when the current syntax is temporarily invalid.
+			state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
+
 			symbolIndexer.rebuildIndicesForDocument(state);
 
 			publishDiagnostics(state);
@@ -222,6 +224,8 @@ public final class WorkspaceRebuilder
 			final String modelKind = doc.model() == null ? "null" : doc.model().getClass().getSimpleName();
 			LOG.debug("LMF LSP analyzeDocument done: uri={}, model={}, syntaxDiag={}, semanticDiag={}",
 					  state.uri(), modelKind, syntaxCount, semanticCount);
+
+				// Let the client decide when to refresh semantic tokens.
 		}
 		catch (LinkException e)
 		{
@@ -255,6 +259,10 @@ public final class WorkspaceRebuilder
 				readResult.source());
 			state.setSyntaxSnapshot(syntaxSnapshot);
 
+			// Linking failed but parsing succeeded; keep this as last good
+			// syntax so that semantic tokens can still rely on a stable tree.
+			state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
+
 			final var semanticSnapshot = new SemanticSnapshot(
 				null,
 				List.of(),
@@ -277,7 +285,27 @@ public final class WorkspaceRebuilder
 			final String text = state.text();
 			final var diagnostics = new ArrayList<LmDiagnostic>();
 			final var reader = new LmTreeReader();
-			final var readResult = reader.read(text, diagnostics);
+
+			List<org.logoce.lmf.model.util.tree.Tree<org.logoce.lmf.model.resource.parsing.PNode>> roots;
+			CharSequence source;
+			try
+			{
+				final var readResult = reader.read(text, diagnostics);
+				roots = readResult.roots();
+				source = readResult.source();
+			}
+			catch (Exception parseEx)
+			{
+				roots = List.of();
+				source = text;
+				diagnostics.add(new LmDiagnostic(
+					1,
+					1,
+					Math.max(1, text.length()),
+					0,
+					LmDiagnostic.Severity.ERROR,
+					parseEx.getMessage() == null ? "Error while parsing document" : parseEx.getMessage()));
+			}
 
 			diagnostics.add(new LmDiagnostic(
 				1,
@@ -289,9 +317,9 @@ public final class WorkspaceRebuilder
 
 			final var syntaxSnapshot = new SyntaxSnapshot(
 				List.of(),
-				readResult.roots(),
+				roots,
 				List.copyOf(diagnostics),
-				readResult.source());
+				source);
 			state.setSyntaxSnapshot(syntaxSnapshot);
 
 			final var semanticSnapshot = new SemanticSnapshot(
