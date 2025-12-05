@@ -1,7 +1,7 @@
 package org.logoce.lmf.lsp.workspace;
 
-import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
+import org.logoce.lmf.lsp.LspRanges;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.ModelKey;
@@ -61,8 +61,6 @@ public final class SymbolIndexer
 			return;
 		}
 
-		final var modelKey = new ModelKey(metaModel.domain(), metaModel.name());
-
 		final LmSymbolIndex index = LmSemanticIndexBuilder.buildIndex(metaModel,
 																	  semantic.linkTrees(),
 																	  registry,
@@ -72,8 +70,9 @@ public final class SymbolIndexer
 		for (final var decl : index.declarations())
 		{
 			final var id = toSymbolId(decl.id());
+			final var containerId = decl.container() != null ? toSymbolId(decl.container()) : null;
 			final var range = toRange(decl.span(), syntax.source());
-			symbolEntries.add(new SymbolEntry(id, state.uri(), range));
+			symbolEntries.add(new SymbolEntry(id, containerId, state.uri(), range));
 		}
 
 		final var references = new ArrayList<ReferenceOccurrence>();
@@ -105,15 +104,7 @@ public final class SymbolIndexer
 
 	private static Range toRange(final TextPositions.Span span, final CharSequence source)
 	{
-		final int startOffset = span.offset();
-		final int endOffset = startOffset + Math.max(1, span.length());
-		final int startLine = Math.max(0, TextPositions.lineFor(source, startOffset) - 1);
-		final int startChar = Math.max(0, TextPositions.columnFor(source, startOffset) - 1);
-		final int endLine = Math.max(0, TextPositions.lineFor(source, endOffset) - 1);
-		final int endChar = Math.max(0, TextPositions.columnFor(source, endOffset) - 1);
-		final var startPos = new Position(startLine, startChar);
-		final var endPos = new Position(endLine, endChar);
-		return new Range(startPos, endPos);
+		return LspRanges.forSpan(source, span);
 	}
 
 }

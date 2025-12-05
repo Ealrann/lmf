@@ -2,6 +2,7 @@ package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
+import org.logoce.lmf.lsp.LspRanges;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
@@ -97,26 +98,7 @@ final class SyntaxNavigation
 
 	static Range rangeForToken(final PToken token, final CharSequence source)
 	{
-		final int start = token.offset();
-		final int end = start + Math.max(1, token.length());
-		final int startLine = Math.max(0, TextPositions.lineFor(source, start) - 1);
-		final int startChar = Math.max(0, TextPositions.columnFor(source, start) - 1);
-		final int endLine = Math.max(0, TextPositions.lineFor(source, end) - 1);
-		final int endChar = Math.max(0, TextPositions.columnFor(source, end) - 1);
-		final var startPos = new Position(startLine, startChar);
-		final var endPos = new Position(endLine, endChar);
-		return new Range(startPos, endPos);
-	}
-
-	private static Range rangeForOffsets(final int startOffset, final int endOffset, final CharSequence source)
-	{
-		final int startLine = Math.max(0, TextPositions.lineFor(source, startOffset) - 1);
-		final int startChar = Math.max(0, TextPositions.columnFor(source, startOffset) - 1);
-		final int endLine = Math.max(0, TextPositions.lineFor(source, endOffset) - 1);
-		final int endChar = Math.max(0, TextPositions.columnFor(source, endOffset) - 1);
-		final var startPos = new Position(startLine, startChar);
-		final var endPos = new Position(endLine, endChar);
-		return new Range(startPos, endPos);
+		return LspRanges.forToken(source, token);
 	}
 
 	static boolean rangeContains(final Range range, final Position pos)

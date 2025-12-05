@@ -62,7 +62,7 @@ final class SemanticNavigation
 		final PNode headerNode = SyntaxNavigation.findPNodeAtOrBeforePosition(syntax, pos);
 		if (headerNode == null)
 		{
-			LOG.info("LMF LSP completion: SemanticNavigation.findFeatureAtValuePosition – no PNode at or before position line={}, character={}",
+			LOG.debug("LMF LSP completion: SemanticNavigation.findFeatureAtValuePosition – no PNode at or before position line={}, character={}",
 					  pos.getLine(), pos.getCharacter());
 			return null;
 		}
@@ -72,7 +72,7 @@ final class SemanticNavigation
 		{
 			final String keyword = SyntaxNavigation.headerKeyword(headerNode);
 			final String name = SyntaxNavigation.headerName(headerNode);
-			LOG.info("LMF LSP completion: SemanticNavigation.findFeatureAtValuePosition – no link node for header keyword={}, name={}, line={}, character={}",
+			LOG.debug("LMF LSP completion: SemanticNavigation.findFeatureAtValuePosition – no link node for header keyword={}, name={}, line={}, character={}",
 					  keyword, name, pos.getLine(), pos.getCharacter());
 			return null;
 		}

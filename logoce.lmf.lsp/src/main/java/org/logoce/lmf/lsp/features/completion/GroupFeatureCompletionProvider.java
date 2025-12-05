@@ -96,12 +96,12 @@ final class GroupFeatureCompletionProvider
 
 		for (final Feature<?, ?> feature : group.features())
 		{
-			LOG.info("LMF LSP completion: inspecting feature '{}' (class={}) used={} contains={} isOperationGroup={}",
-					 feature.name(),
-					 feature.getClass().getSimpleName(),
-					 usedFeatures != null && usedFeatures.contains(feature),
-					 feature instanceof Relation<?, ?> r && r.contains(),
-					 isOperationGroup);
+			LOG.debug("LMF LSP completion: inspecting feature '{}' (class={}) used={} contains={} isOperationGroup={}",
+					  feature.name(),
+					  feature.getClass().getSimpleName(),
+					  usedFeatures != null && usedFeatures.contains(feature),
+					  feature instanceof Relation<?, ?> r && r.contains(),
+					  isOperationGroup);
 
 			if (!isOperationGroup && feature instanceof Relation<?, ?> relation && relation.contains())
 			{

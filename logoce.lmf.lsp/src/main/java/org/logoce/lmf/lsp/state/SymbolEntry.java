@@ -4,7 +4,6 @@ import org.eclipse.lsp4j.Range;
 
 import java.net.URI;
 
-public record SymbolEntry(SymbolId id, URI uri, Range range)
+public record SymbolEntry(SymbolId id, SymbolId container, URI uri, Range range)
 {
 }
-
