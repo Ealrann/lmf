@@ -56,12 +56,12 @@ final class GroupFeatureCompletionProvider
 
 		if (group == null)
 		{
-			LOG.info("LMF LSP completion: no group resolved at position line={}, character={}, metaModel={}",
-					 pos.getLine(),
-					 pos.getCharacter(),
-					 context.metaModel() != null
-					 ? context.metaModel().domain() + "." + context.metaModel().name()
-					 : "null");
+			LOG.debug("LMF LSP completion: no group resolved at position line={}, character={}, metaModel={}",
+					  pos.getLine(),
+					  pos.getCharacter(),
+					  context.metaModel() != null
+					  ? context.metaModel().domain() + "." + context.metaModel().name()
+					  : "null");
 			return List.of();
 		}
 
@@ -76,8 +76,8 @@ final class GroupFeatureCompletionProvider
 			final var labels = items.stream()
 									.map(CompletionItem::getLabel)
 									.toList();
-			LOG.info("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
-					 group.name(), items.size(), labels);
+			LOG.debug("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
+					  group.name(), items.size(), labels);
 		}
 		return items;
 	}
@@ -87,10 +87,10 @@ final class GroupFeatureCompletionProvider
 	{
 		final var items = new ArrayList<CompletionItem>();
 
-		LOG.info("LMF LSP completion: building feature completions for group={} features={} used={}",
-				 group.name(),
-				 group.features().size(),
-				 usedFeatures != null ? usedFeatures.size() : 0);
+		LOG.debug("LMF LSP completion: building feature completions for group={} features={} used={}",
+				  group.name(),
+				  group.features().size(),
+				  usedFeatures != null ? usedFeatures.size() : 0);
 
 		final boolean isOperationGroup = "Operation".equals(group.name()) || "OperationParameter".equals(group.name());
 

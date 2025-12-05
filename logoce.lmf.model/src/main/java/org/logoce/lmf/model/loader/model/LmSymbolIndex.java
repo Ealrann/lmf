@@ -20,7 +20,11 @@ public record LmSymbolIndex(List<SymbolSpan> declarations,
 		FEATURE
 	}
 
-	public record SymbolId(String modelDomain, String modelName, SymbolKind kind, String name)
+	public record SymbolId(String modelDomain,
+						   String modelName,
+						   SymbolKind kind,
+						   String name,
+						   String containerPath)
 	{
 	}
 

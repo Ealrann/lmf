@@ -21,22 +21,25 @@ final class SyntaxNavigation
 	{
 		final CharSequence source = syntax.source();
 
-		// Fast path: inspect the character under the caret directly. This ensures
+		// Fast path: inspect the character at and just before the caret. This ensures
 		// that standalone '@' / '#' markers (for example in partially-typed type
-		// references) are correctly classified even when they are not yet part of
-		// a well-formed parse tree node.
+		// references, or when the caret sits just after them) are correctly classified
+		// even when they are not yet part of a well-formed parse tree node.
 		final int offset = TextPositions.offsetFor(
 			source,
 			pos.getLine() + 1,
 			pos.getCharacter() + 1);
-		if (offset >= 0 && offset < source.length())
+		if (offset >= 0 && offset <= source.length())
 		{
-			final char ch = source.charAt(offset);
-			if (ch == '@')
+			final int length = source.length();
+			final char current = offset < length ? source.charAt(offset) : '\0';
+			final char previous = offset > 0 ? source.charAt(offset - 1) : '\0';
+
+			if (current == '@' || previous == '@')
 			{
 				return CompletionContextKind.LOCAL_AT;
 			}
-			if (ch == '#')
+			if (current == '#' || previous == '#')
 			{
 				return CompletionContextKind.CROSS_MODEL_HASH;
 			}

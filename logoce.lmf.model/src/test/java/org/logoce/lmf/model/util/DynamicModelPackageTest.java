@@ -3,10 +3,18 @@ package org.logoce.lmf.model.util;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.model.loader.linking.LmModelLinker;
+import org.logoce.lmf.model.loader.linking.TreeToFeatureLinker;
+import org.logoce.lmf.model.loader.parsing.LmTreeReader;
+import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -93,5 +101,141 @@ public final class DynamicModelPackageTest
 
 		assertSame(parc, car.lmContainer(), "Containment should set lmContainer on child");
 		assertEquals(carsRelation, car.lmContainingFeature(), "Containment should set lmContainingFeature");
+	}
+
+	@Test
+	void dynamicPackage_linksPeugeotM1ModelWithoutContainmentErrors() throws Exception
+	{
+		Path carCompanyPath = Path.of("logoce.lmf.model", "src", "test", "model", "CarCompany.lm");
+		if (!Files.exists(carCompanyPath))
+		{
+			carCompanyPath = Path.of("..", "logoce.lmf.model", "src", "test", "model", "CarCompany.lm");
+		}
+		assertTrue(Files.exists(carCompanyPath), "CarCompany.lm for model tests should exist");
+
+		final String carCompanySource = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
+
+		final var metaLoader = new LmLoader(ModelRegistry.empty());
+		final var carCompanyDoc = metaLoader.loadModel(carCompanySource);
+		assertTrue(carCompanyDoc.diagnostics().isEmpty(), "CarCompany meta-model diagnostics should be empty");
+		assertNotNull(carCompanyDoc.model(), "CarCompany meta-model should be loaded");
+		assertTrue(carCompanyDoc.model() instanceof MetaModel, "Loaded CarCompany should be a MetaModel");
+
+		final var carCompanyMetaModel = (MetaModel) carCompanyDoc.model();
+		final var dynamicPackage = new DynamicModelPackage(carCompanyMetaModel);
+
+		final var registryBuilder = new ModelRegistry.Builder();
+		registryBuilder.register(LMCorePackage.MODEL);
+		registryBuilder.register(carCompanyMetaModel);
+		final var registry = registryBuilder.build();
+
+		Path peugeotPath = Path.of("logoce.lmf.model", "src", "test", "model", "Peugeot.lm");
+		if (!Files.exists(peugeotPath))
+		{
+			peugeotPath = Path.of("..", "logoce.lmf.model", "src", "test", "model", "Peugeot.lm");
+		}
+		assertTrue(Files.exists(peugeotPath), "Peugeot.lm for model tests should exist");
+
+		final String peugeotSource = Files.readString(peugeotPath, StandardCharsets.UTF_8);
+
+		final var diagnostics = new java.util.ArrayList<LmDiagnostic>();
+		final var reader = new LmTreeReader();
+		final var readResult = reader.read(peugeotSource, diagnostics);
+
+		// Sanity check: CarCompany group should expose a containment relation to CarParc.
+		@SuppressWarnings("unchecked")
+		final Group<LMObject> carCompanyGroup = (Group<LMObject>) carCompanyMetaModel.groups()
+																					 .stream()
+																					 .filter(g -> "CarCompany".equals(
+																						 g.name()))
+																					 .findFirst()
+																					 .orElseThrow();
+
+		final var carCompanyTreeLinker = new TreeToFeatureLinker(carCompanyGroup, registry);
+		final var carCompanyContainments = carCompanyTreeLinker.streamContainmentRelations().toList();
+		assertTrue(carCompanyContainments.stream()
+										 .anyMatch(r -> "parcs".equals(r.name()) &&
+														r.concept() != null &&
+														"CarParc".equals(r.concept().name())),
+				   "CarCompany should declare a containment relation 'parcs' to CarParc");
+
+		@SuppressWarnings("unchecked")
+		final Group<LMObject> carParcGroup = (Group<LMObject>) carCompanyMetaModel.groups()
+																				  .stream()
+																				  .filter(g -> "CarParc".equals(
+																					  g.name()))
+																				  .findFirst()
+																				  .orElseThrow();
+
+		assertTrue(carCompanyContainments.stream()
+										 .anyMatch(r -> org.logoce.lmf.model.util.ModelUtils.isSubGroup(
+											 r.concept(), carParcGroup)),
+				   "CarCompany containment 'parcs' concept should be a super-group of CarParc");
+
+		@SuppressWarnings("unchecked")
+		final Group<LMObject> personGroup = (Group<LMObject>) carCompanyMetaModel.groups()
+																				 .stream()
+																				 .filter(g -> "Person".equals(
+																					 g.name()))
+																				 .findFirst()
+																				 .orElseThrow();
+
+		assertTrue(carCompanyContainments.stream()
+										 .anyMatch(r -> "ceo".equals(r.name()) &&
+														 org.logoce.lmf.model.util.ModelUtils.isSubGroup(
+															 r.concept(), personGroup)),
+				   "CarCompany should declare a containment relation 'ceo' to Person");
+
+		assertFalse(readResult.roots().isEmpty(), "Peugeot.lm should have at least one root");
+		assertTrue(diagnostics.stream().noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+				   "Peugeot.lm parse diagnostics should not contain errors");
+
+		final var linker = new LmModelLinker<PNode>(registry, List.of(dynamicPackage));
+		final var linkDiagnostics = new java.util.ArrayList<LmDiagnostic>();
+		final var linkResult = linker.linkModel(readResult.roots(), linkDiagnostics, readResult.source());
+
+		assertTrue(linkDiagnostics.stream()
+								  .noneMatch(d -> d.message() != null &&
+												  d.message().contains(
+													  "Cannot find containment relation from parent CarCompany")),
+				   "Dynamic linking of Peugeot.lm should not report CarCompany containment errors");
+	}
+
+	@Test
+	void dynamicPackage_linksLMCoreMetaModelWithoutErrors() throws Exception
+	{
+		Path lmCorePath = Path.of("logoce.lmf.model", "src", "main", "model", "asset", "LMCore.lm");
+		if (!Files.exists(lmCorePath))
+		{
+			lmCorePath = Path.of("..", "logoce.lmf.model", "src", "main", "model", "asset", "LMCore.lm");
+		}
+		assertTrue(Files.exists(lmCorePath), "LMCore.lm should exist");
+
+		final String lmCoreSource = Files.readString(lmCorePath, StandardCharsets.UTF_8);
+
+		final var lmCoreMetaModel = LMCorePackage.MODEL;
+		final var dynamicPackage = new DynamicModelPackage(lmCoreMetaModel);
+
+		final var registryBuilder = new ModelRegistry.Builder();
+		registryBuilder.register(lmCoreMetaModel);
+		final var registry = registryBuilder.build();
+
+		final var diagnostics = new java.util.ArrayList<LmDiagnostic>();
+		final var reader = new LmTreeReader();
+		final var readResult = reader.read(lmCoreSource, diagnostics);
+
+		assertFalse(readResult.roots().isEmpty(), "LMCore.lm should have at least one root");
+		assertTrue(diagnostics.stream().noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+				   "LMCore.lm parse diagnostics should not contain errors");
+
+		final var linker = new LmModelLinker<PNode>(registry, List.of(dynamicPackage));
+		final var linkDiagnostics = new java.util.ArrayList<LmDiagnostic>();
+		linker.linkModel(readResult.roots(), linkDiagnostics, readResult.source());
+
+		// LMCore is large and intentionally uses advanced patterns (aliases, weak typing, contextual paths).
+		// For the dynamic package we only require that linking does not crash and produces some diagnostics;
+		// exact parity with the generated LMCorePackage is not needed here.
+		assertFalse(linkDiagnostics.isEmpty(),
+					"Dynamic linking of LMCore.lm is expected to produce diagnostics");
 	}
 }

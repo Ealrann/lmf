@@ -9,7 +9,7 @@ public record PFeature(Optional<String> name, List<String> values, boolean isRel
 	{
 		final var firstVal = values.get(0);
 		final var firstChar = firstVal.charAt(0);
-		final var isRelation = firstChar == '@' || firstChar == '#' || firstChar == '.' || firstChar == '/';
+		final var isRelation = firstChar == '@' || firstChar == '#' || firstChar == '.' || firstChar == '/' || firstChar == '^';
 		return new PFeature(name, List.copyOf(values), isRelation);
 	}
 

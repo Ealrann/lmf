@@ -202,6 +202,25 @@ For your own M2 models:
 - The generator will emit Java types that carry those generics; this is powerful for strongly‑typed APIs, but it’s easy to get wrong if parameter lists don’t line up, so it’s best to copy patterns from LMCore’s `Feature` / `Attribute` / `Relation` definitions.
 - Relative paths: `../` climbs one level in the current block, `/groups.N/generics.M` jumps by index. When in doubt, mirror LMCore’s patterns (e.g. `Attribute`/`Relation` in `LMCore.lm`).
 
+### 6.1 Contextual name paths (`^`)
+
+To make some references less brittle than raw indices, LMCore adds a small “contextual name” shortcut:
+
+- `^name` means “look for an element called `name` starting from my current context, walking up through parents and each parent’s immediate children”.
+- This is mostly used for generics and other locally‑scoped names where `../../generics.0` would be noisy or fragile.
+
+Typical LMCore pattern for generics:
+
+```lm
+(Group Concept
+    (includes @Type
+        (parameters ^T))
+    (Generic name=T))
+```
+
+Here `^T` resolves to the nearest `Generic` named `T` in the surrounding context.  
+The same `^name` form can also be used for instance‑level references (for example in M1 models) when you want to prefer the “closest” matching object instead of searching the whole model with `@name`.
+
 **Common pitfall:** `Operation` now carries a `returnType` plus contained `returnTypeParameters` and `parameters` (each `OperationParameter` can itself have contained `parameters` for generics). When you need to refer to a group‑level generic from inside an operation parameter, you still have to walk back up with the right number of `../generics.N` hops. Example (pattern aligned with LMCore’s `LMCore.lm`):
 
 ```lm

@@ -17,6 +17,17 @@ public final class ModelReferenceResolver implements ReferenceResolver
 	private final Model model;
 	private final Relation<?, ?> relation;
 
+	/**
+	 * Marker interface for static model reference resolutions that point to a
+	 * concrete target {@link LMObject}. This is used by tooling-oriented
+	 * consumers (for example the semantic index builder) to extract the target
+	 * object without depending on the internal {@link ModelExplorer} type.
+	 */
+	public interface StaticResolution extends FeatureResolution<Relation<?, ?>>
+	{
+		LMObject value();
+	}
+
 	public ModelReferenceResolver(final Model model, final Relation<?, ?> relation)
 	{
 		this.model = model;
@@ -126,7 +137,8 @@ public final class ModelReferenceResolver implements ReferenceResolver
 
 		public record StaticReferenceResolution<Y extends LMObject, T extends Relation<Y, ?>>(T relation,
 																							  Y value) implements
-																									   FeatureResolution<Relation<?, ?>>
+																									   FeatureResolution<Relation<?, ?>>,
+																									   StaticResolution
 		{
 			@Override
 			public void pushValue(final IFeaturedObject.Builder<?> builder)
@@ -142,4 +154,3 @@ public final class ModelReferenceResolver implements ReferenceResolver
 		}
 	}
 }
-

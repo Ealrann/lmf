@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.loader.linking;
 
 import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.feature.ITokenResolver;
@@ -9,7 +10,9 @@ import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.ModelRegistry;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,14 +26,16 @@ public final class TreeToFeatureLinker
 	public TreeToFeatureLinker(final Group<?> group, final ModelRegistry modelRegistry)
 	{
 		this.group = group;
-		final var features = ModelUtils.streamAllFeatures(group)
-									   .collect(java.util.stream.Collectors.toMap(f -> f.rawFeature(),
-																				  f -> f,
-																				  (a, b) -> a,
-																				  java.util.LinkedHashMap::new))
-									   .values()
-									   .stream()
-									   .toList();
+		final List<Feature<?, ?>> allFeatures = ModelUtils.streamAllFeatures(group).toList();
+
+		final Map<Object, Feature<?, ?>> featureMap = new LinkedHashMap<>();
+		for (final Feature<?, ?> feature : allFeatures)
+		{
+			final Object key = feature.rawFeature() != null ? feature.rawFeature() : feature;
+			featureMap.put(key, feature);
+		}
+
+		final var features = featureMap.values().stream().toList();
 		final var tokenResolverBuilder = new ITokenResolver.Builder(modelRegistry);
 
 		final var attributeResolvers = features.stream()
@@ -49,11 +54,11 @@ public final class TreeToFeatureLinker
 											  .map(Optional::get)
 											  .toList();
 
-		containmentRelations = features.stream()
-									   .filter(Relation.class::isInstance)
-									   .map(r -> (Relation<?, ?>) r)
-									   .filter(Relation::contains)
-									   .collect(Collectors.toUnmodifiableList());
+		containmentRelations = allFeatures.stream()
+										  .filter(Relation.class::isInstance)
+										  .map(r -> (Relation<?, ?>) r)
+										  .filter(Relation::contains)
+										  .collect(Collectors.toUnmodifiableList());
 
 		nodeLinker = new NodeLinker(attributeResolvers, relationResolvers);
 	}

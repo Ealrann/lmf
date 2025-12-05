@@ -8,11 +8,9 @@ import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.loader.model.LmSymbolIndex;
-import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
+import org.logoce.lmf.lsp.state.SymbolEntry;
+import org.logoce.lmf.lsp.state.SymbolId;
+import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
@@ -31,55 +29,36 @@ public final class DocumentSymbols
 	}
 
 	public static List<Either<SymbolInformation, DocumentSymbol>> buildDocumentSymbols(final SyntaxSnapshot syntax,
-																					   final SemanticSnapshot semantic)
+																					   final SemanticSnapshot semantic,
+																					   final WorkspaceIndex workspaceIndex,
+																					   final java.net.URI uri)
 	{
 		if (syntax == null)
 		{
 			return List.of();
 		}
 
-		if (semantic == null)
+		if (semantic == null || workspaceIndex == null || uri == null)
 		{
 			return buildDocumentSymbols(syntax);
 		}
 
-		final Model model = semantic.model();
-		final LmSymbolIndex index;
-
-		if (model != null)
+		// Prefer the global symbol index maintained in WorkspaceIndex; this is
+		// built from the semantic index (link trees + meta-models) and keeps
+		// M1/M2 documents consistent.
+		final List<SymbolEntry> entries = workspaceIndex.symbolsForUri(uri);
+		if (entries.isEmpty())
 		{
-			index = LmSymbolIndexBuilder.buildIndex(
-				model,
-				syntax.roots(),
-				syntax.source(),
-				ModelRegistry.empty());
-		}
-		else
-		{
-			// When no runtime model is available (for example in semantic-only
-			// linking paths for M1/M2 documents), fall back to a meta-model
-			// driven index using the active meta-model or LMCore. If this
-			// yields no declarations, fall back to the purely syntactic outline.
-			final MetaModel metaModel =
-				MetaModelResolver.resolveForDocument(syntax, null, ModelRegistry.empty());
-
-			index = LmSymbolIndexBuilder.buildIndex(
-				metaModel,
-				syntax.roots(),
-				syntax.source(),
-				ModelRegistry.empty());
-
-			if (index.declarations().isEmpty())
-			{
-				return buildDocumentSymbols(syntax);
-			}
+			// Fall back to the purely syntactic outline when no semantic symbols
+			// are available for this document.
+			return buildDocumentSymbols(syntax);
 		}
 
-		final var byId = new java.util.LinkedHashMap<LmSymbolIndex.SymbolId, DocumentSymbol>();
+		final var byId = new java.util.LinkedHashMap<SymbolId, DocumentSymbol>();
 
-		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		for (final SymbolEntry entry : entries)
 		{
-			final var id = decl.id();
+			final SymbolId id = entry.id();
 			final SymbolKind kind = switch (id.kind())
 			{
 				case META_MODEL -> SymbolKind.Namespace;
@@ -87,39 +66,19 @@ public final class DocumentSymbols
 				case FEATURE -> SymbolKind.Field;
 			};
 
-			final var range = spanToRange(decl.span(), syntax.source());
-			final var symbol = new DocumentSymbol(id.name(), kind, range, range);
+			final var symbol = new DocumentSymbol(id.name(), kind, entry.range(), entry.range());
 			byId.put(id, symbol);
 		}
 
-		// Attach children to their containers using the container id from the index.
-		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
-		{
-			final var containerId = decl.container();
-			if (containerId == null)
-			{
-				continue;
-			}
-			final var child = byId.get(decl.id());
-			final var container = byId.get(containerId);
-			if (child == null || container == null)
-			{
-				continue;
-			}
-			addChild(container, child);
-		}
-
-		// Top-level symbols are those without a container.
+		// Top-level symbols: we currently don't track container relationships in
+		// WorkspaceIndex, so all entries are treated as top-level.
 		final var topLevel = new ArrayList<DocumentSymbol>();
-		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		for (final SymbolEntry entry : entries)
 		{
-			if (decl.container() == null)
+			final var symbol = byId.get(entry.id());
+			if (symbol != null)
 			{
-				final var symbol = byId.get(decl.id());
-				if (symbol != null)
-				{
-					topLevel.add(symbol);
-				}
+				topLevel.add(symbol);
 			}
 		}
 

@@ -83,7 +83,7 @@ public final class MetaModelResolver
 					final Model model = registry.getModel(name);
 					if (model instanceof MetaModel mm)
 					{
-						LOG.info("LMF LSP MetaModelResolver: resolved header metamodel '{}' to {}", name,
+						LOG.debug("LMF LSP MetaModelResolver: resolved header metamodel '{}' to {}", name,
 								 mm.domain() + "." + mm.name());
 						return mm;
 					}
@@ -93,7 +93,7 @@ public final class MetaModelResolver
 				{
 					// Header explicitly declares metamodels but none are available in the
 					// registry; fall back to LMCore so that basic tooling remains usable.
-					LOG.info("LMF LSP MetaModelResolver: header metamodels {} not found in registry, using LMCore",
+					LOG.debug("LMF LSP MetaModelResolver: header metamodels {} not found in registry, using LMCore",
 							 metamodelNames);
 					return LMCorePackage.MODEL;
 				}
@@ -117,7 +117,7 @@ public final class MetaModelResolver
 													 .anyMatch(g -> rootKeyword.equals(g.name()));
 							if (matches)
 							{
-								LOG.info("LMF LSP MetaModelResolver: resolved root keyword '{}' to meta-model {}.{}",
+								LOG.debug("LMF LSP MetaModelResolver: resolved root keyword '{}' to meta-model {}.{}",
 										 rootKeyword,
 										 mm.domain(),
 										 mm.name());
@@ -140,7 +140,7 @@ public final class MetaModelResolver
 						final Model selfModel = registry.getModel(domain, name);
 						if (selfModel instanceof MetaModel mm)
 						{
-							LOG.info("LMF LSP MetaModelResolver: resolved self meta-model {}.{} from registry",
+								LOG.debug("LMF LSP MetaModelResolver: resolved self meta-model {}.{} from registry",
 									 domain, name);
 							return mm;
 						}
@@ -162,14 +162,14 @@ public final class MetaModelResolver
 						final Model model = registry.getModel(name);
 						if (model instanceof MetaModel mm)
 						{
-							LOG.info("LMF LSP MetaModelResolver: resolved header metamodel '{}' (text scan) to {}",
+							LOG.debug("LMF LSP MetaModelResolver: resolved header metamodel '{}' (text scan) to {}",
 									 name,
 									 mm.domain() + "." + mm.name());
 							return mm;
 						}
 					}
 
-					LOG.info("LMF LSP MetaModelResolver: header metamodels {} (text scan) not found in registry, using LMCore",
+					LOG.debug("LMF LSP MetaModelResolver: header metamodels {} (text scan) not found in registry, using LMCore",
 							 namesFromText);
 					return LMCorePackage.MODEL;
 				}
@@ -178,12 +178,12 @@ public final class MetaModelResolver
 
 		if (semanticModel instanceof MetaModel mm)
 		{
-			LOG.info("LMF LSP MetaModelResolver: using semantic model meta-model {}.{}",
+			LOG.debug("LMF LSP MetaModelResolver: using semantic model meta-model {}.{}",
 					 mm.domain(), mm.name());
 			return mm;
 		}
 
-		LOG.info("LMF LSP MetaModelResolver: falling back to LMCore meta-model");
+		LOG.debug("LMF LSP MetaModelResolver: falling back to LMCore meta-model");
 		return LMCorePackage.MODEL;
 	}
 

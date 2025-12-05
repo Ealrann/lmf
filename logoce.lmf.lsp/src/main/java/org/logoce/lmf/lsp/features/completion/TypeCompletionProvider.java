@@ -12,8 +12,6 @@ import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.loader.model.LmSymbolIndex;
-import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +32,9 @@ final class TypeCompletionProvider
 	static List<CompletionItem> complete(final CompletionContext context)
 	{
 		final var items = buildTypeCompletions(context);
-		final var shaped = shapeCompletionItems(items, context.contextKind());
-		LOG.info("LMF LSP completion: type completions (semantic), uri={}, items={}, context={}",
-				 context.uri(), shaped.size(), context.contextKind());
+		final var shaped = shapeCompletionItems(items, context);
+		LOG.debug("LMF LSP completion: type completions (semantic), uri={}, items={}, context={}",
+				  context.uri(), shaped.size(), context.contextKind());
 		return shaped;
 	}
 
@@ -45,39 +43,43 @@ final class TypeCompletionProvider
 		final List<CompletionItem> items = new ArrayList<>();
 		final Set<String> seenLabels = new HashSet<>();
 
-		for (final CompletionItem item : basicCompletions())
-		{
-			if (seenLabels.add(item.getLabel()))
-			{
-				items.add(item);
-			}
-		}
-
 		final LmLanguageServer server = context.server();
 		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
 		final MetaModel mm = context.metaModel();
-		final TypeUsageKind usageKind = context.value() != null ? context.value().typeUsageKind() : TypeUsageKind.ANY;
+		TypeUsageKind usageKind = context.value() != null ? context.value().typeUsageKind() : TypeUsageKind.ANY;
+
+		// For explicit '@' / '#' reference contexts, offer all types
+		// regardless of Concept/Datatype classification; the user is
+		// explicitly requesting a type reference and both concepts and
+		// datatypes are valid candidates.
+		if (context.contextKind() == CompletionContextKind.LOCAL_AT ||
+			context.contextKind() == CompletionContextKind.CROSS_MODEL_HASH)
+		{
+			usageKind = TypeUsageKind.ANY;
+		}
 
 		if (mm == null)
 		{
 			return items;
 		}
 
-		LOG.info("LMF LSP completion: buildTypeCompletions, uri={}, usageKind={}, context={}, metaModel={}, line={}, character={}",
-				 context.uri(),
-				 usageKind,
-				 context.contextKind(),
-				 mm != null ? (mm.domain() + "." + mm.name()) : "null",
-				 context.position().getLine(),
-				 context.position().getCharacter());
+		LOG.debug("LMF LSP completion: buildTypeCompletions, uri={}, usageKind={}, context={}, metaModel={}, line={}, character={}",
+				  context.uri(),
+				  usageKind,
+				  context.contextKind(),
+				  mm != null ? (mm.domain() + "." + mm.name()) : "null",
+				  context.position().getLine(),
+				  context.position().getCharacter());
 
 		// Local types from the current document via the symbol index.
 		final int localTypes = addLocalTypesFromSymbolIndex(context, mm, usageKind, items, seenLabels);
 
-		// Fallback: when no local type declarations are discovered (for example in simple
-		// meta-models or M1 instance documents), derive available types directly from the
-		// active meta-model so that '@' completions still expose groups/enums/units/wrappers.
-		if (localTypes == 0)
+		// When no local type declarations are discovered (for example in simple
+		// meta-models or M1 instance documents), or when the usage kind is
+		// DATATYPE, derive available types directly from the active meta-model
+		// so that '@' completions still expose enums/units/wrappers even if
+		// they are not indexed as local symbols.
+		if (localTypes == 0 || usageKind == TypeUsageKind.DATATYPE)
 		{
 			addMetaModelTypes(mm, null, false, items, seenLabels, usageKind);
 		}
@@ -99,36 +101,55 @@ final class TypeCompletionProvider
 			addCrossModelTypes(context, lmCore, lmCore.name(), usageKind, items, seenLabels);
 		}
 
+		// If no semantic/meta-model types were discovered, fall back to LMCore
+		// header/alias keywords as generic suggestions.
+		if (items.isEmpty())
+		{
+			items.addAll(basicCompletions());
+		}
+
 		return items;
 	}
 
 	private static List<CompletionItem> basicCompletions()
 	{
 		final List<CompletionItem> items = new ArrayList<>();
-		for (final String label : List.of("MetaModel",
-										  "Group",
-										  "Definition",
-										  "Enum",
-										  "Unit",
-										  "Alias",
-										  "JavaWrapper",
-										  "Generic",
-										  "Operation",
-										  "+att",
-										  "-att",
-										  "+contains",
-										  "-contains",
-										  "+refers",
-										  "-refers"))
+		final MetaModel lmCore = LMCorePackage.MODEL;
+
+		for (final Group<?> group : lmCore.groups())
 		{
-			items.add(new CompletionItem(label));
+			final String name = group.name();
+			if (name != null && !name.isBlank())
+			{
+				items.add(new CompletionItem(name));
+			}
 		}
+
+		for (final org.logoce.lmf.model.lang.Alias alias : lmCore.aliases())
+		{
+			final String name = alias.name();
+			if (name != null && !name.isBlank())
+			{
+				items.add(new CompletionItem(name));
+			}
+		}
+
 		return items;
 	}
 
 	private static List<CompletionItem> shapeCompletionItems(final List<CompletionItem> items,
-															 final CompletionContextKind contextKind)
+															 final CompletionContext context)
 	{
+		final CompletionContextKind contextKind = context.contextKind();
+		final CompletionContext.HeaderContext header = context.header();
+		final CompletionContext.ValueContext value = context.value();
+
+		final boolean inRelationValue =
+			header != null &&
+			header.positionKind() == CompletionContext.HeaderPositionKind.FEATURE_VALUE &&
+			value != null &&
+			value.relation() != null;
+
 		if (items.isEmpty())
 		{
 			return items;
@@ -150,7 +171,28 @@ final class TypeCompletionProvider
 			{
 				case LOCAL_AT ->
 				{
-					if (label.startsWith("#") || !isTypeItem)
+					if (!isTypeItem)
+					{
+						continue;
+					}
+
+					// For relation-valued positions (e.g. datatype=@...), present
+					// type candidates in the same reference-like shape as other
+					// relation completions: '@Name' as label, inserting only the
+					// bare name after the already-typed '@'.
+					if (inRelationValue)
+					{
+						if (label.startsWith("@") || label.startsWith("#"))
+						{
+							continue;
+						}
+						item.setInsertText(label);
+						item.setLabel("@" + label);
+						result.add(item);
+						continue;
+					}
+
+					if (label.startsWith("#"))
 					{
 						continue;
 					}
@@ -244,14 +286,14 @@ final class TypeCompletionProvider
 
 		if (addedGroups + addedEnums + addedUnits + addedWrappers > 0)
 		{
-			LOG.info("LMF LSP completion: addMetaModelTypes model={} alias={} usageKind={} groups={} enums={} units={} wrappers={}",
-					 modelQualifiedName,
-					 modelAlias,
-					 usageKind,
-					 addedGroups,
-					 addedEnums,
-					 addedUnits,
-					 addedWrappers);
+			LOG.debug("LMF LSP completion: addMetaModelTypes model={} alias={} usageKind={} groups={} enums={} units={} wrappers={}",
+					  modelQualifiedName,
+					  modelAlias,
+					  usageKind,
+					  addedGroups,
+					  addedEnums,
+					  addedUnits,
+					  addedWrappers);
 		}
 	}
 
@@ -261,36 +303,31 @@ final class TypeCompletionProvider
 													final List<CompletionItem> items,
 													final Set<String> seenLabels)
 	{
-		final var semantic = context.semantic();
 		final var syntax = context.syntax();
 		if (syntax == null)
 		{
-			LOG.info("LMF LSP completion: local symbol index skipped (syntax is null)");
+			LOG.debug("LMF LSP completion: local symbol index skipped (syntax is null)");
 			return 0;
 		}
 
-		final Model model = semantic != null && semantic.model() != null
-							? semantic.model()
-							: mm;
-		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(
-			model,
-			syntax.roots(),
-			syntax.source(),
-			ModelRegistry.empty());
-
-		LOG.info("LMF LSP completion: local symbol index for model={} declarations={}",
-				 model.getClass().getSimpleName(),
-				 index.declarations().size());
+		final var workspaceIndex = context.server().workspaceIndex();
+		final var targetKey = new ModelKey(mm.domain(), mm.name());
 
 		int added = 0;
-		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
+		for (final SymbolEntry entry : workspaceIndex.symbolIndex().values())
 		{
-			if (decl.id().kind() != LmSymbolIndex.SymbolKind.TYPE)
+			final var id = entry.id();
+			if (id.kind() != LmSymbolKind.TYPE)
 			{
 				continue;
 			}
 
-			final String typeName = decl.id().name();
+			if (!targetKey.equals(id.modelKey()))
+			{
+				continue;
+			}
+
+			final String typeName = id.name();
 			final boolean conceptLike = isConceptLikeType(mm, typeName);
 			final boolean datatypeLike = isDatatypeLikeType(mm, typeName);
 
@@ -310,9 +347,9 @@ final class TypeCompletionProvider
 
 		if (added > 0)
 		{
-			LOG.info("LMF LSP completion: addLocalTypesFromSymbolIndex model={} types={}",
-					 mm.domain() + "." + mm.name(),
-					 added);
+			LOG.debug("LMF LSP completion: addLocalTypesFromSymbolIndex model={} types={}",
+					  mm.domain() + "." + mm.name(),
+					  added);
 		}
 
 		return added;
@@ -360,10 +397,10 @@ final class TypeCompletionProvider
 
 		if (added > 0)
 		{
-			LOG.info("LMF LSP completion: addCrossModelTypes model={} alias={} types={}",
-					 importedMm.domain() + "." + importedMm.name(),
-					 modelAlias,
-					 added);
+			LOG.debug("LMF LSP completion: addCrossModelTypes model={} alias={} types={}",
+					  importedMm.domain() + "." + importedMm.name(),
+					  modelAlias,
+					  added);
 			return;
 		}
 

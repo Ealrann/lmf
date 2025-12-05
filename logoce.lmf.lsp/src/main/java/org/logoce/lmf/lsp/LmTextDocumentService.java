@@ -187,7 +187,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			{
 				return List.<Either<SymbolInformation, DocumentSymbol>>of();
 			}
-			return DocumentSymbols.buildDocumentSymbols(syntax, state.semanticSnapshot());
+			return DocumentSymbols.buildDocumentSymbols(syntax, state.semanticSnapshot(), server.workspaceIndex(), uri);
 		}, server.worker());
 	}
 
@@ -211,9 +211,9 @@ public final class LmTextDocumentService implements TextDocumentService
 				}
 			}
 
-			// 2) Fallback: symbol-based highlights (types only).
+			// 2) Fallback: symbol-based highlights (any resolved symbol).
 			final var id = server.findTargetSymbol(uri, pos);
-			if (id == null || id.kind() != LmSymbolKind.TYPE)
+			if (id == null)
 			{
 				return List.<DocumentHighlight>of();
 			}
@@ -522,14 +522,14 @@ public final class LmTextDocumentService implements TextDocumentService
 			final var state = server.workspaceIndex().getDocument(uri);
 			if (state == null)
 			{
-				LOG.debug("LMF LSP semanticTokensFull: uri={} no document state, tokens=0", uri);
+				LOG.info("LMF LSP semanticTokensFull: uri={} no document state, tokens=0", uri);
 				return new SemanticTokens(java.util.List.of());
 			}
 
 			var syntax = state.syntaxSnapshot();
 			if (syntax == null)
 			{
-				LOG.debug("LMF LSP semanticTokensFull: uri={} has no syntax snapshot yet, analyzing document", uri);
+				LOG.info("LMF LSP semanticTokensFull: uri={} has no syntax snapshot yet, analyzing document", uri);
 				server.analyzeDocument(state);
 				syntax = state.syntaxSnapshot();
 				if (syntax == null)
@@ -537,14 +537,14 @@ public final class LmTextDocumentService implements TextDocumentService
 					final var lastGood = state.lastGoodSyntaxSnapshot();
 					if (lastGood != null)
 					{
-						LOG.debug("LMF LSP semanticTokensFull: uri={} using lastGoodSyntaxSnapshot", uri);
+						LOG.info("LMF LSP semanticTokensFull: uri={} using lastGoodSyntaxSnapshot", uri);
 						syntax = lastGood;
 					}
 				}
 
 				if (syntax == null)
 				{
-					LOG.debug("LMF LSP semanticTokensFull: uri={} no syntax available, tokens=0", uri);
+					LOG.info("LMF LSP semanticTokensFull: uri={} no syntax available, tokens=0", uri);
 					return new SemanticTokens(java.util.List.of());
 				}
 			}
@@ -602,7 +602,7 @@ public final class LmTextDocumentService implements TextDocumentService
 
 			if (headerTokens.isEmpty())
 			{
-				LOG.debug("LMF LSP semanticTokensFull: uri={} no header tokens, tokens=0", uri);
+				LOG.info("LMF LSP semanticTokensFull: uri={} no header tokens, tokens=0", uri);
 				return new SemanticTokens(java.util.List.of());
 			}
 
@@ -635,8 +635,8 @@ public final class LmTextDocumentService implements TextDocumentService
 			}
 
 			final var tokens = new SemanticTokens(data);
-			LOG.debug("LMF LSP semanticTokensFull: uri={}, version={}, sourceLength={}, tokens={}",
-					  uri, state.version(), source.length(), data.size() / 5);
+			LOG.info("LMF LSP semanticTokensFull: uri={}, version={}, sourceLength={}, tokens={}",
+					 uri, state.version(), source.length(), data.size() / 5);
 			return tokens;
 		}, server.worker());
 	}

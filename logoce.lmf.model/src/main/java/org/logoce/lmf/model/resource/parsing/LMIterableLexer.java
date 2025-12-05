@@ -60,6 +60,12 @@ public final class LMIterableLexer implements Iterable<PToken>
 				handleForcedValue(start);
 			}
 
+			if (token == ELMTokenType.BAD_CHARACTER && "^".equals(text))
+			{
+				final var valueToken = handleContextValue(start);
+				return Optional.of(valueToken);
+			}
+
 			return Optional.of(new PToken(text, token, start, text.length()));
 		}
 		catch (IOException e)
@@ -102,6 +108,33 @@ public final class LMIterableLexer implements Iterable<PToken>
 
 		lexerNeedsReset = true;
 		resetIndex = closingQuoteOffset + 1;
+	}
+
+	private PToken handleContextValue(final int caretOffset)
+	{
+		final int length = text.length();
+		int i = caretOffset + 1;
+
+		while (i < length)
+		{
+			final char c = text.charAt(i);
+			if (!Character.isJavaIdentifierPart(c))
+			{
+				break;
+			}
+			i++;
+		}
+
+		final String value = text.subSequence(caretOffset, i).toString();
+		final int rawLength = i - caretOffset;
+
+		lexerNeedsReset = true;
+		resetIndex = i;
+
+		offset = i;
+		lastLength = rawLength;
+
+		return new PToken(value, ELMTokenType.VALUE, caretOffset, rawLength);
 	}
 
 	private ForcedValue readForcedValue(final int startIndex)

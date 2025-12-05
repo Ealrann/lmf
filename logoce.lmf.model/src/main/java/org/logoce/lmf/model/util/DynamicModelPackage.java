@@ -8,6 +8,8 @@ import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Feature;
 
@@ -194,7 +196,8 @@ public final class DynamicModelPackage implements IModelPackage
 	/**
 	 * Minimal LMObject implementation that stores feature values in a map.
 	 */
-	private static final class DynamicLMObject<T extends LMObject> extends AdaptableStructureObject implements LMObject
+	private static final class DynamicLMObject<T extends LMObject> extends AdaptableStructureObject
+		implements LMObject, Model, Named
 	{
 		private final Group<T> group;
 		private final Map<Feature<?, ?>, Object> values;
@@ -211,6 +214,36 @@ public final class DynamicModelPackage implements IModelPackage
 		public Group<T> lmGroup()
 		{
 			return group;
+		}
+
+		@Override
+		public String name()
+		{
+			final Attribute<String, ?> nameAttribute = findAttribute("name");
+			return nameAttribute == null ? null : (String) get(nameAttribute);
+		}
+
+		@Override
+		public String domain()
+		{
+			final Attribute<String, ?> domainAttribute = findAttribute("domain");
+			return domainAttribute == null ? null : (String) get(domainAttribute);
+		}
+
+		@Override
+		public java.util.List<String> imports()
+		{
+			final Attribute<java.util.List<String>, ?> importsAttribute = findAttribute("imports");
+			return importsAttribute == null ? java.util.List.of()
+											: (java.util.List<String>) get(importsAttribute);
+		}
+
+		@Override
+		public java.util.List<String> metamodels()
+		{
+			final Attribute<java.util.List<String>, ?> metamodelsAttribute = findAttribute("metamodels");
+			return metamodelsAttribute == null ? java.util.List.of()
+											   : (java.util.List<String>) get(metamodelsAttribute);
 		}
 
 		@Override
@@ -249,6 +282,21 @@ public final class DynamicModelPackage implements IModelPackage
 			if (feature == null) return;
 
 			values.put(feature, value);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <V> Attribute<V, ?> findAttribute(final String attributeName)
+		{
+			if (attributeName == null) return null;
+
+			for (final Feature<?, ?> feature : group.features())
+			{
+				if (feature instanceof Attribute<?, ?> attribute && attributeName.equals(attribute.name()))
+				{
+					return (Attribute<V, ?>) attribute;
+				}
+			}
+			return null;
 		}
 
 		@Override

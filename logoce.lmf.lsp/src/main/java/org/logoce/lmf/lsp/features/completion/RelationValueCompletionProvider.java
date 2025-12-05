@@ -80,8 +80,8 @@ final class RelationValueCompletionProvider
 			items.add(item);
 		}
 
-		LOG.info("LMF LSP completion: relation value completions, feature={}, items={}",
-				 relationFeature.name(), items.size());
+		LOG.debug("LMF LSP completion: relation value completions, feature={}, items={}",
+				  relationFeature.name(), items.size());
 
 		return List.copyOf(items);
 	}

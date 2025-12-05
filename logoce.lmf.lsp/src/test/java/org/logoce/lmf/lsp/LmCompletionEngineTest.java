@@ -110,7 +110,6 @@ final class LmCompletionEngineTest
 	{
 		final var text = readLmCoreSource();
 		final var uri = URI.create("file:///home/eal/git/LMF/logoce.lmf.model/src/main/model/asset/LMCore.lm");
-
 		final var position = positionAfter(text, "group=@");
 
 		final var items = complete(uri, text, position);
@@ -118,6 +117,51 @@ final class LmCompletionEngineTest
 		assertFalse(items.isEmpty(), "Expected relation value completions for 'group=@...'");
 		assertTrue(items.stream().anyMatch(i -> "@Named".equals(i.getLabel())),
 				   "Expected '@Named' among relation value completions for 'group=@...'");
+	}
+
+	@Test
+	void attributeDatatypeCompletionOffersDatatypeTypes()
+		throws Exception
+	{
+		final var text = readLmCoreSource();
+		final var uri = URI.create("file:///home/eal/git/LMF/logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		final var position = positionAfter(text, "name=imports datatype=@");
+
+		final var items = complete(uri, text, position);
+
+		for (final var item : items)
+		{
+			System.err.println("attributeDatatypeCompletionOffersDatatypeTypes completion: " + item.getLabel() +
+							   " detail=" + item.getDetail() +
+							   " insertText=" + item.getInsertText());
+		}
+
+		assertFalse(items.isEmpty(), "Expected type completions for 'name=imports datatype=@...'");
+		assertTrue(items.stream().anyMatch(i -> "@string".equals(i.getLabel())),
+				   "Expected '@string' among datatype completions for 'name=imports datatype=@...'");
+	}
+
+	@Test
+	void attributeDatatypeRelationCompletionOffersReferenceLikeGroups()
+		throws Exception
+	{
+		final var text = readLmCoreSource();
+		final var uri = URI.create("file:///home/eal/git/LMF/logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		final var position = positionAfter(text, "name=defaultValue datatype=@");
+
+		final var items = complete(uri, text, position);
+
+		for (final var item : items)
+		{
+			System.err.println("attributeDatatypeRelationCompletionOffersReferenceLikeGroups completion: " +
+							   item.getLabel() + " detail=" + item.getDetail() +
+							   " insertText=" + item.getInsertText());
+		}
+
+		assertFalse(items.isEmpty(),
+					"Expected relation-like reference completions for 'name=defaultValue datatype=@...'");
+		assertTrue(items.stream().anyMatch(i -> "@string".equals(i.getLabel())),
+				   "Expected '@string' among relation-like datatype completions for 'name=defaultValue datatype=@...'");
 	}
 
 	@Test

@@ -48,22 +48,22 @@ final class AttributeValueCompletionProvider
 
 		if (syntax == null)
 		{
-			LOG.info("LMF LSP completion: attribute value – missing syntax snapshot, uri={}, line={}, character={}",
-					 context.uri(), context.position().getLine(), context.position().getCharacter());
+			LOG.debug("LMF LSP completion: attribute value – missing syntax snapshot, uri={}, line={}, character={}",
+					  context.uri(), context.position().getLine(), context.position().getCharacter());
 			return List.of();
 		}
 
 		final Attribute<?, ?> attribute = context.value() != null ? context.value().attribute() : null;
 		if (attribute == null)
 		{
-			LOG.info("LMF LSP completion: attribute value – no attribute resolved from header text at uri={}, line={}, character={}",
-					 context.uri(), context.position().getLine(), context.position().getCharacter());
+			LOG.debug("LMF LSP completion: attribute value – no attribute resolved from header text at uri={}, line={}, character={}",
+					  context.uri(), context.position().getLine(), context.position().getCharacter());
 			return List.of();
 		}
 
 		final List<CompletionItem> items = buildAttributeValueCompletions(attribute, context.position());
-		LOG.info("LMF LSP completion: attribute value completions, attribute={}, items={}",
-				 attribute.name(), items.size());
+		LOG.debug("LMF LSP completion: attribute value completions, attribute={}, items={}",
+				  attribute.name(), items.size());
 		return items;
 	}
 

@@ -6,23 +6,26 @@ import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.ModelKey;
 import org.logoce.lmf.lsp.state.ReferenceOccurrence;
+import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.lsp.state.SymbolId;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.loader.model.LmSemanticIndexBuilder;
 import org.logoce.lmf.model.loader.model.LmSymbolIndex;
-import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.TextPositions;
-import org.logoce.lmf.model.util.tree.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class SymbolIndexer
 {
@@ -48,26 +51,22 @@ public final class SymbolIndexer
 			return;
 		}
 
-		Model model = semantic.model();
-		if (model == null)
-		{
-			final var registry = workspaceIndex.modelRegistry();
-			model = MetaModelResolver.resolveForDocument(syntax, null, registry);
+		final var registry = workspaceIndex.modelRegistry();
+		final Model semanticModel = semantic.model();
 
-			if (model == null)
-			{
-				workspaceIndex.clearIndicesForDocument(state.uri());
-				return;
-			}
+		final MetaModel metaModel = MetaModelResolver.resolveForDocument(syntax, semanticModel, registry);
+		if (metaModel == null)
+		{
+			workspaceIndex.clearIndicesForDocument(state.uri());
+			return;
 		}
 
-		final var modelKey = new ModelKey(model.domain(), model.name());
+		final var modelKey = new ModelKey(metaModel.domain(), metaModel.name());
 
-		final var registry = workspaceIndex.modelRegistry();
-		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(model,
-																	syntax.roots(),
-																	syntax.source(),
-																	registry);
+		final LmSymbolIndex index = LmSemanticIndexBuilder.buildIndex(metaModel,
+																	  semantic.linkTrees(),
+																	  registry,
+																	  syntax.source());
 
 		final var symbolEntries = new ArrayList<SymbolEntry>();
 		for (final var decl : index.declarations())
@@ -77,34 +76,19 @@ public final class SymbolIndexer
 			symbolEntries.add(new SymbolEntry(id, state.uri(), range));
 		}
 
-		workspaceIndex.registerSymbols(state.uri(), symbolEntries);
-
-		final var references = buildReferences(modelKey, model, syntax, state.uri());
-		workspaceIndex.registerReferences(state.uri(), references);
-
-		LOG.debug("LMF LSP SymbolIndexer: uri={}, symbols={}, references={}",
-				  state.uri(), symbolEntries.size(), references.size());
-	}
-
-	private List<ReferenceOccurrence> buildReferences(final ModelKey modelKey,
-													  final Model model,
-													  final SyntaxSnapshot syntax,
-													  final URI uri)
-	{
-		final var registry = workspaceIndex.modelRegistry();
-		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(model,
-																	syntax.roots(),
-																	syntax.source(),
-																	registry);
-
-		final var out = new ArrayList<ReferenceOccurrence>();
+		final var references = new ArrayList<ReferenceOccurrence>();
 		for (final var ref : index.references())
 		{
 			final var id = toSymbolId(ref.target());
 			final var range = toRange(ref.span(), syntax.source());
-			out.add(new ReferenceOccurrence(id, uri, range));
+			references.add(new ReferenceOccurrence(id, state.uri(), range));
 		}
-		return List.copyOf(out);
+
+		workspaceIndex.registerSymbols(state.uri(), symbolEntries);
+		workspaceIndex.registerReferences(state.uri(), references);
+
+		LOG.debug("LMF LSP SymbolIndexer: uri={}, symbols={}, references={}",
+				  state.uri(), symbolEntries.size(), references.size());
 	}
 
 	private static SymbolId toSymbolId(final LmSymbolIndex.SymbolId id)
@@ -116,7 +100,7 @@ public final class SymbolIndexer
 			case FEATURE -> LmSymbolKind.FEATURE;
 		};
 		final var modelKey = new ModelKey(id.modelDomain(), id.modelName());
-		return new SymbolId(modelKey, kind, id.name());
+		return new SymbolId(modelKey, kind, id.name(), id.containerPath());
 	}
 
 	private static Range toRange(final TextPositions.Span span, final CharSequence source)
@@ -131,4 +115,5 @@ public final class SymbolIndexer
 		final var endPos = new Position(endLine, endChar);
 		return new Range(startPos, endPos);
 	}
+
 }

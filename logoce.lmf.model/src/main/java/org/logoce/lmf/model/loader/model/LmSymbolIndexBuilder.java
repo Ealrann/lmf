@@ -21,19 +21,18 @@ import static org.logoce.lmf.model.loader.model.LmSymbolIndex.SymbolKind;
 import static org.logoce.lmf.model.loader.model.LmSymbolIndex.SymbolSpan;
 
 /**
- * Builds an {@link LmSymbolIndex} for a single document based purely on its
- * parsed trees and linked {@link Model}. Intended for tooling (LSP, editor)
- * as a shared, language-level index.
+ * Legacy symbol index builder for a single document based on its parsed trees
+ * and linked {@link Model}.
  * <p>
- * The current implementation mirrors the existing LSP behaviour:
- * <ul>
- *   <li>Declarations are derived from S-expression headers (MetaModel, Group, Definition,
- *       Enum, Unit, JavaWrapper, Alias, Generic, Operation, feature aliases).</li>
- *   <li>References are collected from {@code @Type} and {@code #Model@Type} tokens,
- *       using {@link PathUtil} and {@link ModelImports} for cross-model resolution.</li>
- * </ul>
- * This keeps symbol and reference semantics in {@code logoce.lmf.model} while
- * letting front-ends translate them into UI-specific structures.
+ * This implementation derives declarations from S-expression headers
+ * (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Generic,
+ * Operation, feature aliases) and collects references from {@code @Type} and
+ * {@code #Model@Type} tokens using {@link PathUtil} and {@link ModelImports}.
+ * <p>
+ * New tooling should prefer {@link LmSemanticIndexBuilder}, which operates on
+ * link trees and LMObjects instead of raw syntax. This builder is kept for
+ * backwards compatibility and non-LSP tooling that still relies on
+ * header-based indices.
  */
 public final class LmSymbolIndexBuilder
 {
@@ -66,7 +65,7 @@ public final class LmSymbolIndexBuilder
 
 		final var declarations = new ArrayList<SymbolSpan>();
 
-		final var metaModelId = new SymbolId(modelDomain, modelName, SymbolKind.META_MODEL, modelName);
+		final var metaModelId = new SymbolId(modelDomain, modelName, SymbolKind.META_MODEL, modelName, "");
 
 		for (final Tree<PNode> root : roots)
 		{
@@ -80,6 +79,42 @@ public final class LmSymbolIndexBuilder
 		}
 
 		return new LmSymbolIndex(List.copyOf(declarations), List.copyOf(references));
+	}
+
+	/**
+	 * Build a symbol index for an instance-style (M1) document, where the
+	 * active type environment is provided by a {@link MetaModel} but the
+	 * document itself does not declare types in LMCore terms.
+	 * <p>
+	 * The returned index intentionally exposes only references:
+	 * <ul>
+	 *   <li>Declarations are always empty for the instance document.</li>
+	 *   <li>References are collected from {@code @Type} and {@code #Model@Type}
+	 *       tokens, resolved against {@code envMetaModel} and the registry.</li>
+	 * </ul>
+	 * This keeps type resolution semantics aligned between M1 and M2 while
+	 * avoiding "fake" type declarations in instance documents.
+	 */
+	public static LmSymbolIndex buildIndexForInstance(final MetaModel envMetaModel,
+													  final List<Tree<PNode>> roots,
+													  final CharSequence source,
+													  final ModelRegistry registry)
+	{
+		if (envMetaModel == null || roots == null || roots.isEmpty())
+		{
+			return new LmSymbolIndex(List.of(), List.of());
+		}
+
+		final String modelDomain = envMetaModel.domain();
+		final String modelName = envMetaModel.name();
+
+		final var references = new ArrayList<ReferenceSpan>();
+		for (final Tree<PNode> root : roots)
+		{
+			collectInstanceReferences(root, modelDomain, modelName, envMetaModel, source, registry, references);
+		}
+
+		return new LmSymbolIndex(List.of(), List.copyOf(references));
 	}
 
 	private static void collectDeclarations(final String modelDomain,
@@ -106,7 +141,7 @@ public final class LmSymbolIndexBuilder
 			{
 				final var span = nameToken.map(tok -> TextPositions.spanOf(tok, source))
 										  .orElseGet(() -> TextPositions.spanOf(pnode, source));
-				final var id = new SymbolId(modelDomain, modelName, kind, symbolName);
+				final var id = new SymbolId(modelDomain, modelName, kind, symbolName, "");
 
 				if (kind == SymbolKind.META_MODEL)
 				{
@@ -156,7 +191,7 @@ public final class LmSymbolIndexBuilder
 				final String typeName = value.substring(1);
 				if (!typeName.isEmpty())
 				{
-					final var id = new SymbolId(modelDomain, modelName, SymbolKind.TYPE, typeName);
+					final var id = new SymbolId(modelDomain, modelName, SymbolKind.TYPE, typeName, "");
 					if (containsDeclaration(declarations, id))
 					{
 						final var span = TextPositions.spanOf(token, source);
@@ -198,7 +233,7 @@ public final class LmSymbolIndexBuilder
 						targetModel = targetModelName;
 					}
 
-					final var id = new SymbolId(targetDomain, targetModel, SymbolKind.TYPE, targetType);
+					final var id = new SymbolId(targetDomain, targetModel, SymbolKind.TYPE, targetType, "");
 					if (containsDeclaration(declarations, id))
 					{
 						final var span = TextPositions.spanOf(token, source);
@@ -214,11 +249,131 @@ public final class LmSymbolIndexBuilder
 		}
 	}
 
+	private static void collectInstanceReferences(final Tree<PNode> node,
+												  final String envDomain,
+												  final String envName,
+												  final MetaModel envMetaModel,
+												  final CharSequence source,
+												  final ModelRegistry registry,
+												  final List<ReferenceSpan> out)
+	{
+		final var tokens = node.data().tokens();
+		for (final PToken token : tokens)
+		{
+			final String value = token.value();
+			if (value == null || value.isEmpty())
+			{
+				continue;
+			}
+
+			final char first = value.charAt(0);
+			if (first == '@')
+			{
+				final String typeName = value.substring(1);
+				if (!typeName.isEmpty() && envHasType(envMetaModel, typeName))
+				{
+					final var id = new SymbolId(envDomain, envName, SymbolKind.TYPE, typeName, "");
+					final var span = TextPositions.spanOf(token, source);
+					out.add(new ReferenceSpan(id, span));
+				}
+			}
+			else if (first == '#')
+			{
+				final var parsed = PathUtil.parse(value);
+				String targetModelName = null;
+				String targetType = null;
+
+				for (final var segment : parsed.segments())
+				{
+					if (segment.type() == PathParser.Type.MODEL && targetModelName == null)
+					{
+						targetModelName = segment.text();
+					}
+					else if (segment.type() == PathParser.Type.NAME)
+					{
+						targetType = segment.text();
+					}
+				}
+
+				if (targetModelName != null && targetType != null)
+				{
+					final var resolved = ModelImports.resolveModel(envMetaModel, targetModelName, registry);
+					final String targetDomain;
+					final String targetModel;
+
+					if (resolved.isPresent() && resolved.get() instanceof MetaModel mm)
+					{
+						targetDomain = mm.domain();
+						targetModel = mm.name();
+					}
+					else
+					{
+						targetDomain = "";
+						targetModel = targetModelName;
+					}
+
+					final MetaModel targetMetaModel = resolved.orElse(envMetaModel) instanceof MetaModel mm
+													  ? mm
+													  : null;
+					if (targetMetaModel != null && envHasType(targetMetaModel, targetType))
+					{
+						final var id = new SymbolId(targetDomain, targetModel, SymbolKind.TYPE, targetType, "");
+						final var span = TextPositions.spanOf(token, source);
+						out.add(new ReferenceSpan(id, span));
+					}
+				}
+			}
+		}
+
+		for (final Tree<PNode> child : node.children())
+		{
+			collectInstanceReferences(child, envDomain, envName, envMetaModel, source, registry, out);
+		}
+	}
+
 	private static boolean containsDeclaration(final List<SymbolSpan> declarations, final SymbolId id)
 	{
 		for (final var decl : declarations)
 		{
 			if (decl.id().equals(id))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean envHasType(final MetaModel mm, final String typeName)
+	{
+		if (typeName == null || typeName.isEmpty())
+		{
+			return false;
+		}
+
+		for (final org.logoce.lmf.model.lang.Group<?> g : mm.groups())
+		{
+			if (typeName.equals(g.name()))
+			{
+				return true;
+			}
+		}
+		for (final org.logoce.lmf.model.lang.Enum<?> e : mm.enums())
+		{
+			if (typeName.equals(e.name()))
+			{
+				return true;
+			}
+		}
+		for (final org.logoce.lmf.model.lang.Unit<?> u : mm.units())
+		{
+			if (typeName.equals(u.name()))
+			{
+				return true;
+			}
+		}
+		for (final org.logoce.lmf.model.lang.JavaWrapper<?> w : mm.javaWrappers())
+		{
+			if (typeName.equals(w.name()))
 			{
 				return true;
 			}

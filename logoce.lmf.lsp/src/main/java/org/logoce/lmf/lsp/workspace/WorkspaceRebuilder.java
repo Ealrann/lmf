@@ -106,36 +106,51 @@ public final class WorkspaceRebuilder
 
 		try
 		{
-			final var loader = LmLoader.withEmptyRegistry();
 			final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
+			final var reader = new LmTreeReader();
+
 			for (final LmDocumentState docState : docs)
 			{
-				try
+				final String text = docState.text();
+				final var diagnostics = new ArrayList<LmDiagnostic>();
+				final var readResult = reader.read(text, diagnostics);
+				final var roots = readResult.roots();
+
+				if (roots.isEmpty())
 				{
-					final var text = docState.text();
-					final var doc = loader.loadModel(text);
-					if (doc.roots().isEmpty())
+					final var error = diagnostics.stream()
+												.filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
+												.findFirst();
+					if (error.isPresent())
 					{
-						final var error = doc.diagnostics().stream()
-											 .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
-											 .findFirst();
-						if (error.isPresent())
-						{
-							final var d = error.get();
-							LOG.warn("LMF LSP rebuildModelRegistry: skipping document {} due to parse error at {}:{} - {}",
-									 docState.uri(), d.line(), d.column(), d.message());
-						}
-						continue;
+						final var d = error.get();
+						LOG.warn("LMF LSP rebuildModelRegistry: skipping document {} due to parse error at {}:{} - {}",
+								 docState.uri(), d.line(), d.column(), d.message());
 					}
-					documents.add(doc);
+					continue;
 				}
-				catch (IllegalStateException e)
+
+				// Only MetaModel roots participate in the model registry; M1 instance
+				// documents rely on their 'metamodels' header and the registry should
+				// contain only the referenced meta-models, not the instances themselves.
+				if (!ModelHeaderUtil.isMetaModelRoot(roots))
 				{
-					// Meta-model package resolution or similar issues while rebuilding the
-					// registry should not abort the whole process; log and skip this document.
-					LOG.warn("LMF LSP rebuildModelRegistry: skipping document {} due to meta-model error: {}",
-							 docState.uri(), e.getMessage());
+					continue;
 				}
+
+				final var doc = new org.logoce.lmf.model.loader.model.LmDocument(
+					null,
+					List.copyOf(diagnostics),
+					roots,
+					readResult.source(),
+					List.of());
+				documents.add(doc);
+			}
+
+			if (documents.isEmpty())
+			{
+				workspaceIndex.setModelRegistry(ModelRegistry.empty());
+				return;
 			}
 
 			final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
@@ -144,6 +159,10 @@ public final class WorkspaceRebuilder
 		}
 		catch (Exception e)
 		{
+			// If multi-model registry rebuild fails (for example due to incomplete
+			// import graphs in the currently open documents), keep the previous
+			// registry so that already-built models (LMCore, compiled meta-models)
+			// remain available for analysis.
 			LOG.debug("Failed to rebuild model registry from open documents, keeping previous registry: {}",
 					  e.getMessage(), e);
 		}
@@ -152,7 +171,7 @@ public final class WorkspaceRebuilder
 	private List<org.logoce.lmf.model.loader.model.LmDocument> loadDocumentsFromProjectRoot(final Path root) throws Exception
 	{
 		final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
-		final var loader = LmLoader.withEmptyRegistry();
+		final var reader = new LmTreeReader();
 		try (final var paths = Files.walk(root))
 		{
 			paths.filter(Files::isRegularFile)
@@ -162,12 +181,14 @@ public final class WorkspaceRebuilder
 					 {
 						 final byte[] bytes = Files.readAllBytes(p);
 						 final var text = new String(bytes, StandardCharsets.UTF_8);
-						 final var doc = loader.loadModel(text);
-						 if (doc.roots().isEmpty())
+						 final var diagnostics = new ArrayList<LmDiagnostic>();
+						 final var readResult = reader.read(text, diagnostics);
+						 final var roots = readResult.roots();
+						 if (roots.isEmpty())
 						 {
-							 final var error = doc.diagnostics().stream()
-												  .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
-												  .findFirst();
+							 final var error = diagnostics.stream()
+														  .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
+														  .findFirst();
 							 if (error.isPresent())
 							 {
 								 final var d = error.get();
@@ -177,6 +198,18 @@ public final class WorkspaceRebuilder
 							 }
 							 return;
 						 }
+
+						 if (!ModelHeaderUtil.isMetaModelRoot(roots))
+						 {
+							 return;
+						 }
+
+						 final var doc = new org.logoce.lmf.model.loader.model.LmDocument(
+							 null,
+							 List.copyOf(diagnostics),
+							 roots,
+							 readResult.source(),
+							 List.of());
 						 documents.add(doc);
 					 }
 					 catch (Exception e)
@@ -197,7 +230,7 @@ public final class WorkspaceRebuilder
 	{
 		try
 		{
-			LOG.info("LMF LSP analyzeDocument start: uri={}, textLength={}", state.uri(), state.text().length());
+			LOG.debug("LMF LSP analyzeDocument start: uri={}, textLength={}", state.uri(), state.text().length());
 			final String text = state.text();
 
 			final var loader = new LmLoader(workspaceIndex.modelRegistry());
@@ -243,9 +276,9 @@ public final class WorkspaceRebuilder
 		{
 			// Link errors (for example unresolved imported models) are expected in
 			// partially-loaded workspaces. Treat them as document diagnostics instead
-			// of hard LSP errors to avoid flooding the client notification view.
-			LOG.warn("LMF LSP analyzeDocument link error for uri={}: {}",
-					 state.uri(), e.getMessage());
+			// of hard LSP errors to avoid flooding the client notification view or logs.
+			LOG.debug("LMF LSP analyzeDocument link error for uri={}: {}",
+					  state.uri(), e.getMessage());
 
 			final String text = state.text();
 			final var diagnostics = new ArrayList<LmDiagnostic>();

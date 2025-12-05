@@ -51,7 +51,7 @@ final class CompletionContextResolver
 		final LmDocumentState state = server.workspaceIndex().getDocument(uri);
 		if (state == null)
 		{
-			LOG.info("LMF LSP completion: no document state for uri={}", uri);
+			LOG.debug("LMF LSP completion: no document state for uri={}", uri);
 			return Optional.empty();
 		}
 
@@ -183,7 +183,8 @@ final class CompletionContextResolver
 		{
 			final Group<?> conceptGroup = relationConcept.lmGroup();
 
-			if (ModelUtils.isSubGroup(LMCoreDefinition.Groups.DATATYPE, conceptGroup))
+			if (relationConcept instanceof Datatype<?> ||
+				ModelUtils.isSubGroup(LMCoreDefinition.Groups.DATATYPE, conceptGroup))
 			{
 				return TypeUsageKind.DATATYPE;
 			}
