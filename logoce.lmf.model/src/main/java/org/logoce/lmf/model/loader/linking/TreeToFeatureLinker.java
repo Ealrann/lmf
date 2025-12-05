@@ -6,6 +6,7 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.feature.ITokenResolver;
 import org.logoce.lmf.model.loader.linking.feature.RelationResolver;
 import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
+import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.util.List;
@@ -22,7 +23,14 @@ public final class TreeToFeatureLinker
 	public TreeToFeatureLinker(final Group<?> group, final ModelRegistry modelRegistry)
 	{
 		this.group = group;
-		final var features = group.features();
+		final var features = ModelUtils.streamAllFeatures(group)
+									   .collect(java.util.stream.Collectors.toMap(f -> f.rawFeature(),
+																				  f -> f,
+																				  (a, b) -> a,
+																				  java.util.LinkedHashMap::new))
+									   .values()
+									   .stream()
+									   .toList();
 		final var tokenResolverBuilder = new ITokenResolver.Builder(modelRegistry);
 
 		final var attributeResolvers = features.stream()
@@ -70,4 +78,3 @@ public final class TreeToFeatureLinker
 		return nodeLinker;
 	}
 }
-

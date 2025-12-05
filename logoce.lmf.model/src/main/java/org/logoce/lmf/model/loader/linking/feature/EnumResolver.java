@@ -3,6 +3,7 @@ package org.logoce.lmf.model.loader.linking.feature;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.loader.linking.MetaModelPackages;
 import org.logoce.lmf.model.loader.linking.FeatureResolution;
 
 import java.util.Optional;
@@ -29,7 +30,24 @@ public final class EnumResolver<Y> extends AttributeResolver
 	private Optional<Y> extractEnumLiteral(final String value, final Enum<Y> _enum)
 	{
 		final var mm = (MetaModel) _enum.lmContainer();
-		final var pkg = mm.lmPackage();
+		if (mm == null)
+		{
+			return Optional.empty();
+		}
+
+		var pkg = mm.lmPackage();
+		if (pkg == null)
+		{
+			try
+			{
+				pkg = MetaModelPackages.resolveModelPackage(mm);
+			}
+			catch (IllegalStateException ignored)
+			{
+				return Optional.empty();
+			}
+		}
+
 		return pkg.resolveEnumLiteral(_enum, capitalizeFirstLetter(value));
 	}
 
@@ -42,4 +60,3 @@ public final class EnumResolver<Y> extends AttributeResolver
 		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
 	}
 }
-

@@ -37,7 +37,7 @@ public record CompletionContext(
 
 	public record HeaderContext(String keyword,
 								String groupName,
-								Group<?> lmCoreGroup,
+								Group<?> headerGroup,
 								HeaderPositionKind positionKind,
 								Group<?> semanticGroup,
 								Feature<?, ?> semanticFeature,

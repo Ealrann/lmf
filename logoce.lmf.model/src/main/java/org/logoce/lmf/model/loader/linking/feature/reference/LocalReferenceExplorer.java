@@ -39,6 +39,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 			{
 				case ROOT -> current = current.root();
 				case NAME -> current = searchNamedNode(current.root(), step.text());
+				case CONTEXT_NAME -> current = searchContextNamedNode(current, step.text());
 				case PARENT -> current = current.parent();
 				case CHILD -> current = searchChild(step.text());
 				default -> throw new IllegalStateException("Unsupported path step: " + step.type());
@@ -87,6 +88,33 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 				   .orElseThrow(() -> new NoSuchElementException("Cannot find named Object : " + name));
 	}
 
+	private LinkNodeInternal<?, ?, ?> searchContextNamedNode(final LinkNodeInternal<?, ?, ?> startNode,
+															 final String name)
+	{
+		LinkNodeInternal<?, ?, ?> cursor = startNode;
+
+		while (cursor != null)
+		{
+			if (groupMatch(cursor) && nameMatch(cursor, name))
+			{
+				return cursor;
+			}
+
+			final var matchingChild = cursor.streamChildren()
+										   .filter(this::groupMatch)
+										   .filter(node -> nameMatch(node, name))
+										   .findAny();
+			if (matchingChild.isPresent())
+			{
+				return matchingChild.get();
+			}
+
+			cursor = cursor.parent();
+		}
+
+		throw new NoSuchElementException("Cannot find context-named Object : " + name);
+	}
+
 	private boolean groupMatch(final LinkNodeInternal<?, ?, ?> node)
 	{
 		final var concept = relation.concept();
@@ -111,4 +139,3 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 				   .anyMatch(r -> name.equals(r.value()));
 	}
 }
-

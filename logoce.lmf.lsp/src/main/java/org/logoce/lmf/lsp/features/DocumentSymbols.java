@@ -8,11 +8,15 @@ import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
+import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.model.LmSymbolIndex;
 import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
 import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
+import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.TextPositions;
 import org.logoce.lmf.model.util.tree.Tree;
 
@@ -29,16 +33,47 @@ public final class DocumentSymbols
 	public static List<Either<SymbolInformation, DocumentSymbol>> buildDocumentSymbols(final SyntaxSnapshot syntax,
 																					   final SemanticSnapshot semantic)
 	{
-		if (semantic == null || semantic.model() == null)
+		if (syntax == null)
+		{
+			return List.of();
+		}
+
+		if (semantic == null)
 		{
 			return buildDocumentSymbols(syntax);
 		}
 
-		final var index = LmSymbolIndexBuilder.buildIndex(
-			semantic.model(),
-			syntax.roots(),
-			syntax.source(),
-			org.logoce.lmf.model.util.ModelRegistry.empty());
+		final Model model = semantic.model();
+		final LmSymbolIndex index;
+
+		if (model != null)
+		{
+			index = LmSymbolIndexBuilder.buildIndex(
+				model,
+				syntax.roots(),
+				syntax.source(),
+				ModelRegistry.empty());
+		}
+		else
+		{
+			// When no runtime model is available (for example in semantic-only
+			// linking paths for M1/M2 documents), fall back to a meta-model
+			// driven index using the active meta-model or LMCore. If this
+			// yields no declarations, fall back to the purely syntactic outline.
+			final MetaModel metaModel =
+				MetaModelResolver.resolveForDocument(syntax, null, ModelRegistry.empty());
+
+			index = LmSymbolIndexBuilder.buildIndex(
+				metaModel,
+				syntax.roots(),
+				syntax.source(),
+				ModelRegistry.empty());
+
+			if (index.declarations().isEmpty())
+			{
+				return buildDocumentSymbols(syntax);
+			}
+		}
 
 		final var byId = new java.util.LinkedHashMap<LmSymbolIndex.SymbolId, DocumentSymbol>();
 

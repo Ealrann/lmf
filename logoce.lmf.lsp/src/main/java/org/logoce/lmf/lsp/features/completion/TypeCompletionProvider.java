@@ -57,12 +57,30 @@ final class TypeCompletionProvider
 		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
 		final MetaModel mm = context.metaModel();
 		final TypeUsageKind usageKind = context.value() != null ? context.value().typeUsageKind() : TypeUsageKind.ANY;
-		LOG.info("LMF LSP completion: buildTypeCompletions, uri={}, usageKind={}, context={}, line={}, character={}",
-				 context.uri(), usageKind, context.contextKind(),
-				 context.position().getLine(), context.position().getCharacter());
+
+		if (mm == null)
+		{
+			return items;
+		}
+
+		LOG.info("LMF LSP completion: buildTypeCompletions, uri={}, usageKind={}, context={}, metaModel={}, line={}, character={}",
+				 context.uri(),
+				 usageKind,
+				 context.contextKind(),
+				 mm != null ? (mm.domain() + "." + mm.name()) : "null",
+				 context.position().getLine(),
+				 context.position().getCharacter());
 
 		// Local types from the current document via the symbol index.
-		addLocalTypesFromSymbolIndex(context, mm, usageKind, items, seenLabels);
+		final int localTypes = addLocalTypesFromSymbolIndex(context, mm, usageKind, items, seenLabels);
+
+		// Fallback: when no local type declarations are discovered (for example in simple
+		// meta-models or M1 instance documents), derive available types directly from the
+		// active meta-model so that '@' completions still expose groups/enums/units/wrappers.
+		if (localTypes == 0)
+		{
+			addMetaModelTypes(mm, null, false, items, seenLabels, usageKind);
+		}
 
 		// Types from imported meta-models – prefer workspace symbol index, fall back to the model registry.
 		for (final String imp : mm.imports())
@@ -237,25 +255,32 @@ final class TypeCompletionProvider
 		}
 	}
 
-	private static void addLocalTypesFromSymbolIndex(final CompletionContext context,
-													 final MetaModel mm,
-													 final TypeUsageKind usageKind,
-													 final List<CompletionItem> items,
-													 final Set<String> seenLabels)
+	private static int addLocalTypesFromSymbolIndex(final CompletionContext context,
+													final MetaModel mm,
+													final TypeUsageKind usageKind,
+													final List<CompletionItem> items,
+													final Set<String> seenLabels)
 	{
 		final var semantic = context.semantic();
 		final var syntax = context.syntax();
-		if (semantic == null || syntax == null || semantic.model() == null)
+		if (syntax == null)
 		{
-			return;
+			LOG.info("LMF LSP completion: local symbol index skipped (syntax is null)");
+			return 0;
 		}
 
-		final Model model = semantic.model();
+		final Model model = semantic != null && semantic.model() != null
+							? semantic.model()
+							: mm;
 		final LmSymbolIndex index = LmSymbolIndexBuilder.buildIndex(
 			model,
 			syntax.roots(),
 			syntax.source(),
 			ModelRegistry.empty());
+
+		LOG.info("LMF LSP completion: local symbol index for model={} declarations={}",
+				 model.getClass().getSimpleName(),
+				 index.declarations().size());
 
 		int added = 0;
 		for (final LmSymbolIndex.SymbolSpan decl : index.declarations())
@@ -289,6 +314,8 @@ final class TypeCompletionProvider
 					 mm.domain() + "." + mm.name(),
 					 added);
 		}
+
+		return added;
 	}
 
 	private static void addCrossModelTypes(final CompletionContext context,

@@ -35,9 +35,9 @@ public final class PathUtil
 			final int start = cursor;
 			final int length;
 
-			if (step.type() == PathParser.Type.NAME)
+			if (step.type() == PathParser.Type.NAME || step.type() == PathParser.Type.CONTEXT_NAME)
 			{
-				// @Name – include the leading '@'
+				// @Name / ^Name – include the leading sigil
 				length = 1 + step.text().length();
 			}
 			else if (step.type() == PathParser.Type.MODEL)

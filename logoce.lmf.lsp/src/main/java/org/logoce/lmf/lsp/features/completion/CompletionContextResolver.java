@@ -15,6 +15,7 @@ import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,11 +67,12 @@ final class CompletionContextResolver
 		}
 
 		final Model model = semantic.model();
-		final MetaModel metaModel = model instanceof MetaModel mm ? mm : null;
+		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
+		final MetaModel metaModel = MetaModelResolver.resolveForDocument(syntax, model, registry);
 		final CompletionContextKind contextKind = SyntaxNavigation.detectCompletionContext(syntax, pos);
 
-		// Header / value context derived from the current line and LMCore.
-		final HeaderInfo headerInfo = HeaderInfo.from(syntax, pos);
+		// Header / value context derived from the current line and the active meta-model / LMCore.
+		final HeaderInfo headerInfo = HeaderInfo.from(syntax, pos, metaModel);
 		final CompletionContext.HeaderContext headerContext = buildHeaderContext(headerInfo, semantic, syntax, pos);
 		final CompletionContext.ValueContext valueContext = buildValueContext(headerInfo, headerContext);
 
@@ -119,7 +121,7 @@ final class CompletionContextResolver
 		return new CompletionContext.HeaderContext(
 			headerInfo.keyword(),
 			headerInfo.groupName(),
-			headerInfo.lmCoreGroup(),
+			headerInfo.headerGroup(),
 			headerInfo.positionKind(),
 			semanticGroup,
 			semanticFeature,
@@ -135,7 +137,7 @@ final class CompletionContextResolver
 			return new CompletionContext.ValueContext(null, null, null, TypeUsageKind.ANY);
 		}
 
-		Group<?> headerGroup = headerContext.lmCoreGroup();
+		Group<?> headerGroup = headerContext.headerGroup();
 		if (headerGroup == null)
 		{
 			headerGroup = headerContext.semanticGroup();
@@ -202,19 +204,27 @@ final class CompletionContextResolver
 	}
 
 	/**
-	 * Minimal header/value information extracted from the current line and LMCore.
+	 * Minimal header/value information extracted from the current line and the active
+	 * meta-model / LMCore.
 	 * The header is parsed regardless of whether an '=' exists; feature/value
 	 * information is only present when the caret is within a feature.
 	 */
 	record HeaderInfo(String keyword,
 					  String groupName,
-					  Group<?> lmCoreGroup,
+					  Group<?> headerGroup,
 					  String featureName,
 					  CompletionContext.HeaderPositionKind positionKind)
 	{
 		static HeaderInfo from(final SyntaxSnapshot syntax, final Position pos)
 		{
-			final HeaderInfo direct = fromLine(syntax, pos.getLine(), pos.getCharacter());
+			return from(syntax, pos, null);
+		}
+
+		static HeaderInfo from(final SyntaxSnapshot syntax,
+							   final Position pos,
+							   final MetaModel activeMetaModel)
+		{
+			final HeaderInfo direct = fromLine(syntax, pos.getLine(), pos.getCharacter(), activeMetaModel);
 			if (direct != null)
 			{
 				return direct;
@@ -264,12 +274,13 @@ final class CompletionContextResolver
 			}
 
 			final int lineLength = lineEndOffset - lineStartOffset;
-			return fromLine(syntax, previousLine, lineLength);
+			return fromLine(syntax, previousLine, lineLength, activeMetaModel);
 		}
 
 		private static HeaderInfo fromLine(final SyntaxSnapshot syntax,
 										   final int targetLine,
-										   final int targetChar)
+										   final int targetChar,
+										   final MetaModel activeMetaModel)
 		{
 			final CharSequence source = syntax.source();
 			int line = 0;
@@ -341,25 +352,120 @@ final class CompletionContextResolver
 
 			final String featureName = AttributeValueCompletionProvider.resolveFeatureNameAtCaret(tokens, headerCaret);
 
-			final String groupName = AttributeValueCompletionProvider.resolveGroupNameForHeaderKeyword(keyword);
-			Group<?> lmCoreGroup = null;
-			if (groupName != null && !groupName.isBlank())
-			{
-				final MetaModel lmCore = LMCorePackage.MODEL;
-				for (final Group<?> g : lmCore.groups())
-				{
-					if (groupName.equals(g.name()))
-					{
-						lmCoreGroup = g;
-						break;
-					}
-				}
-			}
+			final Group<?> headerGroup = resolveHeaderGroup(keyword, activeMetaModel);
+			final String groupName = headerGroup != null ? headerGroup.name() : null;
 
 			final CompletionContext.HeaderPositionKind positionKind =
 				determinePositionKind(tokens, headerCaret, featureName);
 
-			return new HeaderInfo(keyword, groupName, lmCoreGroup, featureName, positionKind);
+			return new HeaderInfo(keyword, groupName, headerGroup, featureName, positionKind);
+		}
+
+		private static Group<?> resolveHeaderGroup(final String keyword, final MetaModel activeMetaModel)
+		{
+			if (keyword == null || keyword.isBlank())
+			{
+				return null;
+			}
+
+			// 1) Direct group name in the active meta-model.
+			if (activeMetaModel != null)
+			{
+				for (final Group<?> g : activeMetaModel.groups())
+				{
+					if (keyword.equals(g.name()))
+					{
+						return g;
+					}
+				}
+			}
+
+			// 2) Direct group name in LMCore (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Attribute, Relation, ...).
+			final MetaModel lmCore = LMCorePackage.MODEL;
+			for (final Group<?> g : lmCore.groups())
+			{
+				if (keyword.equals(g.name()))
+				{
+					return g;
+				}
+			}
+
+			// 3) Alias-based header, e.g. +att / -att / +contains / -contains / Definition.
+			final String targetGroupName = resolveGroupNameFromAliases(keyword, activeMetaModel, lmCore);
+			if (targetGroupName == null || targetGroupName.isBlank())
+			{
+				return null;
+			}
+
+			// 4) Resolve the group name from aliases in the active meta-model first, then LMCore.
+			if (activeMetaModel != null)
+			{
+				for (final Group<?> g : activeMetaModel.groups())
+				{
+					if (targetGroupName.equals(g.name()))
+					{
+						return g;
+					}
+				}
+			}
+
+			for (final Group<?> g : lmCore.groups())
+			{
+				if (targetGroupName.equals(g.name()))
+				{
+					return g;
+				}
+			}
+
+			return null;
+		}
+
+		private static String resolveGroupNameFromAliases(final String keyword,
+														  final MetaModel activeMetaModel,
+														  final MetaModel lmCore)
+		{
+			// Prefer aliases defined in the active meta-model when present.
+			if (activeMetaModel != null)
+			{
+				for (final org.logoce.lmf.model.lang.Alias alias : activeMetaModel.aliases())
+				{
+					if (keyword.equals(alias.name()))
+					{
+						return firstToken(alias.value());
+					}
+				}
+			}
+
+			for (final org.logoce.lmf.model.lang.Alias alias : lmCore.aliases())
+			{
+				if (keyword.equals(alias.name()))
+				{
+					return firstToken(alias.value());
+				}
+			}
+
+			return null;
+		}
+
+		private static String firstToken(final String value)
+		{
+			if (value == null || value.isBlank())
+			{
+				return null;
+			}
+
+			int i = 0;
+			final int len = value.length();
+			while (i < len && Character.isWhitespace(value.charAt(i)))
+			{
+				i++;
+			}
+			final int start = i;
+			while (i < len && !Character.isWhitespace(value.charAt(i)))
+			{
+				i++;
+			}
+			return start < i ? value.substring(start, i) : null;
 		}
 
 		private static CompletionContext.HeaderPositionKind determinePositionKind(final java.util.List<AttributeValueCompletionProvider.HeaderToken> tokens,

@@ -11,11 +11,14 @@ import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolTable;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
+import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LinkException;
 import org.logoce.lmf.model.loader.parsing.LmTreeReader;
+import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.TextPositions;
 import org.slf4j.Logger;
@@ -107,23 +110,32 @@ public final class WorkspaceRebuilder
 			final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
 			for (final LmDocumentState docState : docs)
 			{
-				final var text = docState.text();
-				final var doc = loader.loadModel(text);
-				if (doc.roots().isEmpty())
+				try
 				{
-					final var error = doc.diagnostics().stream()
-										 .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
-										 .findFirst();
-					if (error.isPresent())
+					final var text = docState.text();
+					final var doc = loader.loadModel(text);
+					if (doc.roots().isEmpty())
 					{
-						final var d = error.get();
-						throw new IllegalArgumentException("Failed to parse model at " +
-														   d.line() + ":" + d.column() +
-														   " - " + d.message());
+						final var error = doc.diagnostics().stream()
+											 .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
+											 .findFirst();
+						if (error.isPresent())
+						{
+							final var d = error.get();
+							LOG.warn("LMF LSP rebuildModelRegistry: skipping document {} due to parse error at {}:{} - {}",
+									 docState.uri(), d.line(), d.column(), d.message());
+						}
+						continue;
 					}
-					continue;
+					documents.add(doc);
 				}
-				documents.add(doc);
+				catch (IllegalStateException e)
+				{
+					// Meta-model package resolution or similar issues while rebuilding the
+					// registry should not abort the whole process; log and skip this document.
+					LOG.warn("LMF LSP rebuildModelRegistry: skipping document {} due to meta-model error: {}",
+							 docState.uri(), e.getMessage());
+				}
 			}
 
 			final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
@@ -275,6 +287,75 @@ public final class WorkspaceRebuilder
 
 			publishDiagnostics(state);
 		}
+		catch (IllegalStateException e)
+		{
+			// Meta-model package resolution and similar issues are expected in dynamic
+			// workspaces (for example, when generated Java for a meta-model is not on
+			// the LSP classpath). Treat them as document diagnostics instead of hard
+			// LSP errors so that M1/M2 documents remain editable, and attempt a
+			// semantic-only link to populate link trees when possible.
+			LOG.warn("LMF LSP analyzeDocument meta-model error for uri={}: {}",
+					 state.uri(), e.getMessage());
+
+			final String text = state.text();
+			final var diagnostics = new ArrayList<LmDiagnostic>();
+			final var reader = new LmTreeReader();
+
+			List<org.logoce.lmf.model.util.tree.Tree<org.logoce.lmf.model.resource.parsing.PNode>> roots;
+			CharSequence source;
+			try
+			{
+				final var readResult = reader.read(text, diagnostics);
+				roots = readResult.roots();
+				source = readResult.source();
+			}
+			catch (Exception parseEx)
+			{
+				roots = List.of();
+				source = text;
+				diagnostics.add(new LmDiagnostic(
+					1,
+					1,
+					Math.max(1, text.length()),
+					0,
+					LmDiagnostic.Severity.ERROR,
+					parseEx.getMessage() == null ? "Error while parsing document" : parseEx.getMessage()));
+			}
+
+			diagnostics.add(new LmDiagnostic(
+				1,
+				1,
+				Math.max(1, text.length()),
+				0,
+				LmDiagnostic.Severity.ERROR,
+				e.getMessage() == null ? "Error while analyzing document" : e.getMessage()));
+
+			final var activeMetaModels = resolveActiveMetaModels(roots);
+			final var linkTrees = SemanticLinking.link(roots, activeMetaModels, workspaceIndex.modelRegistry(), source);
+
+			final var syntaxSnapshot = new SyntaxSnapshot(
+				List.of(),
+				roots,
+				List.copyOf(diagnostics),
+				source);
+			state.setSyntaxSnapshot(syntaxSnapshot);
+
+			// Linking failed but parsing succeeded; keep this as last good syntax so
+			// that semantic tokens can still rely on a stable tree.
+			state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
+
+			final var semanticSnapshot = new SemanticSnapshot(
+				null,
+				linkTrees,
+				List.of(),
+				SymbolTable.EMPTY,
+				List.of());
+			state.setSemanticSnapshot(semanticSnapshot);
+
+			// Keep lastGoodSemanticSnapshot unchanged: we don't have a new good model.
+
+			publishDiagnostics(state);
+		}
 		catch (Exception e)
 		{
 			// Any other unexpected errors are also surfaced as document diagnostics
@@ -383,5 +464,11 @@ public final class WorkspaceRebuilder
 			case INFO -> DiagnosticSeverity.Information;
 		});
 		return diag;
+	}
+
+	private List<MetaModel> resolveActiveMetaModels(final List<org.logoce.lmf.model.util.tree.Tree<org.logoce.lmf.model.resource.parsing.PNode>> roots)
+	{
+		final var registry = workspaceIndex.modelRegistry();
+		return MetaModelResolver.resolveActiveMetaModelsFromRoots(roots, registry);
 	}
 }

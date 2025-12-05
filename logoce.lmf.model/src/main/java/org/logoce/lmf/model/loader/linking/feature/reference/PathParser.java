@@ -13,6 +13,7 @@ public final class PathParser implements Iterator<PathParser.Step>
 		PARENT,
 		CHILD,
 		NAME,
+		CONTEXT_NAME,
 		MODEL
 	}
 
@@ -41,6 +42,12 @@ public final class PathParser implements Iterator<PathParser.Step>
 			final var text = path.substring(location + 1);
 			location = path.length();
 			return new Step(Type.NAME, text);
+		}
+		else if (firstChar == '^')
+		{
+			final var text = path.substring(location + 1);
+			location = path.length();
+			return new Step(Type.CONTEXT_NAME, text);
 		}
 		else if (firstChar == '#')
 		{
@@ -108,4 +115,3 @@ public final class PathParser implements Iterator<PathParser.Step>
 	{
 	}
 }
-

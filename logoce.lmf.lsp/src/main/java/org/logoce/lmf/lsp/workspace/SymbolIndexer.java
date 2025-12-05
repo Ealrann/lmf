@@ -10,6 +10,7 @@ import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.lsp.state.SymbolId;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
+import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.model.LmSymbolIndex;
 import org.logoce.lmf.model.loader.model.LmSymbolIndexBuilder;
@@ -47,11 +48,17 @@ public final class SymbolIndexer
 			return;
 		}
 
-		final Model model = semantic.model();
+		Model model = semantic.model();
 		if (model == null)
 		{
-			workspaceIndex.clearIndicesForDocument(state.uri());
-			return;
+			final var registry = workspaceIndex.modelRegistry();
+			model = MetaModelResolver.resolveForDocument(syntax, null, registry);
+
+			if (model == null)
+			{
+				workspaceIndex.clearIndicesForDocument(state.uri());
+				return;
+			}
 		}
 
 		final var modelKey = new ModelKey(model.domain(), model.name());

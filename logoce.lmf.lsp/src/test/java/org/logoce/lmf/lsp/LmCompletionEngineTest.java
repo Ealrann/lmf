@@ -161,10 +161,10 @@ final class LmCompletionEngineTest
 		final var items = complete(uri, text, position);
 
 		assertFalse(items.isEmpty(), "Expected completion items in containment position inside Group body");
-		assertTrue(items.stream().anyMatch(i -> "(Attribute )".equals(i.getLabel())),
-				   "Expected '(Attribute )' among containment child completions");
-		assertTrue(items.stream().anyMatch(i -> "(Relation )".equals(i.getLabel())),
-				   "Expected '(Relation )' among containment child completions");
+		assertTrue(items.stream().anyMatch(i -> "(features:Attribute )".equals(i.getLabel())),
+				   "Expected '(features:Attribute )' among containment child completions");
+		assertTrue(items.stream().anyMatch(i -> "(features:Relation )".equals(i.getLabel())),
+				   "Expected '(features:Relation )' among containment child completions");
 	}
 
 	@Test
@@ -187,6 +187,33 @@ final class LmCompletionEngineTest
 		assertFalse(items.isEmpty(), "Expected completion items on blank line after Group header");
 		assertTrue(items.stream().anyMatch(i -> "concrete".equals(i.getLabel())),
 				   "Expected 'concrete' feature in Group header completions on blank line after header");
+	}
+
+	@Test
+	void localAtTypeCompletionOffersMetaModelTypes()
+	{
+		final var text = """
+			(MetaModel domain=test.types name=TestTypes
+			    (Group Entity)
+			    @
+			)
+			""";
+
+		final var uri = URI.create("file:///test/TypeCompletionLocalAt.lm");
+		final var position = positionAt(text, "@");
+
+		final var items = complete(uri, text, position);
+
+		assertFalse(items.isEmpty(), "Expected type completions at '@' position");
+		// Debug output to understand available labels in this context.
+		for (final var item : items)
+		{
+			System.err.println("localAtTypeCompletionOffersMetaModelTypes completion: " + item.getLabel() +
+							   " detail=" + item.getDetail() +
+							   " insertText=" + item.getInsertText());
+		}
+		assertTrue(items.stream().anyMatch(i -> "Entity".equals(i.getLabel())),
+				   "Expected local type completion to include 'Entity' group from active meta-model");
 	}
 
 	private static List<CompletionItem> complete(final URI uri,

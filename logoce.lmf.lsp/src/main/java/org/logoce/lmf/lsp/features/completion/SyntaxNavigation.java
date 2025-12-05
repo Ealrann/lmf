@@ -20,6 +20,28 @@ final class SyntaxNavigation
 	static CompletionContextKind detectCompletionContext(final SyntaxSnapshot syntax, final Position pos)
 	{
 		final CharSequence source = syntax.source();
+
+		// Fast path: inspect the character under the caret directly. This ensures
+		// that standalone '@' / '#' markers (for example in partially-typed type
+		// references) are correctly classified even when they are not yet part of
+		// a well-formed parse tree node.
+		final int offset = TextPositions.offsetFor(
+			source,
+			pos.getLine() + 1,
+			pos.getCharacter() + 1);
+		if (offset >= 0 && offset < source.length())
+		{
+			final char ch = source.charAt(offset);
+			if (ch == '@')
+			{
+				return CompletionContextKind.LOCAL_AT;
+			}
+			if (ch == '#')
+			{
+				return CompletionContextKind.CROSS_MODEL_HASH;
+			}
+		}
+
 		for (final Tree<PNode> root : syntax.roots())
 		{
 			final CompletionContextKind kind = detectContextInNode(root, source, pos);

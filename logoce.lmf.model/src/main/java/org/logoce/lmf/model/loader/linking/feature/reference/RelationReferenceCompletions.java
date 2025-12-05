@@ -11,6 +11,7 @@ import org.logoce.lmf.model.loader.linking.LinkNode;
 import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.loader.linking.feature.AttributeResolver;
 import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
 
@@ -65,18 +66,15 @@ public final class RelationReferenceCompletions
 		final var result = new ArrayList<RelationCandidate>();
 		final Set<String> seenLabels = new HashSet<>();
 
-		if (owningModel != null)
+		// 1) Local objects from the current document: prefer link trees so we
+		// can surface candidates even when the owning model failed to build.
+		if (linkTrees != null && !linkTrees.isEmpty())
 		{
-			// 1) Local objects from the current document: prefer link trees so we
-			// can surface candidates even when the owning model failed to build.
-			if (linkTrees != null && !linkTrees.isEmpty())
-			{
-				collectFromLinkTrees(owningModel, linkTrees, conceptGroup, seenLabels, result);
-			}
-			else
-			{
-				collectFromModel(owningModel, owningModel, conceptGroup, seenLabels, result, true);
-			}
+			collectFromLinkTrees(owningModel, linkTrees, conceptGroup, seenLabels, result);
+		}
+		else if (owningModel != null)
+		{
+			collectFromModel(owningModel, owningModel, conceptGroup, seenLabels, result, true);
 
 			// 2) Imported models from the owning model's header.
 			for (final String imp : owningModel.imports())
@@ -90,6 +88,9 @@ public final class RelationReferenceCompletions
 			}
 		}
 
+		// 2) Meta-models declared in the header (metamodels=...), resolved via the registry.
+		collectFromMetamodelsInHeader(linkTrees, registry, conceptGroup, seenLabels, result);
+
 		// 3) LMCore is implicitly available as a cross-model source.
 		collectFromModel(LMCorePackage.MODEL, owningModel, conceptGroup, seenLabels, result, false);
 
@@ -102,7 +103,9 @@ public final class RelationReferenceCompletions
 											 final Set<String> seenLabels,
 											 final List<RelationCandidate> out)
 	{
-		final String qualified = qualifiedName(owningModel);
+		final String qualified = owningModel != null
+								 ? qualifiedName(owningModel)
+								 : qualifiedNameFromLinkTrees(linkTrees);
 
 		for (final LinkNode<?, PNode> root : linkTrees)
 		{
@@ -133,6 +136,63 @@ public final class RelationReferenceCompletions
 				final String detail = group.name() + " in " + qualified;
 				out.add(new RelationCandidate(label, detail, true));
 			});
+		}
+	}
+
+	private static void collectFromMetamodelsInHeader(final List<? extends LinkNode<?, PNode>> linkTrees,
+													  final ModelRegistry registry,
+													  final Group<?> conceptGroup,
+													  final Set<String> seenLabels,
+													  final List<RelationCandidate> out)
+	{
+		if (linkTrees == null || linkTrees.isEmpty())
+		{
+			return;
+		}
+
+		final LinkNode<?, PNode> root = linkTrees.getFirst();
+		final PNode pNode = root.pNode();
+		final var metamodelNames = ModelHeaderUtil.resolveMetamodelNames(pNode);
+
+		for (final String name : metamodelNames)
+		{
+			final Model model = registry.getModel(name);
+			if (model instanceof MetaModel mm)
+			{
+				collectFromMetaModel(mm, conceptGroup, seenLabels, out);
+			}
+		}
+	}
+
+	private static void collectFromMetaModel(final MetaModel metaModel,
+											 final Group<?> conceptGroup,
+											 final Set<String> seenLabels,
+											 final List<RelationCandidate> out)
+	{
+		final String qualified = qualifiedName(metaModel);
+		final String alias = Objects.toString(metaModel.name(), "");
+
+		for (final Group<?> group : metaModel.groups())
+		{
+			if (!ModelUtils.isSubGroup(conceptGroup, group))
+			{
+				continue;
+			}
+
+			final String name = group.name();
+			if (name == null || name.isBlank())
+			{
+				continue;
+			}
+
+			final String label = "#" + alias + "@" + name;
+			if (!seenLabels.add(label))
+			{
+				continue;
+			}
+
+			final String detail = group.name() + " in " + qualified;
+			out.add(new RelationCandidate(label, detail, false));
 		}
 	}
 
@@ -219,5 +279,38 @@ public final class RelationReferenceCompletions
 		}
 
 		return Objects.toString(model.name(), "");
+	}
+
+	private static String qualifiedNameFromLinkTrees(final List<? extends LinkNode<?, PNode>> linkTrees)
+	{
+		if (linkTrees == null || linkTrees.isEmpty())
+		{
+			return "";
+		}
+
+		final LinkNode<?, PNode> root = linkTrees.getFirst();
+		final PNode pNode = root.pNode();
+
+		final String domain = ModelHeaderUtil.resolveDomain(pNode);
+		final String name = safeModelName(pNode);
+
+		if (name == null || name.isBlank())
+		{
+			return "";
+		}
+
+		return (domain == null || domain.isBlank()) ? name : domain + "." + name;
+	}
+
+	private static String safeModelName(final PNode pNode)
+	{
+		try
+		{
+			return ModelHeaderUtil.resolveName(pNode);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
 	}
 }

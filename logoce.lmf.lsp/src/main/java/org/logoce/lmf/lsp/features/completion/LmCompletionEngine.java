@@ -71,24 +71,7 @@ public final class LmCompletionEngine
 			}
 		}
 
-		// 2) Header keyword, name or feature name position: propose header features only.
-		if (headerPosKind == CompletionContext.HeaderPositionKind.HEADER_KEYWORD ||
-			headerPosKind == CompletionContext.HeaderPositionKind.HEADER_NAME ||
-			headerPosKind == CompletionContext.HeaderPositionKind.FEATURE_NAME)
-		{
-			final var featureItems = GroupFeatureCompletionProvider.complete(context);
-			if (!featureItems.isEmpty())
-			{
-				LOG.debug("LMF LSP completion: feature completion, uri={}, line={}, character={}, items={}",
-						  uri, pos.getLine(), pos.getCharacter(), featureItems.size());
-				return Either.forLeft(List.copyOf(featureItems));
-			}
-			LOG.debug("LMF LSP completion: feature completion produced no items at uri={}, line={}, character={}",
-					  uri, pos.getLine(), pos.getCharacter());
-			return Either.forLeft(List.of());
-		}
-
-		// 3) Explicit local ('@') or cross-model ('#') reference: type completions only.
+		// 2) Explicit local ('@') or cross-model ('#') reference: type completions only.
 		if (contextKind == CompletionContextKind.LOCAL_AT || contextKind == CompletionContextKind.CROSS_MODEL_HASH)
 		{
 			if (metaModel == null)
@@ -108,6 +91,23 @@ public final class LmCompletionEngine
 			}
 			LOG.debug("LMF LSP completion: type completion produced no items at uri={}, line={}, character={}",
 					  uri, pos.getLine(), pos.getCharacter());
+		}
+
+		// 3) Header keyword, name or feature name position: propose header features only.
+		if (headerPosKind == CompletionContext.HeaderPositionKind.HEADER_KEYWORD ||
+			headerPosKind == CompletionContext.HeaderPositionKind.HEADER_NAME ||
+			headerPosKind == CompletionContext.HeaderPositionKind.FEATURE_NAME)
+		{
+			final var featureItems = GroupFeatureCompletionProvider.complete(context);
+			if (!featureItems.isEmpty())
+			{
+				LOG.debug("LMF LSP completion: feature completion, uri={}, line={}, character={}, items={}",
+						  uri, pos.getLine(), pos.getCharacter(), featureItems.size());
+				return Either.forLeft(List.copyOf(featureItems));
+			}
+			LOG.debug("LMF LSP completion: feature completion produced no items at uri={}, line={}, character={}",
+					  uri, pos.getLine(), pos.getCharacter());
+			return Either.forLeft(List.of());
 		}
 
 		// 4) Fallback inside a group: header features and containment children.

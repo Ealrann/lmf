@@ -19,6 +19,7 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,12 +52,16 @@ final class GroupFeatureCompletionProvider
 									   : null;
 		final Group<?> group = semanticGroup != null
 							   ? semanticGroup
-							   : fallbackGroupFromSyntax(syntax, pos);
+							   : fallbackGroupFromSyntax(context);
 
 		if (group == null)
 		{
-			LOG.info("LMF LSP completion: no group resolved at position line={}, character={}",
-					 pos.getLine(), pos.getCharacter());
+			LOG.info("LMF LSP completion: no group resolved at position line={}, character={}, metaModel={}",
+					 pos.getLine(),
+					 pos.getCharacter(),
+					 context.metaModel() != null
+					 ? context.metaModel().domain() + "." + context.metaModel().name()
+					 : "null");
 			return List.of();
 		}
 
@@ -66,13 +71,13 @@ final class GroupFeatureCompletionProvider
 		items.addAll(buildGroupFeatureCompletions(group, usedFeatures));
 		items.addAll(buildContainmentChildCompletions(context, group));
 
-		if (!items.isEmpty() && LOG.isDebugEnabled())
+		if (!items.isEmpty())
 		{
 			final var labels = items.stream()
 									.map(CompletionItem::getLabel)
 									.toList();
-			LOG.debug("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
-					  group.name(), items.size(), labels);
+			LOG.info("LMF LSP completion: group feature completions, group={}, items={}, labels={}",
+					 group.name(), items.size(), labels);
 		}
 		return items;
 	}
@@ -82,8 +87,29 @@ final class GroupFeatureCompletionProvider
 	{
 		final var items = new ArrayList<CompletionItem>();
 
+		LOG.info("LMF LSP completion: building feature completions for group={} features={} used={}",
+				 group.name(),
+				 group.features().size(),
+				 usedFeatures != null ? usedFeatures.size() : 0);
+
+		final boolean isOperationGroup = "Operation".equals(group.name()) || "OperationParameter".equals(group.name());
+
 		for (final Feature<?, ?> feature : group.features())
 		{
+			LOG.info("LMF LSP completion: inspecting feature '{}' (class={}) used={} contains={} isOperationGroup={}",
+					 feature.name(),
+					 feature.getClass().getSimpleName(),
+					 usedFeatures != null && usedFeatures.contains(feature),
+					 feature instanceof Relation<?, ?> r && r.contains(),
+					 isOperationGroup);
+
+			if (!isOperationGroup && feature instanceof Relation<?, ?> relation && relation.contains())
+			{
+				// Containment relations are handled separately via dedicated
+				// child completion logic.
+				continue;
+			}
+
 			final String name = feature.name();
 			if (name == null || name.isEmpty())
 			{
@@ -161,37 +187,20 @@ final class GroupFeatureCompletionProvider
 	private static List<CompletionItem> buildContainmentChildCompletions(final CompletionContext context,
 																		 final Group<?> group)
 	{
-		final var conceptGroups = new ArrayList<Group<?>>();
+		final var items = new ArrayList<CompletionItem>();
+		final Set<String> seenLabels = new HashSet<>();
 
+		// 1) Resolve containment relations and their concrete target groups.
+		final var containmentRelations = new ArrayList<Relation<?, ?>>();
 		for (final Feature<?, ?> feature : group.features())
 		{
-			if (!(feature instanceof Relation<?, ?> relation))
+			if (feature instanceof Relation<?, ?> relation && relation.contains())
 			{
-				continue;
+				containmentRelations.add(relation);
 			}
-
-			if (!relation.contains())
-			{
-				continue;
-			}
-
-			final Concept<?> concept = relation.concept();
-			if (concept == null)
-			{
-				continue;
-			}
-
-			final Group<?> conceptGroup =
-				(concept instanceof Group<?> g) ? g : concept.lmGroup();
-			if (conceptGroup == null)
-			{
-				continue;
-			}
-
-			conceptGroups.add(conceptGroup);
 		}
 
-		if (conceptGroups.isEmpty())
+		if (containmentRelations.isEmpty())
 		{
 			return List.of();
 		}
@@ -205,82 +214,217 @@ final class GroupFeatureCompletionProvider
 		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
 		final MetaModel currentMetaModel = context.metaModel();
 
-		final Set<String> seenCandidateNames = new HashSet<>();
-		final var candidates = new ArrayList<Group<?>>();
-
-		final java.util.function.Consumer<MetaModel> collectFromMetaModel = mm -> {
-			if (mm == null)
-			{
-				return;
-			}
-			for (final Group<?> candidate : mm.groups())
-			{
-				if (!candidate.concrete())
-				{
-					continue;
-				}
-
-				for (final Group<?> conceptGroup : conceptGroups)
-				{
-					if (ModelUtils.isSubGroup(conceptGroup, candidate))
-					{
-						if (seenCandidateNames.add(candidate.name()))
-						{
-							candidates.add(candidate);
-						}
-						break;
-					}
-				}
-			}
-		};
-
+		final var searchMetaModels = new ArrayList<MetaModel>();
 		if (currentMetaModel != null)
 		{
-			collectFromMetaModel.accept(currentMetaModel);
+			searchMetaModels.add(currentMetaModel);
 			for (final String imp : currentMetaModel.imports())
 			{
 				final Model imported = registry.getModel(imp);
 				if (imported instanceof MetaModel importedMm)
 				{
-					collectFromMetaModel.accept(importedMm);
+					searchMetaModels.add(importedMm);
 				}
 			}
 		}
 
 		// Always include LMCore groups as baseline candidates (Attribute, Relation, ...).
-		collectFromMetaModel.accept(LMCorePackage.MODEL);
+		searchMetaModels.add(LMCorePackage.MODEL);
 
-		if (candidates.isEmpty())
-		{
-			return List.of();
-		}
+		// Map each containment relation to the list of concrete groups that can
+		// appear as children for that relation.
+		final var relationToConcreteGroups = new java.util.LinkedHashMap<Relation<?, ?>, List<Group<?>>>();
 
-		final var items = new ArrayList<CompletionItem>();
-		for (final Group<?> candidate : candidates)
+		for (final Relation<?, ?> relation : containmentRelations)
 		{
-			final String name = candidate.name();
-			if (name == null || name.isEmpty())
+			final Concept<?> concept = relation.concept();
+			if (concept == null)
 			{
 				continue;
 			}
 
-			final String snippet = "(" + name + " )";
-			final var item = new CompletionItem(snippet);
-			item.setInsertText(snippet);
-			item.setDetail("Child of " + group.name());
-			items.add(item);
+			final Group<?> conceptGroup =
+				(concept instanceof Group<?> g) ? g : concept.lmGroup();
+			if (conceptGroup == null)
+			{
+				continue;
+			}
+
+			final var concreteGroups = new ArrayList<Group<?>>();
+			final Set<String> seenNames = new HashSet<>();
+
+			for (final MetaModel mm : searchMetaModels)
+			{
+				if (mm == null)
+				{
+					continue;
+				}
+				for (final Group<?> candidate : mm.groups())
+				{
+					final String candidateName = candidate.name();
+					if (!candidate.concrete() || candidateName == null || candidateName.isEmpty())
+					{
+						continue;
+					}
+
+					if (!ModelUtils.isSubGroup(conceptGroup, candidate))
+					{
+						continue;
+					}
+
+					if (seenNames.add(candidateName))
+					{
+						concreteGroups.add(candidate);
+					}
+				}
+			}
+
+			if (!concreteGroups.isEmpty())
+			{
+				relationToConcreteGroups.put(relation, List.copyOf(concreteGroups));
+			}
 		}
 
-		return items;
+		if (relationToConcreteGroups.isEmpty())
+		{
+			return List.of();
+		}
+
+		final String detail = "Child of " + group.name();
+
+		// 2) Aliases as before: propose alias-based snippets such as (-att ),
+		//    (+att ), etc. for suitable target groups, but enrich the insertion
+		//    text with mandatory attributes and non-containment relations of the
+		//    target group.
+		for (final List<Group<?>> concreteGroups : relationToConcreteGroups.values())
+		{
+			for (final Group<?> concrete : concreteGroups)
+			{
+				final String candidateName = concrete.name();
+				for (final String aliasName : MetaModelRegistry.Instance.getAliasMap().keySet())
+				{
+					final String targetGroupName =
+						AttributeValueCompletionProvider.resolveGroupNameForHeaderKeyword(aliasName);
+					if (candidateName.equals(targetGroupName))
+					{
+						final String snippet = "(" + aliasName + " )";
+						final String insertText = buildGroupHeaderInsertText(aliasName, concrete);
+						addSnippetCompletion(snippet, insertText, detail, items, seenLabels);
+					}
+				}
+			}
+		}
+
+		// 3) New relation-based candidates: (<feature_name>:<concrete_group_name> )
+		//    with insertion depending on the number of concrete groups and the
+		//    mandatory features of the target group.
+		for (final var entry : relationToConcreteGroups.entrySet())
+		{
+			final Relation<?, ?> relation = entry.getKey();
+			final List<Group<?>> concreteGroups = entry.getValue();
+
+			final String featureName = relation.name();
+			if (featureName == null || featureName.isBlank())
+			{
+				continue;
+			}
+
+			for (final Group<?> concrete : concreteGroups)
+			{
+				final String groupName = concrete.name();
+				if (groupName == null || groupName.isBlank())
+				{
+					continue;
+				}
+
+				final boolean multiple = concreteGroups.size() > 1;
+				final String headToken = multiple ? groupName : featureName;
+				final String label = "(" + featureName + ":" + groupName + " )";
+				final String insertText = buildGroupHeaderInsertText(headToken, concrete);
+
+				addSnippetCompletion(label, insertText, detail, items, seenLabels);
+			}
+		}
+
+		return List.copyOf(items);
 	}
 
-	private static Group<?> fallbackGroupFromSyntax(final SyntaxSnapshot syntax, final Position pos)
+	private static Group<?> fallbackGroupFromSyntax(final CompletionContext context)
 	{
-		final var headerInfo = CompletionContextResolver.HeaderInfo.from(syntax, pos);
+		final var syntax = context.syntax();
+		if (syntax == null)
+		{
+			return null;
+		}
+
+		final var headerInfo = CompletionContextResolver.HeaderInfo.from(syntax, context.position(), context.metaModel());
 		if (headerInfo == null)
 		{
 			return null;
 		}
-		return headerInfo.lmCoreGroup();
+		return headerInfo.headerGroup();
+	}
+
+	private static String buildGroupHeaderInsertText(final String headToken,
+													 final Group<?> targetGroup)
+	{
+		final var mandatoryFeatureNames = new ArrayList<String>();
+
+		ModelUtils.streamAllFeatures(targetGroup).forEach(feature -> {
+			final String name = feature.name();
+			if (name == null || name.isBlank())
+			{
+				return;
+			}
+
+			if (feature instanceof Attribute<?, ?> attribute)
+			{
+				if (attribute.mandatory())
+				{
+					mandatoryFeatureNames.add(name + "=");
+				}
+			}
+			else if (feature instanceof Relation<?, ?> relation)
+			{
+				if (relation.mandatory() && !relation.contains())
+				{
+					mandatoryFeatureNames.add(name + "=");
+				}
+			}
+		});
+
+		final var sb = new StringBuilder();
+		sb.append('(').append(headToken);
+		for (final String featureName : mandatoryFeatureNames)
+		{
+			sb.append(' ').append(featureName);
+		}
+		sb.append(" )");
+		return sb.toString();
+	}
+
+	private static void addSnippetCompletion(final String label,
+											 final String insertText,
+											 final String detail,
+											 final List<CompletionItem> items,
+											 final Set<String> seenLabels)
+	{
+		if (!seenLabels.add(label))
+		{
+			return;
+		}
+
+		final var item = new CompletionItem(label);
+		item.setInsertText(insertText);
+		item.setDetail(detail);
+		items.add(item);
+	}
+
+	private static void addSnippetCompletion(final String snippet,
+											 final String detail,
+											 final List<CompletionItem> items,
+											 final Set<String> seenLabels)
+	{
+		addSnippetCompletion(snippet, snippet, detail, items, seenLabels);
 	}
 }

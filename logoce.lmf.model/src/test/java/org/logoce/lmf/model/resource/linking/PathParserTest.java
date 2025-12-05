@@ -105,4 +105,17 @@ public class PathParserTest
 
 		assertFalse(parser.hasNext());
 	}
+
+	@Test
+	public void contextName()
+	{
+		final var path = "^toto";
+		final var parser = new PathParser(path);
+
+		final var step1 = parser.next();
+		assertEquals(PathParser.Type.CONTEXT_NAME, step1.type());
+		assertEquals("toto", step1.text());
+
+		assertFalse(parser.hasNext());
+	}
 }
