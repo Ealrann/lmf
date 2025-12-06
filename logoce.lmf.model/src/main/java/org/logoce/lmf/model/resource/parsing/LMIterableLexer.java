@@ -2,7 +2,6 @@ package org.logoce.lmf.model.resource.parsing;
 
 import org.logoce.lmf.model.lexer.ELMTokenType;
 import org.logoce.lmf.model.lexer.LMLexer;
-import org.logoce.lmf.model.resource.parsing.LexerException;
 import org.logoce.lmf.model.resource.util.SoftIterator;
 
 import java.io.IOException;

@@ -45,7 +45,9 @@ public final class BuilderGenerator
 
 		typeInstallers.install(featureResolutions);
 
-		final var javaFile = JavaFile.builder(packageName, classBuilder.build()).build();
+		final var javaFile = JavaFile.builder(packageName, classBuilder.build())
+									 .skipJavaLangImports(true)
+									 .build();
 		FormattedJavaWriter.write(javaFile, targetDirectory);
 	}
 }

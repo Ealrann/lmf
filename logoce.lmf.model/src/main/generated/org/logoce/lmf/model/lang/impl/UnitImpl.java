@@ -1,7 +1,5 @@
 package org.logoce.lmf.model.lang.impl;
 
-import java.lang.Override;
-import java.lang.String;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;

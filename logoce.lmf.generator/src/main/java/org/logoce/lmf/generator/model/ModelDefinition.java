@@ -91,7 +91,9 @@ public class ModelDefinition
 		definitionInterface.addType(aliasBuilder.build(model));
 		definitionInterface.addType(javaWrapperBuilder.build(model));
 
-		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), definitionInterface.build()).build();
+		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), definitionInterface.build())
+									 .skipJavaLangImports(true)
+									 .build();
 		FormattedJavaWriter.write(javaFile, target);
 	}
 

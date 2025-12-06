@@ -81,7 +81,9 @@ public final class InterfaceGenerator
 								: group.operations();
 		operations.forEach(operation -> interfaceBuilder.addMethod(buildOperationMethod(operation)));
 
-		final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build()).build();
+		final var javaFile = JavaFile.builder(packageName, interfaceBuilder.build())
+									 .skipJavaLangImports(true)
+									 .build();
 		FormattedJavaWriter.write(javaFile, targetDirectory);
 	}
 

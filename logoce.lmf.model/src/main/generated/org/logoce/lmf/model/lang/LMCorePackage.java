@@ -1,8 +1,5 @@
 package org.logoce.lmf.model.lang;
 
-import java.lang.Override;
-import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.util.Optional;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;

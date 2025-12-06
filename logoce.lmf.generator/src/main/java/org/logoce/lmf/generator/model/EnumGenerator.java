@@ -34,7 +34,9 @@ public class EnumGenerator
 			enumBuilder.addEnumConstant(GenUtils.capitalizeFirstLetter(litteral));
 		}
 
-		final var javaFile = JavaFile.builder(packageName, enumBuilder.build()).build();
+		final var javaFile = JavaFile.builder(packageName, enumBuilder.build())
+									 .skipJavaLangImports(true)
+									 .build();
 		FormattedJavaWriter.write(javaFile, target);
 	}
 }

@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.lang;
 
-import java.lang.String;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.SerializerBuilder;

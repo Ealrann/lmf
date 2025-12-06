@@ -66,7 +66,9 @@ public class ModelPackage
 		packageClass.addMethod(buildBuilderResolver(definitionName));
 		packageClass.addMethod(buildEnumResolver(definitionName));
 
-		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), packageClass.build()).build();
+		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), packageClass.build())
+									 .skipJavaLangImports(true)
+									 .build();
 		FormattedJavaWriter.write(javaFile, target);
 	}
 

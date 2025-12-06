@@ -12,13 +12,6 @@ import java.util.List;
 
 public class TypeResolutionUtil
 {
-	public static List<ClassName> toParameters(final List<? extends LMEntity<?>> parameters)
-	{
-		return parameters.stream()
-						 .map(p -> ClassName.get("", p.name()))
-						 .toList();
-	}
-
 	public static TypeParameter resolveInclude(final Include<?> refInclude, final Group<?> group)
 	{
 		final var params = refInclude.parameters()

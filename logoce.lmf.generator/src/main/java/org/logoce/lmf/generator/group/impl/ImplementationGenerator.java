@@ -47,7 +47,9 @@ public final class ImplementationGenerator
 
 		installOperationStubs(classBuilder);
 
-		final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build()).build();
+		final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build())
+									 .skipJavaLangImports(true)
+									 .build();
 		FormattedJavaWriter.write(javaFile, targetDirectory);
 	}
 

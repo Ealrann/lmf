@@ -1,7 +1,5 @@
 package org.logoce.lmf.model.lang.builder;
 
-import java.lang.Override;
-import java.lang.String;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;

@@ -1,7 +1,5 @@
 package org.logoce.lmf.model.lang;
 
-import java.lang.Boolean;
-import java.lang.String;
 import java.util.List;
 import org.logoce.lmf.model.api.feature.RawFeature;
 

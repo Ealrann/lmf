@@ -93,37 +93,4 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 
 		return builder.add(".build()").build();
 	}
-
-	private static CodeBlock generateGenericsCodeblock(final LMEntity<?> lmEntity)
-	{
-		return switch (lmEntity)
-		{
-			case Generic<?> generic ->
-			{
-				final var group = (Group<?>) generic.lmContainer();
-				final var model = (MetaModel) ModelUtils.root(group);
-				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
-				final var constantName = GenUtils.toConstantCase(group.name());
-				final var index = group.generics().indexOf(generic);
-				yield CodeBlock.builder()
-							   .add("() -> $T.Generics.$N.ALL.get($L)", modelDefinition, constantName, index)
-							   .build();
-			}
-			case Group<?> group ->
-			{
-				final var model = (MetaModel) ModelUtils.root(group);
-				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
-				final var constantName = GenUtils.toConstantCase(group.name());
-				yield CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
-			}
-			case JavaWrapper<?> javaWrapper ->
-			{
-				final var model = (MetaModel) ModelUtils.root(javaWrapper);
-				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
-				final var constantName = GenUtils.toConstantCase(javaWrapper.name());
-				yield CodeBlock.builder().add("() -> $T.JavaWrappers.$N", modelDefinition, constantName).build();
-			}
-			default -> throw new IllegalArgumentException("Unsupported generic parameter: " + lmEntity);
-		};
-	}
 }

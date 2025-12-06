@@ -1,11 +1,5 @@
 package org.logoce.lmf.model.lang;
 
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Float;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.String;
 import java.util.List;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.BuilderSupplier;

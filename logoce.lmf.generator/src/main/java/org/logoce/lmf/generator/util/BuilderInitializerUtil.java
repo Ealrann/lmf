@@ -1,13 +1,10 @@
 package org.logoce.lmf.generator.util;
 
 import com.squareup.javapoet.CodeBlock;
-import org.logoce.lmf.model.api.model.IFeaturedObject;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.generator.util.GenUtils;
-import org.logoce.lmf.generator.util.ConstantTypes;
-
 import java.util.List;
 import java.util.function.Predicate;
+import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.lang.Attribute;
 
 public final class BuilderInitializerUtil
 {
