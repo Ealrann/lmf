@@ -8,6 +8,10 @@ import java.util.List;
 
 public class RelationNotificationBuilder
 {
+	private RelationNotificationBuilder()
+	{
+	}
+
 	public static final Notification insert(LMObject notifier, RawFeature<?, ?> feature, LMObject newValue)
 	{
 		if (feature.many())

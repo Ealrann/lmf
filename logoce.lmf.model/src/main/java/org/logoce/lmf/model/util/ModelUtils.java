@@ -9,6 +9,10 @@ import java.util.stream.StreamSupport;
 
 public class ModelUtils
 {
+	public ModelUtils()
+	{
+	}
+
 	public static LMObject root(LMObject child)
 	{
 		if (child == null) return null;

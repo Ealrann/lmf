@@ -16,6 +16,7 @@ subprojects {
 
 	tasks.withType(JavaCompile).configureEach {
 		options.deprecation = true
+		options.compilerArgs += ['-Xlint:all']
 	}
 
 	repositories {

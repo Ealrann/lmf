@@ -14,6 +14,10 @@ public final class ReflectUtils
 	private static final Class<?>[] NO_TYPES = new Class<?>[0];
 	private static final Object[] NO_OBJECTS = new Object[0];
 
+	private ReflectUtils()
+	{
+	}
+
 	public static <T extends IAdapter> T constructNew(Class<T> classifier)
 	{
 		try

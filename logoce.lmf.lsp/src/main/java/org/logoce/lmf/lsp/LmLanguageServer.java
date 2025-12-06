@@ -163,9 +163,8 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	@Override
 	public CompletableFuture<InitializeResult> initialize(final InitializeParams params)
 	{
-		LOG.info("LMF LSP initialize: clientId={}, rootUri={}, projectRoot={}",
+		LOG.info("LMF LSP initialize: clientId={}, projectRoot={}",
 				 params.getClientInfo() != null ? params.getClientInfo().getName() : "unknown",
-				 params.getRootUri(),
 				 projectRoot);
 
 		final var capabilities = new ServerCapabilities();

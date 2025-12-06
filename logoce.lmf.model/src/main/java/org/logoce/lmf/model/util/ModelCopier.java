@@ -10,6 +10,10 @@ public final class ModelCopier
 {
 	private final Map<LMObject, LMObject> copies = new IdentityHashMap<>();
 
+	public ModelCopier()
+	{
+	}
+
 	public <T extends LMObject> T copyTree(final T root)
 	{
 		Objects.requireNonNull(root);

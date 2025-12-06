@@ -40,6 +40,10 @@ public final class FeatureMap<T>
 	{
 		private final List<FeatureTuple<T, ?>> features = new ArrayList<>();
 
+		public Builder()
+		{
+		}
+
 		public FeatureMap<T> build()
 		{
 			return new FeatureMap<>(List.copyOf(features));

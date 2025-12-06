@@ -7,6 +7,10 @@ public abstract class BasicAdaptable implements IAdaptable
 {
 	private BasicAdapterManager adapterManager = null;
 
+	protected BasicAdaptable()
+	{
+	}
+
 	@Override
 	public IAdapterManager adapterManager()
 	{

@@ -40,4 +40,8 @@ public final class DebugUtil
 			}
 		}
 	}
+
+	private DebugUtil()
+	{
+	}
 }

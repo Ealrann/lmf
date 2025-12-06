@@ -230,6 +230,7 @@ public final class DynamicModelPackage implements IModelPackage
 			return domainAttribute == null ? null : (String) get(domainAttribute);
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public java.util.List<String> imports()
 		{
@@ -238,6 +239,7 @@ public final class DynamicModelPackage implements IModelPackage
 											: (java.util.List<String>) get(importsAttribute);
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public java.util.List<String> metamodels()
 		{

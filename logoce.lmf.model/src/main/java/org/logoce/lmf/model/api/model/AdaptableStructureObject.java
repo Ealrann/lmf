@@ -24,6 +24,10 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	private BasicAdapterManager extenderManager = null;
 	private boolean loaded = false;
 
+	protected AdaptableStructureObject()
+	{
+	}
+
 	@Override
 	public final void eNotify(final Notification notification)
 	{

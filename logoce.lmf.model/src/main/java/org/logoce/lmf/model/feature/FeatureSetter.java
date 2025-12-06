@@ -29,6 +29,10 @@ public final class FeatureSetter<T>
 	{
 		private final FeatureMap.Builder<BiConsumer<T, ?>> builder = new FeatureMap.Builder<>();
 
+		public Builder()
+		{
+		}
+
 		public FeatureSetter<T> build()
 		{
 			return new FeatureSetter<>(builder.build());

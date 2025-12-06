@@ -23,6 +23,10 @@ public final class LMIterableLexer implements Iterable<PToken>
 	private boolean lexerNeedsReset = false;
 	private int resetIndex = 0;
 
+	public LMIterableLexer()
+	{
+	}
+
 	@Override
 	public Iterator<PToken> iterator()
 	{

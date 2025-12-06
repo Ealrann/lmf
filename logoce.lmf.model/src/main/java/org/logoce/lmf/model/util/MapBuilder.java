@@ -8,6 +8,10 @@ public class MapBuilder<K, V>
 {
 	private final List<Map.Entry<K, V>> entries = new ArrayList<>();
 
+	public MapBuilder()
+	{
+	}
+
 	public MapBuilder<K, V> add(K key, V value)
 	{
 		entries.add(Map.entry(key, value));

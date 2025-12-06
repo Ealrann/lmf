@@ -33,6 +33,10 @@ public final class FeatureBuilderInserter<T>
 	{
 		private final FeatureMap.Builder<BiConsumer<T, ? extends IFeaturedObject.Builder<?>>> builder = new FeatureMap.Builder<>();
 
+		public Builder()
+		{
+		}
+
 		public FeatureBuilderInserter<T> build()
 		{
 			return new FeatureBuilderInserter<>(builder.build());

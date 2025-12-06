@@ -30,6 +30,10 @@ public final class RelationLazyInserter<T>
 	{
 		private final FeatureMap.Builder<BiConsumer<T, ? extends Supplier<? extends LMObject>>> builder = new FeatureMap.Builder<>();
 
+		public Builder()
+		{
+		}
+
 		public RelationLazyInserter<T> build()
 		{
 			return new RelationLazyInserter<>(builder.build());

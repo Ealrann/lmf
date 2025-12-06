@@ -25,6 +25,10 @@ public final class FeatureGetter<T>
 	{
 		private final FeatureMap.Builder<Function<T, ?>> builder = new FeatureMap.Builder<>();
 
+		public Builder()
+		{
+		}
+
 		public FeatureGetter<T> build()
 		{
 			return new FeatureGetter<>(builder.build());

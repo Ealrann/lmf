@@ -193,6 +193,10 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 	protected static final class ContainmentUtils
 	{
+		private ContainmentUtils()
+		{
+		}
+
 		public static void setContainer(LMObject newContainer, LMObject child, RawFeature<?, ?> feature)
 		{
 			setContainerInternal(newContainer, child, feature);
