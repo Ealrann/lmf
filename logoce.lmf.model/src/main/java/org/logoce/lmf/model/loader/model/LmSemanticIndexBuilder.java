@@ -281,7 +281,98 @@ public final class LmSemanticIndexBuilder
 			});
 		}
 
+		// 6) Build references from model-level imports/metamodels attributes:
+		// these are string-valued features on LMCore's Model/MetaModel types
+		// that denote other models in the registry (for example
+		// "test.multi.GraphCore" or "test.model.CarCompany").
+		collectModelAttributeReferences(linkTrees,
+										registry,
+										owningModel,
+										symbolIds,
+										rootModel,
+										references,
+										source);
+
 		return new LmSymbolIndex(List.copyOf(declarations), List.copyOf(references));
+	}
+
+	private static void collectModelAttributeReferences(final List<? extends LinkNode<?, PNode>> linkTrees,
+													   final ModelRegistry registry,
+													   final Map<LMObject, Model> owningModel,
+													   final Map<LMObject, SymbolId> symbolIds,
+													   final Model rootModel,
+													   final List<ReferenceSpan> references,
+													   final CharSequence source)
+	{
+		for (final LinkNode<?, PNode> root : linkTrees)
+		{
+			if (!(root instanceof LinkNodeFull<?, PNode> fullRoot))
+			{
+				continue;
+			}
+
+			fullRoot.streamTree().forEach(node -> {
+				for (final ResolutionAttempt<Attribute<?, ?>> attempt : node.attributeResolutions())
+				{
+					final var feature = attempt.feature();
+					if (feature == null || feature.values().isEmpty())
+					{
+						continue;
+					}
+
+					final var resolution = attempt.resolution();
+					if (!(resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution))
+					{
+						continue;
+					}
+
+					final var lmFeature = attrResolution.feature();
+					if (lmFeature != LMCoreDefinition.Features.MODEL.IMPORTS &&
+						lmFeature != LMCoreDefinition.Features.MODEL.METAMODELS)
+					{
+						continue;
+					}
+
+					for (final String raw : feature.values())
+					{
+						if (raw == null)
+						{
+							continue;
+						}
+						final String name = raw.trim();
+						if (name.isEmpty())
+						{
+							continue;
+						}
+
+						final Model targetModel = registry.getModel(name);
+						if (targetModel == null)
+						{
+							continue;
+						}
+
+						if (!(targetModel instanceof LMObject targetObject))
+						{
+							continue;
+						}
+
+						final SymbolId targetId = getOrCreateSymbolId(targetObject, symbolIds, owningModel, rootModel);
+						if (targetId == null)
+						{
+							continue;
+						}
+
+						final var span = findValueSpan(name, node, source, false);
+						if (span == null)
+						{
+							continue;
+						}
+
+						references.add(new ReferenceSpan(targetId, span));
+					}
+				}
+			});
+		}
 	}
 
 	private static TextPositions.Span resolveReferenceSpan(final PFeature feature,

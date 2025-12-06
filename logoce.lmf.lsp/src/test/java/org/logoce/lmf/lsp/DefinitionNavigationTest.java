@@ -91,6 +91,74 @@ final class DefinitionNavigationTest
 	}
 
 	@Test
+	void goToDefinitionFromMetaModelImportsEntry() throws Exception
+	{
+		final Path corePath = Path.of("../logoce.lmf.generator/src/test/model/GraphCore.lm");
+		final Path extensionsPath = Path.of("../logoce.lmf.generator/src/test/model/GraphExtensions.lm");
+
+		final String coreText = Files.readString(corePath, StandardCharsets.UTF_8);
+		final String extensionsText = Files.readString(extensionsPath, StandardCharsets.UTF_8);
+
+		final URI coreUri = corePath.toAbsolutePath().toUri();
+		final URI extensionsUri = extensionsPath.toAbsolutePath().toUri();
+
+		final var server = new LmLanguageServer();
+		server.connect(new NoopClient());
+
+		final var coreState = new LmDocumentState(coreUri, 1, coreText);
+		final var extensionsState = new LmDocumentState(extensionsUri, 1, extensionsText);
+		server.workspaceIndex().putDocument(coreState);
+		server.workspaceIndex().putDocument(extensionsState);
+
+		server.worker().submit(server::rebuildWorkspace).get();
+
+		final Position importsRef = positionAt(extensionsText, "test.multi.GraphCore");
+		final var id = server.findTargetSymbol(extensionsUri, importsRef);
+
+		assertNotNull(id, "Expected a target symbol at 'test.multi.GraphCore' import reference");
+		assertEquals(LmSymbolKind.META_MODEL, id.kind(), "Expected META_MODEL symbol for import reference");
+		assertEquals("test.multi.GraphCore", id.modelKey().qualifiedName(), "Expected GraphCore meta-model as target");
+
+		server.shutdown().join();
+	}
+
+	@Test
+	void goToDefinitionFromMetamodelsEntryInM1Model() throws Exception
+	{
+		Path carCompanyPath = Path.of("../logoce.lmf.model/src/test/model/CarCompany.lm");
+		if (!Files.exists(carCompanyPath))
+		{
+			carCompanyPath = Path.of("logoce.lmf.model/src/test/model/CarCompany.lm");
+		}
+		final Path peugeotPath = Path.of("../logoce.lmf.model/src/test/model/Peugeot.lm");
+
+		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
+		final String peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
+
+		final URI carCompanyUri = carCompanyPath.toAbsolutePath().toUri();
+		final URI peugeotUri = peugeotPath.toAbsolutePath().toUri();
+
+		final var server = new LmLanguageServer();
+		server.connect(new NoopClient());
+
+		final var carCompanyState = new LmDocumentState(carCompanyUri, 1, carCompanyText);
+		final var peugeotState = new LmDocumentState(peugeotUri, 1, peugeotText);
+		server.workspaceIndex().putDocument(carCompanyState);
+		server.workspaceIndex().putDocument(peugeotState);
+
+		server.worker().submit(server::rebuildWorkspace).get();
+
+		final Position metamodelRef = positionAt(peugeotText, "test.model.CarCompany");
+		final var id = server.findTargetSymbol(peugeotUri, metamodelRef);
+
+		assertNotNull(id, "Expected a target symbol at 'test.model.CarCompany' metamodels reference");
+		assertEquals(LmSymbolKind.META_MODEL, id.kind(), "Expected META_MODEL symbol for metamodels reference");
+		assertEquals("test.model.CarCompany", id.modelKey().qualifiedName(), "Expected CarCompany meta-model as target");
+
+		server.shutdown().join();
+	}
+
+	@Test
 	void goToDefinitionNavigatesToNameToken() throws Exception
 	{
 		Path path = Path.of("logoce.lmf.model/src/test/model/CarCompany.lm");
