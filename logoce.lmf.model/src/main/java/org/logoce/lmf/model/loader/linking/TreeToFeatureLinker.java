@@ -5,7 +5,6 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.feature.ITokenResolver;
-import org.logoce.lmf.model.loader.linking.feature.RelationResolver;
 import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
 import org.logoce.lmf.model.util.ModelUtils;
 import org.logoce.lmf.model.util.ModelRegistry;

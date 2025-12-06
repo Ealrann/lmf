@@ -12,7 +12,6 @@ import org.logoce.lmf.model.lang.MetaModel;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
-import java.io.IOException;
 
 public class ModelPackage
 {

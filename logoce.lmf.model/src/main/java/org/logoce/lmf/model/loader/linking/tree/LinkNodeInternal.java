@@ -1,11 +1,9 @@
 package org.logoce.lmf.model.loader.linking.tree;
 
-import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.LinkNode;
-import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.parsing.PNode;
@@ -38,4 +36,3 @@ public interface LinkNodeInternal<T extends LMObject, I extends PNode, S extends
 	@Override
 	T build();
 }
-

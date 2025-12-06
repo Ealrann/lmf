@@ -6,26 +6,19 @@ import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.ModelKey;
 import org.logoce.lmf.lsp.state.ReferenceOccurrence;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.lsp.state.SymbolId;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.model.LmSemanticIndexBuilder;
 import org.logoce.lmf.model.loader.model.LmSymbolIndex;
-import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
 
 public final class SymbolIndexer
 {

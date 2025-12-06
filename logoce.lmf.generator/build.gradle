@@ -74,6 +74,11 @@ publishing {
 	}
 }
 
+tasks.withType(JavaCompile).configureEach {
+	// Silence javac lint about requiring the automatic module com.squareup.javapoet
+	options.compilerArgs += ['-Xlint:-requires-automatic']
+}
+
 sourceSets {
 	main {
 		java.srcDirs += ['src/main/model'

@@ -10,7 +10,6 @@ import org.logoce.lmf.model.lang.Group;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
-import java.io.IOException;
 
 public final class BuilderGenerator
 {

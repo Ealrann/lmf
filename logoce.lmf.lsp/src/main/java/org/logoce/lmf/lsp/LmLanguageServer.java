@@ -18,8 +18,6 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 import org.logoce.lmf.lsp.workspace.SymbolIndexer;
 import org.logoce.lmf.lsp.workspace.WorkspaceRebuilder;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
-import org.logoce.lmf.lsp.state.LmSymbolKind;
-import org.logoce.lmf.lsp.state.ModelKey;
 import org.logoce.lmf.lsp.state.SymbolId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +27,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class LmLanguageServer implements LanguageServer, LanguageClientAware
 {

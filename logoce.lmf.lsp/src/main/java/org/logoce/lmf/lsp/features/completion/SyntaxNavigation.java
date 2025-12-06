@@ -9,8 +9,6 @@ import org.logoce.lmf.model.resource.parsing.PToken;
 import org.logoce.lmf.model.util.TextPositions;
 import org.logoce.lmf.model.util.tree.Tree;
 
-import java.util.List;
-
 final class SyntaxNavigation
 {
 

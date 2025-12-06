@@ -5,8 +5,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
-import com.squareup.javapoet.WildcardTypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.feature.FeatureFieldBuilder;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
@@ -18,8 +16,6 @@ import org.logoce.lmf.generator.code.type.RelationManyListMethodBuilder;
 import org.logoce.lmf.generator.code.type.AttributeManyListMethodBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.DefaultValueUtil;
-import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 

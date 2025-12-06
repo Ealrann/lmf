@@ -8,6 +8,7 @@ buildscript {
 subprojects {
 
 	apply plugin: 'java-library'
+	apply plugin: 'checkstyle'
 
 	java {
 		sourceCompatibility = JavaVersion.VERSION_25
@@ -17,6 +18,17 @@ subprojects {
 	tasks.withType(JavaCompile).configureEach {
 		options.deprecation = true
 		options.compilerArgs += ['-Xlint:all']
+	}
+
+	checkstyle {
+		toolVersion = '12.2.0'
+		configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+		ignoreFailures = true
+		showViolations = true
+	}
+
+	tasks.withType(Checkstyle).configureEach {
+		exclude('**/module-info.java')
 	}
 
 	repositories {

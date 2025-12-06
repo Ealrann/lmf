@@ -12,7 +12,6 @@ import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.slf4j.Logger;

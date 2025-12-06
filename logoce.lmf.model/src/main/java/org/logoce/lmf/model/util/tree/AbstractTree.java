@@ -15,7 +15,7 @@ public abstract class AbstractTree<Y extends StructuredTree<Y>> implements Struc
 		this.children = List.of();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "this-escape"})
 	public AbstractTree(final Y parent, final Function<Y, List<Y>> childrenBuilder)
 	{
 		this.parent = parent;

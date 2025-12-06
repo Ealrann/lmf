@@ -10,6 +10,7 @@ public interface CodeInstaller<Input>
 	void install(Input input);
 
 	@SafeVarargs
+	@SuppressWarnings("varargs")
 	static <Input> CodeInstaller<Input> compose(CodeInstaller<Input>... installers)
 	{
 		return new ComposedCodeInstallers<>(List.of(installers));

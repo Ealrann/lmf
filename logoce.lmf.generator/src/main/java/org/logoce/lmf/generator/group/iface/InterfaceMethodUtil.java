@@ -10,8 +10,6 @@ import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.lang.Attribute;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

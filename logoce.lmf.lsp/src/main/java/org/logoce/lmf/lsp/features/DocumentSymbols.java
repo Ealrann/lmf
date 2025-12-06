@@ -14,7 +14,6 @@ import org.logoce.lmf.lsp.state.SymbolId;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.resource.parsing.PToken;
-import org.logoce.lmf.model.util.TextPositions;
 import org.logoce.lmf.model.util.tree.Tree;
 
 import java.util.ArrayList;

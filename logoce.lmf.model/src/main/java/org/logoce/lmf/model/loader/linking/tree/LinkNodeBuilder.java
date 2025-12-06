@@ -6,7 +6,6 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.LinkException;
 import org.logoce.lmf.model.loader.linking.ModelGroup;
 import org.logoce.lmf.model.loader.linking.TreeToFeatureLinker;
-import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
 import org.logoce.lmf.model.resource.interpretation.PGroup;
 import org.logoce.lmf.model.resource.interpretation.PType;
 import org.logoce.lmf.model.resource.parsing.PNode;

@@ -33,7 +33,6 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
 import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

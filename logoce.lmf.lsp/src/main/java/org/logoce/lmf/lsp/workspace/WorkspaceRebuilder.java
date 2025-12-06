@@ -2,8 +2,6 @@ package org.logoce.lmf.lsp.workspace;
 
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.logoce.lmf.lsp.state.LmDocumentState;
@@ -13,7 +11,6 @@ import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LinkException;
@@ -26,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.services.LanguageClient;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;

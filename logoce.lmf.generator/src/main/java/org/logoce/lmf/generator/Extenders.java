@@ -9,6 +9,10 @@ import java.util.List;
 
 public class Extenders implements IAdapterProvider
 {
+	public Extenders()
+	{
+	}
+
 	@Override
 	public List<Class<? extends IAdapter>> classifiers()
 	{
