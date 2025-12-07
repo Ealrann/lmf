@@ -31,8 +31,9 @@ public class ModelPackage
 
 	public void generate(final File target)
 	{
-		final var currentClass = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Package");
-		final var definitionName = model.name() + "Definition";
+		final var currentClass = ClassName.get(TargetPathUtil.packageName(model),
+											   model.name() + "ModelPackage");
+		final var definitionName = model.name() + "ModelDefinition";
 
 		final var packageClass = TypeSpec.classBuilder(currentClass)
 										 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)

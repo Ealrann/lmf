@@ -16,8 +16,8 @@ public interface OperationParameter extends Named {
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.OPERATION_PARAMETER.TYPE);
-    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.OPERATION_PARAMETER.PARAMETERS);
+    RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.OPERATION_PARAMETER.TYPE);
+    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.OPERATION_PARAMETER.PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<OperationParameter> {

@@ -2,7 +2,7 @@ package org.logoce.lmf.model.loader.linking;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
@@ -32,7 +32,7 @@ public final class LmModelLinker<I extends PNode>
 
 	public LmModelLinker(final ModelRegistry modelRegistry)
 	{
-		this(modelRegistry, List.of(LMCorePackage.Instance));
+		this(modelRegistry, List.of(LMCoreModelPackage.Instance));
 	}
 
 	public LmModelLinker(final ModelRegistry modelRegistry,

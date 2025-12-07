@@ -15,6 +15,7 @@ public final class ModelResolution implements IAdapter
 
 	private ModelResolution(final MetaModel model)
 	{
-		this.modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+		this.modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+											 model.name() + "ModelDefinition");
 	}
 }

@@ -17,10 +17,10 @@ public interface GenericParameter extends LMObject {
   List<GenericParameter> parameters();
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    RawFeature<Boolean, Boolean> wildcard = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.WILDCARD);
-    RawFeature<BoundType, BoundType> wildcardBoundType = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.WILDCARD_BOUND_TYPE);
-    RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.TYPE);
-    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GENERIC_PARAMETER.PARAMETERS);
+    RawFeature<Boolean, Boolean> wildcard = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.GENERIC_PARAMETER.WILDCARD);
+    RawFeature<BoundType, BoundType> wildcardBoundType = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.GENERIC_PARAMETER.WILDCARD_BOUND_TYPE);
+    RawFeature<Type<?>, Type<?>> type = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.GENERIC_PARAMETER.TYPE);
+    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GENERIC_PARAMETER.PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<GenericParameter> {

@@ -7,7 +7,7 @@ import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
@@ -44,7 +44,7 @@ public final class OperationParameterImpl extends FeaturedObject implements Oper
 
   @Override
   public Group<OperationParameter> lmGroup() {
-    return LMCoreDefinition.Groups.OPERATION_PARAMETER;
+    return LMCoreModelDefinition.Groups.OPERATION_PARAMETER;
   }
 
   @Override

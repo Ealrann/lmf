@@ -1,5 +1,6 @@
 package org.logoce.lmf.model.util;
 
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.Model;
 
 import java.util.Optional;
@@ -59,9 +60,9 @@ public final class ModelImports
 		}
 
 		// LMCore is implicitly available for all models.
-		if (org.logoce.lmf.model.lang.LMCorePackage.MODEL.name().equals(modelName))
+		if (LMCoreModelPackage.MODEL.name().equals(modelName))
 		{
-			final var lmCore = org.logoce.lmf.model.lang.LMCorePackage.MODEL;
+			final var lmCore = LMCoreModelPackage.MODEL;
 			return Optional.of(lmCore.domain() + "." + lmCore.name());
 		}
 

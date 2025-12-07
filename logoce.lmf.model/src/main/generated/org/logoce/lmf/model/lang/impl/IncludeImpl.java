@@ -8,7 +8,7 @@ import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Include;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 
 public final class IncludeImpl<T extends LMObject> extends FeaturedObject implements Include<T> {
@@ -36,7 +36,7 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject implem
 
   @Override
   public Group<Include<?>> lmGroup() {
-    return LMCoreDefinition.Groups.INCLUDE;
+    return LMCoreModelDefinition.Groups.INCLUDE;
   }
 
   @Override

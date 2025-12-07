@@ -15,8 +15,8 @@ public interface Include<T extends LMObject> extends LMObject {
   List<GenericParameter> parameters();
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    RawFeature<Group<?>, Group<?>> group = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.INCLUDE.GROUP);
-    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.INCLUDE.PARAMETERS);
+    RawFeature<Group<?>, Group<?>> group = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.INCLUDE.GROUP);
+    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.INCLUDE.PARAMETERS);
   }
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Include<T>> {

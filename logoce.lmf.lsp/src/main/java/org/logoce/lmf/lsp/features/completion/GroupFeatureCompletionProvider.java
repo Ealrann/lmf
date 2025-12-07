@@ -11,8 +11,8 @@ import org.logoce.lmf.model.loader.linking.FeatureResolution;
 import org.logoce.lmf.model.loader.linking.LinkNode;
 import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
@@ -124,7 +124,7 @@ final class GroupFeatureCompletionProvider
 			final var item = new CompletionItem(name);
 
 			final boolean isBooleanAttribute =
-				feature instanceof Attribute<?, ?> attr && attr.datatype() == LMCoreDefinition.Units.BOOLEAN;
+				feature instanceof Attribute<?, ?> attr && attr.datatype() == LMCoreModelDefinition.Units.BOOLEAN;
 
 			if (!isBooleanAttribute)
 			{
@@ -229,7 +229,7 @@ final class GroupFeatureCompletionProvider
 		}
 
 		// Always include LMCore groups as baseline candidates (Attribute, Relation, ...).
-		searchMetaModels.add(LMCorePackage.MODEL);
+		searchMetaModels.add(LMCoreModelPackage.MODEL);
 
 		// Map each containment relation to the list of concrete groups that can
 		// appear as children for that relation.

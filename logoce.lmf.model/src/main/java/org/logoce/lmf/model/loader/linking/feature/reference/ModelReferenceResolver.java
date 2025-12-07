@@ -2,7 +2,7 @@ package org.logoce.lmf.model.loader.linking.feature.reference;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
@@ -73,7 +73,7 @@ public final class ModelReferenceResolver implements ReferenceResolver
 		return ModelUtils.streamTree(model)
 						 .filter(o -> ModelUtils.isSubGroup(group, o.lmGroup()))
 						 .map(o -> (T) o)
-						 .filter(o -> o.get(LMCoreDefinition.Features.NAMED.NAME).equals(name))
+						 .filter(o -> o.get(LMCoreModelDefinition.Features.NAMED.NAME).equals(name))
 						 .findAny()
 						 .map(o -> new ModelExplorer.StaticReferenceResolution<>(relation, o));
 	}

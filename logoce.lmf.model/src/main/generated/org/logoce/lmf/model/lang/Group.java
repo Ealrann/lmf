@@ -21,12 +21,12 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
 
   interface Features<T extends Features<T>> extends Type.Features<T>, Concept.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<Boolean, Boolean> concrete = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.CONCRETE);
-    RawFeature<Include<?>, List<Include<?>>> includes = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.INCLUDES);
-    RawFeature<Feature<?, ?>, List<Feature<?, ?>>> features = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.FEATURES);
-    RawFeature<Generic<?>, List<Generic<?>>> generics = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.GENERICS);
-    RawFeature<Operation, List<Operation>> operations = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.GROUP.OPERATIONS);
-    RawFeature<BuilderSupplier<?>, BuilderSupplier<?>> lmBuilder = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.GROUP.LM_BUILDER);
+    RawFeature<Boolean, Boolean> concrete = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.GROUP.CONCRETE);
+    RawFeature<Include<?>, List<Include<?>>> includes = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GROUP.INCLUDES);
+    RawFeature<Feature<?, ?>, List<Feature<?, ?>>> features = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GROUP.FEATURES);
+    RawFeature<Generic<?>, List<Generic<?>>> generics = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GROUP.GENERICS);
+    RawFeature<Operation, List<Operation>> operations = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GROUP.OPERATIONS);
+    RawFeature<BuilderSupplier<?>, BuilderSupplier<?>> lmBuilder = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.GROUP.LM_BUILDER);
   }
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Group<T>> {

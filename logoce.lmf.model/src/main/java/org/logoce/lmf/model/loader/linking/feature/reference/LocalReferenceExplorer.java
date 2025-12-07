@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.loader.linking.feature.reference;
 
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.FeatureResolution;
@@ -135,7 +135,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 				   .map(ResolutionAttempt::resolution)
 				   .filter(AttributeResolver.AttributeResolution.class::isInstance)
 				   .map(AttributeResolver.AttributeResolution.class::cast)
-				   .filter(r -> r.feature() == LMCoreDefinition.Features.NAMED.NAME)
+				   .filter(r -> r.feature() == LMCoreModelDefinition.Features.NAMED.NAME)
 				   .anyMatch(r -> name.equals(r.value()));
 	}
 }

@@ -15,8 +15,8 @@ public interface JavaWrapper<T> extends Datatype<T> {
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<String, String> qualifiedClassName = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.JAVA_WRAPPER.QUALIFIED_CLASS_NAME);
-    RawFeature<Serializer, Serializer> serializer = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.JAVA_WRAPPER.SERIALIZER);
+    RawFeature<String, String> qualifiedClassName = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.JAVA_WRAPPER.QUALIFIED_CLASS_NAME);
+    RawFeature<Serializer, Serializer> serializer = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.JAVA_WRAPPER.SERIALIZER);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<JavaWrapper<T>> {

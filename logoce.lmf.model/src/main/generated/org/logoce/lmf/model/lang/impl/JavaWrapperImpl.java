@@ -5,7 +5,7 @@ import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
 public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrapper<T> {
@@ -41,7 +41,7 @@ public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrap
 
   @Override
   public Group<JavaWrapper<?>> lmGroup() {
-    return LMCoreDefinition.Groups.JAVA_WRAPPER;
+    return LMCoreModelDefinition.Groups.JAVA_WRAPPER;
   }
 
   @Override

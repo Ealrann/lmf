@@ -8,7 +8,7 @@ import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericParameterImpl extends FeaturedObject implements GenericParameter {
@@ -51,7 +51,7 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
 
   @Override
   public Group<GenericParameter> lmGroup() {
-    return LMCoreDefinition.Groups.GENERIC_PARAMETER;
+    return LMCoreModelDefinition.Groups.GENERIC_PARAMETER;
   }
 
   @Override

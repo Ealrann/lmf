@@ -133,14 +133,16 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 						throw new IllegalStateException("Generic " + generic.name() + " not found in container");
 					}
 					final var model = (MetaModel) ModelUtils.root(group);
-					final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+					final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+															  model.name() + "ModelDefinition");
 					final var groupConstantName = GenUtils.toConstantCase(group.name());
 					return CodeBlock.of("$T.Generics.$N.ALL.get($L)", modelDefinition, groupConstantName, index);
 				}
 			}
 
 			final var model = (MetaModel) ModelUtils.root(type);
-			final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+			final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+													  model.name() + "ModelDefinition");
 			final var typeConstantName = GenUtils.toConstantCase(type.name());
 			final var typeHolder = TypeResolutionUtil.resolveTypeHolder(type);
 			if (typeHolder == null)

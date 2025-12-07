@@ -8,7 +8,7 @@ import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Unit;
@@ -114,7 +114,7 @@ final class TypeCompletionProvider
 	private static List<CompletionItem> basicCompletions()
 	{
 		final List<CompletionItem> items = new ArrayList<>();
-		final MetaModel lmCore = LMCorePackage.MODEL;
+		final MetaModel lmCore = LMCoreModelPackage.MODEL;
 
 		for (final Group<?> group : lmCore.groups())
 		{
@@ -503,12 +503,12 @@ final class TypeCompletionProvider
 		for (final Model model : (Iterable<Model>) registry.models()::iterator)
 		{
 			if (model instanceof MetaModel mm &&
-				LMCorePackage.MODEL.domain().equals(mm.domain()) &&
-				LMCorePackage.MODEL.name().equals(mm.name()))
+				LMCoreModelPackage.MODEL.domain().equals(mm.domain()) &&
+				LMCoreModelPackage.MODEL.name().equals(mm.name()))
 			{
 				return mm;
 			}
 		}
-		return LMCorePackage.MODEL;
+		return LMCoreModelPackage.MODEL;
 	}
 }

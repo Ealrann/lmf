@@ -10,7 +10,7 @@ import org.logoce.lmf.model.lang.Datatype;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
   private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(Attribute.Features.name, Attribute::name).add(Attribute.Features.immutable, Attribute::immutable).add(Attribute.Features.many, Attribute::many).add(Attribute.Features.mandatory, Attribute::mandatory).add(Attribute.Features.parameters, Attribute::parameters).add(Attribute.Features.rawFeature, Attribute::rawFeature).add(Attribute.Features.datatype, Attribute::datatype).add(Attribute.Features.defaultValue, Attribute::defaultValue).build();
@@ -82,7 +82,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 
   @Override
   public Group<Attribute<?, ?>> lmGroup() {
-    return LMCoreDefinition.Groups.ATTRIBUTE;
+    return LMCoreModelDefinition.Groups.ATTRIBUTE;
   }
 
   @Override

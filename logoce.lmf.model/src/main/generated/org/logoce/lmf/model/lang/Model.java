@@ -10,8 +10,8 @@ public interface Model extends Named {
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.MODEL.DOMAIN);
-    RawFeature<String, List<String>> imports = new RawFeature<>(true,false,() -> LMCoreDefinition.Features.MODEL.IMPORTS);
-    RawFeature<String, List<String>> metamodels = new RawFeature<>(true,false,() -> LMCoreDefinition.Features.MODEL.METAMODELS);
+    RawFeature<String, String> domain = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.MODEL.DOMAIN);
+    RawFeature<String, List<String>> imports = new RawFeature<>(true,false,() -> LMCoreModelDefinition.Features.MODEL.IMPORTS);
+    RawFeature<String, List<String>> metamodels = new RawFeature<>(true,false,() -> LMCoreModelDefinition.Features.MODEL.METAMODELS);
   }
 }

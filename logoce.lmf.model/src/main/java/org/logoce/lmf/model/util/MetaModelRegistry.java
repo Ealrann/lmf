@@ -31,7 +31,7 @@ public final class MetaModelRegistry
 	{
 		final var res = new HashMap<String, IModelPackage>();
 
-		final var p = LMCorePackage.Instance;
+		final var p = LMCoreModelPackage.Instance;
 		res.put(p.model().name(), p);
 
 		return res;

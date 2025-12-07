@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Include;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 
@@ -78,7 +78,7 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 
   @Override
   public Group<Group<?>> lmGroup() {
-    return LMCoreDefinition.Groups.GROUP;
+    return LMCoreModelDefinition.Groups.GROUP;
   }
 
   @Override

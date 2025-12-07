@@ -6,7 +6,7 @@ import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Generic;
 import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
   private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(Generic.Features.name, Generic::name).add(Generic.Features.extension, Generic::extension).build();
@@ -33,7 +33,7 @@ public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
 
   @Override
   public Group<Generic<?>> lmGroup() {
-    return LMCoreDefinition.Groups.GENERIC;
+    return LMCoreModelDefinition.Groups.GENERIC;
   }
 
   @Override

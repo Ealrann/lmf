@@ -21,8 +21,8 @@ public interface Attribute<UnaryType, EffectiveType> extends Feature<UnaryType, 
     RawFeature<Boolean, Boolean> mandatory = Feature.Features.mandatory;
     RawFeature<GenericParameter, List<GenericParameter>> parameters = Feature.Features.parameters;
     RawFeature<RawFeature<?, ?>, RawFeature<?, ?>> rawFeature = Feature.Features.rawFeature;
-    RawFeature<Datatype<?>, Datatype<?>> datatype = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.ATTRIBUTE.DATATYPE);
-    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.ATTRIBUTE.DEFAULT_VALUE);
+    RawFeature<Datatype<?>, Datatype<?>> datatype = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.ATTRIBUTE.DATATYPE);
+    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.ATTRIBUTE.DEFAULT_VALUE);
   }
 
   interface Builder<UnaryType, EffectiveType> extends IFeaturedObject.Builder<Attribute<UnaryType, EffectiveType>> {

@@ -1,7 +1,7 @@
 package org.logoce.lmf.lsp.workspace;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LmModelLinker;
@@ -42,7 +42,7 @@ final class SemanticLinking
 		}
 
 		final var metaModelPackages = new ArrayList<IModelPackage>();
-		metaModelPackages.add(LMCorePackage.Instance);
+		metaModelPackages.add(LMCoreModelPackage.Instance);
 
 		for (final MetaModel mm : activeMetaModels)
 		{

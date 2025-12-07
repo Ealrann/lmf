@@ -14,9 +14,9 @@ public interface Serializer extends LMObject {
   String convert();
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.DEFAULT_VALUE);
-    RawFeature<String, String> create = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.CREATE);
-    RawFeature<String, String> convert = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.SERIALIZER.CONVERT);
+    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.SERIALIZER.DEFAULT_VALUE);
+    RawFeature<String, String> create = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.SERIALIZER.CREATE);
+    RawFeature<String, String> convert = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.SERIALIZER.CONVERT);
   }
 
   interface Builder extends IFeaturedObject.Builder<Serializer> {

@@ -4,7 +4,7 @@ import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
 public final class SerializerImpl extends FeaturedObject implements Serializer {
@@ -38,7 +38,7 @@ public final class SerializerImpl extends FeaturedObject implements Serializer {
 
   @Override
   public Group<Serializer> lmGroup() {
-    return LMCoreDefinition.Groups.SERIALIZER;
+    return LMCoreModelDefinition.Groups.SERIALIZER;
   }
 
   @Override

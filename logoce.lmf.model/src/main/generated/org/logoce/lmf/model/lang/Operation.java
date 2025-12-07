@@ -18,10 +18,10 @@ public interface Operation extends Named {
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<String, String> content = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.OPERATION.CONTENT);
-    RawFeature<Type<?>, Type<?>> returnType = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.OPERATION.RETURN_TYPE);
-    RawFeature<GenericParameter, List<GenericParameter>> returnTypeParameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.OPERATION.RETURN_TYPE_PARAMETERS);
-    RawFeature<OperationParameter, List<OperationParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.OPERATION.PARAMETERS);
+    RawFeature<String, String> content = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.OPERATION.CONTENT);
+    RawFeature<Type<?>, Type<?>> returnType = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.OPERATION.RETURN_TYPE);
+    RawFeature<GenericParameter, List<GenericParameter>> returnTypeParameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.OPERATION.RETURN_TYPE_PARAMETERS);
+    RawFeature<OperationParameter, List<OperationParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.OPERATION.PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<Operation> {

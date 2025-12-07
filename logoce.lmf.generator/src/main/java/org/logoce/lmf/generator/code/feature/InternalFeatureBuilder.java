@@ -76,7 +76,7 @@ public class InternalFeatureBuilder
 	private static CodeBlock localInitializer(final Feature<?, ?> feature, final Group<?> owner)
 	{
 		final var model = (MetaModel) ModelUtils.root(owner);
-		final var definitionFile = model.name() + "Definition";
+		final var definitionFile = model.name() + "ModelDefinition";
 		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), definitionFile);
 		final var group = owner;
 		final var many = feature.many();

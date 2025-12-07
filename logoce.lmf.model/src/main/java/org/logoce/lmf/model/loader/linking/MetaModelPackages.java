@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.loader.linking;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
@@ -60,14 +60,14 @@ public final class MetaModelPackages
 	{
 		if (roots.isEmpty())
 		{
-			return List.of(LMCorePackage.Instance);
+			return List.of(LMCoreModelPackage.Instance);
 		}
 
 		final var rootNode = roots.getFirst().data();
 		final var metamodelNames = ModelHeaderUtil.resolveMetamodelNames(rootNode);
 		if (metamodelNames.isEmpty())
 		{
-			return List.of(LMCorePackage.Instance);
+			return List.of(LMCoreModelPackage.Instance);
 		}
 
 		final var packages = new ArrayList<IModelPackage>();
@@ -80,7 +80,7 @@ public final class MetaModelPackages
 			}
 		}
 
-		return packages.isEmpty() ? List.of(LMCorePackage.Instance) : List.copyOf(packages);
+		return packages.isEmpty() ? List.of(LMCoreModelPackage.Instance) : List.copyOf(packages);
 	}
 
 	public static IModelPackage resolveModelPackage(final MetaModel metaModel)

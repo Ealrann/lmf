@@ -1,7 +1,7 @@
 package org.logoce.lmf.lsp.features.completion;
 
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *       return the first {@link MetaModel} found.</li>
  *   <li>If no {@code metamodels} are declared and the semantic root model is itself a
  *       {@link MetaModel}, return it.</li>
- *   <li>If nothing matches, fall back to {@link LMCorePackage#MODEL} so that LMCore editing
+ *   <li>If nothing matches, fall back to {@link LMCoreModelPackage#MODEL} so that LMCore editing
  *       remains supported even with an empty registry.</li>
  * </ul>
  */
@@ -95,7 +95,7 @@ public final class MetaModelResolver
 					// registry; fall back to LMCore so that basic tooling remains usable.
 					LOG.debug("LMF LSP MetaModelResolver: header metamodels {} not found in registry, using LMCore",
 							 metamodelNames);
-					return LMCorePackage.MODEL;
+					return LMCoreModelPackage.MODEL;
 				}
 
 				// No explicit metamodels declared. For M1-style documents where the root
@@ -171,7 +171,7 @@ public final class MetaModelResolver
 
 					LOG.debug("LMF LSP MetaModelResolver: header metamodels {} (text scan) not found in registry, using LMCore",
 							 namesFromText);
-					return LMCorePackage.MODEL;
+					return LMCoreModelPackage.MODEL;
 				}
 			}
 		}
@@ -184,7 +184,7 @@ public final class MetaModelResolver
 		}
 
 		LOG.debug("LMF LSP MetaModelResolver: falling back to LMCore meta-model");
-		return LMCorePackage.MODEL;
+		return LMCoreModelPackage.MODEL;
 	}
 
 	private static java.util.List<String> parseMetamodelNamesFromSource(final CharSequence source)

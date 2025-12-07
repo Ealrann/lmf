@@ -2,7 +2,7 @@ package org.logoce.lmf.model.loader.linking.feature.reference;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.LmLoader;
@@ -27,7 +27,7 @@ final class RelationReferenceCompletionsM1Test
 	void localCandidatesFromM1LinkTreesEvenWithoutOwningModel() throws Exception
 	{
 		final var registryBuilder = new ModelRegistry.Builder();
-		registryBuilder.register(LMCorePackage.MODEL);
+		registryBuilder.register(LMCoreModelPackage.MODEL);
 		registryBuilder.register(CarCompanyPackage.MODEL);
 		final var registry = registryBuilder.build();
 
@@ -62,7 +62,7 @@ final class RelationReferenceCompletionsM1Test
 	void crossModelCandidatesFromMetamodelHeaderComeFromRegistry() throws Exception
 	{
 		final var registryBuilder = new ModelRegistry.Builder();
-		registryBuilder.register(LMCorePackage.MODEL);
+		registryBuilder.register(LMCoreModelPackage.MODEL);
 		registryBuilder.register(CarCompanyPackage.MODEL);
 		final var registry = registryBuilder.build();
 

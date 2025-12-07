@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.loader.linking.feature.reference;
 
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
@@ -92,7 +92,7 @@ public final class RelationReferenceCompletions
 		collectFromMetamodelsInHeader(linkTrees, registry, conceptGroup, seenLabels, result);
 
 		// 3) LMCore is implicitly available as a cross-model source.
-		collectFromModel(LMCorePackage.MODEL, owningModel, conceptGroup, seenLabels, result, false);
+		collectFromModel(LMCoreModelPackage.MODEL, owningModel, conceptGroup, seenLabels, result, false);
 
 		return List.copyOf(result);
 	}
@@ -203,7 +203,7 @@ public final class RelationReferenceCompletions
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				attrResolution.feature() == LMCoreDefinition.Features.NAMED.NAME)
+				attrResolution.feature() == LMCoreModelDefinition.Features.NAMED.NAME)
 			{
 				return attrResolution.value();
 			}
@@ -238,7 +238,7 @@ public final class RelationReferenceCompletions
 			final Object value;
 			try
 			{
-				value = object.get(LMCoreDefinition.Features.NAMED.NAME);
+				value = object.get(LMCoreModelDefinition.Features.NAMED.NAME);
 			}
 			catch (Exception e)
 			{

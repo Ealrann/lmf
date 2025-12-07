@@ -10,8 +10,8 @@ import org.logoce.lmf.model.lang.Concept;
 import org.logoce.lmf.model.lang.Datatype;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
@@ -184,13 +184,13 @@ final class CompletionContextResolver
 			final Group<?> conceptGroup = relationConcept.lmGroup();
 
 			if (relationConcept instanceof Datatype<?> ||
-				ModelUtils.isSubGroup(LMCoreDefinition.Groups.DATATYPE, conceptGroup))
+				ModelUtils.isSubGroup(LMCoreModelDefinition.Groups.DATATYPE, conceptGroup))
 			{
 				return TypeUsageKind.DATATYPE;
 			}
 
-			if (ModelUtils.isSubGroup(LMCoreDefinition.Groups.CONCEPT, conceptGroup) ||
-				ModelUtils.isSubGroup(LMCoreDefinition.Groups.TYPE, conceptGroup))
+			if (ModelUtils.isSubGroup(LMCoreModelDefinition.Groups.CONCEPT, conceptGroup) ||
+				ModelUtils.isSubGroup(LMCoreModelDefinition.Groups.TYPE, conceptGroup))
 			{
 				return TypeUsageKind.CONCEPT;
 			}
@@ -382,7 +382,7 @@ final class CompletionContextResolver
 			}
 
 			// 2) Direct group name in LMCore (MetaModel, Group, Definition, Enum, Unit, JavaWrapper, Alias, Attribute, Relation, ...).
-			final MetaModel lmCore = LMCorePackage.MODEL;
+			final MetaModel lmCore = LMCoreModelPackage.MODEL;
 			for (final Group<?> g : lmCore.groups())
 			{
 				if (keyword.equals(g.name()))

@@ -26,14 +26,14 @@ public interface MetaModel extends Model {
     RawFeature<String, String> domain = Model.Features.domain;
     RawFeature<String, List<String>> imports = Model.Features.imports;
     RawFeature<String, List<String>> metamodels = Model.Features.metamodels;
-    RawFeature<Group<?>, List<Group<?>>> groups = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.GROUPS);
-    RawFeature<Enum<?>, List<Enum<?>>> enums = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.ENUMS);
-    RawFeature<Unit<?>, List<Unit<?>>> units = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.UNITS);
-    RawFeature<Alias, List<Alias>> aliases = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.ALIASES);
-    RawFeature<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RawFeature<>(true,true,() -> LMCoreDefinition.Features.META_MODEL.JAVA_WRAPPERS);
-    RawFeature<IModelPackage, IModelPackage> lmPackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.LM_PACKAGE);
-    RawFeature<Boolean, Boolean> genNamePackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.GEN_NAME_PACKAGE);
-    RawFeature<String, String> extraPackage = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.META_MODEL.EXTRA_PACKAGE);
+    RawFeature<Group<?>, List<Group<?>>> groups = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.META_MODEL.GROUPS);
+    RawFeature<Enum<?>, List<Enum<?>>> enums = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.META_MODEL.ENUMS);
+    RawFeature<Unit<?>, List<Unit<?>>> units = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.META_MODEL.UNITS);
+    RawFeature<Alias, List<Alias>> aliases = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.META_MODEL.ALIASES);
+    RawFeature<JavaWrapper<?>, List<JavaWrapper<?>>> javaWrappers = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.META_MODEL.JAVA_WRAPPERS);
+    RawFeature<IModelPackage, IModelPackage> lmPackage = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.META_MODEL.LM_PACKAGE);
+    RawFeature<Boolean, Boolean> genNamePackage = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.META_MODEL.GEN_NAME_PACKAGE);
+    RawFeature<String, String> extraPackage = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.META_MODEL.EXTRA_PACKAGE);
   }
 
   interface Builder extends IFeaturedObject.Builder<MetaModel> {

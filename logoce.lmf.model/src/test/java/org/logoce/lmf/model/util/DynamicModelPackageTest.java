@@ -3,7 +3,7 @@ package org.logoce.lmf.model.util;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Attribute;
@@ -123,7 +123,7 @@ public final class DynamicModelPackageTest
 		final var dynamicPackage = new DynamicModelPackage(carCompanyMetaModel);
 
 		final var registryBuilder = new ModelRegistry.Builder();
-		registryBuilder.register(LMCorePackage.MODEL);
+		registryBuilder.register(LMCoreModelPackage.MODEL);
 		registryBuilder.register(carCompanyMetaModel);
 		final var registry = registryBuilder.build();
 
@@ -211,7 +211,7 @@ public final class DynamicModelPackageTest
 
 		final String lmCoreSource = Files.readString(lmCorePath, StandardCharsets.UTF_8);
 
-		final var lmCoreMetaModel = LMCorePackage.MODEL;
+		final var lmCoreMetaModel = LMCoreModelPackage.MODEL;
 		final var dynamicPackage = new DynamicModelPackage(lmCoreMetaModel);
 
 		final var registryBuilder = new ModelRegistry.Builder();

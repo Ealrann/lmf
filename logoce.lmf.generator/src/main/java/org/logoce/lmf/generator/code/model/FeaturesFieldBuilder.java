@@ -79,7 +79,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 								if (typeModel != parentModel)
 							{
 								final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
-																		  typeModel.name() + "Definition");
+																		  typeModel.name() + "ModelDefinition");
 								datatypeBlock = CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeName);
 							}
 							else
@@ -113,7 +113,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						if (typeModel != parentModel)
 						{
 							final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
-																	  typeModel.name() + "Definition");
+																	  typeModel.name() + "ModelDefinition");
 							datatypeBlock = CodeBlock.of("$T.$N.$N", modelDefinition, typeHolder, typeName);
 						}
 						else
@@ -154,7 +154,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	{
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) group.lmContainer();
-		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+												  model.name() + "ModelDefinition");
 		final var constantGroupName = GenUtils.toConstantCase(group.name());
 		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
 
@@ -180,7 +181,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			{
 				final var model = (MetaModel) ModelUtils.root(group);
 				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
-														  model.name() + "Definition");
+														  model.name() + "ModelDefinition");
 				final var constantName = GenUtils.toConstantCase(group.name());
 				return CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
 			}
@@ -198,7 +199,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	{
 		final var group = (Group<?>) generic.lmContainer();
 		final var model = (MetaModel) ModelUtils.root(group);
-		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+												  model.name() + "ModelDefinition");
 		final var constantName = GenUtils.toConstantCase(group.name());
 		final var index = group.generics().indexOf(generic);
 		return CodeBlock.builder()
@@ -219,14 +221,16 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			case Group<?> group ->
 			{
 				final var model = (MetaModel) ModelUtils.root(group);
-				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+														  model.name() + "ModelDefinition");
 				final var constantName = GenUtils.toConstantCase(group.name());
 				yield CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
 			}
 			case JavaWrapper<?> javaWrapper ->
 			{
 				final var model = (MetaModel) ModelUtils.root(javaWrapper);
-				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), model.name() + "Definition");
+				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+														  model.name() + "ModelDefinition");
 				final var constantName = GenUtils.toConstantCase(javaWrapper.name());
 				yield CodeBlock.builder().add("() -> $T.JavaWrappers.$N", modelDefinition, constantName).build();
 			}

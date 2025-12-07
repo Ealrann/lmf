@@ -22,9 +22,9 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
     RawFeature<Boolean, Boolean> mandatory = Feature.Features.mandatory;
     RawFeature<GenericParameter, List<GenericParameter>> parameters = Feature.Features.parameters;
     RawFeature<RawFeature<?, ?>, RawFeature<?, ?>> rawFeature = Feature.Features.rawFeature;
-    RawFeature<Concept<?>, Concept<?>> concept = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.RELATION.CONCEPT);
-    RawFeature<Boolean, Boolean> lazy = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.RELATION.LAZY);
-    RawFeature<Boolean, Boolean> contains = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.RELATION.CONTAINS);
+    RawFeature<Concept<?>, Concept<?>> concept = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.RELATION.CONCEPT);
+    RawFeature<Boolean, Boolean> lazy = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.RELATION.LAZY);
+    RawFeature<Boolean, Boolean> contains = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.RELATION.CONTAINS);
   }
 
   interface Builder<UnaryType extends LMObject, EffectiveType> extends IFeaturedObject.Builder<Relation<UnaryType, EffectiveType>> {

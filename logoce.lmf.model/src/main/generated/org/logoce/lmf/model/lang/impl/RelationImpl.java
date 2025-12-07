@@ -10,7 +10,7 @@ import org.logoce.lmf.model.lang.Concept;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
@@ -91,7 +91,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
 
   @Override
   public Group<Relation<?, ?>> lmGroup() {
-    return LMCoreDefinition.Groups.RELATION;
+    return LMCoreModelDefinition.Groups.RELATION;
   }
 
   @Override

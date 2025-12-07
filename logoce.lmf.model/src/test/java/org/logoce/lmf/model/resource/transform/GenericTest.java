@@ -3,7 +3,7 @@ package org.logoce.lmf.model.resource.transform;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.Generic;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.LmLoader;
@@ -29,7 +29,7 @@ public class GenericTest
 		assertEquals("UnaryType", generic.name());
 		assertNotNull(generic.extension());
 		assertEquals(BoundType.Extends, generic.extension().boundType());
-		assertEquals(generic.extension().type(), LMCorePackage.MODEL.groups().get(0));
+		assertEquals(generic.extension().type(), LMCoreModelPackage.MODEL.groups().get(0));
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class GenericTest
 		final var generic = container.generics().get(0);
 		assertNotNull(generic.extension());
 		assertEquals(BoundType.Extends, generic.extension().boundType());
-		assertEquals(generic.extension().type(), LMCorePackage.MODEL.groups().get(0));
+		assertEquals(generic.extension().type(), LMCoreModelPackage.MODEL.groups().get(0));
 
 		assertEquals(car, carContainer.includes().get(0).parameters().get(0).type());
 	}
@@ -132,6 +132,6 @@ public class GenericTest
 
 		assertNotNull(genericOfContainer.extension());
 		assertEquals(BoundType.Extends, genericOfContainer.extension().boundType());
-		assertEquals(genericOfContainer.extension().type(), LMCorePackage.MODEL.groups().get(0));
+		assertEquals(genericOfContainer.extension().type(), LMCoreModelPackage.MODEL.groups().get(0));
 	}
 }

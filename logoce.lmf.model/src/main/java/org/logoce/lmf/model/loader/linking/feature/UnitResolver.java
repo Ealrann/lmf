@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.loader.linking.feature;
 
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.loader.linking.FeatureResolution;
 
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public final class UnitResolver<T> extends AttributeResolver
 {
-	private static final Pattern ROOT_MATCHER = Pattern.compile(LMCoreDefinition.Units.MATCHER.matcher());
+	private static final Pattern ROOT_MATCHER = Pattern.compile(LMCoreModelDefinition.Units.MATCHER.matcher());
 
 	private final Pattern matcherPattern;
 	private final Pattern extractorPattern;

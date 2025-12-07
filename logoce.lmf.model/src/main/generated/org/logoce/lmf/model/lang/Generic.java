@@ -14,7 +14,7 @@ public interface Generic<T> extends Concept<T>, Datatype<T> {
 
   interface Features<T extends Features<T>> extends Concept.Features<T>, Datatype.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreDefinition.Features.GENERIC.EXTENSION);
+    RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.GENERIC.EXTENSION);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<Generic<T>> {

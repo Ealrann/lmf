@@ -4,7 +4,7 @@ import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 
@@ -54,7 +54,7 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
 
   @Override
   public Group<Unit<?>> lmGroup() {
-    return LMCoreDefinition.Groups.UNIT;
+    return LMCoreModelDefinition.Groups.UNIT;
   }
 
   @Override

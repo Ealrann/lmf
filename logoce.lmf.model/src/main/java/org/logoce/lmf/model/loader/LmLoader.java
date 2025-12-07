@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.loader;
 
 import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
@@ -73,7 +73,7 @@ public final class LmLoader
 									  : modelRegistry;
 
 		final var metaPackages = isMetaModelRoot
-								 ? List.<IModelPackage>of(LMCorePackage.Instance)
+								 ? List.<IModelPackage>of(LMCoreModelPackage.Instance)
 								 : MetaModelPackages.resolve(roots, effectiveRegistry);
 
 		final var linker = new LmModelLinker<PNode>(effectiveRegistry, metaPackages);
@@ -147,7 +147,7 @@ public final class LmLoader
 		}
 
 		final var metaPackages = ModelHeaderUtil.isMetaModelRoot(roots)
-								 ? List.<IModelPackage>of(LMCorePackage.Instance)
+								 ? List.<IModelPackage>of(LMCoreModelPackage.Instance)
 								 : MetaModelPackages.resolve(roots, modelRegistry);
 
 		final var linker = new LmModelLinker<PNode>(modelRegistry, metaPackages);
@@ -197,14 +197,14 @@ public final class LmLoader
 
 	private static ModelRegistry ensureLmCore(final ModelRegistry registry)
 	{
-		final var existing = registry.getModel(LMCorePackage.MODEL.domain(), LMCorePackage.MODEL.name());
+		final var existing = registry.getModel(LMCoreModelPackage.MODEL.domain(), LMCoreModelPackage.MODEL.name());
 		if (existing != null)
 		{
 			return registry;
 		}
 
 		final var builder = new ModelRegistry.Builder(registry);
-		builder.register(LMCorePackage.MODEL);
+		builder.register(LMCoreModelPackage.MODEL);
 		return builder.build();
 	}
 

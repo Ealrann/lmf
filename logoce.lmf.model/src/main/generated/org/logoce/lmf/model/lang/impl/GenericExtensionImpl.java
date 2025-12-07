@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.BoundType;
 import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
@@ -45,7 +45,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
 
   @Override
   public Group<GenericExtension> lmGroup() {
-    return LMCoreDefinition.Groups.GENERIC_EXTENSION;
+    return LMCoreModelDefinition.Groups.GENERIC_EXTENSION;
   }
 
   @Override

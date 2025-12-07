@@ -16,10 +16,10 @@ public interface Unit<T> extends Datatype<T> {
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<String, String> matcher = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.UNIT.MATCHER);
-    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.UNIT.DEFAULT_VALUE);
-    RawFeature<Primitive, Primitive> primitive = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.UNIT.PRIMITIVE);
-    RawFeature<String, String> extractor = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.UNIT.EXTRACTOR);
+    RawFeature<String, String> matcher = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.UNIT.MATCHER);
+    RawFeature<String, String> defaultValue = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.UNIT.DEFAULT_VALUE);
+    RawFeature<Primitive, Primitive> primitive = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.UNIT.PRIMITIVE);
+    RawFeature<String, String> extractor = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.UNIT.EXTRACTOR);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<Unit<T>> {

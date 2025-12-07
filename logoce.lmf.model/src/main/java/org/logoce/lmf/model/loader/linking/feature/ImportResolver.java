@@ -1,5 +1,6 @@
 package org.logoce.lmf.model.loader.linking.feature;
 
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.linking.LinkException;
 import org.logoce.lmf.model.loader.linking.tree.LinkNodeInternal;
@@ -48,9 +49,9 @@ public final class ImportResolver
 			return modelName;
 		}
 
-		if (org.logoce.lmf.model.lang.LMCorePackage.MODEL.name().equals(modelName))
+		if (LMCoreModelPackage.MODEL.name().equals(modelName))
 		{
-			final var lmCore = org.logoce.lmf.model.lang.LMCorePackage.MODEL;
+			final var lmCore = LMCoreModelPackage.MODEL;
 			return lmCore.domain() + "." + lmCore.name();
 		}
 

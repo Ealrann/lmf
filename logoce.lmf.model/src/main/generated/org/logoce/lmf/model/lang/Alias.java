@@ -13,7 +13,7 @@ public interface Alias extends Named {
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
-    RawFeature<String, String> value = new RawFeature<>(false,false,() -> LMCoreDefinition.Features.ALIAS.VALUE);
+    RawFeature<String, String> value = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.ALIAS.VALUE);
   }
 
   interface Builder extends IFeaturedObject.Builder<Alias> {

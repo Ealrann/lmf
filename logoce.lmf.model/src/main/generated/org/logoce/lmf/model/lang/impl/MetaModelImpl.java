@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
@@ -115,7 +115,7 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
 
   @Override
   public Group<MetaModel> lmGroup() {
-    return LMCoreDefinition.Groups.META_MODEL;
+    return LMCoreModelDefinition.Groups.META_MODEL;
   }
 
   @Override

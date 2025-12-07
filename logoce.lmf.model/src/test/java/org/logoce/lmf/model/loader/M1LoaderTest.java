@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.loader;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.model.LmDocument;
 import org.logoce.lmf.model.util.ModelRegistry;
@@ -22,7 +22,7 @@ public final class M1LoaderTest
 	void loadPeugeotM1Model_usesCarCompanyAsMetamodel() throws IOException
 	{
 		final var registryBuilder = new ModelRegistry.Builder();
-		registryBuilder.register(LMCorePackage.MODEL);
+		registryBuilder.register(LMCoreModelPackage.MODEL);
 		registryBuilder.register(CarCompanyPackage.MODEL);
 		final var registry = registryBuilder.build();
 

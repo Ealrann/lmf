@@ -80,7 +80,7 @@ public class ModelDefinition
 
 	public void generate(final File target)
 	{
-		final var definitionInterface = TypeSpec.interfaceBuilder(model.name() + "Definition")
+		final var definitionInterface = TypeSpec.interfaceBuilder(model.name() + "ModelDefinition")
 												.addModifiers(Modifier.PUBLIC);
 
 		definitionInterface.addType(featureInterfacesBuilder.build(model));

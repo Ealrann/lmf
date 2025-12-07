@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.util;
 
-import org.logoce.lmf.model.lang.LMCorePackage;
+import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 
@@ -17,7 +17,7 @@ public final class ModelRegistry implements IModelRegistry
 
 	public static ModelRegistry empty()
 	{
-		return new Builder(List.of(LMCorePackage.MODEL)).build();
+		return new Builder(List.of(LMCoreModelPackage.MODEL)).build();
 	}
 
 	public ModelRegistry(Map<String, Model> map)

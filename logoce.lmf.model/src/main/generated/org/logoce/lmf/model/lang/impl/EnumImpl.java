@@ -6,7 +6,7 @@ import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreDefinition;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
   private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>().add(Enum.Features.name, Enum::name).add(Enum.Features.literals, Enum::literals).build();
@@ -32,7 +32,7 @@ public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
 
   @Override
   public Group<Enum<?>> lmGroup() {
-    return LMCoreDefinition.Groups.ENUM;
+    return LMCoreModelDefinition.Groups.ENUM;
   }
 
   @Override

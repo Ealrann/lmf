@@ -81,7 +81,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		else
 		{
 			final var modelDefinition = ClassName.get(TargetPathUtil.packageName(targetModel),
-													  targetModel.name() + "Definition");
+													  targetModel.name() + "ModelDefinition");
 			builder.add(".group(() -> $T.Groups.$N)", modelDefinition, groupConstantName);
 		}
 
