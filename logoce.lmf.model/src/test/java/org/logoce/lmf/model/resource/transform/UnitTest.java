@@ -7,8 +7,6 @@ import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
-import java.io.ByteArrayInputStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("ExtractMethodRecommender")
@@ -53,18 +51,18 @@ public class UnitTest
 	public void allBaseUnits()
 	{
 		final var textModel = """
-				 (MetaModel Test
-					(Unit name=matcher   matcher="rgx_match:<(.+?)>")
-					(Unit name=extractor matcher="rgx_match:<(.+?)>")
-					(Enum name=BoundType extends,super)
-				    
-					(Enum name=Primitive boolean,int,long,float,double,string)
-					(Unit name=boolean matcher="rgx_match:<(true|false)>" defaultValue=false primitive=boolean )
-					(Unit name=int     matcher="rgx_match:<[0-9]+>"       defaultValue=0     primitive=int     )
-					(Unit name=long    matcher="rgx_match:<[0-9]+[Ll]>"   defaultValue=0L    primitive=long    )
-					(Unit name=float   matcher="rgx_match:<[0-9.]+[Ff]>"  defaultValue=0f    primitive=float   )
-					(Unit name=double  matcher="rgx_match:<[0-9.]+>"      defaultValue=0.    primitive=double  )
-					(Unit name=string) )
+				(MetaModel Test
+				    (Unit name=matcher   matcher="rgx_match:<(.+?)>")
+				    (Unit name=extractor matcher="rgx_match:<(.+?)>")
+				    (Enum name=BoundType extends,super)
+
+				    (Enum name=Primitive boolean,int,long,float,double,string)
+				    (Unit name=boolean matcher="rgx_match:<(true|false)>" defaultValue=false primitive=boolean )
+				    (Unit name=int     matcher="rgx_match:<[0-9]+>"       defaultValue=0     primitive=int     )
+				    (Unit name=long    matcher="rgx_match:<[0-9]+[Ll]>"   defaultValue=0L    primitive=long    )
+				    (Unit name=float   matcher="rgx_match:<[0-9.]+[Ff]>"  defaultValue=0f    primitive=float   )
+				    (Unit name=double  matcher="rgx_match:<[0-9.]+>"      defaultValue=0.    primitive=double  )
+				    (Unit name=string) )
 				""";
 		final var loader = new LmLoader(ModelRegistry.empty());
 		final var roots = loader.loadObjects(textModel);

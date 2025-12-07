@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T> {
-  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(org.logoce.lmf.model.lang.Group.Features.name, org.logoce.lmf.model.lang.Group::name).add(org.logoce.lmf.model.lang.Group.Features.concrete, org.logoce.lmf.model.lang.Group::concrete).add(org.logoce.lmf.model.lang.Group.Features.includes, org.logoce.lmf.model.lang.Group::includes).add(org.logoce.lmf.model.lang.Group.Features.features, org.logoce.lmf.model.lang.Group::features).add(org.logoce.lmf.model.lang.Group.Features.generics, org.logoce.lmf.model.lang.Group::generics).add(org.logoce.lmf.model.lang.Group.Features.operations, org.logoce.lmf.model.lang.Group::operations).add(org.logoce.lmf.model.lang.Group.Features.lmBuilder, org.logoce.lmf.model.lang.Group::lmBuilder).build();
+  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(Group.Features.name, Group::name).add(Group.Features.concrete, Group::concrete).add(Group.Features.includes, Group::includes).add(Group.Features.features, Group::features).add(Group.Features.generics, Group::generics).add(Group.Features.operations, Group::operations).add(Group.Features.lmBuilder, Group::lmBuilder).build();
   private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>().build();
   private final String name;
   private final boolean concrete;
@@ -38,6 +38,7 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
     setContainer(features, Group.Features.features);
     setContainer(generics, Group.Features.generics);
     setContainer(operations, Group.Features.operations);
+    eDeliver(true);
   }
 
   @Override

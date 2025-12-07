@@ -120,7 +120,7 @@ public interface LMCoreDefinition {
     interface OPERATION {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
       Attribute<String, String> CONTENT = new AttributeBuilder<String, String>().name("content").immutable(true).rawFeature(Operation.Features.content).datatype(() -> Units.STRING).build();
-      Relation<Type<?>, Type<?>> RETURN_TYPE = new RelationBuilder<Type<?>, Type<?>>().name("returnType").immutable(true).rawFeature(Operation.Features.returnType).concept(() -> LMCoreDefinition.Groups.TYPE).build();
+      Relation<Type<?>, Type<?>> RETURN_TYPE = new RelationBuilder<Type<?>, Type<?>>().name("returnType").immutable(true).lazy(true).rawFeature(Operation.Features.returnType).concept(() -> LMCoreDefinition.Groups.TYPE).build();
       Relation<GenericParameter, List<GenericParameter>> RETURN_TYPE_PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("returnTypeParameters").immutable(true).many(true).contains(true).rawFeature(Operation.Features.returnTypeParameters).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).build();
       Relation<OperationParameter, List<OperationParameter>> PARAMETERS = new RelationBuilder<OperationParameter, List<OperationParameter>>().name("parameters").immutable(true).many(true).contains(true).rawFeature(Operation.Features.parameters).concept(() -> LMCoreDefinition.Groups.OPERATION_PARAMETER).build();
       List<Feature<?, ?>> ALL = List.of(NAME, CONTENT, RETURN_TYPE, RETURN_TYPE_PARAMETERS, PARAMETERS);
@@ -128,7 +128,7 @@ public interface LMCoreDefinition {
 
     interface OPERATION_PARAMETER {
       Attribute<String, String> NAME = LMCoreDefinition.Features.NAMED.NAME;
-      Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).mandatory(true).rawFeature(OperationParameter.Features.type).concept(() -> LMCoreDefinition.Groups.TYPE).build();
+      Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).mandatory(true).lazy(true).rawFeature(OperationParameter.Features.type).concept(() -> LMCoreDefinition.Groups.TYPE).build();
       Relation<GenericParameter, List<GenericParameter>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("parameters").immutable(true).many(true).contains(true).rawFeature(OperationParameter.Features.parameters).concept(() -> LMCoreDefinition.Groups.GENERIC_PARAMETER).build();
       List<Feature<?, ?>> ALL = List.of(NAME, TYPE, PARAMETERS);
     }

@@ -52,7 +52,7 @@ public final class OperationParameterBuilder implements Builder {
   @Override
   public OperationParameter build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new OperationParameterImpl(name, type.get(), builtParameters);
+    final var built = new OperationParameterImpl(name, type, builtParameters);
     return built;
   }
 

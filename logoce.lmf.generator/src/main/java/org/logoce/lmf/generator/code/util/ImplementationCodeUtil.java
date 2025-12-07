@@ -12,8 +12,16 @@ public class ImplementationCodeUtil
 {
 	public static CodeBlock assignationStatement(final Feature<?, ?> feature, final String paramName)
 	{
-		final var assignPattern = feature.many() ? "this.$N = List.copyOf($N)" : "this.$N = $N";
-		return CodeBlock.of(assignPattern, paramName, paramName);
+		if (feature.many())
+		{
+			if (feature.immutable())
+			{
+				return CodeBlock.of("this.$N = List.copyOf($N)", paramName, paramName);
+			}
+			return CodeBlock.of("this.$N.addAll($N)", paramName, paramName);
+		}
+
+		return CodeBlock.of("this.$N = $N", paramName, paramName);
 	}
 
 	public static List<CodeBlock> featureReturnStatement(FeatureParameter parameter)

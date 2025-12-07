@@ -92,6 +92,16 @@ public final class FeatureResolution implements IAdapter
 				return bound;
 			}
 		}
+
+		if (feature instanceof Relation<?, ?> relation && relation.concept() instanceof Generic<?> generic)
+		{
+			final var extension = generic.extension();
+			if (extension != null && extension.type() != null)
+			{
+				return TypeResolutionUtil.resolveSimpleType(extension.type());
+			}
+		}
+
 		return rawSingleType;
 	}
 

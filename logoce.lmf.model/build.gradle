@@ -63,7 +63,7 @@ publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId = 'org.logoce.lmf'
-			artifactId = 'model'
+			artifactId = 'logoce.lmf.model'
 			version = "$logoceVersion"
 
 			from components.java

@@ -18,7 +18,7 @@ publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId = 'org.logoce.lmf'
-			artifactId = 'notification'
+			artifactId = 'logoce.lmf.notification'
 			version = "$logoceVersion"
 
 			from components.java

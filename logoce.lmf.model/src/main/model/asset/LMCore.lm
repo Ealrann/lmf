@@ -87,13 +87,13 @@
 	(Definition Operation
 		(includes group=@Named)
 		(-att name=content datatype=@string [0..1])
-		(-refers returnType [0..1] @Type)
+		(-refers returnType lazy [0..1] @Type)
 		(-contains returnTypeParameters [0..*] @GenericParameter)
 		(-contains parameters [0..*] @OperationParameter))
 
 	(Definition OperationParameter
 		(includes group=@Named)
-		(-refers type [1..1] @Type)
+		(-refers type lazy [1..1] @Type)
 		(-contains parameters [0..*] @GenericParameter))
 
 	(Group Datatype

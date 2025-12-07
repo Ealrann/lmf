@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(org.logoce.lmf.model.lang.Attribute.Features.name, org.logoce.lmf.model.lang.Attribute::name).add(org.logoce.lmf.model.lang.Attribute.Features.immutable, org.logoce.lmf.model.lang.Attribute::immutable).add(org.logoce.lmf.model.lang.Attribute.Features.many, org.logoce.lmf.model.lang.Attribute::many).add(org.logoce.lmf.model.lang.Attribute.Features.mandatory, org.logoce.lmf.model.lang.Attribute::mandatory).add(org.logoce.lmf.model.lang.Attribute.Features.parameters, org.logoce.lmf.model.lang.Attribute::parameters).add(org.logoce.lmf.model.lang.Attribute.Features.rawFeature, org.logoce.lmf.model.lang.Attribute::rawFeature).add(org.logoce.lmf.model.lang.Attribute.Features.datatype, org.logoce.lmf.model.lang.Attribute::datatype).add(org.logoce.lmf.model.lang.Attribute.Features.defaultValue, org.logoce.lmf.model.lang.Attribute::defaultValue).build();
+  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(Attribute.Features.name, Attribute::name).add(Attribute.Features.immutable, Attribute::immutable).add(Attribute.Features.many, Attribute::many).add(Attribute.Features.mandatory, Attribute::mandatory).add(Attribute.Features.parameters, Attribute::parameters).add(Attribute.Features.rawFeature, Attribute::rawFeature).add(Attribute.Features.datatype, Attribute::datatype).add(Attribute.Features.defaultValue, Attribute::defaultValue).build();
   private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>().build();
   private final String name;
   private final boolean immutable;
@@ -37,6 +37,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
     this.datatype = datatype;
     this.defaultValue = defaultValue;
     setContainer(parameters, Feature.Features.parameters);
+    eDeliver(true);
   }
 
   @Override

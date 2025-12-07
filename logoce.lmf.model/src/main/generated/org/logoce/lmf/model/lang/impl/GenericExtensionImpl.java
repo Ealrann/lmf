@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
-  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(org.logoce.lmf.model.lang.GenericExtension.Features.type, org.logoce.lmf.model.lang.GenericExtension::type).add(org.logoce.lmf.model.lang.GenericExtension.Features.boundType, org.logoce.lmf.model.lang.GenericExtension::boundType).add(org.logoce.lmf.model.lang.GenericExtension.Features.parameters, org.logoce.lmf.model.lang.GenericExtension::parameters).build();
+  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(GenericExtension.Features.type, GenericExtension::type).add(GenericExtension.Features.boundType, GenericExtension::boundType).add(GenericExtension.Features.parameters, GenericExtension::parameters).build();
   private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>().build();
   private final Supplier<Type<?>> type;
   private final BoundType boundType;
@@ -25,6 +25,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
     this.boundType = boundType;
     this.parameters = List.copyOf(parameters);
     setContainer(parameters, GenericExtension.Features.parameters);
+    eDeliver(true);
   }
 
   @Override

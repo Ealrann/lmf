@@ -6,7 +6,6 @@ import test.model.carcompany.Brand;
 import test.model.carcompany.Car;
 import test.model.carcompany.CarCompany;
 import test.model.carcompany.CarParc;
-import test.model.carcompany.Person;
 import test.model.carcompany.impl.PersonImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

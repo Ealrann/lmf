@@ -11,12 +11,10 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.logoce.lmf.gradle.diagnostics.GenerationFailureReporter;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.LmWorkspace;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,20 +63,8 @@ public abstract class GenerateLmfSources extends DefaultTask
 									 final File outputDir,
 									 final Logger logger) throws IOException
 	{
-		final var loader = new LmLoader(ModelRegistry.empty());
-		final List<File> metaModelFiles = new ArrayList<>();
-
-		for (final var file : modelFiles)
-		{
-			try (final var in = new FileInputStream(file))
-			{
-				final var document = loader.loadModel(in);
-				if (document.model() instanceof MetaModel)
-				{
-					metaModelFiles.add(file);
-				}
-			}
-		}
+		final var workspace = LmWorkspace.loadMetaModels(modelFiles, ModelRegistry.empty());
+		final List<File> metaModelFiles = new ArrayList<>(workspace.files());
 
 		if (metaModelFiles.isEmpty())
 		{

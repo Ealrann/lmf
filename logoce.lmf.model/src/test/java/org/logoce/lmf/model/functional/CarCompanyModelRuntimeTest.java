@@ -1,7 +1,6 @@
 package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.model.api.model.LilyBasicNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
 import test.model.carcompany.*;
 import test.model.carcompany.impl.PersonImpl;
@@ -119,9 +118,6 @@ public class CarCompanyModelRuntimeTest
 						   .name("Car")
 						   .brand(Brand.Renault)
 						   .build();
-
-		((LilyBasicNotifier) company).eDeliver(true);
-		((LilyBasicNotifier) car).eDeliver(true);
 
 		final List<Notification> companyNotifications = new ArrayList<>();
 		final List<Notification> carNotifications = new ArrayList<>();

@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 
 public final class IncludeImpl<T extends LMObject> extends FeaturedObject implements Include<T> {
-  private static final FeatureGetter<Include<?>> GET_MAP = new FeatureGetter.Builder<Include<?>>().add(org.logoce.lmf.model.lang.Include.Features.group, org.logoce.lmf.model.lang.Include::group).add(org.logoce.lmf.model.lang.Include.Features.parameters, org.logoce.lmf.model.lang.Include::parameters).build();
+  private static final FeatureGetter<Include<?>> GET_MAP = new FeatureGetter.Builder<Include<?>>().add(Include.Features.group, Include::group).add(Include.Features.parameters, Include::parameters).build();
   private static final FeatureSetter<Include<?>> SET_MAP = new FeatureSetter.Builder<Include<?>>().build();
   private final Supplier<Group<T>> group;
   private final List<GenericParameter> parameters;
@@ -21,6 +21,7 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject implem
     this.group = group;
     this.parameters = List.copyOf(parameters);
     setContainer(parameters, Include.Features.parameters);
+    eDeliver(true);
   }
 
   @Override

@@ -167,6 +167,25 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		{
 			return CodeBlock.of("() -> null");
 		}
+
+		if (concept instanceof Generic<?> generic && generic.extension() != null && generic.extension().type() != null)
+		{
+			// When a relation concept is a Generic with an explicit bound (for example
+			// Condition<T extends Parameter> and value : T), static feature metadata
+			// cannot use the type variable T directly. Use the bound type instead so
+			// that Relation<Bound, Bound> and its concept supplier remain valid in a
+			// non-generic context.
+			final var boundType = generic.extension().type();
+			if (boundType instanceof Group<?> group)
+			{
+				final var model = (MetaModel) ModelUtils.root(group);
+				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
+														  model.name() + "Definition");
+				final var constantName = GenUtils.toConstantCase(group.name());
+				return CodeBlock.builder().add("() -> $T.Groups.$N", modelDefinition, constantName).build();
+			}
+		}
+
 		return generateGenericsCodeblock(concept);
 	}
 

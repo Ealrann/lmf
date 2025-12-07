@@ -15,7 +15,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> extends FeaturedObject implements Relation<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(org.logoce.lmf.model.lang.Relation.Features.name, org.logoce.lmf.model.lang.Relation::name).add(org.logoce.lmf.model.lang.Relation.Features.immutable, org.logoce.lmf.model.lang.Relation::immutable).add(org.logoce.lmf.model.lang.Relation.Features.many, org.logoce.lmf.model.lang.Relation::many).add(org.logoce.lmf.model.lang.Relation.Features.mandatory, org.logoce.lmf.model.lang.Relation::mandatory).add(org.logoce.lmf.model.lang.Relation.Features.parameters, org.logoce.lmf.model.lang.Relation::parameters).add(org.logoce.lmf.model.lang.Relation.Features.rawFeature, org.logoce.lmf.model.lang.Relation::rawFeature).add(org.logoce.lmf.model.lang.Relation.Features.concept, org.logoce.lmf.model.lang.Relation::concept).add(org.logoce.lmf.model.lang.Relation.Features.lazy, org.logoce.lmf.model.lang.Relation::lazy).add(org.logoce.lmf.model.lang.Relation.Features.contains, org.logoce.lmf.model.lang.Relation::contains).build();
+  private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(Relation.Features.name, Relation::name).add(Relation.Features.immutable, Relation::immutable).add(Relation.Features.many, Relation::many).add(Relation.Features.mandatory, Relation::mandatory).add(Relation.Features.parameters, Relation::parameters).add(Relation.Features.rawFeature, Relation::rawFeature).add(Relation.Features.concept, Relation::concept).add(Relation.Features.lazy, Relation::lazy).add(Relation.Features.contains, Relation::contains).build();
   private static final FeatureSetter<Relation<?, ?>> SET_MAP = new FeatureSetter.Builder<Relation<?, ?>>().build();
   private final String name;
   private final boolean immutable;
@@ -41,6 +41,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
     this.lazy = lazy;
     this.contains = contains;
     setContainer(parameters, Feature.Features.parameters);
+    eDeliver(true);
   }
 
   @Override

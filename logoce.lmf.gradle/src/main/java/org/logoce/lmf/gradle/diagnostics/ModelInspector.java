@@ -1,5 +1,6 @@
 package org.logoce.lmf.gradle.diagnostics;
 
+import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.parsing.LmTreeReader;
@@ -26,19 +27,25 @@ final class ModelInspector
 
 	static List<ModelInspectionResult> inspect(final List<File> modelFiles)
 	{
+		if (modelFiles.isEmpty()) return List.of();
+
+		final var registryBuilder = new ModelRegistry.Builder(ModelRegistry.empty());
 		final List<ModelInspectionResult> results = new ArrayList<>(modelFiles.size());
+
 		for (final var file : modelFiles)
 		{
-			results.add(inspectSingle(file));
+			results.add(inspectSingle(file, registryBuilder));
 		}
 		return results;
 	}
 
-	private static ModelInspectionResult inspectSingle(final File file)
+	private static ModelInspectionResult inspectSingle(final File file, final ModelRegistry.Builder registryBuilder)
 	{
+		final var registry = registryBuilder.build();
+
 		try (final var inputStream = new FileInputStream(file))
 		{
-			final var loader = new LmLoader(ModelRegistry.empty());
+			final var loader = new LmLoader(registry);
 			final var document = loader.loadModel(inputStream);
 
 			final List<Tree<PNode>> roots = document.roots();
@@ -46,6 +53,12 @@ final class ModelInspector
 			final var imports = extractImports(roots);
 
 			final var filteredDiagnostics = filterDiagnostics(document.diagnostics());
+
+			final var model = document.model();
+			if (model instanceof Model m)
+			{
+				registryBuilder.register(m);
+			}
 
 			return new ModelInspectionResult(file,
 											 qualifiedName,

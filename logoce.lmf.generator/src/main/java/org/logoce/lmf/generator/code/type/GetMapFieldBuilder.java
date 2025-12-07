@@ -34,18 +34,18 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var wildcardInterface = interfaceType.parametrizedWildcard();
 		final var type = GETTER_MAP_CLASS.nest(wildcardInterface);
 		final var builderType = GETTER_MAP_BUILDER_CLASS.nest(wildcardInterface);
-		final var statementBuilder = new StringBuilder();
-		statementBuilder.append("new $T()");
+		final var initializerBuilder = CodeBlock.builder()
+												.add("new $T()", builderType.parametrized());
 
 		FeatureStreams.distinctFeatures(group)
 					  .map(f -> f.adapt(FeatureResolution.class))
 					  .map(this::buildStatement)
-					  .forEach(statementBuilder::append);
-		statementBuilder.append(".build()");
+					  .forEach(initializerBuilder::add);
+		initializerBuilder.add(".build()");
 
 		return FieldSpec.builder(type.parametrized(), "GET_MAP")
 						.addModifiers(modifiers)
-						.initializer(statementBuilder.toString(), builderType.parametrized())
+						.initializer(initializerBuilder.build())
 						.build();
 	}
 

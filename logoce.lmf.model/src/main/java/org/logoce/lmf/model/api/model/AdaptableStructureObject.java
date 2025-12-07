@@ -29,7 +29,7 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	}
 
 	@Override
-	public final void eNotify(final Notification notification)
+	protected final void eNotify(final Notification notification)
 	{
 		final var feature = notification.feature();
 		final boolean isContainment = feature.featureSupplier().get() instanceof Relation<?, ?> relation &&

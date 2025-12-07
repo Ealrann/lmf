@@ -75,7 +75,7 @@ public final class OperationBuilder implements Builder {
   public Operation build() {
     final var builtReturnTypeParameters = BuildUtils.collectSuppliers(returnTypeParameters);
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new OperationImpl(name, content, returnType.get(), builtReturnTypeParameters, builtParameters);
+    final var built = new OperationImpl(name, content, returnType, builtReturnTypeParameters, builtParameters);
     return built;
   }
 

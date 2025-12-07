@@ -6,7 +6,7 @@ publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId = 'org.logoce.lmf'
-			artifactId = 'extender'
+			artifactId = 'logoce.lmf.extender'
 			version = "$logoceVersion"
 
 			from components.java

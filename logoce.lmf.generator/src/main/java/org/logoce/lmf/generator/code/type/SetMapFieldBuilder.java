@@ -37,20 +37,20 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var type = SETTER_MAP_CLASS.nest(interfaceType.parametrizedWildcard());
 		final var builderType = SETTER_MAP_BUILDER_CLASS.nest(interfaceType.parametrizedWildcard());
 		final var implementationType = group.adapt(GroupImplementationType.class);
-		final var statementBuilder = new StringBuilder();
-		statementBuilder.append("new $T()");
+		final var initializerBuilder = CodeBlock.builder()
+												.add("new $T()", builderType.parametrized());
 
 		FeatureStreams.distinctFeatures(group)
 					  .filter(SetMapFieldBuilder::isSingleMutable)
 					  .map(f -> f.adapt(FeatureResolution.class))
 					  .map(resolution -> buildStatement(resolution, implementationType))
-					  .forEach(statementBuilder::append);
+					  .forEach(initializerBuilder::add);
 
-		statementBuilder.append(".build()");
+		initializerBuilder.add(".build()");
 
 		return FieldSpec.builder(type.parametrized(), "SET_MAP")
 						.addModifiers(modifiers)
-						.initializer(statementBuilder.toString(), builderType.parametrized())
+						.initializer(initializerBuilder.build())
 						.build();
 	}
 

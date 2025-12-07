@@ -1,7 +1,6 @@
 package org.logoce.lmf.lsp;
 
 import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 
 import java.util.List;

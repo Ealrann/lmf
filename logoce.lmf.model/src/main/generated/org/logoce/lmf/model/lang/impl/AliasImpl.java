@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreDefinition;
 
 public final class AliasImpl extends FeaturedObject implements Alias {
-  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(org.logoce.lmf.model.lang.Alias.Features.name, org.logoce.lmf.model.lang.Alias::name).add(org.logoce.lmf.model.lang.Alias.Features.value, org.logoce.lmf.model.lang.Alias::value).build();
+  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(Alias.Features.name, Alias::name).add(Alias.Features.value, Alias::value).build();
   private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>().build();
   private final String name;
   private final String value;
@@ -16,6 +16,7 @@ public final class AliasImpl extends FeaturedObject implements Alias {
   public AliasImpl(final String name, final String value) {
     this.name = name;
     this.value = value;
+    eDeliver(true);
   }
 
   @Override

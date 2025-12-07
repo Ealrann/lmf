@@ -20,7 +20,7 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 		listenerMap = new EMFListenerMap(featureCount);
 	}
 
-	public void eNotify(final Notification notification)
+	protected void eNotify(final Notification notification)
 	{
 		if (eDeliver()) listenerMap.notify(notification);
 	}

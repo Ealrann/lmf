@@ -9,10 +9,8 @@ repositories {
 }
 
 dependencies {
-	def lmfVersion = findProperty('logoceVersion') ?: '0.0.1'
-
-	implementation "org.logoce.lmf:model:${lmfVersion}"
-	implementation "org.logoce.lmf:adapter:${lmfVersion}"
-	implementation "org.logoce.lmf:extender:${lmfVersion}"
-	implementation "org.logoce.lmf:notification:${lmfVersion}"
+	implementation project(':logoce.lmf.model')
+	implementation project(':logoce.lmf.adapter')
+	implementation project(':logoce.lmf.extender')
+	implementation project(':logoce.lmf.notification')
 }

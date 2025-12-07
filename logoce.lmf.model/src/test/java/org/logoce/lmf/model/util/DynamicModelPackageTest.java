@@ -7,14 +7,12 @@ import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LmModelLinker;
 import org.logoce.lmf.model.loader.linking.TreeToFeatureLinker;
 import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

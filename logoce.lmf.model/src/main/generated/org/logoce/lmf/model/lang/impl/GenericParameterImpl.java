@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.LMCoreDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericParameterImpl extends FeaturedObject implements GenericParameter {
-  private static final FeatureGetter<GenericParameter> GET_MAP = new FeatureGetter.Builder<GenericParameter>().add(org.logoce.lmf.model.lang.GenericParameter.Features.wildcard, org.logoce.lmf.model.lang.GenericParameter::wildcard).add(org.logoce.lmf.model.lang.GenericParameter.Features.wildcardBoundType, org.logoce.lmf.model.lang.GenericParameter::wildcardBoundType).add(org.logoce.lmf.model.lang.GenericParameter.Features.type, org.logoce.lmf.model.lang.GenericParameter::type).add(org.logoce.lmf.model.lang.GenericParameter.Features.parameters, org.logoce.lmf.model.lang.GenericParameter::parameters).build();
+  private static final FeatureGetter<GenericParameter> GET_MAP = new FeatureGetter.Builder<GenericParameter>().add(GenericParameter.Features.wildcard, GenericParameter::wildcard).add(GenericParameter.Features.wildcardBoundType, GenericParameter::wildcardBoundType).add(GenericParameter.Features.type, GenericParameter::type).add(GenericParameter.Features.parameters, GenericParameter::parameters).build();
   private static final FeatureSetter<GenericParameter> SET_MAP = new FeatureSetter.Builder<GenericParameter>().build();
   private final boolean wildcard;
   private final BoundType wildcardBoundType;
@@ -26,6 +26,7 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
     this.type = type;
     this.parameters = List.copyOf(parameters);
     setContainer(parameters, GenericParameter.Features.parameters);
+    eDeliver(true);
   }
 
   @Override

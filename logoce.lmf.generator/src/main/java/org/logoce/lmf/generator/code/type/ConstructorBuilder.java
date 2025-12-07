@@ -41,6 +41,8 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 				.map(Optional::get)
 				.forEach(constructor::addStatement);
 
+		constructor.addStatement("eDeliver(true)");
+
 		return constructor.build();
 	}
 
@@ -53,12 +55,16 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 	private static ParameterCode bakeCode(final FeatureResolution resolution)
 	{
 		final var paramSpec = resolution.parameterSpec();
-		final var assignCode = ImplementationCodeUtil.assignationStatement(resolution.feature(), paramSpec.name);
-		final var isContainment = resolution.feature() instanceof Relation<?, ?> r && r.contains();
+		final var feature = resolution.feature();
+		final var assignCode = ImplementationCodeUtil.assignationStatement(feature, paramSpec.name);
+
+		final var isRelation = feature instanceof Relation<?, ?> relation;
+		final var isContainment = isRelation && ((Relation<?, ?>) feature).contains();
+		final var manyMutableRelation = isRelation && feature.many() && !feature.immutable();
 
 		return new ParameterCode(paramSpec,
 								 assignCode,
-								 isContainment
+								 isContainment && !manyMutableRelation
 								 ? Optional.of(containmentSetStatement(resolution, paramSpec.name))
 								 : Optional.empty());
 	}

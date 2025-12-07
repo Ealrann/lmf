@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
+import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -12,15 +13,15 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
 public final class OperationImpl extends FeaturedObject implements Operation {
-  private static final FeatureGetter<Operation> GET_MAP = new FeatureGetter.Builder<Operation>().add(org.logoce.lmf.model.lang.Operation.Features.name, org.logoce.lmf.model.lang.Operation::name).add(org.logoce.lmf.model.lang.Operation.Features.content, org.logoce.lmf.model.lang.Operation::content).add(org.logoce.lmf.model.lang.Operation.Features.returnType, org.logoce.lmf.model.lang.Operation::returnType).add(org.logoce.lmf.model.lang.Operation.Features.returnTypeParameters, org.logoce.lmf.model.lang.Operation::returnTypeParameters).add(org.logoce.lmf.model.lang.Operation.Features.parameters, org.logoce.lmf.model.lang.Operation::parameters).build();
+  private static final FeatureGetter<Operation> GET_MAP = new FeatureGetter.Builder<Operation>().add(Operation.Features.name, Operation::name).add(Operation.Features.content, Operation::content).add(Operation.Features.returnType, Operation::returnType).add(Operation.Features.returnTypeParameters, Operation::returnTypeParameters).add(Operation.Features.parameters, Operation::parameters).build();
   private static final FeatureSetter<Operation> SET_MAP = new FeatureSetter.Builder<Operation>().build();
   private final String name;
   private final String content;
-  private final Type<?> returnType;
+  private final Supplier<Type<?>> returnType;
   private final List<GenericParameter> returnTypeParameters;
   private final List<OperationParameter> parameters;
 
-  public OperationImpl(final String name, final String content, final Type<?> returnType,
+  public OperationImpl(final String name, final String content, final Supplier<Type<?>> returnType,
       final List<GenericParameter> returnTypeParameters,
       final List<OperationParameter> parameters) {
     this.name = name;
@@ -30,6 +31,7 @@ public final class OperationImpl extends FeaturedObject implements Operation {
     this.parameters = List.copyOf(parameters);
     setContainer(returnTypeParameters, Operation.Features.returnTypeParameters);
     setContainer(parameters, Operation.Features.parameters);
+    eDeliver(true);
   }
 
   @Override
@@ -44,7 +46,7 @@ public final class OperationImpl extends FeaturedObject implements Operation {
 
   @Override
   public Type<?> returnType() {
-    return returnType;
+    return returnType.get();
   }
 
   @Override

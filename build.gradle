@@ -5,7 +5,13 @@ buildscript {
 	}
 }
 
+def lmfGroup = 'org.logoce.lmf'
+def lmfVersion = findProperty('logoceVersion') ?: '0.0.1'
+
 subprojects {
+
+	group = lmfGroup
+	version = lmfVersion
 
 	apply plugin: 'java-library'
 	apply plugin: 'checkstyle'
@@ -13,11 +19,6 @@ subprojects {
 	java {
 		sourceCompatibility = JavaVersion.VERSION_25
 		targetCompatibility = JavaVersion.VERSION_25
-	}
-
-	tasks.withType(JavaCompile).configureEach {
-		options.deprecation = true
-		options.compilerArgs += ['-Xlint:all']
 	}
 
 	checkstyle {

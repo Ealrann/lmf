@@ -11,12 +11,7 @@ repositories {
 }
 
 dependencies {
-	if (findProject(':logoce.lmf.generator') != null) {
-		implementation project(':logoce.lmf.generator')
-	}
-	else {
-		implementation "org.logoce.lmf:generator:${lmfVersion}"
-	}
+	implementation project(':logoce.lmf.generator')
 
 	implementation gradleApi()
 	//implementation "dev.gradleplugins:gradle-api:8.3"

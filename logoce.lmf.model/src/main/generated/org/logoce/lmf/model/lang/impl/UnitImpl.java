@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
-  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(org.logoce.lmf.model.lang.Unit.Features.name, org.logoce.lmf.model.lang.Unit::name).add(org.logoce.lmf.model.lang.Unit.Features.matcher, org.logoce.lmf.model.lang.Unit::matcher).add(org.logoce.lmf.model.lang.Unit.Features.defaultValue, org.logoce.lmf.model.lang.Unit::defaultValue).add(org.logoce.lmf.model.lang.Unit.Features.primitive, org.logoce.lmf.model.lang.Unit::primitive).add(org.logoce.lmf.model.lang.Unit.Features.extractor, org.logoce.lmf.model.lang.Unit::extractor).build();
+  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(Unit.Features.name, Unit::name).add(Unit.Features.matcher, Unit::matcher).add(Unit.Features.defaultValue, Unit::defaultValue).add(Unit.Features.primitive, Unit::primitive).add(Unit.Features.extractor, Unit::extractor).build();
   private static final FeatureSetter<Unit<?>> SET_MAP = new FeatureSetter.Builder<Unit<?>>().build();
   private final String name;
   private final String matcher;
@@ -24,6 +24,7 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
     this.defaultValue = defaultValue;
     this.primitive = primitive;
     this.extractor = extractor;
+    eDeliver(true);
   }
 
   @Override

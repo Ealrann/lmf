@@ -6,9 +6,7 @@ import org.logoce.lmf.model.lang.LMCorePackage;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.LmLoader;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.model.LmDocument;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.loader.linking.LinkNode;
@@ -17,7 +15,6 @@ import test.model.carcompany.CarCompanyPackage;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

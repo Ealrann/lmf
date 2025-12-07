@@ -12,6 +12,7 @@ import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.loader.LmLoader;
+import org.logoce.lmf.model.loader.LmWorkspace;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LinkException;
 import org.logoce.lmf.model.loader.parsing.LmTreeReader;
@@ -23,7 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.services.LanguageClient;
 
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -80,10 +82,18 @@ public final class WorkspaceRebuilder
 		{
 			try
 			{
-				final List<org.logoce.lmf.model.loader.model.LmDocument> documents = loadDocumentsFromProjectRoot(projectRoot);
-				final var newRegistry = LmLoader.buildRegistry(documents, workspaceIndex.modelRegistry());
-				workspaceIndex.setModelRegistry(newRegistry);
-				LOG.debug("LMF LSP rebuildModelRegistry: projectRoot={}, documents={}", projectRoot, documents.size());
+				final var modelFiles = collectModelFilesFromProjectRoot(projectRoot);
+				if (modelFiles.isEmpty())
+				{
+					workspaceIndex.setModelRegistry(ModelRegistry.empty());
+				}
+				else
+				{
+					final var workspace = LmWorkspace.loadMetaModels(modelFiles, workspaceIndex.modelRegistry());
+					workspaceIndex.setModelRegistry(workspace.registry());
+					LOG.debug("LMF LSP rebuildModelRegistry: projectRoot={}, metaModels={}", projectRoot,
+							  workspace.files().size());
+				}
 			}
 			catch (Exception e)
 			{
@@ -163,58 +173,16 @@ public final class WorkspaceRebuilder
 		}
 	}
 
-	private List<org.logoce.lmf.model.loader.model.LmDocument> loadDocumentsFromProjectRoot(final Path root) throws Exception
+	private static List<File> collectModelFilesFromProjectRoot(final Path root) throws IOException
 	{
-		final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
-		final var reader = new LmTreeReader();
+		final List<File> files = new ArrayList<>();
 		try (final var paths = Files.walk(root))
 		{
 			paths.filter(Files::isRegularFile)
 				 .filter(p -> p.getFileName().toString().endsWith(".lm"))
-				 .forEach(p -> {
-					 try
-					 {
-						 final byte[] bytes = Files.readAllBytes(p);
-						 final var text = new String(bytes, StandardCharsets.UTF_8);
-						 final var diagnostics = new ArrayList<LmDiagnostic>();
-						 final var readResult = reader.read(text, diagnostics);
-						 final var roots = readResult.roots();
-						 if (roots.isEmpty())
-						 {
-							 final var error = diagnostics.stream()
-														  .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
-														  .findFirst();
-							 if (error.isPresent())
-							 {
-								 final var d = error.get();
-								 throw new IllegalArgumentException("Failed to parse model " + p + " at " +
-																	d.line() + ":" + d.column() +
-																	" - " + d.message());
-							 }
-							 return;
-						 }
-
-						 if (!ModelHeaderUtil.isMetaModelRoot(roots))
-						 {
-							 return;
-						 }
-
-						 final var doc = new org.logoce.lmf.model.loader.model.LmDocument(
-							 null,
-							 List.copyOf(diagnostics),
-							 roots,
-							 readResult.source(),
-							 List.of());
-						 documents.add(doc);
-					 }
-					 catch (Exception e)
-					 {
-						 LOG.warn("LMF LSP rebuildModelRegistry: cannot read model file {}", p, e);
-					 }
-				 });
+				 .forEach(p -> files.add(p.toFile()));
 		}
-
-		return List.copyOf(documents);
+		return List.copyOf(files);
 	}
 
 	/**

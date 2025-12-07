@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class MetaModelImpl extends FeaturedObject implements MetaModel {
-  private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>().add(org.logoce.lmf.model.lang.MetaModel.Features.name, org.logoce.lmf.model.lang.MetaModel::name).add(org.logoce.lmf.model.lang.MetaModel.Features.domain, org.logoce.lmf.model.lang.MetaModel::domain).add(org.logoce.lmf.model.lang.MetaModel.Features.imports, org.logoce.lmf.model.lang.MetaModel::imports).add(org.logoce.lmf.model.lang.MetaModel.Features.metamodels, org.logoce.lmf.model.lang.MetaModel::metamodels).add(org.logoce.lmf.model.lang.MetaModel.Features.groups, org.logoce.lmf.model.lang.MetaModel::groups).add(org.logoce.lmf.model.lang.MetaModel.Features.enums, org.logoce.lmf.model.lang.MetaModel::enums).add(org.logoce.lmf.model.lang.MetaModel.Features.units, org.logoce.lmf.model.lang.MetaModel::units).add(org.logoce.lmf.model.lang.MetaModel.Features.aliases, org.logoce.lmf.model.lang.MetaModel::aliases).add(org.logoce.lmf.model.lang.MetaModel.Features.javaWrappers, org.logoce.lmf.model.lang.MetaModel::javaWrappers).add(org.logoce.lmf.model.lang.MetaModel.Features.lmPackage, org.logoce.lmf.model.lang.MetaModel::lmPackage).add(org.logoce.lmf.model.lang.MetaModel.Features.genNamePackage, org.logoce.lmf.model.lang.MetaModel::genNamePackage).add(org.logoce.lmf.model.lang.MetaModel.Features.extraPackage, org.logoce.lmf.model.lang.MetaModel::extraPackage).build();
+  private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>().add(MetaModel.Features.name, MetaModel::name).add(MetaModel.Features.domain, MetaModel::domain).add(MetaModel.Features.imports, MetaModel::imports).add(MetaModel.Features.metamodels, MetaModel::metamodels).add(MetaModel.Features.groups, MetaModel::groups).add(MetaModel.Features.enums, MetaModel::enums).add(MetaModel.Features.units, MetaModel::units).add(MetaModel.Features.aliases, MetaModel::aliases).add(MetaModel.Features.javaWrappers, MetaModel::javaWrappers).add(MetaModel.Features.lmPackage, MetaModel::lmPackage).add(MetaModel.Features.genNamePackage, MetaModel::genNamePackage).add(MetaModel.Features.extraPackage, MetaModel::extraPackage).build();
   private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>().build();
   private final String name;
   private final String domain;
@@ -50,6 +50,7 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
     setContainer(units, MetaModel.Features.units);
     setContainer(aliases, MetaModel.Features.aliases);
     setContainer(javaWrappers, MetaModel.Features.javaWrappers);
+    eDeliver(true);
   }
 
   @Override
