@@ -168,4 +168,43 @@ public final class ModelUtil
 			return source;
 		}
 	}
+
+	public static Type<?> resolveGenericType(LMObject object, Group<?> genericHolder)
+	{
+		return resolveGenericType(object.lmGroup(), genericHolder);
+	}
+
+	private static Type<?> resolveGenericType(Group<?> group, Group<?> genericHolder)
+	{
+		Type<?> res = null;
+		final var includes = group.includes();
+
+		for (int i = 0; i < includes.size(); i++)
+		{
+			final var include = includes.get(i);
+			if (genericHolder == include.group())
+			{
+				res = include.parameters().getFirst().type();
+				break;
+			}
+		}
+
+		if (res == null)
+		{
+			for (int i = 0; i < includes.size(); i++)
+			{
+				final var include = includes.get(i);
+				if (include.group() instanceof Group<?> includedGroup)
+				{
+					res = resolveGenericType(includedGroup, genericHolder);
+					if (res != null)
+					{
+						break;
+					}
+				}
+			}
+		}
+
+		return res;
+	}
 }

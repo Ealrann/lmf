@@ -195,6 +195,158 @@ public interface LMCoreModelDefinition {
     }
   }
 
+  interface FeatureIDs {
+    interface LM_OBJECT {
+    }
+
+    interface NAMED {
+      int NAME = 0;
+    }
+
+    interface TYPE {
+      int NAME = 0;
+    }
+
+    interface MODEL {
+      int NAME = 0;
+      int DOMAIN = 1;
+      int IMPORTS = 2;
+      int METAMODELS = 3;
+    }
+
+    interface META_MODEL {
+      int NAME = 0;
+      int DOMAIN = 1;
+      int IMPORTS = 2;
+      int METAMODELS = 3;
+      int GROUPS = 4;
+      int ENUMS = 5;
+      int UNITS = 6;
+      int ALIASES = 7;
+      int JAVA_WRAPPERS = 8;
+      int LM_PACKAGE = 9;
+      int GEN_NAME_PACKAGE = 10;
+      int EXTRA_PACKAGE = 11;
+    }
+
+    interface CONCEPT {
+      int NAME = 0;
+    }
+
+    interface GROUP {
+      int NAME = 0;
+      int CONCRETE = 1;
+      int INCLUDES = 2;
+      int FEATURES = 3;
+      int GENERICS = 4;
+      int OPERATIONS = 5;
+      int LM_BUILDER = 6;
+    }
+
+    interface INCLUDE {
+      int GROUP = 0;
+      int PARAMETERS = 1;
+    }
+
+    interface FEATURE {
+      int NAME = 0;
+      int IMMUTABLE = 1;
+      int MANY = 2;
+      int MANDATORY = 3;
+      int PARAMETERS = 4;
+      int RAW_FEATURE = 5;
+    }
+
+    interface ATTRIBUTE {
+      int NAME = 0;
+      int IMMUTABLE = 1;
+      int MANY = 2;
+      int MANDATORY = 3;
+      int PARAMETERS = 4;
+      int RAW_FEATURE = 5;
+      int DATATYPE = 6;
+      int DEFAULT_VALUE = 7;
+    }
+
+    interface RELATION {
+      int NAME = 0;
+      int IMMUTABLE = 1;
+      int MANY = 2;
+      int MANDATORY = 3;
+      int PARAMETERS = 4;
+      int RAW_FEATURE = 5;
+      int CONCEPT = 6;
+      int LAZY = 7;
+      int CONTAINS = 8;
+    }
+
+    interface OPERATION {
+      int NAME = 0;
+      int CONTENT = 1;
+      int RETURN_TYPE = 2;
+      int RETURN_TYPE_PARAMETERS = 3;
+      int PARAMETERS = 4;
+    }
+
+    interface OPERATION_PARAMETER {
+      int NAME = 0;
+      int TYPE = 1;
+      int PARAMETERS = 2;
+    }
+
+    interface DATATYPE {
+      int NAME = 0;
+    }
+
+    interface ALIAS {
+      int NAME = 0;
+      int VALUE = 1;
+    }
+
+    interface ENUM {
+      int NAME = 0;
+      int LITERALS = 1;
+    }
+
+    interface UNIT {
+      int NAME = 0;
+      int MATCHER = 1;
+      int DEFAULT_VALUE = 2;
+      int PRIMITIVE = 3;
+      int EXTRACTOR = 4;
+    }
+
+    interface GENERIC {
+      int NAME = 0;
+      int EXTENSION = 1;
+    }
+
+    interface GENERIC_EXTENSION {
+      int TYPE = 0;
+      int BOUND_TYPE = 1;
+      int PARAMETERS = 2;
+    }
+
+    interface GENERIC_PARAMETER {
+      int WILDCARD = 0;
+      int WILDCARD_BOUND_TYPE = 1;
+      int TYPE = 2;
+      int PARAMETERS = 3;
+    }
+
+    interface JAVA_WRAPPER {
+      int NAME = 0;
+      int QUALIFIED_CLASS_NAME = 1;
+      int SERIALIZER = 2;
+    }
+
+    interface SERIALIZER {
+      int DEFAULT_VALUE = 0;
+      int CREATE = 1;
+      int CONVERT = 2;
+    }
+  }
+
   interface Generics {
     interface TYPE {
       Generic<?> T = new GenericBuilder<>().name("T").build();
