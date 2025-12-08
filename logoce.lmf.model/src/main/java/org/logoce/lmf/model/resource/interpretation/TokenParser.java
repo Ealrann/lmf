@@ -85,6 +85,8 @@ final class TokenParser
 	private static List<String> nextContiguousValues(final Iterator<PToken> iterator)
 	{
 		final List<String> res = new ArrayList<>();
+		int quoteCount = 0;
+
 		_while:
 		while (iterator.hasNext())
 		{
@@ -95,6 +97,8 @@ final class TokenParser
 				case WHITE_SPACE:
 					break _while;
 				case QUOTE:
+					quoteCount++;
+					continue;
 				case LIST_SEPARATOR:
 					continue;
 				case VALUE:
@@ -103,6 +107,13 @@ final class TokenParser
 				default:
 					throw new IllegalStateException("Unmanaged case: " + type);
 			}
+		}
+
+		if (res.isEmpty() && quoteCount >= 2)
+		{
+			// Interpret a pair of quotes with no VALUE tokens (e.g. defaultValue="")
+			// as an explicit empty string, which is a valid attribute value.
+			res.add("");
 		}
 		return res;
 	}

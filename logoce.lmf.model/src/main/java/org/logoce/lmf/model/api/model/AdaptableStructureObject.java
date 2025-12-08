@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.util.NotificationUnifier;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.oldlogoce.TreeLazyIterator;
 
 import java.util.List;
@@ -168,11 +168,11 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	@Override
 	public final Stream<LMObject> streamChildren()
 	{
-		return ModelUtils.streamContainmentFeatures(lmGroup())
-						 .map(RawFeature::featureSupplier)
-						 .map(Supplier::get)
-						 .map(Relation.class::cast)
-						 .flatMap(this::streamReference);
+		return ModelUtil.streamContainmentFeatures(lmGroup())
+						.map(RawFeature::featureSupplier)
+						.map(Supplier::get)
+						.map(Relation.class::cast)
+						.flatMap(this::streamReference);
 	}
 
 	@SuppressWarnings("unchecked")

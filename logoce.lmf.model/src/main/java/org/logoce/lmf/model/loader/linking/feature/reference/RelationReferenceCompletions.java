@@ -13,7 +13,7 @@ import org.logoce.lmf.model.loader.linking.feature.AttributeResolver;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,7 +116,7 @@ public final class RelationReferenceCompletions
 
 			fullRoot.streamTree().forEach(node -> {
 				final Group<?> group = node.group();
-				if (!ModelUtils.isSubGroup(conceptGroup, group))
+				if (!ModelUtil.isSubGroup(conceptGroup, group))
 				{
 					return;
 				}
@@ -174,7 +174,7 @@ public final class RelationReferenceCompletions
 
 		for (final Group<?> group : metaModel.groups())
 		{
-			if (!ModelUtils.isSubGroup(conceptGroup, group))
+			if (!ModelUtil.isSubGroup(conceptGroup, group))
 			{
 				continue;
 			}
@@ -227,10 +227,10 @@ public final class RelationReferenceCompletions
 		final String qualified = qualifiedName(model);
 		final String alias = model.name();
 
-		for (final LMObject object : (Iterable<LMObject>) ModelUtils.streamTree(root)::iterator)
+		for (final LMObject object : (Iterable<LMObject>) ModelUtil.streamTree(root)::iterator)
 		{
 			final Group<?> group = object.lmGroup();
-			if (!ModelUtils.isSubGroup(conceptGroup, group))
+			if (!ModelUtil.isSubGroup(conceptGroup, group))
 			{
 				continue;
 			}

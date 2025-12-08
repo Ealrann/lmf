@@ -2,7 +2,7 @@ package org.logoce.lmf.model.util.oldlogoce;
 
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public final class ContainmentFeatureMap
 
 	private List<RawFeature<?, ?>> computeNew(final Group<?> group)
 	{
-		final var containmentFeatures = ModelUtils.streamContainmentFeatures(group).toList();
+		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group).toList();
 		map.add(new ClassFeatureEntry(group, containmentFeatures));
 		return containmentFeatures;
 	}

@@ -88,12 +88,15 @@ public final class GenUtils
 		try
 		{
 			final var clazz = Class.forName(qualifiedName);
-			final var typeParameters = clazz.getTypeParameters();
-			return typeParameters.length;
+			return clazz.getTypeParameters().length;
 		}
 		catch (ClassNotFoundException e)
 		{
-			throw new RuntimeException(e);
+			// For custom wrapper types that are not yet compiled or not on the
+			// generator classpath, fall back to "no generics". This keeps code
+			// generation working for non-generic wrappers while avoiding hard
+			// failures during composite builds.
+			return 0;
 		}
 	}
 }

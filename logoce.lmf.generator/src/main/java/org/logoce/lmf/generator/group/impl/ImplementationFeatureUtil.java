@@ -19,7 +19,7 @@ import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -88,7 +88,7 @@ public final class ImplementationFeatureUtil
 		if (!many || immutable) return Optional.empty();
 
 		final var group = (Group<?>) feature.lmContainer();
-		final var model = (MetaModel) ModelUtils.root(group);
+		final var model = (MetaModel) ModelUtil.root(group);
 		final var modelResolution = model.adapt(ModelResolution.class);
 		final var groupConstantName = GenUtils.toConstantCase(group.name());
 		final var featureConstantName = GenUtils.toConstantCase(feature.name());
@@ -132,7 +132,7 @@ public final class ImplementationFeatureUtil
 		final var assignment = ImplementationCodeUtil.assignationStatement(feature, paramName);
 
 		final var group = (Group<?>) feature.lmContainer();
-		final var model = (MetaModel) ModelUtils.root(group);
+		final var model = (MetaModel) ModelUtil.root(group);
 		final var domainType = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		final var rawFeatureExpr = CodeBlock.of("$T.Features.$N", domainType, feature.name());
 

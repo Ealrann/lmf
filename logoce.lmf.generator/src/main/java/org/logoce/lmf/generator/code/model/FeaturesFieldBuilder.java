@@ -8,7 +8,7 @@ import org.logoce.lmf.generator.util.*;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 
 import java.util.List;
@@ -51,15 +51,18 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			}
 			else
 			{
-			final var builderType = isAttribute
-									? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
-									: TypeParameter.of(RELATION_BUILDER_TYPE, types);
+				final var builderType = isAttribute
+										? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
+										: TypeParameter.of(RELATION_BUILDER_TYPE, types);
 
-			initBuilder.add("new $T()", builderType.parametrized());
+				initBuilder.add("new $T()", builderType.parametrized());
 
-			BuilderInitializerUtil.appendAttributes(input, initBuilder,
-													attribute -> attribute.rawFeature() != Feature.Features.rawFeature);
-			initBuilder.add(".rawFeature($N.Features.$N)", targetGroup.name(), name);
+				BuilderInitializerUtil.appendAttributes(input, initBuilder,
+														attribute -> attribute.rawFeature() != Feature.Features.rawFeature);
+
+				final var model = (MetaModel) ModelUtil.root(targetGroup);
+				final var domainType = ClassName.get(TargetPathUtil.packageName(model), targetGroup.name());
+				initBuilder.add(".rawFeature($T.Features.$N)", domainType, name);
 
 				if (isAttribute)
 				{
@@ -179,7 +182,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			final var boundType = generic.extension().type();
 			if (boundType instanceof Group<?> group)
 			{
-				final var model = (MetaModel) ModelUtils.root(group);
+				final var model = (MetaModel) ModelUtil.root(group);
 				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 														  model.name() + "ModelDefinition");
 				final var constantName = GenUtils.toConstantCase(group.name());
@@ -198,7 +201,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	private static CodeBlock referenceGeneric(final Generic<?> generic)
 	{
 		final var group = (Group<?>) generic.lmContainer();
-		final var model = (MetaModel) ModelUtils.root(group);
+		final var model = (MetaModel) ModelUtil.root(group);
 		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 												  model.name() + "ModelDefinition");
 		final var constantName = GenUtils.toConstantCase(group.name());
@@ -220,7 +223,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			}
 			case Group<?> group ->
 			{
-				final var model = (MetaModel) ModelUtils.root(group);
+				final var model = (MetaModel) ModelUtil.root(group);
 				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 														  model.name() + "ModelDefinition");
 				final var constantName = GenUtils.toConstantCase(group.name());
@@ -228,7 +231,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			}
 			case JavaWrapper<?> javaWrapper ->
 			{
-				final var model = (MetaModel) ModelUtils.root(javaWrapper);
+				final var model = (MetaModel) ModelUtil.root(javaWrapper);
 				final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 														  model.name() + "ModelDefinition");
 				final var constantName = GenUtils.toConstantCase(javaWrapper.name());

@@ -16,7 +16,7 @@ import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -85,7 +85,7 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 		}
 		else
 		{
-			final var model = (MetaModel) ModelUtils.root(resolution.feature());
+			final var model = (MetaModel) ModelUtil.root(resolution.feature());
 			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
 			final var constantGroupName = GenUtils.toConstantCase(group.name());
 			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",

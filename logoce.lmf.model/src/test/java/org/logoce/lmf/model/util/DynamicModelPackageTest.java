@@ -166,7 +166,7 @@ public final class DynamicModelPackageTest
 																				  .orElseThrow();
 
 		assertTrue(carCompanyContainments.stream()
-										 .anyMatch(r -> org.logoce.lmf.model.util.ModelUtils.isSubGroup(
+										 .anyMatch(r -> ModelUtil.isSubGroup(
 											 r.concept(), carParcGroup)),
 				   "CarCompany containment 'parcs' concept should be a super-group of CarParc");
 
@@ -180,7 +180,7 @@ public final class DynamicModelPackageTest
 
 		assertTrue(carCompanyContainments.stream()
 										 .anyMatch(r -> "ceo".equals(r.name()) &&
-														 org.logoce.lmf.model.util.ModelUtils.isSubGroup(
+														ModelUtil.isSubGroup(
 															 r.concept(), personGroup)),
 				   "CarCompany should declare a containment relation 'ceo' to Person");
 

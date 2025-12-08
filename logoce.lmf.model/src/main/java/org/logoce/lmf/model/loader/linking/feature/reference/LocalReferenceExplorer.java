@@ -9,7 +9,7 @@ import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.loader.linking.feature.AttributeResolver;
 import org.logoce.lmf.model.loader.linking.feature.RelationResolver;
 import org.logoce.lmf.model.loader.linking.tree.LinkNodeInternal;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -46,7 +46,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 			}
 		}
 
-		if (ModelUtils.isSubGroup(relation.concept(), current.group()))
+		if (ModelUtil.isSubGroup(relation.concept(), current.group()))
 		{
 			return Optional.of(buildResolution(relation, current));
 		}
@@ -120,7 +120,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 		final var concept = relation.concept();
 		if (concept instanceof Group<?> group)
 		{
-			return ModelUtils.isSubGroup(group, node.group());
+			return ModelUtil.isSubGroup(group, node.group());
 		}
 		else
 		{

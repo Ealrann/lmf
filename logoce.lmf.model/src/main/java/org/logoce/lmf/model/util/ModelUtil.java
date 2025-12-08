@@ -7,9 +7,9 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class ModelUtils
+public final class ModelUtil
 {
-	public ModelUtils()
+	public ModelUtil()
 	{
 	}
 

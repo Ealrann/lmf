@@ -10,7 +10,7 @@ import org.logoce.lmf.model.loader.model.LmDocument;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
 import org.logoce.lmf.model.loader.linking.LinkNode;
-import test.model.carcompany.CarCompanyPackage;
+import test.model.carcompany.CarCompanyModelPackage;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,7 +28,7 @@ final class RelationReferenceCompletionsM1Test
 	{
 		final var registryBuilder = new ModelRegistry.Builder();
 		registryBuilder.register(LMCoreModelPackage.MODEL);
-		registryBuilder.register(CarCompanyPackage.MODEL);
+		registryBuilder.register(CarCompanyModelPackage.MODEL);
 		final var registry = registryBuilder.build();
 
 		final var loader = new LmLoader(registry);
@@ -43,7 +43,7 @@ final class RelationReferenceCompletionsM1Test
 			(List<? extends LinkNode<?, PNode>>) doc.linkTrees();
 		assertFalse(linkTrees.isEmpty(), "Peugeot.lm should produce link trees");
 
-		final MetaModel carCompanyMetaModel = CarCompanyPackage.MODEL;
+		final MetaModel carCompanyMetaModel = CarCompanyModelPackage.MODEL;
 		final Relation<?, ?> carRelation = findRelation(carCompanyMetaModel, "Person", "car");
 		assertNotNull(carRelation, "Relation Person.car should be present in CarCompany meta-model");
 
@@ -63,7 +63,7 @@ final class RelationReferenceCompletionsM1Test
 	{
 		final var registryBuilder = new ModelRegistry.Builder();
 		registryBuilder.register(LMCoreModelPackage.MODEL);
-		registryBuilder.register(CarCompanyPackage.MODEL);
+		registryBuilder.register(CarCompanyModelPackage.MODEL);
 		final var registry = registryBuilder.build();
 
 		final var loader = new LmLoader(registry);
@@ -78,7 +78,7 @@ final class RelationReferenceCompletionsM1Test
 			(List<? extends LinkNode<?, PNode>>) doc.linkTrees();
 		assertFalse(linkTrees.isEmpty(), "Peugeot.lm should produce link trees");
 
-		final MetaModel carCompanyMetaModel = CarCompanyPackage.MODEL;
+		final MetaModel carCompanyMetaModel = CarCompanyModelPackage.MODEL;
 		final Relation<?, ?> carRelation = findRelation(carCompanyMetaModel, "Person", "car");
 		assertNotNull(carRelation, "Relation Person.car should be present in CarCompany meta-model");
 

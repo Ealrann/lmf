@@ -15,7 +15,7 @@ import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.builder.GenericBuilder;
 import org.logoce.lmf.model.lang.builder.GenericExtensionBuilder;
 import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic<?>>
 {
@@ -132,7 +132,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 					{
 						throw new IllegalStateException("Generic " + generic.name() + " not found in container");
 					}
-					final var model = (MetaModel) ModelUtils.root(group);
+					final var model = (MetaModel) ModelUtil.root(group);
 					final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 															  model.name() + "ModelDefinition");
 					final var groupConstantName = GenUtils.toConstantCase(group.name());
@@ -140,7 +140,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 				}
 			}
 
-			final var model = (MetaModel) ModelUtils.root(type);
+			final var model = (MetaModel) ModelUtil.root(type);
 			final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 													  model.name() + "ModelDefinition");
 			final var typeConstantName = GenUtils.toConstantCase(type.name());

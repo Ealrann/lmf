@@ -2,7 +2,7 @@ package org.logoce.lmf.model.util.oldlogoce;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -178,7 +178,7 @@ public class TreeLazyIterator implements Spliterator<LMObject>
 			public void load(final Consumer<Notification> listener, final Deque<LMObject> course)
 			{
 				final var group = element.lmGroup();
-				ModelUtils.streamContainmentFeatures(group).forEach(feature -> {
+				ModelUtil.streamContainmentFeatures(group).forEach(feature -> {
 					final var val = element.get(feature.featureSupplier().get());
 					if (feature.many()) course.addAll((List<LMObject>) val);
 					else if (val != null) course.add((LMObject) val);
@@ -189,7 +189,7 @@ public class TreeLazyIterator implements Spliterator<LMObject>
 			public void dispose(Consumer<Notification> listener)
 			{
 				final var group = element.lmGroup();
-				ModelUtils.streamContainmentFeatures(group).forEach(feature -> {
+				ModelUtil.streamContainmentFeatures(group).forEach(feature -> {
 					element.sulk(listener, feature);
 				});
 			}

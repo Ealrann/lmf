@@ -12,7 +12,7 @@ import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 
@@ -68,7 +68,7 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		}
 		else
 		{
-			final var model = (MetaModel) ModelUtils.root(group);
+			final var model = (MetaModel) ModelUtil.root(group);
 			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
 			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
 								modelDefinition,

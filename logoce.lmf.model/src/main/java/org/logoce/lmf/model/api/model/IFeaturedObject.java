@@ -2,7 +2,7 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -19,7 +19,7 @@ public interface IFeaturedObject extends ILilyEObject
 
 	default Stream<LMObject> lmStreamTree()
 	{
-		return ModelUtils.streamTree((LMObject) this);
+		return ModelUtil.streamTree((LMObject) this);
 	}
 
 	void listenStruture(Consumer<Notification> listener);

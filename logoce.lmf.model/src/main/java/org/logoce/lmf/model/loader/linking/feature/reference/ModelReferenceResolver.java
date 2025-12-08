@@ -7,7 +7,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.FeatureResolution;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,12 +70,12 @@ public final class ModelReferenceResolver implements ReferenceResolver
 																						 final Relation<T, ?> relation)
 	{
 		final var group = (Group<?>) relation.concept();
-		return ModelUtils.streamTree(model)
-						 .filter(o -> ModelUtils.isSubGroup(group, o.lmGroup()))
-						 .map(o -> (T) o)
-						 .filter(o -> o.get(LMCoreModelDefinition.Features.NAMED.NAME).equals(name))
-						 .findAny()
-						 .map(o -> new ModelExplorer.StaticReferenceResolution<>(relation, o));
+		return ModelUtil.streamTree(model)
+						.filter(o -> ModelUtil.isSubGroup(group, o.lmGroup()))
+						.map(o -> (T) o)
+						.filter(o -> o.get(LMCoreModelDefinition.Features.NAMED.NAME).equals(name))
+						.findAny()
+						.map(o -> new ModelExplorer.StaticReferenceResolution<>(relation, o));
 	}
 
 	private static final class ModelExplorer
@@ -117,7 +117,7 @@ public final class ModelReferenceResolver implements ReferenceResolver
 		public <T extends Relation<?, ?>> Optional<FeatureResolution<Relation<?, ?>>> build(final T relation)
 		{
 			final var concept = relation.concept();
-			if (concept instanceof Group<?> group && ModelUtils.isSubGroup(group, current.lmGroup()))
+			if (concept instanceof Group<?> group && ModelUtil.isSubGroup(group, current.lmGroup()))
 			{
 				return Optional.of(buildInternal(relation, current));
 			}

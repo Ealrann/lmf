@@ -2,7 +2,7 @@ package org.logoce.lmf.generator.util;
 
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -18,8 +18,8 @@ public final class FeatureStreams
 	public static Stream<Feature<?, ?>> distinctFeatures(final Group<?> group)
 	{
 		final Set<Feature<?, ?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
-		return ModelUtils.streamAllFeatures(group)
-						 .filter(feature -> seen.add(feature));
+		return ModelUtil.streamAllFeatures(group)
+						.filter(feature -> seen.add(feature));
 	}
 }
 

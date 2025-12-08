@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject.poi;
 
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 public final class EObjectStructureNoParamPOI implements IEObjectPOI
 {
@@ -16,7 +16,7 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 	public void listen(final LMObject object)
 	{
 		final var group = object.lmGroup();
-		final var containmentFeatures = ModelUtils.streamContainmentFeatures(group).toList();
+		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group).toList();
 		object.listenNoParam(listener, containmentFeatures);
 	}
 
@@ -24,7 +24,7 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 	public void sulk(final LMObject object)
 	{
 		final var group = object.lmGroup();
-		final var containmentFeatures = ModelUtils.streamContainmentFeatures(group).toList();
+		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group).toList();
 		object.sulkNoParam(listener, containmentFeatures);
 	}
 }

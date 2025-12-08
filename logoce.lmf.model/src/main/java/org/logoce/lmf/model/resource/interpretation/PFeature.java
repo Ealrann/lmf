@@ -7,9 +7,26 @@ public record PFeature(Optional<String> name, List<String> values, boolean isRel
 {
 	public static PFeature of(Optional<String> name, List<String> values)
 	{
-		final var firstVal = values.get(0);
-		final var firstChar = firstVal.charAt(0);
-		final var isRelation = firstChar == '@' || firstChar == '#' || firstChar == '.' || firstChar == '/' || firstChar == '^';
+		if (values.isEmpty())
+		{
+			throw new IllegalArgumentException("Empty value list for feature '" + name.orElse("<anonymous>") + "'");
+		}
+
+		final var firstVal = values.getFirst();
+		final boolean isRelation;
+		if (firstVal.isEmpty())
+		{
+			isRelation = false;
+		}
+		else
+		{
+			final var firstChar = firstVal.charAt(0);
+			isRelation = firstChar == '@'
+						 || firstChar == '#'
+						 || firstChar == '.'
+						 || firstChar == '/'
+						 || firstChar == '^';
+		}
 		return new PFeature(name, List.copyOf(values), isRelation);
 	}
 

@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 
@@ -75,7 +75,7 @@ public class InternalFeatureBuilder
 
 	private static CodeBlock localInitializer(final Feature<?, ?> feature, final Group<?> owner)
 	{
-		final var model = (MetaModel) ModelUtils.root(owner);
+		final var model = (MetaModel) ModelUtil.root(owner);
 		final var definitionFile = model.name() + "ModelDefinition";
 		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), definitionFile);
 		final var group = owner;
@@ -94,7 +94,7 @@ public class InternalFeatureBuilder
 	private static CodeBlock parentInitializer(final Feature<?, ?> feature)
 	{
 		final var group = (Group<?>) feature.lmContainer();
-		final var model = (MetaModel) ModelUtils.root(group);
+		final var model = (MetaModel) ModelUtil.root(group);
 		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		return CodeBlock.of("$T.Features.$N", groupClass, feature.name());
 	}

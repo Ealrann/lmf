@@ -32,10 +32,10 @@ public class CarCompanyModelRuntimeTest
 
 		assertSame(companyA, ceo1.lmContainer(), "CEO 1 container should be company A");
 		assertSame(companyB, ceo2.lmContainer(), "CEO 2 container should be company B");
-		assertSame(CarCompanyDefinition.Features.CAR_COMPANY.CEO,
+		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.CEO,
 				   ceo1.lmContainingFeature(),
 				   "CEO 1 containing feature should be CarCompany.ceo");
-		assertSame(CarCompanyDefinition.Features.CAR_COMPANY.CEO,
+		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.CEO,
 				   ceo2.lmContainingFeature(),
 				   "CEO 2 containing feature should be CarCompany.ceo");
 
@@ -57,16 +57,16 @@ public class CarCompanyModelRuntimeTest
 		companyA.parcs().add(parcA);
 
 		assertSame(companyA, parcA.lmContainer(), "Parc A container should be company A");
-		assertSame(CarCompanyDefinition.Features.CAR_COMPANY.PARCS,
+		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.PARCS,
 				   parcA.lmContainingFeature(),
 				   "Parc A containing feature should be CarCompany.parcs");
 
 		assertSame(parcA, car1.lmContainer(), "Car 1 container should be parc A");
 		assertSame(parcA, car2.lmContainer(), "Car 2 container should be parc A");
-		assertSame(CarCompanyDefinition.Features.CAR_PARC.CARS,
+		assertSame(CarCompanyModelDefinition.Features.CAR_PARC.CARS,
 				   car1.lmContainingFeature(),
 				   "Car 1 containing feature should be CarParc.cars");
-		assertSame(CarCompanyDefinition.Features.CAR_PARC.CARS,
+		assertSame(CarCompanyModelDefinition.Features.CAR_PARC.CARS,
 				   car2.lmContainingFeature(),
 				   "Car 2 containing feature should be CarParc.cars");
 
@@ -75,17 +75,17 @@ public class CarCompanyModelRuntimeTest
 
 		assertSame(car1, passenger1.lmContainer(), "Passenger 1 container should be car 1");
 		assertSame(car2, passenger2.lmContainer(), "Passenger 2 container should be car 2");
-		assertSame(CarCompanyDefinition.Features.CAR.PASSENGERS,
+		assertSame(CarCompanyModelDefinition.Features.CAR.PASSENGERS,
 				   passenger1.lmContainingFeature(),
 				   "Passenger 1 containing feature should be Car.passengers");
-		assertSame(CarCompanyDefinition.Features.CAR.PASSENGERS,
+		assertSame(CarCompanyModelDefinition.Features.CAR.PASSENGERS,
 				   passenger2.lmContainingFeature(),
 				   "Passenger 2 containing feature should be Car.passengers");
 
 		companyB.ceo(ceo1);
 
 		assertSame(companyB, ceo1.lmContainer(), "CEO 1 container should move to company B");
-		assertSame(CarCompanyDefinition.Features.CAR_COMPANY.CEO,
+		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.CEO,
 				   ceo1.lmContainingFeature(),
 				   "CEO 1 containing feature should remain CarCompany.ceo");
 
@@ -93,7 +93,7 @@ public class CarCompanyModelRuntimeTest
 		carParc.cars().add(car1);
 
 		assertSame(carParc, car1.lmContainer(), "Car 1 container should move to car parc");
-		assertSame(CarCompanyDefinition.Features.CAR_PARC.CARS,
+		assertSame(CarCompanyModelDefinition.Features.CAR_PARC.CARS,
 				   car1.lmContainingFeature(),
 				   "Car 1 containing feature should be CarParc.cars");
 
@@ -101,7 +101,7 @@ public class CarCompanyModelRuntimeTest
 		car2.passengers().add(passenger1);
 
 		assertSame(car2, passenger1.lmContainer(), "Passenger 1 container should move to car 2");
-		assertSame(CarCompanyDefinition.Features.CAR.PASSENGERS,
+		assertSame(CarCompanyModelDefinition.Features.CAR.PASSENGERS,
 				   passenger1.lmContainingFeature(),
 				   "Passenger 1 containing feature should remain Car.passengers");
 	}

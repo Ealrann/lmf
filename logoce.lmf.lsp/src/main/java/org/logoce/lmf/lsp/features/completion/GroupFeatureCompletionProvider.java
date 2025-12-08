@@ -18,7 +18,7 @@ import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -267,7 +267,7 @@ final class GroupFeatureCompletionProvider
 						continue;
 					}
 
-					if (!ModelUtils.isSubGroup(conceptGroup, candidate))
+					if (!ModelUtil.isSubGroup(conceptGroup, candidate))
 					{
 						continue;
 					}
@@ -370,7 +370,7 @@ final class GroupFeatureCompletionProvider
 	{
 		final var mandatoryFeatureNames = new ArrayList<String>();
 
-		ModelUtils.streamAllFeatures(targetGroup).forEach(feature -> {
+		ModelUtil.streamAllFeatures(targetGroup).forEach(feature -> {
 			final String name = feature.name();
 			if (name == null || name.isBlank())
 			{

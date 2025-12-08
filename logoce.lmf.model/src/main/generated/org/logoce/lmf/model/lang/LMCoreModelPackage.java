@@ -8,9 +8,7 @@ import org.logoce.lmf.model.lang.builder.MetaModelBuilder;
 public final class LMCoreModelPackage implements IModelPackage {
   public static final LMCoreModelPackage Instance = new LMCoreModelPackage();
 
-  public static final MetaModel MODEL = new MetaModelBuilder().name("LMCore").domain("org.logoce.lmf.model").genNamePackage(false).extraPackage("lang").lmPackage(Instance).addGroups(
-		  LMCoreModelDefinition.Groups.ALL).addEnums(LMCoreModelDefinition.Enums.ALL).addUnits(LMCoreModelDefinition.Units.ALL).addAliases(
-		  LMCoreModelDefinition.Aliases.ALL).addJavaWrappers(LMCoreModelDefinition.JavaWrappers.ALL).build();
+  public static final MetaModel MODEL = new MetaModelBuilder().name("LMCore").domain("org.logoce.lmf.model").genNamePackage(false).extraPackage("lang").lmPackage(Instance).addGroups(LMCoreModelDefinition.Groups.ALL).addEnums(LMCoreModelDefinition.Enums.ALL).addUnits(LMCoreModelDefinition.Units.ALL).addAliases(LMCoreModelDefinition.Aliases.ALL).addJavaWrappers(LMCoreModelDefinition.JavaWrappers.ALL).build();
 
   private LMCoreModelPackage() {
   }

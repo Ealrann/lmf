@@ -9,7 +9,7 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TargetPathUtil;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
@@ -73,7 +73,7 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 	{
 		final var feature = resolution.feature();
 		final var group = (Group<?>) feature.lmContainer();
-		final var model = (MetaModel) ModelUtils.root(group);
+		final var model = (MetaModel) ModelUtil.root(group);
 		final var domainType = ClassName.get(TargetPathUtil.packageName(model), group.name());
 
 		return CodeBlock.of("setContainer($N, $T.Features.$N)",

@@ -5,7 +5,7 @@ import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.model.LmDocument;
 import org.logoce.lmf.model.util.ModelRegistry;
-import test.model.carcompany.CarCompanyPackage;
+import test.model.carcompany.CarCompanyModelPackage;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +23,7 @@ public final class M1LoaderTest
 	{
 		final var registryBuilder = new ModelRegistry.Builder();
 		registryBuilder.register(LMCoreModelPackage.MODEL);
-		registryBuilder.register(CarCompanyPackage.MODEL);
+		registryBuilder.register(CarCompanyModelPackage.MODEL);
 		final var registry = registryBuilder.build();
 
 		final var loader = new LmLoader(registry);

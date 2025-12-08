@@ -115,7 +115,7 @@ public final class ModelExplorer implements IModelExplorer
 
 	private static Object getValue(LMObject target, final RawFeature<?, ?> reference)
 	{
-		final var found = ModelUtils.streamContainmentFeatures(target.lmGroup()).anyMatch(f -> f == reference);
+		final var found = ModelUtil.streamContainmentFeatures(target.lmGroup()).anyMatch(f -> f == reference);
 		if (found)
 		{
 			return target.get(reference.featureSupplier().get());

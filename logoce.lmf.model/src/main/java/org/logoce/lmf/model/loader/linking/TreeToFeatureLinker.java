@@ -6,7 +6,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.feature.ITokenResolver;
 import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
 
 import java.util.LinkedHashMap;
@@ -25,7 +25,7 @@ public final class TreeToFeatureLinker
 	public TreeToFeatureLinker(final Group<?> group, final ModelRegistry modelRegistry)
 	{
 		this.group = group;
-		final List<Feature<?, ?>> allFeatures = ModelUtils.streamAllFeatures(group).toList();
+		final List<Feature<?, ?>> allFeatures = ModelUtil.streamAllFeatures(group).toList();
 
 		final Map<Object, Feature<?, ?>> featureMap = new LinkedHashMap<>();
 		for (final Feature<?, ?> feature : allFeatures)

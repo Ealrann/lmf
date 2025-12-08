@@ -15,7 +15,7 @@ import org.logoce.lmf.model.loader.linking.tree.LinkNodeFull;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.parsing.PNode;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.TextPositions;
 
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public final class LmSemanticIndexBuilder
 		// 2) Map LMObjects to their owning Models using the registry (and the root model).
 		final Map<LMObject, Model> owningModel = new IdentityHashMap<>();
 		registry.models().forEach(model -> {
-			for (final LMObject object : (Iterable<LMObject>) () -> ModelUtils.streamTree(model).iterator())
+			for (final LMObject object : (Iterable<LMObject>) () -> ModelUtil.streamTree(model).iterator())
 			{
 				owningModel.putIfAbsent(object, model);
 			}
@@ -111,7 +111,7 @@ public final class LmSemanticIndexBuilder
 
 		if (!owningModel.containsKey(rootModel))
 		{
-			for (final LMObject object : (Iterable<LMObject>) () -> ModelUtils.streamTree(rootModel).iterator())
+			for (final LMObject object : (Iterable<LMObject>) () -> ModelUtil.streamTree(rootModel).iterator())
 			{
 				owningModel.putIfAbsent(object, rootModel);
 			}

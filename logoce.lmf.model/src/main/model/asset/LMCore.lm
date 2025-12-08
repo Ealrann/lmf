@@ -166,7 +166,7 @@
 	(Unit name=long matcher="rgx_match:<[0-9]+[Ll]>" defaultValue=0L primitive=long)
 	(Unit name=float matcher="rgx_match:<[0-9.]+[Ff]>" defaultValue=0f primitive=float)
 	(Unit name=double matcher="rgx_match:<[0-9.]+>" defaultValue=0. primitive=double)
-	(Unit name=string)
+	(Unit name=string defaultValue="")
 
 	(Alias Definition value="Group concrete")
 	(Alias +contains value="Relation contains immutable=false")

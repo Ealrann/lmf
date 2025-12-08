@@ -119,7 +119,8 @@ public final class MetaModelPackages
 			pkg.append('.').append(metaModel.name().toLowerCase(Locale.ROOT));
 		}
 
-		final String className = pkg + "." + metaModel.name() + "Package";
+		final var basePackage = pkg.toString();
+		final var className = basePackage + "." + metaModel.name() + "ModelPackage";
 
 		final Class<?> clazz = Class.forName(className);
 		if (!IModelPackage.class.isAssignableFrom(clazz))

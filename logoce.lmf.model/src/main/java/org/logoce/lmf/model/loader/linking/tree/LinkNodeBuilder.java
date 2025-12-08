@@ -9,7 +9,7 @@ import org.logoce.lmf.model.loader.linking.TreeToFeatureLinker;
 import org.logoce.lmf.model.resource.interpretation.PGroup;
 import org.logoce.lmf.model.resource.interpretation.PType;
 import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.tree.BasicTree;
 import org.logoce.lmf.model.util.tree.Tree;
 
@@ -123,7 +123,7 @@ public final class LinkNodeBuilder<I extends PNode>
 	{
 		return metaResolvers.get(parentGroup)
 							.streamContainmentRelations()
-							.filter(r -> ModelUtils.isSubGroup(r.concept(), childGroup))
+							.filter(r -> ModelUtil.isSubGroup(r.concept(), childGroup))
 							.findAny();
 	}
 

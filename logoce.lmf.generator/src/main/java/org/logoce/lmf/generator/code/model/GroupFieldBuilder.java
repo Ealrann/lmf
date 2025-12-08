@@ -17,7 +17,7 @@ import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.lang.builder.GroupBuilder;
 import org.logoce.lmf.model.lang.builder.IncludeBuilder;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 
 public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {
@@ -66,8 +66,8 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var parametersBlockBuilder = new CodeblockBuilder<>(", ", GenericFieldBuilder::genericParameterBlock);
 		final var group = reference.group();
 		final var groupConstantName = GenUtils.toConstantCase(group.name());
-		final var targetModel = (MetaModel) ModelUtils.root(group);
-		final var sourceModel = (MetaModel) ModelUtils.root(reference);
+		final var targetModel = (MetaModel) ModelUtil.root(group);
+		final var sourceModel = (MetaModel) ModelUtil.root(reference);
 		final var includeType = TypeResolutionUtil.parametrizedType(group, List.of()).parametrizedWildcard();
 		reference.parameters().forEach(parametersBlockBuilder::feed);
 

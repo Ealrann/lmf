@@ -16,7 +16,7 @@ import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.ModelUtils;
+import org.logoce.lmf.model.util.ModelUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,13 +184,13 @@ final class CompletionContextResolver
 			final Group<?> conceptGroup = relationConcept.lmGroup();
 
 			if (relationConcept instanceof Datatype<?> ||
-				ModelUtils.isSubGroup(LMCoreModelDefinition.Groups.DATATYPE, conceptGroup))
+				ModelUtil.isSubGroup(LMCoreModelDefinition.Groups.DATATYPE, conceptGroup))
 			{
 				return TypeUsageKind.DATATYPE;
 			}
 
-			if (ModelUtils.isSubGroup(LMCoreModelDefinition.Groups.CONCEPT, conceptGroup) ||
-				ModelUtils.isSubGroup(LMCoreModelDefinition.Groups.TYPE, conceptGroup))
+			if (ModelUtil.isSubGroup(LMCoreModelDefinition.Groups.CONCEPT, conceptGroup) ||
+				ModelUtil.isSubGroup(LMCoreModelDefinition.Groups.TYPE, conceptGroup))
 			{
 				return TypeUsageKind.CONCEPT;
 			}
