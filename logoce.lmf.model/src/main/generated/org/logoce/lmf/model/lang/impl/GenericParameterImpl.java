@@ -63,4 +63,15 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
   protected FeatureGetter<GenericParameter> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case GenericParameter.FeatureIDs.WILDCARD -> 0;
+      case GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE -> 1;
+      case GenericParameter.FeatureIDs.TYPE -> 2;
+      case GenericParameter.FeatureIDs.PARAMETERS -> 3;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

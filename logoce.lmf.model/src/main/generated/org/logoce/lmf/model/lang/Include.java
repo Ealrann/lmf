@@ -19,6 +19,11 @@ public interface Include<T extends LMObject> extends LMObject {
     RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.INCLUDE.PARAMETERS);
   }
 
+  interface FeatureIDs {
+    int GROUP = 450930500;
+    int PARAMETERS = -221199291;
+  }
+
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Include<T>> {
     Builder<T> group(Supplier<Group<T>> group);
     Builder<T> addParameter(Supplier<GenericParameter> parameter);

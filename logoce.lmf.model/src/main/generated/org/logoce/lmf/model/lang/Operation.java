@@ -24,6 +24,14 @@ public interface Operation extends Named {
     RawFeature<OperationParameter, List<OperationParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.OPERATION.PARAMETERS);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int CONTENT = 357588989;
+    int RETURN_TYPE = -1807540602;
+    int RETURN_TYPE_PARAMETERS = -1420505840;
+    int PARAMETERS = 1608955878;
+  }
+
   interface Builder extends IFeaturedObject.Builder<Operation> {
     Builder name(String name);
     Builder content(String content);

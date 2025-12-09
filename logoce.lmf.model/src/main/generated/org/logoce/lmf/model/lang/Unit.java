@@ -22,6 +22,14 @@ public interface Unit<T> extends Datatype<T> {
     RawFeature<String, String> extractor = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.UNIT.EXTRACTOR);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int MATCHER = 1032045637;
+    int DEFAULT_VALUE = -221625219;
+    int PRIMITIVE = 1504038714;
+    int EXTRACTOR = -1208971145;
+  }
+
   interface Builder<T> extends IFeaturedObject.Builder<Unit<T>> {
     Builder<T> name(String name);
     Builder<T> matcher(String matcher);

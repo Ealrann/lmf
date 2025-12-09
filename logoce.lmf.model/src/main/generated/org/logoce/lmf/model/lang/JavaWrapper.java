@@ -19,6 +19,12 @@ public interface JavaWrapper<T> extends Datatype<T> {
     RawFeature<Serializer, Serializer> serializer = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.JAVA_WRAPPER.SERIALIZER);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int QUALIFIED_CLASS_NAME = 1292771257;
+    int SERIALIZER = -1882174364;
+  }
+
   interface Builder<T> extends IFeaturedObject.Builder<JavaWrapper<T>> {
     Builder<T> name(String name);
     Builder<T> qualifiedClassName(String qualifiedClassName);

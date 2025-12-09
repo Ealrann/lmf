@@ -1,6 +1,7 @@
 package org.logoce.lmf.generator.group.impl;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -9,6 +10,7 @@ import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
+import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
@@ -45,12 +47,53 @@ public final class ImplementationGenerator
 					  .forEach(featureInstallers::install);
 		typeInstallers.install(group);
 
+		installFeatureIndex(classBuilder, interfaceType);
 		installOperationStubs(classBuilder);
 
 		final var javaFile = JavaFile.builder(implementationType.raw().packageName(), classBuilder.build())
 									 .skipJavaLangImports(true)
 									 .build();
 		FormattedJavaWriter.write(javaFile, targetDirectory);
+	}
+
+	private void installFeatureIndex(final TypeSpec.Builder classBuilder,
+									 final GroupInterfaceType interfaceType)
+	{
+		final var domainType = interfaceType.raw();
+		final var features = FeatureStreams.distinctFeatures(group).toList();
+		final var methodBuilder = MethodSpec.methodBuilder("featureIndex")
+											.addAnnotation(Override.class)
+											.addModifiers(Modifier.PROTECTED)
+											.returns(int.class)
+											.addParameter(int.class, "featureId");
+
+		if (features.isEmpty())
+		{
+			methodBuilder.addStatement("throw new IllegalArgumentException($S + featureId)",
+									   "Unknown featureId: ");
+		}
+		else
+		{
+			final var body = CodeBlock.builder();
+			body.add("return switch (featureId) {\n");
+
+			for (int i = 0; i < features.size(); i++)
+			{
+				final var feature = features.get(i);
+				final var constantName = GenUtils.toConstantCase(feature.name());
+				body.addStatement("  case $T.FeatureIDs.$N -> $L", domainType, constantName, i);
+			}
+
+			body.addStatement("  default -> throw new IllegalArgumentException($S + featureId)",
+							  "Unknown featureId: ");
+			body.add("};\n");
+
+			methodBuilder.addCode(body.build());
+		}
+
+		final var method = methodBuilder.build();
+
+		classBuilder.addMethod(method);
 	}
 
 	private void installOperationStubs(final TypeSpec.Builder classBuilder)

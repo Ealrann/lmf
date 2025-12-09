@@ -6,4 +6,7 @@ import org.logoce.lmf.notification.api.IFeatures;
 public interface LMObject extends IFeaturedObject {
   interface Features<T extends Features<T>> extends IFeatures<T> {
   }
+
+  interface FeatureIDs {
+  }
 }

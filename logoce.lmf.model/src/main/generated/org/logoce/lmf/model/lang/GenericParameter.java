@@ -23,6 +23,13 @@ public interface GenericParameter extends LMObject {
     RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GENERIC_PARAMETER.PARAMETERS);
   }
 
+  interface FeatureIDs {
+    int WILDCARD = 520310873;
+    int WILDCARD_BOUND_TYPE = 673018239;
+    int TYPE = -1625571015;
+    int PARAMETERS = -47630167;
+  }
+
   interface Builder extends IFeaturedObject.Builder<GenericParameter> {
     Builder wildcard(boolean wildcard);
     Builder wildcardBoundType(BoundType wildcardBoundType);

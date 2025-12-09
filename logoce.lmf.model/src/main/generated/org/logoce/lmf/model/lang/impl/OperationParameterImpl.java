@@ -56,4 +56,14 @@ public final class OperationParameterImpl extends FeaturedObject implements Oper
   protected FeatureGetter<OperationParameter> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case OperationParameter.FeatureIDs.NAME -> 0;
+      case OperationParameter.FeatureIDs.TYPE -> 1;
+      case OperationParameter.FeatureIDs.PARAMETERS -> 2;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

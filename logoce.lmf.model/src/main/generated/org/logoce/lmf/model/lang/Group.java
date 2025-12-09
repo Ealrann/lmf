@@ -29,6 +29,16 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     RawFeature<BuilderSupplier<?>, BuilderSupplier<?>> lmBuilder = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.GROUP.LM_BUILDER);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int CONCRETE = -431948311;
+    int INCLUDES = 240954415;
+    int FEATURES = -139964511;
+    int GENERICS = 1961073888;
+    int OPERATIONS = -1207043504;
+    int LM_BUILDER = 1328379894;
+  }
+
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Group<T>> {
     Builder<T> name(String name);
     Builder<T> concrete(boolean concrete);

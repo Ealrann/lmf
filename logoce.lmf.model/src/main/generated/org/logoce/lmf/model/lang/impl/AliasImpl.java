@@ -43,4 +43,13 @@ public final class AliasImpl extends FeaturedObject implements Alias {
   protected FeatureGetter<Alias> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Alias.FeatureIDs.NAME -> 0;
+      case Alias.FeatureIDs.VALUE -> 1;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

@@ -19,6 +19,12 @@ public interface Serializer extends LMObject {
     RawFeature<String, String> convert = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.SERIALIZER.CONVERT);
   }
 
+  interface FeatureIDs {
+    int DEFAULT_VALUE = -947412497;
+    int CREATE = 2102923899;
+    int CONVERT = 689167380;
+  }
+
   interface Builder extends IFeaturedObject.Builder<Serializer> {
     Builder defaultValue(String defaultValue);
     Builder create(String create);

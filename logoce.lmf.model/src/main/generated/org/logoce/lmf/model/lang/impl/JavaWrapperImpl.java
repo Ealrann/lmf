@@ -53,4 +53,14 @@ public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrap
   protected FeatureGetter<JavaWrapper<?>> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case JavaWrapper.FeatureIDs.NAME -> 0;
+      case JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME -> 1;
+      case JavaWrapper.FeatureIDs.SERIALIZER -> 2;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

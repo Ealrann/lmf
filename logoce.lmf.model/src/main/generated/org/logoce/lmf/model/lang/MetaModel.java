@@ -36,6 +36,21 @@ public interface MetaModel extends Model {
     RawFeature<String, String> extraPackage = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.META_MODEL.EXTRA_PACKAGE);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int DOMAIN = Model.FeatureIDs.DOMAIN;
+    int IMPORTS = Model.FeatureIDs.IMPORTS;
+    int METAMODELS = Model.FeatureIDs.METAMODELS;
+    int GROUPS = 1867707507;
+    int ENUMS = -1604280045;
+    int UNITS = -1589515024;
+    int ALIASES = 856393791;
+    int JAVA_WRAPPERS = -62373407;
+    int LM_PACKAGE = 968992902;
+    int GEN_NAME_PACKAGE = 1673060714;
+    int EXTRA_PACKAGE = 768798069;
+  }
+
   interface Builder extends IFeaturedObject.Builder<MetaModel> {
     Builder name(String name);
     Builder domain(String domain);

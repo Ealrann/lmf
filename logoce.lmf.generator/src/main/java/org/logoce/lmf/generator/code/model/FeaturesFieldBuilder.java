@@ -45,41 +45,44 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 		final var initBuilder = CodeBlock.builder();
 
-			if (!specializeInherited && group != parentGroup)
+		if (!specializeInherited && group != parentGroup)
+		{
+			initBuilder.add(parentInitializer(input));
+		}
+		else
+		{
+			final var builderType = isAttribute
+									? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
+									: TypeParameter.of(RELATION_BUILDER_TYPE, types);
+
+			initBuilder.add("new $T()", builderType.parametrized());
+
+			BuilderInitializerUtil.appendAttributes(input,
+													initBuilder,
+													attribute -> attribute.rawFeature() != Feature.Features.rawFeature &&
+																 !attribute.name().equals("id"));
+
+			final var model = (MetaModel) ModelUtil.root(targetGroup);
+			final var domainType = ClassName.get(TargetPathUtil.packageName(model), targetGroup.name());
+			initBuilder.add(".rawFeature($T.Features.$N)", domainType, name);
+			initBuilder.add(".id($T.FeatureIDs.$N)", domainType, constantName);
+
+			if (isAttribute)
 			{
-				initBuilder.add(parentInitializer(input));
-			}
-			else
-			{
-				final var builderType = isAttribute
-										? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
-										: TypeParameter.of(RELATION_BUILDER_TYPE, types);
-
-				initBuilder.add("new $T()", builderType.parametrized());
-
-				BuilderInitializerUtil.appendAttributes(input, initBuilder,
-														attribute -> attribute.rawFeature() != Feature.Features.rawFeature);
-
-				final var model = (MetaModel) ModelUtil.root(targetGroup);
-				final var domainType = ClassName.get(TargetPathUtil.packageName(model), targetGroup.name());
-				initBuilder.add(".rawFeature($T.Features.$N)", domainType, name);
-
-				if (isAttribute)
+				final var attribute = (Attribute<?, ?>) input;
+				final var datatype = attribute.datatype();
+				if (datatype instanceof Generic<?> generic)
 				{
-					final var attribute = (Attribute<?, ?>) input;
-					final var datatype = attribute.datatype();
-					if (datatype instanceof Generic<?> generic)
+					final var boundType = TypeResolutionUtil.resolveGenericBindingType(generic, targetGroup);
+					if (boundType != null)
 					{
-						final var boundType = TypeResolutionUtil.resolveGenericBindingType(generic, targetGroup);
-						if (boundType != null)
+						final var typeHolder = TypeResolutionUtil.resolveTypeHolder(boundType);
+						final var typeName = GenUtils.toConstantCase(boundType.name());
+						CodeBlock datatypeBlock;
+						if (boundType.lmContainer() instanceof MetaModel typeModel)
 						{
-							final var typeHolder = TypeResolutionUtil.resolveTypeHolder(boundType);
-							final var typeName = GenUtils.toConstantCase(boundType.name());
-							CodeBlock datatypeBlock;
-							if (boundType.lmContainer() instanceof MetaModel typeModel)
-							{
-								final var parentModel = (MetaModel) targetGroup.lmContainer();
-								if (typeModel != parentModel)
+							final var parentModel = (MetaModel) targetGroup.lmContainer();
+							if (typeModel != parentModel)
 							{
 								final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
 																		  typeModel.name() + "ModelDefinition");
@@ -89,25 +92,25 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 							{
 								datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 							}
-							}
-							else
-							{
-								datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
-							}
-
-							initBuilder.add(".datatype(() -> $L)", datatypeBlock);
 						}
 						else
 						{
-							final var rawType = resolvedFeature.rawSingleTypeFor(targetGroup).parametrized();
-							final var genericRef = referenceGeneric(generic);
-							initBuilder.add(".datatype(() -> ($T<$T>) $L)", ClassName.get(Datatype.class), rawType, genericRef);
+							datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 						}
+
+						initBuilder.add(".datatype(() -> $L)", datatypeBlock);
 					}
 					else
 					{
-						final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
-						final var typeName = GenUtils.toConstantCase(datatype.name());
+						final var rawType = resolvedFeature.rawSingleTypeFor(targetGroup).parametrized();
+						final var genericRef = referenceGeneric(generic);
+						initBuilder.add(".datatype(() -> ($T<$T>) $L)", ClassName.get(Datatype.class), rawType, genericRef);
+					}
+				}
+				else
+				{
+					final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
+					final var typeName = GenUtils.toConstantCase(datatype.name());
 
 					CodeBlock datatypeBlock;
 					if (datatype != null && typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
@@ -131,7 +134,6 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 					initBuilder.add(".datatype(() -> $L)", datatypeBlock);
 				}
-
 			}
 			else
 			{
@@ -141,9 +143,9 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				initBuilder.add(".concept($L)", conceptBlock);
 			}
 
-				input.parameters()
-					 .forEach(parameter -> initBuilder.add(".addParameter(() -> $L)",
-														  generateParameterCodeblock(parameter)));
+			input.parameters()
+				 .forEach(parameter -> initBuilder.add(".addParameter(() -> $L)",
+													  generateParameterCodeblock(parameter)));
 
 			initBuilder.add(".build()");
 		}

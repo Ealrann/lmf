@@ -127,4 +127,23 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
   protected FeatureGetter<MetaModel> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case MetaModel.FeatureIDs.NAME -> 0;
+      case MetaModel.FeatureIDs.DOMAIN -> 1;
+      case MetaModel.FeatureIDs.IMPORTS -> 2;
+      case MetaModel.FeatureIDs.METAMODELS -> 3;
+      case MetaModel.FeatureIDs.GROUPS -> 4;
+      case MetaModel.FeatureIDs.ENUMS -> 5;
+      case MetaModel.FeatureIDs.UNITS -> 6;
+      case MetaModel.FeatureIDs.ALIASES -> 7;
+      case MetaModel.FeatureIDs.JAVA_WRAPPERS -> 8;
+      case MetaModel.FeatureIDs.LM_PACKAGE -> 9;
+      case MetaModel.FeatureIDs.GEN_NAME_PACKAGE -> 10;
+      case MetaModel.FeatureIDs.EXTRA_PACKAGE -> 11;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

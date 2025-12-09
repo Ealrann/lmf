@@ -16,6 +16,11 @@ public interface Alias extends Named {
     RawFeature<String, String> value = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.ALIAS.VALUE);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int VALUE = -1357955170;
+  }
+
   interface Builder extends IFeaturedObject.Builder<Alias> {
     Builder name(String name);
     Builder value(String value);

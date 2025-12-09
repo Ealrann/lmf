@@ -90,4 +90,18 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
   protected FeatureGetter<Group<?>> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Group.FeatureIDs.NAME -> 0;
+      case Group.FeatureIDs.CONCRETE -> 1;
+      case Group.FeatureIDs.INCLUDES -> 2;
+      case Group.FeatureIDs.FEATURES -> 3;
+      case Group.FeatureIDs.GENERICS -> 4;
+      case Group.FeatureIDs.OPERATIONS -> 5;
+      case Group.FeatureIDs.LM_BUILDER -> 6;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

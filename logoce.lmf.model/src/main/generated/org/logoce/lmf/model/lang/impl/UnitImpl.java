@@ -66,4 +66,16 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
   protected FeatureGetter<Unit<?>> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Unit.FeatureIDs.NAME -> 0;
+      case Unit.FeatureIDs.MATCHER -> 1;
+      case Unit.FeatureIDs.DEFAULT_VALUE -> 2;
+      case Unit.FeatureIDs.PRIMITIVE -> 3;
+      case Unit.FeatureIDs.EXTRACTOR -> 4;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

@@ -18,6 +18,7 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
   interface Features<T extends Features<T>> extends Feature.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
     RawFeature<Boolean, Boolean> immutable = Feature.Features.immutable;
+    RawFeature<Integer, Integer> id = Feature.Features.id;
     RawFeature<Boolean, Boolean> many = Feature.Features.many;
     RawFeature<Boolean, Boolean> mandatory = Feature.Features.mandatory;
     RawFeature<GenericParameter, List<GenericParameter>> parameters = Feature.Features.parameters;
@@ -27,9 +28,23 @@ public interface Relation<UnaryType extends LMObject, EffectiveType> extends Fea
     RawFeature<Boolean, Boolean> contains = new RawFeature<>(false,false,() -> LMCoreModelDefinition.Features.RELATION.CONTAINS);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int IMMUTABLE = Feature.FeatureIDs.IMMUTABLE;
+    int ID = Feature.FeatureIDs.ID;
+    int MANY = Feature.FeatureIDs.MANY;
+    int MANDATORY = Feature.FeatureIDs.MANDATORY;
+    int PARAMETERS = Feature.FeatureIDs.PARAMETERS;
+    int RAW_FEATURE = Feature.FeatureIDs.RAW_FEATURE;
+    int CONCEPT = 1758409075;
+    int LAZY = -813813687;
+    int CONTAINS = -1308319628;
+  }
+
   interface Builder<UnaryType extends LMObject, EffectiveType> extends IFeaturedObject.Builder<Relation<UnaryType, EffectiveType>> {
     Builder<UnaryType, EffectiveType> name(String name);
     Builder<UnaryType, EffectiveType> immutable(boolean immutable);
+    Builder<UnaryType, EffectiveType> id(int id);
     Builder<UnaryType, EffectiveType> many(boolean many);
     Builder<UnaryType, EffectiveType> mandatory(boolean mandatory);
     Builder<UnaryType, EffectiveType> addParameter(Supplier<GenericParameter> parameter);

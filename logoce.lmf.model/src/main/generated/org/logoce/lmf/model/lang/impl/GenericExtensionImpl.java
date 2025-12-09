@@ -57,4 +57,14 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
   protected FeatureGetter<GenericExtension> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case GenericExtension.FeatureIDs.TYPE -> 0;
+      case GenericExtension.FeatureIDs.BOUND_TYPE -> 1;
+      case GenericExtension.FeatureIDs.PARAMETERS -> 2;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

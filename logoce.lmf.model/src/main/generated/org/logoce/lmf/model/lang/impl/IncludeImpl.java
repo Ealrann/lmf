@@ -48,4 +48,13 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject implem
   protected FeatureGetter<Include<?>> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Include.FeatureIDs.GROUP -> 0;
+      case Include.FeatureIDs.PARAMETERS -> 1;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

@@ -17,6 +17,11 @@ public interface Enum<T> extends Datatype<T> {
     RawFeature<String, List<String>> literals = new RawFeature<>(true,false,() -> LMCoreModelDefinition.Features.ENUM.LITERALS);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int LITERALS = 384564756;
+  }
+
   interface Builder<T> extends IFeaturedObject.Builder<Enum<T>> {
     Builder<T> name(String name);
     Builder<T> addLiteral(String literal);

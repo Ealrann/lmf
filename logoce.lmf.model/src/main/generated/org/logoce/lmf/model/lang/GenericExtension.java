@@ -21,6 +21,12 @@ public interface GenericExtension extends LMObject {
     RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.GENERIC_EXTENSION.PARAMETERS);
   }
 
+  interface FeatureIDs {
+    int TYPE = 1591035491;
+    int BOUND_TYPE = 1549707343;
+    int PARAMETERS = -1733249453;
+  }
+
   interface Builder extends IFeaturedObject.Builder<GenericExtension> {
     Builder type(Supplier<Type<?>> type);
     Builder boundType(BoundType boundType);

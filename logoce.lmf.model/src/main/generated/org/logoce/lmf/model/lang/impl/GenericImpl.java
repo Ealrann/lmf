@@ -45,4 +45,13 @@ public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
   protected FeatureGetter<Generic<?>> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Generic.FeatureIDs.NAME -> 0;
+      case Generic.FeatureIDs.EXTENSION -> 1;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

@@ -66,15 +66,6 @@ public class ModelDefinition
 
 	private final GroupTopologyBuilder topology;
 
-	private final InterfaceBuilder<Group<?>> groupFeatureIdInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
-																								 FeatureIdFieldBuilder::new,
-																								 FeatureStreams::distinctFeatures,
-																								 null);
-
-	private final InterfaceBuilder<MetaModel> featureIdsInterfacesBuilder = new SubInterfaceBuilder<>("FeatureIDs",
-																									  groupFeatureIdInterfaceBuilder,
-																									  this::streamOrderedGroup);
-
 	public ModelDefinition(MetaModel model)
 	{
 		this.model = model;
@@ -92,7 +83,6 @@ public class ModelDefinition
 												.addModifiers(Modifier.PUBLIC);
 
 		definitionInterface.addType(featureInterfacesBuilder.build(model));
-		definitionInterface.addType(featureIdsInterfacesBuilder.build(model));
 		definitionInterface.addType(genericBuilder.build(model));
 		definitionInterface.addType(groupBuilder.build(model));
 		definitionInterface.addType(unitBuilder.build(model));

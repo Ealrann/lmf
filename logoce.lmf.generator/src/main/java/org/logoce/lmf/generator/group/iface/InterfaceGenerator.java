@@ -44,8 +44,10 @@ public final class InterfaceGenerator
 		final var packageName = groupType.packageName;
 		final var isFinal = group.concrete();
 		final var internalFeaturesGenerator = new InternalFeaturesGenerator(group);
+		final var internalFeatureIdsGenerator = new InternalFeatureIdsGenerator(group);
 		final var notificationFeaturesGenerator = new NotificationFeaturesGenerator(group);
 		final var internalFeatures = internalFeaturesGenerator.build();
+		final var featureIds = internalFeatureIdsGenerator.build();
 		final var notificationFeatures = notificationFeaturesGenerator.build();
 		final var featureResolutions = FeatureStreams.distinctFeatures(group)
 													 .map(f -> f.adapt(FeatureResolution.class))
@@ -53,7 +55,8 @@ public final class InterfaceGenerator
 
 		final var interfaceBuilder = groupType.interfaceSpecBuilder()
 											  .addModifiers(Modifier.PUBLIC)
-											  .addType(internalFeatures);
+											  .addType(internalFeatures)
+											  .addType(featureIds);
 
 		if (ENUM_NOTIFICATION_FEATURES) interfaceBuilder.addTypes(notificationFeatures);
 

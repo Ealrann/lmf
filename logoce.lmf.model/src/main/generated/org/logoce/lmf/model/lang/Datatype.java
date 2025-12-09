@@ -6,4 +6,8 @@ public interface Datatype<T> extends Type<T> {
   interface Features<T extends Features<T>> extends Type.Features<T> {
     RawFeature<String, String> name = Named.Features.name;
   }
+
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+  }
 }

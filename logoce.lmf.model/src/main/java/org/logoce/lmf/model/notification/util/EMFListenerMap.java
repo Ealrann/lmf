@@ -5,28 +5,30 @@ import org.logoce.lmf.model.api.model.IEMFNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
 
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 public final class EMFListenerMap implements IEMFNotifier
 {
 	private final int featureCount;
+	private final IndexFunction indexFunction;
 
-	private Map<RawFeature<?, ?>, Deque<Object>> listenerMap = null;
+	private Deque<Object>[] listenerMap = null;
 
-	public EMFListenerMap(int featureCount)
+	public EMFListenerMap(int featureCount, IndexFunction indexFunction)
 	{
 		this.featureCount = featureCount;
+		this.indexFunction = indexFunction;
 	}
 
 	public void notify(Notification notification)
 	{
 		if (listenerMap != null)
 		{
-			final var listeners = listenerMap.get(notification.feature());
+			final int featureId = notification.feature().featureSupplier().get().id();
+			final int featureIdx = indexFunction.index(featureId);
+			final var listeners = listenerMap[featureIdx];
 			if (listeners != null)
 			{
 				notify(listeners, notification);
@@ -93,7 +95,9 @@ public final class EMFListenerMap implements IEMFNotifier
 		{
 			for (final var feature : features)
 			{
-				final var list = listenerMap.get(feature);
+				final int featureId = feature.featureSupplier().get().id();
+				final int featureIdx = indexFunction.index(featureId);
+				final var list = listenerMap[featureIdx];
 				if (list != null)
 				{
 					list.remove(listener);
@@ -102,19 +106,28 @@ public final class EMFListenerMap implements IEMFNotifier
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void initNotificationMap()
 	{
-		listenerMap = new HashMap<>(featureCount);
+		listenerMap = new Deque[featureCount];
 	}
 
 	private void registerNotificationListener(final Object listener, final RawFeature<?, ?> feature)
 	{
-		var list = listenerMap.get(feature);
+		final int featureId = feature.featureSupplier().get().id();
+		final int featureIdx = indexFunction.index(featureId);
+		var list = listenerMap[featureIdx];
 		if (list == null)
 		{
 			list = new ConcurrentLinkedDeque<>();
-			listenerMap.put(feature, list);
+			listenerMap[featureIdx] = list;
 		}
 		list.add(listener);
+	}
+
+	@FunctionalInterface
+	public interface IndexFunction
+	{
+		int index(int id);
 	}
 }

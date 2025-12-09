@@ -50,4 +50,14 @@ public final class SerializerImpl extends FeaturedObject implements Serializer {
   protected FeatureGetter<Serializer> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Serializer.FeatureIDs.DEFAULT_VALUE -> 0;
+      case Serializer.FeatureIDs.CREATE -> 1;
+      case Serializer.FeatureIDs.CONVERT -> 2;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

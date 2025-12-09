@@ -16,10 +16,11 @@ import org.logoce.lmf.model.lang.impl.RelationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Builder<UnaryType, EffectiveType> {
-  private static final FeatureInserter<RelationBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.name, RelationBuilder::name).add(Relation.Features.immutable, RelationBuilder::immutable).add(Relation.Features.many, RelationBuilder::many).add(Relation.Features.mandatory, RelationBuilder::mandatory).add(Relation.Features.rawFeature, RelationBuilder::_rawFeature).add(Relation.Features.lazy, RelationBuilder::lazy).add(Relation.Features.contains, RelationBuilder::contains).build();
+  private static final FeatureInserter<RelationBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.name, RelationBuilder::name).add(Relation.Features.immutable, RelationBuilder::immutable).add(Relation.Features.id, RelationBuilder::id).add(Relation.Features.many, RelationBuilder::many).add(Relation.Features.mandatory, RelationBuilder::mandatory).add(Relation.Features.rawFeature, RelationBuilder::_rawFeature).add(Relation.Features.lazy, RelationBuilder::lazy).add(Relation.Features.contains, RelationBuilder::contains).build();
   private static final RelationLazyInserter<RelationBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.parameters, RelationBuilder::addParameter).add(Relation.Features.concept, RelationBuilder::_concept).build();
   private String name;
   private boolean immutable;
+  private int id;
   private boolean many;
   private boolean mandatory;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
@@ -40,6 +41,12 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   @Override
   public RelationBuilder<UnaryType, EffectiveType> immutable(boolean immutable) {
     this.immutable = immutable;
+    return this;
+  }
+
+  @Override
+  public RelationBuilder<UnaryType, EffectiveType> id(int id) {
+    this.id = id;
     return this;
   }
 
@@ -115,7 +122,7 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   @Override
   public Relation<UnaryType, EffectiveType> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, many, mandatory, builtParameters, rawFeature, concept, lazy, contains);
+    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, id, many, mandatory, builtParameters, rawFeature, concept, lazy, contains);
     return built;
   }
 

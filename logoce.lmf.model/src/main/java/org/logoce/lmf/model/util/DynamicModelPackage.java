@@ -54,10 +54,7 @@ public final class DynamicModelPackage implements IModelPackage
 			return Optional.empty();
 		}
 
-		final var builder = new DynamicBuilder<>(group);
-		@SuppressWarnings("unchecked")
-		final IFeaturedObject.Builder<T> typed = (IFeaturedObject.Builder<T>) builder;
-		return Optional.of(typed);
+		return Optional.of(new DynamicBuilder<>(group));
 	}
 
 	@Override
@@ -299,6 +296,12 @@ public final class DynamicModelPackage implements IModelPackage
 				}
 			}
 			return null;
+		}
+
+		@Override
+		protected int featureIndex(final int featureId)
+		{
+			return 0;
 		}
 
 		@Override

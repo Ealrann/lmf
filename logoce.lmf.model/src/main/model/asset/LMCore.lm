@@ -55,6 +55,7 @@
 		(Generic UnaryType)
 		(Generic EffectiveType)
 		(-att name=immutable datatype=@boolean)
+		(-att id @int)
 		(-att name=many datatype=@boolean)
 		(-att name=mandatory datatype=@boolean)
 		(-contains parameters [0..*] @GenericParameter)

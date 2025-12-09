@@ -14,4 +14,11 @@ public interface Model extends Named {
     RawFeature<String, List<String>> imports = new RawFeature<>(true,false,() -> LMCoreModelDefinition.Features.MODEL.IMPORTS);
     RawFeature<String, List<String>> metamodels = new RawFeature<>(true,false,() -> LMCoreModelDefinition.Features.MODEL.METAMODELS);
   }
+
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int DOMAIN = -463269570;
+    int IMPORTS = -1387965388;
+    int METAMODELS = -1744988119;
+  }
 }

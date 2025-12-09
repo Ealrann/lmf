@@ -44,4 +44,13 @@ public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
   protected FeatureGetter<Enum<?>> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Enum.FeatureIDs.NAME -> 0;
+      case Enum.FeatureIDs.LITERALS -> 1;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }

@@ -15,10 +15,11 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> extends FeaturedObject implements Relation<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(Relation.Features.name, Relation::name).add(Relation.Features.immutable, Relation::immutable).add(Relation.Features.many, Relation::many).add(Relation.Features.mandatory, Relation::mandatory).add(Relation.Features.parameters, Relation::parameters).add(Relation.Features.rawFeature, Relation::rawFeature).add(Relation.Features.concept, Relation::concept).add(Relation.Features.lazy, Relation::lazy).add(Relation.Features.contains, Relation::contains).build();
+  private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(Relation.Features.name, Relation::name).add(Relation.Features.immutable, Relation::immutable).add(Relation.Features.id, Relation::id).add(Relation.Features.many, Relation::many).add(Relation.Features.mandatory, Relation::mandatory).add(Relation.Features.parameters, Relation::parameters).add(Relation.Features.rawFeature, Relation::rawFeature).add(Relation.Features.concept, Relation::concept).add(Relation.Features.lazy, Relation::lazy).add(Relation.Features.contains, Relation::contains).build();
   private static final FeatureSetter<Relation<?, ?>> SET_MAP = new FeatureSetter.Builder<Relation<?, ?>>().build();
   private final String name;
   private final boolean immutable;
+  private final int id;
   private final boolean many;
   private final boolean mandatory;
   private final List<GenericParameter> parameters;
@@ -27,12 +28,13 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
   private final boolean lazy;
   private final boolean contains;
 
-  public RelationImpl(final String name, final boolean immutable, final boolean many,
+  public RelationImpl(final String name, final boolean immutable, final int id, final boolean many,
       final boolean mandatory, final List<GenericParameter> parameters,
       final RawFeature<UnaryType, EffectiveType> rawFeature,
       final Supplier<Concept<UnaryType>> concept, final boolean lazy, final boolean contains) {
     this.name = name;
     this.immutable = immutable;
+    this.id = id;
     this.many = many;
     this.mandatory = mandatory;
     this.parameters = List.copyOf(parameters);
@@ -52,6 +54,11 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
   @Override
   public boolean immutable() {
     return immutable;
+  }
+
+  @Override
+  public int id() {
+    return id;
   }
 
   @Override
@@ -102,5 +109,22 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
   @Override
   protected FeatureGetter<Relation<?, ?>> getterMap() {
     return GET_MAP;
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Relation.FeatureIDs.NAME -> 0;
+      case Relation.FeatureIDs.IMMUTABLE -> 1;
+      case Relation.FeatureIDs.ID -> 2;
+      case Relation.FeatureIDs.MANY -> 3;
+      case Relation.FeatureIDs.MANDATORY -> 4;
+      case Relation.FeatureIDs.PARAMETERS -> 5;
+      case Relation.FeatureIDs.RAW_FEATURE -> 6;
+      case Relation.FeatureIDs.CONCEPT -> 7;
+      case Relation.FeatureIDs.LAZY -> 8;
+      case Relation.FeatureIDs.CONTAINS -> 9;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
   }
 }

@@ -17,8 +17,10 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	public LilyBasicNotifier()
 	{
 		final int featureCount = 100;
-		listenerMap = new EMFListenerMap(featureCount);
+		listenerMap = new EMFListenerMap(featureCount, this::featureIndex);
 	}
+
+	abstract protected int featureIndex(int featureId);
 
 	protected void eNotify(final Notification notification)
 	{

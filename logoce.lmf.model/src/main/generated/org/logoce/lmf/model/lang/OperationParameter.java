@@ -20,6 +20,12 @@ public interface OperationParameter extends Named {
     RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.OPERATION_PARAMETER.PARAMETERS);
   }
 
+  interface FeatureIDs {
+    int NAME = Named.FeatureIDs.NAME;
+    int TYPE = 302950153;
+    int PARAMETERS = -525565319;
+  }
+
   interface Builder extends IFeaturedObject.Builder<OperationParameter> {
     Builder name(String name);
     Builder type(Supplier<Type<?>> type);

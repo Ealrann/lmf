@@ -73,4 +73,16 @@ public final class OperationImpl extends FeaturedObject implements Operation {
   protected FeatureGetter<Operation> getterMap() {
     return GET_MAP;
   }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return switch (featureId) {
+      case Operation.FeatureIDs.NAME -> 0;
+      case Operation.FeatureIDs.CONTENT -> 1;
+      case Operation.FeatureIDs.RETURN_TYPE -> 2;
+      case Operation.FeatureIDs.RETURN_TYPE_PARAMETERS -> 3;
+      case Operation.FeatureIDs.PARAMETERS -> 4;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
 }
