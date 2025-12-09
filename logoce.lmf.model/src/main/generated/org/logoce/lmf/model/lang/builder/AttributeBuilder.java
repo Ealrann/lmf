@@ -16,8 +16,8 @@ import org.logoce.lmf.model.lang.impl.AttributeImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder<UnaryType, EffectiveType> {
-  private static final FeatureInserter<AttributeBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.name, AttributeBuilder::name).add(Attribute.Features.immutable, AttributeBuilder::immutable).add(Attribute.Features.id, AttributeBuilder::id).add(Attribute.Features.many, AttributeBuilder::many).add(Attribute.Features.mandatory, AttributeBuilder::mandatory).add(Attribute.Features.rawFeature, AttributeBuilder::_rawFeature).add(Attribute.Features.defaultValue, AttributeBuilder::defaultValue).build();
-  private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.Features.parameters, AttributeBuilder::addParameter).add(Attribute.Features.datatype, AttributeBuilder::_datatype).build();
+  private static final FeatureInserter<AttributeBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.RFeatures.name, AttributeBuilder::name).add(Attribute.RFeatures.immutable, AttributeBuilder::immutable).add(Attribute.RFeatures.id, AttributeBuilder::id).add(Attribute.RFeatures.many, AttributeBuilder::many).add(Attribute.RFeatures.mandatory, AttributeBuilder::mandatory).add(Attribute.RFeatures.rawFeature, AttributeBuilder::_rawFeature).add(Attribute.RFeatures.defaultValue, AttributeBuilder::defaultValue).build();
+  private static final RelationLazyInserter<AttributeBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder<?, ?>>().add(Attribute.RFeatures.parameters, AttributeBuilder::addParameter).add(Attribute.RFeatures.datatype, AttributeBuilder::_datatype).build();
   private String name;
   private boolean immutable;
   private int id;

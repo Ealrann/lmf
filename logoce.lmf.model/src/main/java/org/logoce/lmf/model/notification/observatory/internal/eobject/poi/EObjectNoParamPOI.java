@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject.poi;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.List;
 public final class EObjectNoParamPOI implements IEObjectPOI
 {
 	private final Runnable listener;
-	private final List<RawFeature<?, ?>> features;
+	private final List<Feature<?, ?>> features;
 
-	public EObjectNoParamPOI(Runnable listener, List<RawFeature<?, ?>> features)
+	public EObjectNoParamPOI(final Runnable listener, final List<Feature<?, ?>> features)
 	{
 		this.listener = listener;
 		this.features = List.copyOf(features);

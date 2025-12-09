@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
-  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(Generic.Features.name, Generic::name).add(Generic.Features.extension, Generic::extension).build();
+  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(Generic.RFeatures.name, Generic::name).add(Generic.RFeatures.extension, Generic::extension).build();
   private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
   private final String name;
   private final GenericExtension extension;
@@ -17,7 +17,7 @@ public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
   public GenericImpl(final String name, final GenericExtension extension) {
     this.name = name;
     this.extension = extension;
-    setContainer(extension, Generic.Features.extension);
+    setContainer(extension, Generic.RFeatures.extension);
     eDeliver(true);
   }
 
@@ -47,7 +47,7 @@ public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Generic.FeatureIDs.NAME -> 0;
       case Generic.FeatureIDs.EXTENSION -> 1;

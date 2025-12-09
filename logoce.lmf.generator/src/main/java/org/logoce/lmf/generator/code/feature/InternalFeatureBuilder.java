@@ -35,8 +35,8 @@ public class InternalFeatureBuilder
 		final var specialize = featureResolution.requiresOwnerSpecialization(group);
 		final var concrete = group.concrete();
 		final var featuresType = local
-								 ? concrete ? ClassName.get("", "Features") : ClassName.get("", "Features<?>")
-								 : ClassName.get("", parent.name() + ".Features<?>");
+								 ? concrete ? ClassName.get("", "RFeatures") : ClassName.get("", "RFeatures<?>")
+								 : ClassName.get("", parent.name() + ".RFeatures<?>");
 		final var type = ParameterizedTypeName.get(ClassName.get(RawFeature.class),
 												   callbackType.box(),
 												   featuresType.box());
@@ -76,18 +76,15 @@ public class InternalFeatureBuilder
 	private static CodeBlock localInitializer(final Feature<?, ?> feature, final Group<?> owner)
 	{
 		final var model = (MetaModel) ModelUtil.root(owner);
-		final var definitionFile = model.name() + "ModelDefinition";
-		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model), definitionFile);
-		final var group = owner;
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), owner.name());
 		final var many = feature.many();
 		final var relation = feature instanceof Relation<?, ?>;
 
-		return CodeBlock.of("new $T<>($L,$L,() -> $T.Features.$N.$N)",
+		return CodeBlock.of("new $T<>($L,$L,() -> $T.Features.$N)",
 							RAW_FEATURE,
 							many,
 							relation,
-							modelDefinition,
-							GenUtils.toConstantCase(group.name()),
+							groupClass,
 							GenUtils.toConstantCase(feature.name()));
 	}
 
@@ -96,6 +93,6 @@ public class InternalFeatureBuilder
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
 		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
-		return CodeBlock.of("$T.Features.$N", groupClass, feature.name());
+		return CodeBlock.of("$T.RFeatures.$N", groupClass, feature.name());
 	}
 }

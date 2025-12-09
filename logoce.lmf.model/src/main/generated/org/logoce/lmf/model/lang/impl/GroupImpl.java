@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T> {
-  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(Group.Features.name, Group::name).add(Group.Features.concrete, Group::concrete).add(Group.Features.includes, Group::includes).add(Group.Features.features, Group::features).add(Group.Features.generics, Group::generics).add(Group.Features.operations, Group::operations).add(Group.Features.lmBuilder, Group::lmBuilder).build();
+  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(Group.RFeatures.name, Group::name).add(Group.RFeatures.concrete, Group::concrete).add(Group.RFeatures.includes, Group::includes).add(Group.RFeatures.features, Group::features).add(Group.RFeatures.generics, Group::generics).add(Group.RFeatures.operations, Group::operations).add(Group.RFeatures.lmBuilder, Group::lmBuilder).build();
   private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>().build();
   private final String name;
   private final boolean concrete;
@@ -34,10 +34,10 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
     this.generics = List.copyOf(generics);
     this.operations = List.copyOf(operations);
     this.lmBuilder = lmBuilder;
-    setContainer(includes, Group.Features.includes);
-    setContainer(features, Group.Features.features);
-    setContainer(generics, Group.Features.generics);
-    setContainer(operations, Group.Features.operations);
+    setContainer(includes, Group.RFeatures.includes);
+    setContainer(features, Group.RFeatures.features);
+    setContainer(generics, Group.RFeatures.generics);
+    setContainer(operations, Group.RFeatures.operations);
     eDeliver(true);
   }
 
@@ -92,7 +92,7 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Group.FeatureIDs.NAME -> 0;
       case Group.FeatureIDs.CONCRETE -> 1;

@@ -12,8 +12,8 @@ import org.logoce.lmf.model.lang.Serializer;
 import org.logoce.lmf.model.lang.impl.JavaWrapperImpl;
 
 public final class JavaWrapperBuilder<T> implements Builder<T> {
-  private static final FeatureInserter<JavaWrapperBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.Features.name, JavaWrapperBuilder::name).add(JavaWrapper.Features.qualifiedClassName, JavaWrapperBuilder::qualifiedClassName).build();
-  private static final RelationLazyInserter<JavaWrapperBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.Features.serializer, JavaWrapperBuilder::serializer).build();
+  private static final FeatureInserter<JavaWrapperBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.RFeatures.name, JavaWrapperBuilder::name).add(JavaWrapper.RFeatures.qualifiedClassName, JavaWrapperBuilder::qualifiedClassName).build();
+  private static final RelationLazyInserter<JavaWrapperBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.RFeatures.serializer, JavaWrapperBuilder::serializer).build();
   private String name;
   private String qualifiedClassName;
   private Supplier<Serializer> serializer = () -> null;

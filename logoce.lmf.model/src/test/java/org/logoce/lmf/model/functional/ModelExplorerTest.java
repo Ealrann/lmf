@@ -26,7 +26,7 @@ public class ModelExplorerTest
 													 .brand(Brand.Renault)
 													 .build())
 								   .build();
-		final var explorer = new ModelExplorer(List.of(CarParc.Features.cars));
+		final var explorer = new ModelExplorer(List.of(CarParc.Features.CARS));
 		final var cars = explorer.explore(carParc, Car.class);
 
 		assertEquals(2, cars.size());
@@ -55,9 +55,9 @@ public class ModelExplorerTest
 																			 .build())
 														   .build())
 									  .build();
-		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs,
-													   CarParc.Features.cars,
-													   Car.Features.passengers));
+		final var explorer = new ModelExplorer(List.of(CarCompany.Features.PARCS,
+													   CarParc.Features.CARS,
+													   Car.Features.PASSENGERS));
 		final var passengers = explorer.explore(company, Person.class);
 
 		assertEquals(2, passengers.size());
@@ -76,7 +76,7 @@ public class ModelExplorerTest
 						   .addPassenger(() -> new PersonImpl("Passenger 2"))
 						   .build();
 		final var passenger = car.passengers().getFirst();
-		final var explorer = new ModelExplorer(1, List.of(Car.Features.passengers));
+		final var explorer = new ModelExplorer(1, List.of(Car.Features.PASSENGERS));
 		final var passengers = explorer.explore(passenger, Person.class);
 
 		assertEquals(2, passengers.size());
@@ -105,8 +105,8 @@ public class ModelExplorerTest
 									  .addParc(() -> parc2)
 									  .build();
 		final var passenger = car1.passengers().getFirst();
-		final var explorer = new ModelExplorer(3, List.of(CarCompany.Features.parcs,
-														  CarParc.Features.cars));
+		final var explorer = new ModelExplorer(3, List.of(CarCompany.Features.PARCS,
+														  CarParc.Features.CARS));
 		final var cars = explorer.explore(passenger, Car.class);
 
 		assertEquals(2, cars.size());
@@ -134,8 +134,8 @@ public class ModelExplorerTest
 																			 .build())
 														   .build())
 									  .build();
-		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs,
-													   CarParc.Features.cars));
+		final var explorer = new ModelExplorer(List.of(CarCompany.Features.PARCS,
+													   CarParc.Features.CARS));
 		final var adapters = explorer.exploreAdapt(company, ModelExplorerAdapters.CarAdapter.class);
 
 		assertEquals(2, adapters.size());
@@ -162,9 +162,9 @@ public class ModelExplorerTest
 																			 .build())
 														   .build())
 									  .build();
-		final var explorer = new ModelExplorer(List.of(CarCompany.Features.parcs,
-													   CarParc.Features.cars,
-													   Car.Features.passengers));
+		final var explorer = new ModelExplorer(List.of(CarCompany.Features.PARCS,
+													   CarParc.Features.CARS,
+													   Car.Features.PASSENGERS));
 		final var adapters = explorer.exploreAdaptNotNull(company,
 														  ModelExplorerAdapters.PersonAdapter.class);
 

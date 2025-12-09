@@ -153,7 +153,7 @@ public class ModelPackage
 
 		BuilderInitializerUtil.appendAttributes(model,
 												initializer,
-												attribute -> attribute.rawFeature() != MetaModel.Features.lmPackage);
+												attribute -> attribute.rawFeature() != MetaModel.RFeatures.lmPackage);
 
 		initializer.add(".lmPackage(Instance)");
 

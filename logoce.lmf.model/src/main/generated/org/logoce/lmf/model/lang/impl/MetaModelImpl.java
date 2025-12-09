@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class MetaModelImpl extends FeaturedObject implements MetaModel {
-  private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>().add(MetaModel.Features.name, MetaModel::name).add(MetaModel.Features.domain, MetaModel::domain).add(MetaModel.Features.imports, MetaModel::imports).add(MetaModel.Features.metamodels, MetaModel::metamodels).add(MetaModel.Features.groups, MetaModel::groups).add(MetaModel.Features.enums, MetaModel::enums).add(MetaModel.Features.units, MetaModel::units).add(MetaModel.Features.aliases, MetaModel::aliases).add(MetaModel.Features.javaWrappers, MetaModel::javaWrappers).add(MetaModel.Features.lmPackage, MetaModel::lmPackage).add(MetaModel.Features.genNamePackage, MetaModel::genNamePackage).add(MetaModel.Features.extraPackage, MetaModel::extraPackage).build();
+  private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>().add(MetaModel.RFeatures.name, MetaModel::name).add(MetaModel.RFeatures.domain, MetaModel::domain).add(MetaModel.RFeatures.imports, MetaModel::imports).add(MetaModel.RFeatures.metamodels, MetaModel::metamodels).add(MetaModel.RFeatures.groups, MetaModel::groups).add(MetaModel.RFeatures.enums, MetaModel::enums).add(MetaModel.RFeatures.units, MetaModel::units).add(MetaModel.RFeatures.aliases, MetaModel::aliases).add(MetaModel.RFeatures.javaWrappers, MetaModel::javaWrappers).add(MetaModel.RFeatures.lmPackage, MetaModel::lmPackage).add(MetaModel.RFeatures.genNamePackage, MetaModel::genNamePackage).add(MetaModel.RFeatures.extraPackage, MetaModel::extraPackage).build();
   private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>().build();
   private final String name;
   private final String domain;
@@ -45,11 +45,11 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
     this.lmPackage = lmPackage;
     this.genNamePackage = genNamePackage;
     this.extraPackage = extraPackage;
-    setContainer(groups, MetaModel.Features.groups);
-    setContainer(enums, MetaModel.Features.enums);
-    setContainer(units, MetaModel.Features.units);
-    setContainer(aliases, MetaModel.Features.aliases);
-    setContainer(javaWrappers, MetaModel.Features.javaWrappers);
+    setContainer(groups, MetaModel.RFeatures.groups);
+    setContainer(enums, MetaModel.RFeatures.enums);
+    setContainer(units, MetaModel.RFeatures.units);
+    setContainer(aliases, MetaModel.RFeatures.aliases);
+    setContainer(javaWrappers, MetaModel.RFeatures.javaWrappers);
     eDeliver(true);
   }
 
@@ -129,7 +129,7 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case MetaModel.FeatureIDs.NAME -> 0;
       case MetaModel.FeatureIDs.DOMAIN -> 1;

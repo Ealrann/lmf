@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
 public final class SerializerImpl extends FeaturedObject implements Serializer {
-  private static final FeatureGetter<Serializer> GET_MAP = new FeatureGetter.Builder<Serializer>().add(Serializer.Features.defaultValue, Serializer::defaultValue).add(Serializer.Features.create, Serializer::create).add(Serializer.Features.convert, Serializer::convert).build();
+  private static final FeatureGetter<Serializer> GET_MAP = new FeatureGetter.Builder<Serializer>().add(Serializer.RFeatures.defaultValue, Serializer::defaultValue).add(Serializer.RFeatures.create, Serializer::create).add(Serializer.RFeatures.convert, Serializer::convert).build();
   private static final FeatureSetter<Serializer> SET_MAP = new FeatureSetter.Builder<Serializer>().build();
   private final String defaultValue;
   private final String create;
@@ -52,7 +52,7 @@ public final class SerializerImpl extends FeaturedObject implements Serializer {
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Serializer.FeatureIDs.DEFAULT_VALUE -> 0;
       case Serializer.FeatureIDs.CREATE -> 1;

@@ -19,8 +19,8 @@ import org.logoce.lmf.model.lang.impl.GroupImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GroupBuilder<T extends LMObject> implements Builder<T> {
-  private static final FeatureInserter<GroupBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>().add(Group.Features.name, GroupBuilder::name).add(Group.Features.concrete, GroupBuilder::concrete).add(Group.Features.lmBuilder, GroupBuilder::_lmBuilder).build();
-  private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.Features.includes, GroupBuilder::addInclude).add(Group.Features.features, GroupBuilder::addFeature).add(Group.Features.generics, GroupBuilder::addGeneric).add(Group.Features.operations, GroupBuilder::addOperation).build();
+  private static final FeatureInserter<GroupBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>().add(Group.RFeatures.name, GroupBuilder::name).add(Group.RFeatures.concrete, GroupBuilder::concrete).add(Group.RFeatures.lmBuilder, GroupBuilder::_lmBuilder).build();
+  private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.RFeatures.includes, GroupBuilder::addInclude).add(Group.RFeatures.features, GroupBuilder::addFeature).add(Group.RFeatures.generics, GroupBuilder::addGeneric).add(Group.RFeatures.operations, GroupBuilder::addOperation).build();
   private String name;
   private boolean concrete;
   private final List<Supplier<Include<?>>> includes = new ArrayList<>();

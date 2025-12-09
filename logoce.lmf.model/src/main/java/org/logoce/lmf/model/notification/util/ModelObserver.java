@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.notification.util;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.impl.RelationAddManyNotifiation;
 import org.logoce.lmf.model.notification.impl.RelationAddNotifiation;
 import org.logoce.lmf.model.notification.impl.RelationRemoveManyNotifiation;
@@ -13,18 +13,18 @@ import java.util.function.Consumer;
 
 public final class ModelObserver
 {
-	private final List<RawFeature<?, ?>> features;
+	private final List<Relation<?, ?>> features;
 	private final HierarchyNotificationListener rootListener;
 	private final Consumer<Notification> listener;
 
 	private boolean deliver = true;
 
-	public ModelObserver(Consumer<Notification> listener, RawFeature<?, ?> structuralFeatureId)
+	public ModelObserver(final Consumer<Notification> listener, final Relation<?, ?> structuralFeature)
 	{
-		this(listener, List.of(structuralFeatureId));
+		this(listener, List.of(structuralFeature));
 	}
 
-	public ModelObserver(Consumer<Notification> listener, List<RawFeature<?, ?>> structuralFeatures)
+	public ModelObserver(final Consumer<Notification> listener, final List<Relation<?, ?>> structuralFeatures)
 	{
 		this.listener = listener;
 		this.features = List.copyOf(structuralFeatures);
@@ -54,7 +54,7 @@ public final class ModelObserver
 	private final class HierarchyNotificationListener implements Consumer<Notification>
 	{
 		private final int depth;
-		private final RawFeature<?, ?> subFeature;
+		private final Relation<?, ?> subFeature;
 		private final HierarchyNotificationListener childListener;
 
 		public HierarchyNotificationListener(int depth)
@@ -71,7 +71,7 @@ public final class ModelObserver
 			}
 		}
 
-		private RawFeature<?, ?> computeSubFeature()
+		private Relation<?, ?> computeSubFeature()
 		{
 			if (depth == features.size() - 1)
 			{
@@ -99,27 +99,9 @@ public final class ModelObserver
 					ModelObserver.this.listener.accept(notif);
 				}
 			}
-			else if (feature.relation())
-			{
-				try
-				{
-					actOnChildren(feature, value, this::addChild);
-				}
-				catch (IllegalArgumentException e)
-				{
-					throw new AssertionError("Error when exploring feature " +
-											 feature.featureSupplier().get().name() +
-											 " on " +
-											 target.lmGroup().name(), e);
-				}
-			}
 			else
 			{
-				throw new IllegalArgumentException("Observation failed, Feature " +
-												   feature.featureSupplier().get().name() +
-												   " on class " +
-												   target.lmGroup().name() +
-												   " is not a Relation.");
+				actOnChildren(feature, value, this::addChild);
 			}
 		}
 
@@ -148,9 +130,10 @@ public final class ModelObserver
 		}
 
 		@SuppressWarnings("unchecked")
-		private static void actOnChildren(RawFeature<?, ?> feature, Object value, Consumer<LMObject> action)
+		private static void actOnChildren(final Relation<?, ?> feature, final Object value,
+										  final Consumer<LMObject> action)
 		{
-			if (feature.many() == false)
+			if (!feature.many())
 			{
 				action.accept((LMObject) value);
 			}
@@ -164,9 +147,9 @@ public final class ModelObserver
 			}
 		}
 
-		private static LMObject getValue(LMObject target, final RawFeature<?, ?> feature)
+		private static LMObject getValue(final LMObject target, final Relation<?, ?> feature)
 		{
-			return (LMObject) target.get(feature.featureSupplier().get());
+			return (LMObject) target.get(feature);
 		}
 
 		@Override

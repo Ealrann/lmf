@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.resource.interpretation;
 
 import org.logoce.lmf.model.lang.Alias;
-import org.logoce.lmf.model.lang.LMCoreModelDefinition;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lexer.ELMTokenType;
 import org.logoce.lmf.model.lexer.LMLexer;
 import org.logoce.lmf.model.resource.parsing.LMIterableLexer;
@@ -62,6 +62,6 @@ public final class LMInterpreter<I extends PNode>
 	{
 		final var value = first.value();
 		return value.equals(Alias.class.getSimpleName()) ||
-			   value.equals(LMCoreModelDefinition.Features.META_MODEL.ALIASES.name());
+			   value.equals(MetaModel.Features.ALIASES.name());
 	}
 }

@@ -17,7 +17,7 @@ import org.logoce.lmf.model.util.BuildUtils;
 
 public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
   private static final FeatureInserter<IncludeBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder<?>>().build();
-  private static final RelationLazyInserter<IncludeBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder<?>>().add(Include.Features.group, IncludeBuilder::_group).add(Include.Features.parameters, IncludeBuilder::addParameter).build();
+  private static final RelationLazyInserter<IncludeBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder<?>>().add(Include.RFeatures.group, IncludeBuilder::_group).add(Include.RFeatures.parameters, IncludeBuilder::addParameter).build();
   private Supplier<Group<T>> group;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 

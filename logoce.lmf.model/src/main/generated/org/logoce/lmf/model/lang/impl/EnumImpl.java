@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
-  private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>().add(Enum.Features.name, Enum::name).add(Enum.Features.literals, Enum::literals).build();
+  private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>().add(Enum.RFeatures.name, Enum::name).add(Enum.RFeatures.literals, Enum::literals).build();
   private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>().build();
   private final String name;
   private final List<String> literals;
@@ -46,7 +46,7 @@ public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Enum.FeatureIDs.NAME -> 0;
       case Enum.FeatureIDs.LITERALS -> 1;

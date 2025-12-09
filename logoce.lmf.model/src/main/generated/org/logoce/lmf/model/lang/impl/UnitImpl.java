@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
-  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(Unit.Features.name, Unit::name).add(Unit.Features.matcher, Unit::matcher).add(Unit.Features.defaultValue, Unit::defaultValue).add(Unit.Features.primitive, Unit::primitive).add(Unit.Features.extractor, Unit::extractor).build();
+  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(Unit.RFeatures.name, Unit::name).add(Unit.RFeatures.matcher, Unit::matcher).add(Unit.RFeatures.defaultValue, Unit::defaultValue).add(Unit.RFeatures.primitive, Unit::primitive).add(Unit.RFeatures.extractor, Unit::extractor).build();
   private static final FeatureSetter<Unit<?>> SET_MAP = new FeatureSetter.Builder<Unit<?>>().build();
   private final String name;
   private final String matcher;
@@ -68,7 +68,7 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Unit.FeatureIDs.NAME -> 0;
       case Unit.FeatureIDs.MATCHER -> 1;

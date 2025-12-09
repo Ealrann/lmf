@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,14 +11,14 @@ import java.util.stream.Stream;
 public final class ModelExplorer implements IModelExplorer
 {
 	private final int parentHeight;
-	private final List<RawFeature<?, ?>> references;
+	private final List<Relation<?, ?>> references;
 
-	public ModelExplorer(List<RawFeature<?, ?>> references)
+	public ModelExplorer(List<Relation<?, ?>> references)
 	{
 		this(0, references);
 	}
 
-	public ModelExplorer(int parentHeight, List<RawFeature<?, ?>> references)
+	public ModelExplorer(int parentHeight, List<Relation<?, ?>> references)
 	{
 		this.parentHeight = parentHeight;
 		this.references = List.copyOf(references);
@@ -100,7 +100,7 @@ public final class ModelExplorer implements IModelExplorer
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Stream<LMObject> extractList(LMObject object, final RawFeature<?, ?> reference)
+	private static Stream<LMObject> extractList(LMObject object, final Relation<?, ?> reference)
 	{
 		final var val = getValue(object, reference);
 		if (val instanceof List)
@@ -113,16 +113,8 @@ public final class ModelExplorer implements IModelExplorer
 		}
 	}
 
-	private static Object getValue(LMObject target, final RawFeature<?, ?> reference)
+	private static Object getValue(LMObject target, final Relation<?, ?> reference)
 	{
-		final var found = ModelUtil.streamContainmentFeatures(target.lmGroup()).anyMatch(f -> f == reference);
-		if (found)
-		{
-			return target.get(reference.featureSupplier().get());
-		}
-		else
-		{
-			return null;
-		}
+		return target.get(reference);
 	}
 }

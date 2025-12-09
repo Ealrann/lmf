@@ -1,13 +1,14 @@
 package org.logoce.lmf.generator.code.type;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
-import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.lang.Group;
@@ -60,7 +61,7 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 
 		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
 		{
-			return CodeBlock.of(".add($T.Features.$N, $T::$N)",
+			return CodeBlock.of(".add($T.RFeatures.$N, $T::$N)",
 								interfaceType.raw(),
 								featureName,
 								interfaceType.raw(),
@@ -69,10 +70,9 @@ public class GetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		else
 		{
 			final var model = (MetaModel) ModelUtil.root(group);
-			final var modelDefinition = model.adapt(ModelResolution.class).modelDefinition;
-			return CodeBlock.of(".add($T.Features.$N.$N, $T::$N)",
-								modelDefinition,
-								constantGroupName,
+			final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+			return CodeBlock.of(".add($T.Features.$N, $T::$N)",
+								groupClass,
 								GenUtils.toConstantCase(featureName),
 								interfaceType.raw(),
 								featureName);

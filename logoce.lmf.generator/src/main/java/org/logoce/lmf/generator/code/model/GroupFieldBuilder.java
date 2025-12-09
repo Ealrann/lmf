@@ -45,7 +45,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		group.includes().forEach(include -> initializerBuilder.add(".addInclude(() -> $L)",
 																   generateReferencesCodeblock(include)));
 
-		initializerBuilder.add(".addFeatures(Features.$N.ALL)", constantName);
+		initializerBuilder.add(".addFeatures($T.Features.ALL)", interfaceType.raw());
 
 		if (!group.generics().isEmpty())
 		{

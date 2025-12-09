@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 
 public final class IncludeImpl<T extends LMObject> extends FeaturedObject implements Include<T> {
-  private static final FeatureGetter<Include<?>> GET_MAP = new FeatureGetter.Builder<Include<?>>().add(Include.Features.group, Include::group).add(Include.Features.parameters, Include::parameters).build();
+  private static final FeatureGetter<Include<?>> GET_MAP = new FeatureGetter.Builder<Include<?>>().add(Include.RFeatures.group, Include::group).add(Include.RFeatures.parameters, Include::parameters).build();
   private static final FeatureSetter<Include<?>> SET_MAP = new FeatureSetter.Builder<Include<?>>().build();
   private final Supplier<Group<T>> group;
   private final List<GenericParameter> parameters;
@@ -20,7 +20,7 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject implem
   public IncludeImpl(final Supplier<Group<T>> group, final List<GenericParameter> parameters) {
     this.group = group;
     this.parameters = List.copyOf(parameters);
-    setContainer(parameters, Include.Features.parameters);
+    setContainer(parameters, Include.RFeatures.parameters);
     eDeliver(true);
   }
 
@@ -50,7 +50,7 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject implem
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Include.FeatureIDs.GROUP -> 0;
       case Include.FeatureIDs.PARAMETERS -> 1;

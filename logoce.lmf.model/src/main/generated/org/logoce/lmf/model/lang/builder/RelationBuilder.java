@@ -16,8 +16,8 @@ import org.logoce.lmf.model.lang.impl.RelationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Builder<UnaryType, EffectiveType> {
-  private static final FeatureInserter<RelationBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.name, RelationBuilder::name).add(Relation.Features.immutable, RelationBuilder::immutable).add(Relation.Features.id, RelationBuilder::id).add(Relation.Features.many, RelationBuilder::many).add(Relation.Features.mandatory, RelationBuilder::mandatory).add(Relation.Features.rawFeature, RelationBuilder::_rawFeature).add(Relation.Features.lazy, RelationBuilder::lazy).add(Relation.Features.contains, RelationBuilder::contains).build();
-  private static final RelationLazyInserter<RelationBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>().add(Relation.Features.parameters, RelationBuilder::addParameter).add(Relation.Features.concept, RelationBuilder::_concept).build();
+  private static final FeatureInserter<RelationBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>().add(Relation.RFeatures.name, RelationBuilder::name).add(Relation.RFeatures.immutable, RelationBuilder::immutable).add(Relation.RFeatures.id, RelationBuilder::id).add(Relation.RFeatures.many, RelationBuilder::many).add(Relation.RFeatures.mandatory, RelationBuilder::mandatory).add(Relation.RFeatures.rawFeature, RelationBuilder::_rawFeature).add(Relation.RFeatures.lazy, RelationBuilder::lazy).add(Relation.RFeatures.contains, RelationBuilder::contains).build();
+  private static final RelationLazyInserter<RelationBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>().add(Relation.RFeatures.parameters, RelationBuilder::addParameter).add(Relation.RFeatures.concept, RelationBuilder::_concept).build();
   private String name;
   private boolean immutable;
   private int id;

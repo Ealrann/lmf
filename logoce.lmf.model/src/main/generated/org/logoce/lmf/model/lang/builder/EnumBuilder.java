@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.EnumImpl;
 
 public final class EnumBuilder<T> implements Builder<T> {
-  private static final FeatureInserter<EnumBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder<?>>().add(Enum.Features.name, EnumBuilder::name).add(Enum.Features.literals, EnumBuilder::addLiteral).build();
+  private static final FeatureInserter<EnumBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder<?>>().add(Enum.RFeatures.name, EnumBuilder::name).add(Enum.RFeatures.literals, EnumBuilder::addLiteral).build();
   private static final RelationLazyInserter<EnumBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<EnumBuilder<?>>().build();
   private String name;
   private final List<String> literals = new ArrayList<>();

@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
-  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(GenericExtension.Features.type, GenericExtension::type).add(GenericExtension.Features.boundType, GenericExtension::boundType).add(GenericExtension.Features.parameters, GenericExtension::parameters).build();
+  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(GenericExtension.RFeatures.type, GenericExtension::type).add(GenericExtension.RFeatures.boundType, GenericExtension::boundType).add(GenericExtension.RFeatures.parameters, GenericExtension::parameters).build();
   private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>().build();
   private final Supplier<Type<?>> type;
   private final BoundType boundType;
@@ -24,7 +24,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
     this.type = type;
     this.boundType = boundType;
     this.parameters = List.copyOf(parameters);
-    setContainer(parameters, GenericExtension.Features.parameters);
+    setContainer(parameters, GenericExtension.RFeatures.parameters);
     eDeliver(true);
   }
 
@@ -59,7 +59,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case GenericExtension.FeatureIDs.TYPE -> 0;
       case GenericExtension.FeatureIDs.BOUND_TYPE -> 1;

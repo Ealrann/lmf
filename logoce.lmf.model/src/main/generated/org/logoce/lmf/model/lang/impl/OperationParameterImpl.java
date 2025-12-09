@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
 public final class OperationParameterImpl extends FeaturedObject implements OperationParameter {
-  private static final FeatureGetter<OperationParameter> GET_MAP = new FeatureGetter.Builder<OperationParameter>().add(OperationParameter.Features.name, OperationParameter::name).add(OperationParameter.Features.type, OperationParameter::type).add(OperationParameter.Features.parameters, OperationParameter::parameters).build();
+  private static final FeatureGetter<OperationParameter> GET_MAP = new FeatureGetter.Builder<OperationParameter>().add(OperationParameter.RFeatures.name, OperationParameter::name).add(OperationParameter.RFeatures.type, OperationParameter::type).add(OperationParameter.RFeatures.parameters, OperationParameter::parameters).build();
   private static final FeatureSetter<OperationParameter> SET_MAP = new FeatureSetter.Builder<OperationParameter>().build();
   private final String name;
   private final Supplier<Type<?>> type;
@@ -23,7 +23,7 @@ public final class OperationParameterImpl extends FeaturedObject implements Oper
     this.name = name;
     this.type = type;
     this.parameters = List.copyOf(parameters);
-    setContainer(parameters, OperationParameter.Features.parameters);
+    setContainer(parameters, OperationParameter.RFeatures.parameters);
     eDeliver(true);
   }
 
@@ -58,7 +58,7 @@ public final class OperationParameterImpl extends FeaturedObject implements Oper
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case OperationParameter.FeatureIDs.NAME -> 0;
       case OperationParameter.FeatureIDs.TYPE -> 1;

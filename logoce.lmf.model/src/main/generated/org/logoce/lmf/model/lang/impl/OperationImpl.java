@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
 public final class OperationImpl extends FeaturedObject implements Operation {
-  private static final FeatureGetter<Operation> GET_MAP = new FeatureGetter.Builder<Operation>().add(Operation.Features.name, Operation::name).add(Operation.Features.content, Operation::content).add(Operation.Features.returnType, Operation::returnType).add(Operation.Features.returnTypeParameters, Operation::returnTypeParameters).add(Operation.Features.parameters, Operation::parameters).build();
+  private static final FeatureGetter<Operation> GET_MAP = new FeatureGetter.Builder<Operation>().add(Operation.RFeatures.name, Operation::name).add(Operation.RFeatures.content, Operation::content).add(Operation.RFeatures.returnType, Operation::returnType).add(Operation.RFeatures.returnTypeParameters, Operation::returnTypeParameters).add(Operation.RFeatures.parameters, Operation::parameters).build();
   private static final FeatureSetter<Operation> SET_MAP = new FeatureSetter.Builder<Operation>().build();
   private final String name;
   private final String content;
@@ -29,8 +29,8 @@ public final class OperationImpl extends FeaturedObject implements Operation {
     this.returnType = returnType;
     this.returnTypeParameters = List.copyOf(returnTypeParameters);
     this.parameters = List.copyOf(parameters);
-    setContainer(returnTypeParameters, Operation.Features.returnTypeParameters);
-    setContainer(parameters, Operation.Features.parameters);
+    setContainer(returnTypeParameters, Operation.RFeatures.returnTypeParameters);
+    setContainer(parameters, Operation.RFeatures.parameters);
     eDeliver(true);
   }
 
@@ -75,7 +75,7 @@ public final class OperationImpl extends FeaturedObject implements Operation {
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Operation.FeatureIDs.NAME -> 0;
       case Operation.FeatureIDs.CONTENT -> 1;

@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.lang.builder.IncludeBuilder;
+import org.logoce.lmf.model.lang.builder.RelationBuilder;
 
 public interface Include<T extends LMObject> extends LMObject {
   static <T extends LMObject> Builder<T> builder() {
@@ -14,14 +16,20 @@ public interface Include<T extends LMObject> extends LMObject {
   Group<T> group();
   List<GenericParameter> parameters();
 
-  interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    RawFeature<Group<?>, Group<?>> group = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.INCLUDE.GROUP);
-    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> LMCoreModelDefinition.Features.INCLUDE.PARAMETERS);
+  interface RFeatures<T extends RFeatures<T>> extends LMObject.RFeatures<T> {
+    RawFeature<Group<?>, Group<?>> group = new RawFeature<>(false,true,() -> Include.Features.GROUP);
+    RawFeature<GenericParameter, List<GenericParameter>> parameters = new RawFeature<>(true,true,() -> Include.Features.PARAMETERS);
   }
 
   interface FeatureIDs {
     int GROUP = 450930500;
     int PARAMETERS = -221199291;
+  }
+
+  interface Features {
+    Relation<Group<?>, Group<?>> GROUP = new RelationBuilder<Group<?>, Group<?>>().name("group").immutable(true).mandatory(true).lazy(true).rawFeature(Include.RFeatures.group).id(Include.FeatureIDs.GROUP).concept(() -> LMCoreModelDefinition.Groups.GROUP).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.INCLUDE.ALL.get(0)).build()).build();
+    Relation<GenericParameter, List<GenericParameter>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("parameters").immutable(true).many(true).contains(true).rawFeature(Include.RFeatures.parameters).id(Include.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    List<Feature<?, ?>> ALL = List.of(GROUP, PARAMETERS);
   }
 
   interface Builder<T extends LMObject> extends IFeaturedObject.Builder<Include<T>> {

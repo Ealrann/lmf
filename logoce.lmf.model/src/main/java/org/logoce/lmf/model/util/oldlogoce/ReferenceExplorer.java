@@ -1,12 +1,12 @@
 package org.logoce.lmf.model.util.oldlogoce;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-public record ReferenceExplorer(RawFeature<?, ?> reference)
+public record ReferenceExplorer(Relation<?, ?> reference)
 {
 	@SuppressWarnings("unchecked")
 	public Stream<LMObject> stream(LMObject object)
@@ -24,6 +24,7 @@ public record ReferenceExplorer(RawFeature<?, ?> reference)
 
 	private Object getValue(LMObject target)
 	{
-		return target.get(reference.featureSupplier().get());
+		return target.get(reference);
 	}
 }
+

@@ -9,7 +9,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
 public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrapper<T> {
-  private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(JavaWrapper.Features.name, JavaWrapper::name).add(JavaWrapper.Features.qualifiedClassName, JavaWrapper::qualifiedClassName).add(JavaWrapper.Features.serializer, JavaWrapper::serializer).build();
+  private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>().add(JavaWrapper.RFeatures.name, JavaWrapper::name).add(JavaWrapper.RFeatures.qualifiedClassName, JavaWrapper::qualifiedClassName).add(JavaWrapper.RFeatures.serializer, JavaWrapper::serializer).build();
   private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>().build();
   private final String name;
   private final String qualifiedClassName;
@@ -20,7 +20,7 @@ public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrap
     this.name = name;
     this.qualifiedClassName = qualifiedClassName;
     this.serializer = serializer;
-    setContainer(serializer, JavaWrapper.Features.serializer);
+    setContainer(serializer, JavaWrapper.RFeatures.serializer);
     eDeliver(true);
   }
 
@@ -55,7 +55,7 @@ public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrap
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case JavaWrapper.FeatureIDs.NAME -> 0;
       case JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME -> 1;

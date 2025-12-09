@@ -1,12 +1,12 @@
 package org.logoce.lmf.model.notification.impl;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 
 public record ContainerChange(LMObject notifier,
-							  RawFeature<?, ?> oldContainingFeature,
-							  RawFeature<?, ?> newContainingFeature,
+							  Feature<?, ?> oldContainingFeature,
+							  Feature<?, ?> newContainingFeature,
 							  Object newContainer,
 							  Object oldContainer) implements Notification
 {
@@ -29,7 +29,7 @@ public record ContainerChange(LMObject notifier,
 	}
 
 	@Override
-	public RawFeature<?, ?> feature()
+	public Feature<?, ?> feature()
 	{
 		return newContainingFeature;
 	}

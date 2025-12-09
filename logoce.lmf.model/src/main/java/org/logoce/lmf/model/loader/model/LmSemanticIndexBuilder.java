@@ -1,10 +1,10 @@
 package org.logoce.lmf.model.loader.model;
 
 import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
+import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.LinkNode;
 import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
@@ -327,8 +327,8 @@ public final class LmSemanticIndexBuilder
 					}
 
 					final var lmFeature = attrResolution.feature();
-					if (lmFeature != LMCoreModelDefinition.Features.MODEL.IMPORTS &&
-						lmFeature != LMCoreModelDefinition.Features.MODEL.METAMODELS)
+					if (lmFeature != Model.Features.IMPORTS &&
+						lmFeature != Model.Features.METAMODELS)
 					{
 						continue;
 					}
@@ -428,7 +428,7 @@ public final class LmSemanticIndexBuilder
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				attrResolution.feature() == LMCoreModelDefinition.Features.NAMED.NAME)
+				attrResolution.feature() == Named.Features.NAME)
 			{
 				final var feature = attempt.feature();
 				if (feature != null && !feature.values().isEmpty())
@@ -611,7 +611,7 @@ public final class LmSemanticIndexBuilder
 
 		try
 		{
-			final Object value = named.get(LMCoreModelDefinition.Features.NAMED.NAME);
+			final Object value = named.get(Named.Features.NAME);
 			return value != null ? value.toString() : null;
 		}
 		catch (Exception e)

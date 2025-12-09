@@ -8,7 +8,6 @@ import org.logoce.lmf.generator.code.util.InterfaceBuilder;
 import org.logoce.lmf.generator.code.util.SubInterfaceBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
-import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.model.lang.Group;
@@ -53,14 +52,6 @@ public class ModelDefinition
 																						m -> this.streamOrderedGroup(m)
 																							 .filter(g -> !g.generics()
 																											.isEmpty()));
-	private final InterfaceBuilder<Group<?>> groupInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(g.name()),
-																						FeaturesFieldBuilder::new,
-																						FeatureStreams::distinctFeatures,
-																						ConstantTypes.FEATURE_ALL_BUILDER);
-
-	private final InterfaceBuilder<MetaModel> featureInterfacesBuilder = new SubInterfaceBuilder<>("Features",
-																								   groupInterfaceBuilder,
-																								   this::streamOrderedGroup);
 
 	private final MetaModel model;
 
@@ -82,7 +73,6 @@ public class ModelDefinition
 		final var definitionInterface = TypeSpec.interfaceBuilder(model.name() + "ModelDefinition")
 												.addModifiers(Modifier.PUBLIC);
 
-		definitionInterface.addType(featureInterfacesBuilder.build(model));
 		definitionInterface.addType(genericBuilder.build(model));
 		definitionInterface.addType(groupBuilder.build(model));
 		definitionInterface.addType(unitBuilder.build(model));

@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.api.notification;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.List;
 public interface Notification
 {
 	LMObject notifier();
-	RawFeature<?, ?> feature();
+	Feature<?, ?> feature();
 	EventType type();
-	default RawFeature<?, ?> oldContainingFeature() {return null;}
+	default Feature<?, ?> oldContainingFeature() {return null;}
 	default Object oldValue() {return null;}
 	Object newValue();
 	default List<?> newValues() {return List.of();}

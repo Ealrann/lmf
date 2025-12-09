@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.api.model;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.notification.util.EMFListenerMap;
 
@@ -38,28 +38,29 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
-	public final void listen(Consumer<Notification> listener, List<RawFeature<?, ?>> features)
+	public final void listen(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
 		listenerMap.listen(listener, features);
 	}
 
 	@Override
-	public final void sulk(Consumer<Notification> listener, List<RawFeature<?, ?>> features)
+	public final void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
 		listenerMap.sulk(listener, features);
 	}
 
 	@Override
-	public final void listenNoParam(Runnable listener, List<RawFeature<?, ?>> features)
+	public final void listenNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
 		listenerMap.listenNoParam(listener, features);
 	}
 
 	@Override
-	public final void sulkNoParam(Runnable listener, List<RawFeature<?, ?>> features)
+	public final void sulkNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
 		listenerMap.sulkNoParam(listener, features);
 	}
 
 	public abstract Group<?> lmGroup();
 }
+

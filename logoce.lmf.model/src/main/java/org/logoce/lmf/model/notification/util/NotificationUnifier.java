@@ -2,6 +2,7 @@ package org.logoce.lmf.model.notification.util;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -77,7 +78,7 @@ public final class NotificationUnifier
 								 Consumer<List<? extends LMObject>> onAdd,
 								 Consumer<List<? extends LMObject>> onRemove)
 	{
-		assert notification.feature().relation();
+		assert notification.feature() instanceof Relation<?, ?>;
 		switch (notification.type())
 		{
 			case SET, UNSET ->
@@ -103,3 +104,4 @@ public final class NotificationUnifier
 		}
 	}
 }
+

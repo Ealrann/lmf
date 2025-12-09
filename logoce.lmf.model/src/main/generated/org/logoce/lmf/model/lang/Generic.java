@@ -1,9 +1,11 @@
 package org.logoce.lmf.model.lang;
 
+import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.GenericBuilder;
+import org.logoce.lmf.model.lang.builder.RelationBuilder;
 
 public interface Generic<T> extends Concept<T>, Datatype<T> {
   static <T> Builder<T> builder() {
@@ -12,14 +14,20 @@ public interface Generic<T> extends Concept<T>, Datatype<T> {
 
   GenericExtension extension();
 
-  interface Features<T extends Features<T>> extends Concept.Features<T>, Datatype.Features<T> {
-    RawFeature<String, String> name = Named.Features.name;
-    RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> LMCoreModelDefinition.Features.GENERIC.EXTENSION);
+  interface RFeatures<T extends RFeatures<T>> extends Concept.RFeatures<T>, Datatype.RFeatures<T> {
+    RawFeature<String, String> name = Named.RFeatures.name;
+    RawFeature<GenericExtension, GenericExtension> extension = new RawFeature<>(false,true,() -> Generic.Features.EXTENSION);
   }
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
     int EXTENSION = 1695230195;
+  }
+
+  interface Features {
+    Attribute<String, String> NAME = Named.Features.NAME;
+    Relation<GenericExtension, GenericExtension> EXTENSION = new RelationBuilder<GenericExtension, GenericExtension>().name("extension").immutable(true).contains(true).rawFeature(Generic.RFeatures.extension).id(Generic.FeatureIDs.EXTENSION).concept(() -> LMCoreModelDefinition.Groups.GENERIC_EXTENSION).build();
+    List<Feature<?, ?>> ALL = List.of(NAME, EXTENSION);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<Generic<T>> {

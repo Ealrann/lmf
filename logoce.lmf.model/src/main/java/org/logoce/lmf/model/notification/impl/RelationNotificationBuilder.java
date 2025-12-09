@@ -1,8 +1,9 @@
 package org.logoce.lmf.model.notification.impl;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 
 import java.util.List;
 
@@ -12,9 +13,9 @@ public class RelationNotificationBuilder
 	{
 	}
 
-	public static final Notification insert(LMObject notifier, RawFeature<?, ?> feature, LMObject newValue)
+	public static Notification insert(final LMObject notifier, final Feature<?, ?> feature, final LMObject newValue)
 	{
-		if (feature.many())
+		if (feature instanceof Relation<?, ?> relation && relation.many())
 		{
 			return new RelationAddNotifiation(notifier, feature, newValue);
 		}
@@ -24,17 +25,22 @@ public class RelationNotificationBuilder
 		}
 	}
 
-	public static final Notification insert(LMObject notifier,
-											RawFeature<?, ?> feature,
-											List<? extends LMObject> newValues)
+	public static Notification insert(final LMObject notifier,
+									  final Feature<?, ?> feature,
+									  final List<? extends LMObject> newValues)
 	{
-		assert feature.many();
+		if (!(feature instanceof Relation<?, ?> relation) || !relation.many())
+		{
+			throw new IllegalArgumentException("RelationAddMany requires a many-valued relation feature");
+		}
 		return new RelationAddManyNotifiation(notifier, feature, newValues);
 	}
 
-	public static final Notification remove(LMObject notifier, RawFeature<?, ?> feature, LMObject oldValue)
+	public static Notification remove(final LMObject notifier,
+									  final Feature<?, ?> feature,
+									  final LMObject oldValue)
 	{
-		if (feature.many())
+		if (feature instanceof Relation<?, ?> relation && relation.many())
 		{
 			return new RelationRemoveNotifiation(notifier, feature, oldValue);
 		}
@@ -44,11 +50,15 @@ public class RelationNotificationBuilder
 		}
 	}
 
-	public static final Notification remove(LMObject notifier,
-											RawFeature<?, ?> feature,
-											List<? extends LMObject> oldValues)
+	public static Notification remove(final LMObject notifier,
+									  final Feature<?, ?> feature,
+									  final List<? extends LMObject> oldValues)
 	{
-		assert feature.many();
+		if (!(feature instanceof Relation<?, ?> relation) || !relation.many())
+		{
+			throw new IllegalArgumentException("RelationRemoveMany requires a many-valued relation feature");
+		}
 		return new RelationRemoveManyNotifiation(notifier, feature, oldValues);
 	}
 }
+

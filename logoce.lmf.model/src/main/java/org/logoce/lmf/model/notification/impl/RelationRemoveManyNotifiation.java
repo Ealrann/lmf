@@ -1,13 +1,13 @@
 package org.logoce.lmf.model.notification.impl;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 
 import java.util.List;
 
 public record RelationRemoveManyNotifiation(LMObject notifier,
-											RawFeature<?, ?> feature,
+											Feature<?, ?> feature,
 											List<? extends LMObject> oldValues) implements Notification
 {
 	@Override

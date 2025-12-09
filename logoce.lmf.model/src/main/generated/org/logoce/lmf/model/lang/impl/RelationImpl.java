@@ -15,7 +15,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType> extends FeaturedObject implements Relation<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(Relation.Features.name, Relation::name).add(Relation.Features.immutable, Relation::immutable).add(Relation.Features.id, Relation::id).add(Relation.Features.many, Relation::many).add(Relation.Features.mandatory, Relation::mandatory).add(Relation.Features.parameters, Relation::parameters).add(Relation.Features.rawFeature, Relation::rawFeature).add(Relation.Features.concept, Relation::concept).add(Relation.Features.lazy, Relation::lazy).add(Relation.Features.contains, Relation::contains).build();
+  private static final FeatureGetter<Relation<?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?>>().add(Relation.RFeatures.name, Relation::name).add(Relation.RFeatures.immutable, Relation::immutable).add(Relation.RFeatures.id, Relation::id).add(Relation.RFeatures.many, Relation::many).add(Relation.RFeatures.mandatory, Relation::mandatory).add(Relation.RFeatures.parameters, Relation::parameters).add(Relation.RFeatures.rawFeature, Relation::rawFeature).add(Relation.RFeatures.concept, Relation::concept).add(Relation.RFeatures.lazy, Relation::lazy).add(Relation.RFeatures.contains, Relation::contains).build();
   private static final FeatureSetter<Relation<?, ?>> SET_MAP = new FeatureSetter.Builder<Relation<?, ?>>().build();
   private final String name;
   private final boolean immutable;
@@ -42,7 +42,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
     this.concept = concept;
     this.lazy = lazy;
     this.contains = contains;
-    setContainer(parameters, Feature.Features.parameters);
+    setContainer(parameters, Feature.RFeatures.parameters);
     eDeliver(true);
   }
 
@@ -112,7 +112,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType> exten
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Relation.FeatureIDs.NAME -> 0;
       case Relation.FeatureIDs.IMMUTABLE -> 1;

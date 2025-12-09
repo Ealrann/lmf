@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(Attribute.Features.name, Attribute::name).add(Attribute.Features.immutable, Attribute::immutable).add(Attribute.Features.id, Attribute::id).add(Attribute.Features.many, Attribute::many).add(Attribute.Features.mandatory, Attribute::mandatory).add(Attribute.Features.parameters, Attribute::parameters).add(Attribute.Features.rawFeature, Attribute::rawFeature).add(Attribute.Features.datatype, Attribute::datatype).add(Attribute.Features.defaultValue, Attribute::defaultValue).build();
+  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(Attribute.RFeatures.name, Attribute::name).add(Attribute.RFeatures.immutable, Attribute::immutable).add(Attribute.RFeatures.id, Attribute::id).add(Attribute.RFeatures.many, Attribute::many).add(Attribute.RFeatures.mandatory, Attribute::mandatory).add(Attribute.RFeatures.parameters, Attribute::parameters).add(Attribute.RFeatures.rawFeature, Attribute::rawFeature).add(Attribute.RFeatures.datatype, Attribute::datatype).add(Attribute.RFeatures.defaultValue, Attribute::defaultValue).build();
   private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>().build();
   private final String name;
   private final boolean immutable;
@@ -38,7 +38,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
     this.rawFeature = rawFeature;
     this.datatype = datatype;
     this.defaultValue = defaultValue;
-    setContainer(parameters, Feature.Features.parameters);
+    setContainer(parameters, Feature.RFeatures.parameters);
     eDeliver(true);
   }
 
@@ -103,7 +103,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
   }
 
   @Override
-  public int featureIndex(int featureId) {
+  protected int featureIndex(int featureId) {
     return switch (featureId) {
       case Attribute.FeatureIDs.NAME -> 0;
       case Attribute.FeatureIDs.IMMUTABLE -> 1;

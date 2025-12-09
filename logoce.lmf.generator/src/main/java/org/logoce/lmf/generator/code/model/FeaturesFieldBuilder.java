@@ -59,12 +59,12 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 			BuilderInitializerUtil.appendAttributes(input,
 													initBuilder,
-													attribute -> attribute.rawFeature() != Feature.Features.rawFeature &&
+													attribute -> attribute.rawFeature() != Feature.RFeatures.rawFeature &&
 																 !attribute.name().equals("id"));
 
 			final var model = (MetaModel) ModelUtil.root(targetGroup);
 			final var domainType = ClassName.get(TargetPathUtil.packageName(model), targetGroup.name());
-			initBuilder.add(".rawFeature($T.Features.$N)", domainType, name);
+			initBuilder.add(".rawFeature($T.RFeatures.$N)", domainType, name);
 			initBuilder.add(".id($T.FeatureIDs.$N)", domainType, constantName);
 
 			if (isAttribute)
@@ -74,15 +74,12 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 				if (datatype instanceof Generic<?> generic)
 				{
 					final var boundType = TypeResolutionUtil.resolveGenericBindingType(generic, targetGroup);
-					if (boundType != null)
-					{
-						final var typeHolder = TypeResolutionUtil.resolveTypeHolder(boundType);
-						final var typeName = GenUtils.toConstantCase(boundType.name());
-						CodeBlock datatypeBlock;
-						if (boundType.lmContainer() instanceof MetaModel typeModel)
+						if (boundType != null)
 						{
-							final var parentModel = (MetaModel) targetGroup.lmContainer();
-							if (typeModel != parentModel)
+							final var typeHolder = TypeResolutionUtil.resolveTypeHolder(boundType);
+							final var typeName = GenUtils.toConstantCase(boundType.name());
+							CodeBlock datatypeBlock;
+							if (boundType.lmContainer() instanceof MetaModel typeModel)
 							{
 								final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
 																		  typeModel.name() + "ModelDefinition");
@@ -92,14 +89,9 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 							{
 								datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 							}
-						}
-						else
-						{
-							datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
-						}
 
-						initBuilder.add(".datatype(() -> $L)", datatypeBlock);
-					}
+							initBuilder.add(".datatype(() -> $L)", datatypeBlock);
+						}
 					else
 					{
 						final var rawType = resolvedFeature.rawSingleTypeFor(targetGroup).parametrized();
@@ -107,16 +99,13 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						initBuilder.add(".datatype(() -> ($T<$T>) $L)", ClassName.get(Datatype.class), rawType, genericRef);
 					}
 				}
-				else
-				{
-					final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
-					final var typeName = GenUtils.toConstantCase(datatype.name());
-
-					CodeBlock datatypeBlock;
-					if (datatype != null && typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
+					else
 					{
-						final var parentModel = (MetaModel) parentGroup.lmContainer();
-						if (typeModel != parentModel)
+						final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
+						final var typeName = GenUtils.toConstantCase(datatype.name());
+
+						CodeBlock datatypeBlock;
+						if (datatype != null && typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
 						{
 							final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
 																	  typeModel.name() + "ModelDefinition");
@@ -126,14 +115,9 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						{
 							datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 						}
-					}
-					else
-					{
-						datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
-					}
 
-					initBuilder.add(".datatype(() -> $L)", datatypeBlock);
-				}
+						initBuilder.add(".datatype(() -> $L)", datatypeBlock);
+					}
 			}
 			else
 			{
@@ -158,13 +142,11 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	private static CodeBlock parentInitializer(final Feature<?, ?> feature)
 	{
 		final var group = (Group<?>) feature.lmContainer();
-		final var model = (MetaModel) group.lmContainer();
-		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
-												  model.name() + "ModelDefinition");
-		final var constantGroupName = GenUtils.toConstantCase(group.name());
+		final var model = (MetaModel) ModelUtil.root(group);
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
 
-		return CodeBlock.of("$T.Features.$N.$N", modelDefinition, constantGroupName, constantFeatureName);
+		return CodeBlock.of("$T.Features.$N", groupClass, constantFeatureName);
 	}
 
 	private static CodeBlock generateConceptCodeblock(final Concept<?> concept)

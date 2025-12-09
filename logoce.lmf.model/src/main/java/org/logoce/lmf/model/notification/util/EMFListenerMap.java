@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.notification.util;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.model.IEMFNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 
 import java.util.Deque;
 import java.util.List;
@@ -26,7 +26,7 @@ public final class EMFListenerMap implements IEMFNotifier
 	{
 		if (listenerMap != null)
 		{
-			final int featureId = notification.feature().featureSupplier().get().id();
+			final int featureId = notification.feature().id();
 			final int featureIdx = indexFunction.index(featureId);
 			final var listeners = listenerMap[featureIdx];
 			if (listeners != null)
@@ -53,18 +53,18 @@ public final class EMFListenerMap implements IEMFNotifier
 	}
 
 	@Override
-	public void listen(Consumer<Notification> listener, List<RawFeature<?, ?>> features)
+	public void listen(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
 		listenInternal(listener, features);
 	}
 
 	@Override
-	public void listenNoParam(Runnable listener, List<RawFeature<?, ?>> features)
+	public void listenNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
 		listenInternal(listener, features);
 	}
 
-	private void listenInternal(Object listener, List<RawFeature<?, ?>> features)
+	private void listenInternal(Object listener, List<Feature<?, ?>> features)
 	{
 		if (listenerMap == null)
 		{
@@ -78,24 +78,24 @@ public final class EMFListenerMap implements IEMFNotifier
 	}
 
 	@Override
-	public void sulk(Consumer<Notification> listener, List<RawFeature<?, ?>> features)
+	public void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
 		sulkInternal(listener, features);
 	}
 
 	@Override
-	public void sulkNoParam(Runnable listener, List<RawFeature<?, ?>> features)
+	public void sulkNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
 		sulkInternal(listener, features);
 	}
 
-	private void sulkInternal(Object listener, List<RawFeature<?, ?>> features)
+	private void sulkInternal(Object listener, List<Feature<?, ?>> features)
 	{
 		if (listenerMap != null)
 		{
 			for (final var feature : features)
 			{
-				final int featureId = feature.featureSupplier().get().id();
+				final int featureId = feature.id();
 				final int featureIdx = indexFunction.index(featureId);
 				final var list = listenerMap[featureIdx];
 				if (list != null)
@@ -112,9 +112,9 @@ public final class EMFListenerMap implements IEMFNotifier
 		listenerMap = new Deque[featureCount];
 	}
 
-	private void registerNotificationListener(final Object listener, final RawFeature<?, ?> feature)
+	private void registerNotificationListener(final Object listener, final Feature<?, ?> feature)
 	{
-		final int featureId = feature.featureSupplier().get().id();
+		final int featureId = feature.id();
 		final int featureIdx = indexFunction.index(featureId);
 		var list = listenerMap[featureIdx];
 		if (list == null)

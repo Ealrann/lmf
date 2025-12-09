@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.observatory.IEObjectObservatoryBuilder;
@@ -16,9 +15,9 @@ import java.util.List;
 public final class EObjectObservatory<T extends LMObject> extends AbstractEObjectObservatory<T>
 {
 	private final ModelStructureBulkObserver structureObserver;
-	private final RawFeature<?, ?> relation;
+	private final Relation<?, ?> relation;
 
-	public EObjectObservatory(final RawFeature<?, ?> relation,
+	public EObjectObservatory(final Relation<?, ?> relation,
 							  final Class<T> cast,
 							  final List<IObservatory> children,
 							  final List<IEObjectPOI> pois,
@@ -46,14 +45,14 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 	@SuppressWarnings("SameReturnValue")
 	private boolean checkParent(final LMObject parent)
 	{
-		if (((Relation<?, ?>) relation.featureSupplier().get()).contains())
+		if (relation.contains())
 		{
 			return true;
 		}
 		else
 		{
 			throw new IllegalArgumentException("Observation failed, the explored feature " +
-											   relation.featureSupplier().get().name() +
+											   relation.name() +
 											   " on " +
 											   parent.lmGroup().name() +
 											   " is not a Relation.");
@@ -74,9 +73,9 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 																										IEObjectObservatoryBuilder<T>,
 																										InternalObservatoryBuilder
 	{
-		private final RawFeature<?, ?> relation;
+		private final Relation<?, ?> relation;
 
-		public Builder(RawFeature<?, ?> relation, Class<T> cast)
+		public Builder(Relation<?, ?> relation, Class<T> cast)
 		{
 			super(cast);
 			this.relation = relation;

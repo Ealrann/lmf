@@ -76,7 +76,7 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		final var model = (MetaModel) ModelUtil.root(group);
 		final var domainType = ClassName.get(TargetPathUtil.packageName(model), group.name());
 
-		return CodeBlock.of("setContainer($N, $T.Features.$N)",
+		return CodeBlock.of("setContainer($N, $T.RFeatures.$N)",
 							paramName,
 							domainType,
 							feature.name());

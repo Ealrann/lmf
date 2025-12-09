@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.util.oldlogoce;
 
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.util.ModelExplorer;
 
 import java.util.ArrayList;
@@ -14,12 +14,12 @@ public final class CompositeModelExplorer
 {
 	private final List<ModelExplorer> explorers;
 
-	public CompositeModelExplorer(List<List<RawFeature<?, ?>>> featureLists)
+	public CompositeModelExplorer(final List<List<Relation<?, ?>>> featureLists)
 	{
 		this.explorers = List.copyOf(buildExplorers(featureLists));
 	}
 
-	private static List<ModelExplorer> buildExplorers(List<List<RawFeature<?, ?>>> featureLists)
+	private static List<ModelExplorer> buildExplorers(final List<List<Relation<?, ?>>> featureLists)
 	{
 		final List<ModelExplorer> explorers = new ArrayList<>();
 		for (final var features : featureLists)

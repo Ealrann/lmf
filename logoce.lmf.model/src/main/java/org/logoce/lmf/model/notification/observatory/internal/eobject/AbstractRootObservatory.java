@@ -1,9 +1,10 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject;
 
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.observatory.*;
 import org.logoce.lmf.model.notification.observatory.internal.InternalObservatoryBuilder;
 import org.logoce.lmf.model.notification.observatory.internal.allocation.AdapterObservatory;
@@ -109,7 +110,7 @@ public abstract class AbstractRootObservatory implements IObservatory
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<LMObject> explore(final RawFeature<?, ?> relation)
+		public IEObjectObservatoryBuilder<LMObject> explore(final Relation<?, ?> relation)
 		{
 			final var child = new EObjectObservatory.Builder<>(relation, LMObject.class);
 			children.add(child);
@@ -117,7 +118,7 @@ public abstract class AbstractRootObservatory implements IObservatory
 		}
 
 		@Override
-		public <T extends LMObject> IEObjectObservatoryBuilder<T> explore(final RawFeature<?, ?> relation,
+		public <T extends LMObject> IEObjectObservatoryBuilder<T> explore(final Relation<?, ?> relation,
 																		  final Class<T> cast)
 		{
 			final var child = new EObjectObservatory.Builder<>(relation, cast);
@@ -159,14 +160,16 @@ public abstract class AbstractRootObservatory implements IObservatory
 		}
 
 		@Override
-		public IObservatoryBuilder listen(final Consumer<Notification> listener, final List<RawFeature<?, ?>> features)
+		public IObservatoryBuilder listen(final Consumer<Notification> listener,
+										  final List<Feature<?, ?>> features)
 		{
 			pois.add(new EObjectPOI(listener, features));
 			return this;
 		}
 
 		@Override
-		public IObservatoryBuilder listenNoParam(final Runnable listener, final List<RawFeature<?, ?>> features)
+		public IObservatoryBuilder listenNoParam(final Runnable listener,
+												 final List<Feature<?, ?>> features)
 		{
 			pois.add(new EObjectNoParamPOI(listener, features));
 			return this;

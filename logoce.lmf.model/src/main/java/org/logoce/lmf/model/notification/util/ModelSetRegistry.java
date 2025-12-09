@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.notification.util;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,7 @@ public final class ModelSetRegistry<T extends LMObject>
 	private final List<T> list = new ArrayList<>();
 	private final ModelStructureObserver structureObserver;
 
-	public ModelSetRegistry(Class<T> classCast, List<RawFeature<?, ?>> features)
+	public ModelSetRegistry(final Class<T> classCast, final List<Relation<?, ?>> features)
 	{
 		structureObserver = new ModelStructureObserver(features, this::add, this::remove);
 		this.classCast = classCast;
@@ -44,3 +44,4 @@ public final class ModelSetRegistry<T extends LMObject>
 		list.remove(classCast.cast(oldValue));
 	}
 }
+

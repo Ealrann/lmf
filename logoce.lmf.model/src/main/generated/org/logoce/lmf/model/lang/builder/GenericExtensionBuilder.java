@@ -17,8 +17,8 @@ import org.logoce.lmf.model.lang.impl.GenericExtensionImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericExtensionBuilder implements Builder {
-  private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.boundType, GenericExtensionBuilder::boundType).build();
-  private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.Features.type, GenericExtensionBuilder::type).add(GenericExtension.Features.parameters, GenericExtensionBuilder::addParameter).build();
+  private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.RFeatures.boundType, GenericExtensionBuilder::boundType).build();
+  private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.RFeatures.type, GenericExtensionBuilder::type).add(GenericExtension.RFeatures.parameters, GenericExtensionBuilder::addParameter).build();
   private Supplier<Type<?>> type = () -> null;
   private BoundType boundType;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();

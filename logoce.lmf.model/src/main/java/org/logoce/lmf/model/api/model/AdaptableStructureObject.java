@@ -2,7 +2,6 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.adapter.api.BasicAdapterManager;
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Named;
@@ -12,7 +11,6 @@ import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.oldlogoce.TreeLazyIterator;
 
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -32,8 +30,7 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	protected final void eNotify(final Notification notification)
 	{
 		final var feature = notification.feature();
-		final boolean isContainment = feature.featureSupplier().get() instanceof Relation<?, ?> relation &&
-									  relation.contains();
+		final boolean isContainment = feature instanceof Relation<?, ?> relation && relation.contains();
 		if (isContainment) NotificationUnifier.unifyAdded(notification, this::setupChild);
 		super.eNotify(notification);
 		if (isContainment) NotificationUnifier.unifyRemoved(notification, this::disposeChild);
@@ -169,8 +166,6 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	public final Stream<LMObject> streamChildren()
 	{
 		return ModelUtil.streamContainmentFeatures(lmGroup())
-						.map(RawFeature::featureSupplier)
-						.map(Supplier::get)
 						.map(Relation.class::cast)
 						.flatMap(this::streamReference);
 	}

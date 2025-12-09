@@ -32,10 +32,10 @@ public class CarCompanyModelRuntimeTest
 
 		assertSame(companyA, ceo1.lmContainer(), "CEO 1 container should be company A");
 		assertSame(companyB, ceo2.lmContainer(), "CEO 2 container should be company B");
-		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.CEO,
+		assertSame(CarCompany.Features.CEO,
 				   ceo1.lmContainingFeature(),
 				   "CEO 1 containing feature should be CarCompany.ceo");
-		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.CEO,
+		assertSame(CarCompany.Features.CEO,
 				   ceo2.lmContainingFeature(),
 				   "CEO 2 containing feature should be CarCompany.ceo");
 
@@ -57,16 +57,16 @@ public class CarCompanyModelRuntimeTest
 		companyA.parcs().add(parcA);
 
 		assertSame(companyA, parcA.lmContainer(), "Parc A container should be company A");
-		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.PARCS,
+		assertSame(CarCompany.Features.PARCS,
 				   parcA.lmContainingFeature(),
 				   "Parc A containing feature should be CarCompany.parcs");
 
 		assertSame(parcA, car1.lmContainer(), "Car 1 container should be parc A");
 		assertSame(parcA, car2.lmContainer(), "Car 2 container should be parc A");
-		assertSame(CarCompanyModelDefinition.Features.CAR_PARC.CARS,
+		assertSame(CarParc.Features.CARS,
 				   car1.lmContainingFeature(),
 				   "Car 1 containing feature should be CarParc.cars");
-		assertSame(CarCompanyModelDefinition.Features.CAR_PARC.CARS,
+		assertSame(CarParc.Features.CARS,
 				   car2.lmContainingFeature(),
 				   "Car 2 containing feature should be CarParc.cars");
 
@@ -75,17 +75,17 @@ public class CarCompanyModelRuntimeTest
 
 		assertSame(car1, passenger1.lmContainer(), "Passenger 1 container should be car 1");
 		assertSame(car2, passenger2.lmContainer(), "Passenger 2 container should be car 2");
-		assertSame(CarCompanyModelDefinition.Features.CAR.PASSENGERS,
+		assertSame(Car.Features.PASSENGERS,
 				   passenger1.lmContainingFeature(),
 				   "Passenger 1 containing feature should be Car.passengers");
-		assertSame(CarCompanyModelDefinition.Features.CAR.PASSENGERS,
+		assertSame(Car.Features.PASSENGERS,
 				   passenger2.lmContainingFeature(),
 				   "Passenger 2 containing feature should be Car.passengers");
 
 		companyB.ceo(ceo1);
 
 		assertSame(companyB, ceo1.lmContainer(), "CEO 1 container should move to company B");
-		assertSame(CarCompanyModelDefinition.Features.CAR_COMPANY.CEO,
+		assertSame(CarCompany.Features.CEO,
 				   ceo1.lmContainingFeature(),
 				   "CEO 1 containing feature should remain CarCompany.ceo");
 
@@ -93,7 +93,7 @@ public class CarCompanyModelRuntimeTest
 		carParc.cars().add(car1);
 
 		assertSame(carParc, car1.lmContainer(), "Car 1 container should move to car parc");
-		assertSame(CarCompanyModelDefinition.Features.CAR_PARC.CARS,
+		assertSame(CarParc.Features.CARS,
 				   car1.lmContainingFeature(),
 				   "Car 1 containing feature should be CarParc.cars");
 
@@ -101,7 +101,7 @@ public class CarCompanyModelRuntimeTest
 		car2.passengers().add(passenger1);
 
 		assertSame(car2, passenger1.lmContainer(), "Passenger 1 container should move to car 2");
-		assertSame(CarCompanyModelDefinition.Features.CAR.PASSENGERS,
+		assertSame(Car.Features.PASSENGERS,
 				   passenger1.lmContainingFeature(),
 				   "Passenger 1 containing feature should remain Car.passengers");
 	}
@@ -125,14 +125,14 @@ public class CarCompanyModelRuntimeTest
 		final Consumer<Notification> companyListener = companyNotifications::add;
 		final Consumer<Notification> carListener = carNotifications::add;
 
-		company.listen(companyListener, CarCompany.Features.parcs);
-		car.listen(carListener, Car.Features.passengers);
+		company.listen(companyListener, CarCompany.Features.PARCS);
+		car.listen(carListener, Car.Features.PASSENGERS);
 
 		final var newPassenger = new PersonImpl("Passenger");
 		car.passengers().add(newPassenger);
 
 		assertTrue(carNotifications.stream()
-								   .anyMatch(n -> n.feature() == Car.Features.passengers &&
+								   .anyMatch(n -> n.feature() == Car.Features.PASSENGERS &&
 												  n.type() == Notification.EventType.ADD &&
 												  n.newValue() == newPassenger),
 				   "Adding a passenger should produce an ADD notification on Car.passengers");
@@ -141,14 +141,14 @@ public class CarCompanyModelRuntimeTest
 		company.parcs().add(parc);
 
 		assertTrue(companyNotifications.stream()
-									   .anyMatch(n -> n.feature() == CarCompany.Features.parcs &&
+									   .anyMatch(n -> n.feature() == CarCompany.Features.PARCS &&
 													  n.type() == Notification.EventType.ADD &&
 													  n.newValue() == parc),
 				   "Adding a parc should produce an ADD notification on CarCompany.parcs");
 
 		final var previousCarNotificationCount = carNotifications.size();
 
-		car.sulk(carListener, Car.Features.passengers);
+		car.sulk(carListener, Car.Features.PASSENGERS);
 
 		car.passengers().add(new PersonImpl("Another Passenger"));
 

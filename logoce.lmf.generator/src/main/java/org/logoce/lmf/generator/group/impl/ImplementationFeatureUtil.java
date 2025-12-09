@@ -6,7 +6,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
-import org.logoce.lmf.generator.adapter.ModelResolution;
 import org.logoce.lmf.generator.code.feature.FeatureFieldBuilder;
 import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.feature.FeatureParameter;
@@ -89,14 +88,12 @@ public final class ImplementationFeatureUtil
 
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var modelResolution = model.adapt(ModelResolution.class);
-		final var groupConstantName = GenUtils.toConstantCase(group.name());
-		final var featureConstantName = GenUtils.toConstantCase(feature.name());
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var constantName = GenUtils.toConstantCase(feature.name());
 
-		return Optional.of(CodeBlock.of("newObservableList($T.Features.$N.$N)",
-										modelResolution.modelDefinition,
-										groupConstantName,
-										featureConstantName));
+		return Optional.of(CodeBlock.of("newObservableList($T.Features.$N)",
+										groupClass,
+										constantName));
 	}
 
 	private static ConstructorBuilder parameterBuilder()
@@ -134,7 +131,8 @@ public final class ImplementationFeatureUtil
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
 		final var domainType = ClassName.get(TargetPathUtil.packageName(model), group.name());
-		final var rawFeatureExpr = CodeBlock.of("$T.Features.$N", domainType, feature.name());
+		final var constantName = GenUtils.toConstantCase(feature.name());
+		final var rawFeatureExpr = CodeBlock.of("$T.RFeatures.$N", domainType, feature.name());
 
 		final var oldValue = CodeBlock.of("final var oldValue = this.$N", feature.name());
 		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();
@@ -144,18 +142,20 @@ public final class ImplementationFeatureUtil
 			return List.of(oldValue,
 						   assignment,
 						   setContainer,
-						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
+						   CodeBlock.of("eNotify(new $T(this, $T.Features.$N, $N, oldValue))",
 										SET_NOTIFICATION_TYPE,
-										rawFeatureExpr,
+										domainType,
+										constantName,
 										paramName));
 		}
 		else
 		{
 			return List.of(oldValue,
 						   assignment,
-						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
+						   CodeBlock.of("eNotify(new $T(this, $T.Features.$N, $N, oldValue))",
 										SET_NOTIFICATION_TYPE,
-										rawFeatureExpr,
+										domainType,
+										constantName,
 										paramName));
 		}
 	}

@@ -16,8 +16,8 @@ import org.logoce.lmf.model.lang.impl.GenericParameterImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericParameterBuilder implements Builder {
-  private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>().add(GenericParameter.Features.wildcard, GenericParameterBuilder::wildcard).add(GenericParameter.Features.wildcardBoundType, GenericParameterBuilder::wildcardBoundType).build();
-  private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>().add(GenericParameter.Features.type, GenericParameterBuilder::type).add(GenericParameter.Features.parameters, GenericParameterBuilder::addParameter).build();
+  private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>().add(GenericParameter.RFeatures.wildcard, GenericParameterBuilder::wildcard).add(GenericParameter.RFeatures.wildcardBoundType, GenericParameterBuilder::wildcardBoundType).build();
+  private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>().add(GenericParameter.RFeatures.type, GenericParameterBuilder::type).add(GenericParameter.RFeatures.parameters, GenericParameterBuilder::addParameter).build();
   private boolean wildcard;
   private BoundType wildcardBoundType;
   private Supplier<Type<?>> type;

@@ -47,7 +47,7 @@ public class NotificationFeaturesGenerator
 		}
 		else
 		{
-			final var notificationFeature = ClassName.get(LMObject.Features.class);
+			final var notificationFeature = ClassName.get(LMObject.RFeatures.class);
 			featureInterfaceBuilder.addSuperinterface(notificationFeature);
 		}
 

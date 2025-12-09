@@ -16,8 +16,8 @@ import org.logoce.lmf.model.lang.impl.OperationParameterImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class OperationParameterBuilder implements Builder {
-  private static final FeatureInserter<OperationParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationParameterBuilder>().add(OperationParameter.Features.name, OperationParameterBuilder::name).build();
-  private static final RelationLazyInserter<OperationParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationParameterBuilder>().add(OperationParameter.Features.type, OperationParameterBuilder::type).add(OperationParameter.Features.parameters, OperationParameterBuilder::addParameter).build();
+  private static final FeatureInserter<OperationParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationParameterBuilder>().add(OperationParameter.RFeatures.name, OperationParameterBuilder::name).build();
+  private static final RelationLazyInserter<OperationParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationParameterBuilder>().add(OperationParameter.RFeatures.type, OperationParameterBuilder::type).add(OperationParameter.RFeatures.parameters, OperationParameterBuilder::addParameter).build();
   private String name;
   private Supplier<Type<?>> type;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();

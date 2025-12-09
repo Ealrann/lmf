@@ -1,12 +1,17 @@
 package org.logoce.lmf.model.lang;
 
+import java.util.List;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.notification.api.IFeatures;
 
 public interface LMObject extends IFeaturedObject {
-  interface Features<T extends Features<T>> extends IFeatures<T> {
+  interface RFeatures<T extends RFeatures<T>> extends IFeatures<T> {
   }
 
   interface FeatureIDs {
+  }
+
+  interface Features {
+    List<Feature<?, ?>> ALL = List.of();
   }
 }

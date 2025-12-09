@@ -1,9 +1,10 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject;
 
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.observatory.IAdapterObservatoryBuilder;
 import org.logoce.lmf.model.notification.observatory.IEObjectObservatoryBuilder;
 import org.logoce.lmf.model.notification.observatory.INotifierAdapterObservatoryBuilder;
@@ -116,7 +117,7 @@ public abstract class AbstractEObjectObservatory<T extends LMObject> implements 
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<LMObject> explore(final RawFeature<?, ?> relation)
+		public IEObjectObservatoryBuilder<LMObject> explore(final Relation<?, ?> relation)
 		{
 			final var child = new EObjectObservatory.Builder<>(relation, LMObject.class);
 			children.add(child);
@@ -124,7 +125,7 @@ public abstract class AbstractEObjectObservatory<T extends LMObject> implements 
 		}
 
 		@Override
-		public <Y extends LMObject> IEObjectObservatoryBuilder<Y> explore(final RawFeature<?, ?> relation,
+		public <Y extends LMObject> IEObjectObservatoryBuilder<Y> explore(final Relation<?, ?> relation,
 																		  final Class<Y> cast)
 		{
 			final var child = new EObjectObservatory.Builder<>(relation, cast);
@@ -167,7 +168,7 @@ public abstract class AbstractEObjectObservatory<T extends LMObject> implements 
 
 		@Override
 		public IEObjectObservatoryBuilder<T> listen(final Consumer<Notification> listener,
-													final List<RawFeature<?, ?>> features)
+													final List<Feature<?, ?>> features)
 		{
 			pois.add(new EObjectPOI(listener, features));
 			return this;
@@ -175,7 +176,7 @@ public abstract class AbstractEObjectObservatory<T extends LMObject> implements 
 
 		@Override
 		public IEObjectObservatoryBuilder<T> listenNoParam(final Runnable listener,
-														   final List<RawFeature<?, ?>> features)
+														   final List<Feature<?, ?>> features)
 		{
 			pois.add(new EObjectNoParamPOI(listener, features));
 			return this;

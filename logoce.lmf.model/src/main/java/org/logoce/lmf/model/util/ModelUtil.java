@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.util;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.*;
 
 import java.util.*;
@@ -56,12 +55,12 @@ public final class ModelUtil
 		return streamHierarchy(group).map(Group::features).flatMap(Collection::stream);
 	}
 
-	public static Stream<RawFeature<?, ?>> streamContainmentFeatures(final Group<?> group)
+	public static Stream<Relation<?, ?>> streamContainmentFeatures(final Group<?> group)
 	{
 		return group.features()
 					.stream()
 					.filter(feature -> feature instanceof Relation<?, ?> relation && relation.contains())
-					.map(feature -> (RawFeature<?, ?>) feature.rawFeature());
+					.map(feature -> (Relation<?, ?>) feature);
 	}
 
 	public static Stream<Group<?>> streamHierarchy(Group<?> group)
@@ -116,6 +115,7 @@ public final class ModelUtil
 			return Stream.of((T) element.get(relation));
 		}
 	}
+
 	public static Optional<ContainmentPath> containmentPath(final LMObject parent, LMObject child)
 	{
 		final Deque<ChildReference> res = new ArrayDeque<>();

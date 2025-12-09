@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.AliasImpl;
 
 public final class AliasBuilder implements Builder {
-  private static final FeatureInserter<AliasBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AliasBuilder>().add(Alias.Features.name, AliasBuilder::name).add(Alias.Features.value, AliasBuilder::value).build();
+  private static final FeatureInserter<AliasBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AliasBuilder>().add(Alias.RFeatures.name, AliasBuilder::name).add(Alias.RFeatures.value, AliasBuilder::value).build();
   private static final RelationLazyInserter<AliasBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<AliasBuilder>().build();
   private String name;
   private String value;

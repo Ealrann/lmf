@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.Unit.Builder;
 import org.logoce.lmf.model.lang.impl.UnitImpl;
 
 public final class UnitBuilder<T> implements Builder<T> {
-  private static final FeatureInserter<UnitBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<UnitBuilder<?>>().add(Unit.Features.name, UnitBuilder::name).add(Unit.Features.matcher, UnitBuilder::matcher).add(Unit.Features.defaultValue, UnitBuilder::defaultValue).add(Unit.Features.primitive, UnitBuilder::primitive).add(Unit.Features.extractor, UnitBuilder::extractor).build();
+  private static final FeatureInserter<UnitBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<UnitBuilder<?>>().add(Unit.RFeatures.name, UnitBuilder::name).add(Unit.RFeatures.matcher, UnitBuilder::matcher).add(Unit.RFeatures.defaultValue, UnitBuilder::defaultValue).add(Unit.RFeatures.primitive, UnitBuilder::primitive).add(Unit.RFeatures.extractor, UnitBuilder::extractor).build();
   private static final RelationLazyInserter<UnitBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<UnitBuilder<?>>().build();
   private String name;
   private String matcher;

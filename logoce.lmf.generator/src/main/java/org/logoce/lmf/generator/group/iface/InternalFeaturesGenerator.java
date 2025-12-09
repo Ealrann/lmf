@@ -25,10 +25,10 @@ public class InternalFeaturesGenerator
 
 	public TypeSpec build()
 	{
-		final var internalFeaturesInterfaceBuilder = TypeSpec.interfaceBuilder("Features")
+		final var internalFeaturesInterfaceBuilder = TypeSpec.interfaceBuilder("RFeatures")
 															 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		final var hasSuperInterfaces = !group.includes().isEmpty();
-		final var featuresClassName = ClassName.get("", "Features");
+		final var featuresClassName = ClassName.get("", "RFeatures");
 		final var variableTypeName = TypeVariableName.get("T",
 														  ParameterizedTypeName.get(featuresClassName,
 																				   TypeVariableName.get("T")));
@@ -39,7 +39,7 @@ public class InternalFeaturesGenerator
 		{
 			for (final var superInterface : group.includes())
 			{
-				final var iFeatures = ClassName.get("", superInterface.group().name() + ".Features");
+				final var iFeatures = ClassName.get("", superInterface.group().name() + ".RFeatures");
 				final var typed = TypeParameter.of(iFeatures, variableTypeName);
 				internalFeaturesInterfaceBuilder.addSuperinterface(typed.parametrized());
 			}
@@ -52,7 +52,7 @@ public class InternalFeaturesGenerator
 		}
 		else
 		{
-			final var iFeatures = ClassName.get(LMObject.Features.class);
+			final var iFeatures = ClassName.get(LMObject.RFeatures.class);
 			final var typed = TypeParameter.of(iFeatures, variableTypeName);
 			internalFeaturesInterfaceBuilder.addSuperinterface(typed.parametrized());
 		}

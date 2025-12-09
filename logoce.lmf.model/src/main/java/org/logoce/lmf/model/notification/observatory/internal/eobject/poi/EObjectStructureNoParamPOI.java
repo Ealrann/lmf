@@ -16,7 +16,9 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 	public void listen(final LMObject object)
 	{
 		final var group = object.lmGroup();
-		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group).toList();
+		@SuppressWarnings("unchecked")
+		final var containmentFeatures = (java.util.List<org.logoce.lmf.model.lang.Feature<?, ?>>)
+				(java.util.List<?>) ModelUtil.streamContainmentFeatures(group).toList();
 		object.listenNoParam(listener, containmentFeatures);
 	}
 
@@ -24,7 +26,9 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 	public void sulk(final LMObject object)
 	{
 		final var group = object.lmGroup();
-		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group).toList();
+		@SuppressWarnings("unchecked")
+		final var containmentFeatures = (java.util.List<org.logoce.lmf.model.lang.Feature<?, ?>>)
+				(java.util.List<?>) ModelUtil.streamContainmentFeatures(group).toList();
 		object.sulkNoParam(listener, containmentFeatures);
 	}
 }

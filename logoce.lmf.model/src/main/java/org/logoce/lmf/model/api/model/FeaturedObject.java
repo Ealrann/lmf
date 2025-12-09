@@ -21,7 +21,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 {
 	private final List<Consumer<Notification>> structureListeners = new ArrayList<>();
 	private LMObject container;
-	private RawFeature<?, ?> containingFeature;
+	private Feature<?, ?> containingFeature;
 
 	public FeaturedObject()
 	{}
@@ -35,7 +35,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	@Override
 	public final Relation<?, ?> lmContainingFeature()
 	{
-		return (Relation<?, ?>) containingFeature.featureSupplier().get();
+		return (Relation<?, ?>) containingFeature;
 	}
 
 	private void structureNotify(final Notification notification)
@@ -66,8 +66,8 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 		final var oldValue = getMap.get((O) this, feature.rawFeature());
 		setMap.set((O) this, feature.rawFeature(), value);
-		final var notification = new SetNotifiation((LMObject) this, feature.rawFeature(), value, oldValue);
-		if(feature instanceof Relation<?,?> relation && relation.contains())
+		final var notification = new SetNotifiation((LMObject) this, feature, value, oldValue);
+		if (feature instanceof Relation<?, ?> relation && relation.contains())
 		{
 			structureNotify(notification);
 		}
@@ -89,10 +89,27 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	{
 		final var isRelation = feature instanceof Relation;
 		final var isContainment = feature instanceof Relation<?, ?> rel && rel.contains();
-		return new ObservableList<>(new ObservableListHandler<>(this, feature.rawFeature(), isRelation, isContainment));
+		return new ObservableList<>(new ObservableListHandler<>(this, feature, isRelation, isContainment));
 	}
 
+	// Legacy overloads for generated implementations still passing RawFeature
 	protected final void setContainer(final LMObject child, final RawFeature<?, ?> feature)
+	{
+		if (child != null)
+		{
+			ContainmentUtils.setContainer((LMObject) this, child, feature.featureSupplier().get());
+		}
+	}
+
+	protected final void setContainer(final List<? extends LMObject> children, final RawFeature<?, ?> feature)
+	{
+		if (!children.isEmpty())
+		{
+			ContainmentUtils.setContainer((LMObject) this, children, feature.featureSupplier().get());
+		}
+	}
+
+	protected final void setContainer(final LMObject child, final Feature<?, ?> feature)
 	{
 		if (child != null)
 		{
@@ -100,7 +117,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 		}
 	}
 
-	protected final void setContainer(final List<? extends LMObject> children, final RawFeature<?, ?> feature)
+	protected final void setContainer(final List<? extends LMObject> children, final Feature<?, ?> feature)
 	{
 		if (!children.isEmpty())
 		{
@@ -121,7 +138,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	private record ObservableListHandler<E>(FeaturedObject owner,
-										   RawFeature<E, ?> rawFeature,
+										   Feature<E, ?> feature,
 										   boolean relation,
 										   boolean containment)
 			implements BiConsumer<Notification.EventType, List<E>>
@@ -149,7 +166,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 					}
 				}
 
-				notification = new SetNotifiation((LMObject) owner, rawFeature, newValue, oldValue);
+				notification = new SetNotifiation((LMObject) owner, feature, newValue, oldValue);
 			}
 			else
 			{
@@ -161,20 +178,20 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 				{
 					if (eventType == Notification.EventType.ADD)
 					{
-						owner.setContainer(children.getFirst(), rawFeature);
+						owner.setContainer(children.getFirst(), feature);
 					}
 					else
 					{
-						owner.setContainer(children, rawFeature);
+						owner.setContainer(children, feature);
 					}
 				}
 
 				notification = switch (eventType)
 				{
-					case ADD -> RelationNotificationBuilder.insert((LMObject) owner, rawFeature, children.getFirst());
-					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, rawFeature, children);
-					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner, rawFeature, children.getFirst());
-					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, rawFeature, children);
+					case ADD -> RelationNotificationBuilder.insert((LMObject) owner, feature, children.getFirst());
+					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, feature, children);
+					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner, feature, children.getFirst());
+					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, feature, children);
 					default -> null;
 				};
 
@@ -196,14 +213,15 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 		{
 		}
 
-		public static void setContainer(LMObject newContainer, LMObject child, RawFeature<?, ?> feature)
+		public static void setContainer(final LMObject newContainer, final LMObject child,
+										final Feature<?, ?> feature)
 		{
 			setContainerInternal(newContainer, child, feature);
 		}
 
-		public static void setContainer(LMObject newContainer,
-										List<? extends LMObject> children,
-										RawFeature<?, ?> newFeature)
+		public static void setContainer(final LMObject newContainer,
+										final List<? extends LMObject> children,
+										final Feature<?, ?> newFeature)
 		{
 			for (final var child : children)
 			{
@@ -213,7 +231,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 		private static void setContainerInternal(final LMObject newContainer,
 												 final LMObject child,
-												 final RawFeature<?, ?> newFeature)
+												 final Feature<?, ?> newFeature)
 		{
 			final var featuredChild = (FeaturedObject) child;
 			final var oldContainer = featuredChild.container;
@@ -224,7 +242,9 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 			if (oldContainer != null)
 			{
-				final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer, oldFeature, child);
+				final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
+																					 oldFeature,
+																					 child);
 				((FeaturedObject) oldContainer).structureNotify(oldParentNotification);
 			}
 

@@ -17,8 +17,8 @@ import org.logoce.lmf.model.lang.impl.OperationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class OperationBuilder implements Builder {
-  private static final FeatureInserter<OperationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationBuilder>().add(Operation.Features.name, OperationBuilder::name).add(Operation.Features.content, OperationBuilder::content).build();
-  private static final RelationLazyInserter<OperationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationBuilder>().add(Operation.Features.returnType, OperationBuilder::returnType).add(Operation.Features.returnTypeParameters, OperationBuilder::addReturnTypeParameter).add(Operation.Features.parameters, OperationBuilder::addParameter).build();
+  private static final FeatureInserter<OperationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationBuilder>().add(Operation.RFeatures.name, OperationBuilder::name).add(Operation.RFeatures.content, OperationBuilder::content).build();
+  private static final RelationLazyInserter<OperationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationBuilder>().add(Operation.RFeatures.returnType, OperationBuilder::returnType).add(Operation.RFeatures.returnTypeParameters, OperationBuilder::addReturnTypeParameter).add(Operation.RFeatures.parameters, OperationBuilder::addParameter).build();
   private String name;
   private String content;
   private Supplier<Type<?>> returnType = () -> null;
