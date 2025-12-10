@@ -57,15 +57,11 @@ public final class BuilderFeatureUtil
 																			 final Group<?> group)
 	{
 		final var inserterMapHolderBuilder = new BuilderInserterMapHolderBuilder(group);
-		final var attributeIndexBuilder = new AttributeIndexMethodBuilder(group);
-		final var relationIndexBuilder = new RelationIndexMethodBuilder(group);
 		final var buildMethodBuilder = new BuildMethodBuilder(group);
 
 		return CodeInstaller.compose(CodeInstaller.of(buildMethodBuilder, classBuilder::addMethod),
 				CodeInstaller.of(ATTRIBUTE_PUSH_BUILDER, classBuilder::addMethod),
 				CodeInstaller.of(RELATION_PUSH_BUILDER, classBuilder::addMethod),
-				CodeInstaller.of(attributeIndexBuilder, classBuilder::addMethod),
-				CodeInstaller.of(relationIndexBuilder, classBuilder::addMethod),
 				CodeInstaller.of(inserterMapHolderBuilder, classBuilder::addType));
 	}
 

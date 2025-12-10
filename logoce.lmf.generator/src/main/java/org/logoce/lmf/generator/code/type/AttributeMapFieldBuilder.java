@@ -48,7 +48,7 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 		final var featureCount = attributes.size();
 
 		final var statementBuilder = CodeBlock.builder();
-		statementBuilder.add("new $T($L, $T::attributeIndex)", inserterBuilderType.parametrized(), featureCount, builderClassName);
+		statementBuilder.add("new $T($L, Inserters::attributeIndex)", inserterBuilderType.parametrized(), featureCount);
 
 		attributes.stream()
 				  .map(this::buildStatement)

@@ -18,11 +18,15 @@ public final class BuilderInserterMapHolderBuilder implements CodeBuilder<List<F
 {
 	private final AttributeMapFieldBuilder attributeMapFieldBuilder;
 	private final RelationMapFieldBuilder relationMapFieldBuilder;
+	private final AttributeIndexMethodBuilder attributeIndexMethodBuilder;
+	private final RelationIndexMethodBuilder relationIndexMethodBuilder;
 
 	public BuilderInserterMapHolderBuilder(final Group<?> group)
 	{
 		this.attributeMapFieldBuilder = new AttributeMapFieldBuilder(group);
 		this.relationMapFieldBuilder = new RelationMapFieldBuilder(group);
+		this.attributeIndexMethodBuilder = new AttributeIndexMethodBuilder(group);
+		this.relationIndexMethodBuilder = new RelationIndexMethodBuilder(group);
 	}
 
 	@Override
@@ -32,7 +36,8 @@ public final class BuilderInserterMapHolderBuilder implements CodeBuilder<List<F
 					   .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
 					   .addField(attributeMapFieldBuilder.build(featureResolutions))
 					   .addField(relationMapFieldBuilder.build(featureResolutions))
+					   .addMethod(attributeIndexMethodBuilder.build(featureResolutions))
+					   .addMethod(relationIndexMethodBuilder.build(featureResolutions))
 					   .build();
 	}
 }
-

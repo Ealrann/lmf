@@ -67,23 +67,23 @@ public final class GenericExtensionBuilder implements Builder {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case GenericExtension.FeatureIDs.BOUND_TYPE -> 0;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case GenericExtension.FeatureIDs.TYPE -> 0;
-      case GenericExtension.FeatureIDs.PARAMETERS -> 1;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>(1, GenericExtensionBuilder::attributeIndex).add(GenericExtension.FeatureIDs.BOUND_TYPE, (builder, value) -> builder.boundType((BoundType) value)).build();
-    private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>(2, GenericExtensionBuilder::relationIndex).add(GenericExtension.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(GenericExtension.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+    private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>(1, Inserters::attributeIndex).add(GenericExtension.FeatureIDs.BOUND_TYPE, (builder, value) -> builder.boundType((BoundType) value)).build();
+    private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>(2, Inserters::relationIndex).add(GenericExtension.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(GenericExtension.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case GenericExtension.FeatureIDs.BOUND_TYPE -> 0;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case GenericExtension.FeatureIDs.TYPE -> 0;
+        case GenericExtension.FeatureIDs.PARAMETERS -> 1;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

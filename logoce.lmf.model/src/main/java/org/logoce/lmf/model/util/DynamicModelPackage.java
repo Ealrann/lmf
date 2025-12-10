@@ -282,11 +282,40 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 
 		@Override
+		public Object get(final int featureID)
+		{
+			for (final Feature<?, ?> feature : group.features())
+			{
+				if (feature.id() == featureID)
+				{
+					return get((Feature<?, Object>) feature);
+				}
+			}
+			throw new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name());
+		}
+
+		@Override
 		public <V> void set(final Feature<?, V> feature, final V value)
 		{
 			if (feature == null) return;
 
 			values.put(feature, value);
+		}
+
+		@Override
+		public void set(final int featureID, final Object value)
+		{
+			for (final Feature<?, ?> feature : group.features())
+			{
+				if (feature.id() == featureID)
+				{
+					@SuppressWarnings("unchecked")
+					final Feature<?, Object> typedFeature = (Feature<?, Object>) feature;
+					set(typedFeature, value);
+					return;
+				}
+			}
+			throw new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name());
 		}
 
 		@SuppressWarnings("unchecked")

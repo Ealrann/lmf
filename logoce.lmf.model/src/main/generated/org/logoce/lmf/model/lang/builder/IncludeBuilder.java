@@ -68,20 +68,20 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case Include.FeatureIDs.GROUP -> 0;
-      case Include.FeatureIDs.PARAMETERS -> 1;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<IncludeBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder>(0, IncludeBuilder::attributeIndex).build();
-    private static final RelationLazyInserter<IncludeBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder>(2, IncludeBuilder::relationIndex).add(Include.FeatureIDs.GROUP, (builder, value) -> builder._group((Supplier<Group<?>>) value)).add(Include.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+    private static final FeatureInserter<IncludeBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder>(0, Inserters::attributeIndex).build();
+    private static final RelationLazyInserter<IncludeBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder>(2, Inserters::relationIndex).add(Include.FeatureIDs.GROUP, (builder, value) -> builder._group((Supplier<Group<?>>) value)).add(Include.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case Include.FeatureIDs.GROUP -> 0;
+        case Include.FeatureIDs.PARAMETERS -> 1;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

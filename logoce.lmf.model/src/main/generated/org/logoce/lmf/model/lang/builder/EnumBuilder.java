@@ -55,20 +55,20 @@ public final class EnumBuilder<T> implements Builder<T> {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case Enum.FeatureIDs.NAME -> 0;
-      case Enum.FeatureIDs.LITERALS -> 1;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<EnumBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder>(2, EnumBuilder::attributeIndex).add(Enum.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Enum.FeatureIDs.LITERALS, (builder, value) -> builder.addLiteral((String) value)).build();
-    private static final RelationLazyInserter<EnumBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<EnumBuilder>(0, EnumBuilder::relationIndex).build();
+    private static final FeatureInserter<EnumBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder>(2, Inserters::attributeIndex).add(Enum.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Enum.FeatureIDs.LITERALS, (builder, value) -> builder.addLiteral((String) value)).build();
+    private static final RelationLazyInserter<EnumBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<EnumBuilder>(0, Inserters::relationIndex).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case Enum.FeatureIDs.NAME -> 0;
+        case Enum.FeatureIDs.LITERALS -> 1;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    }
   }
 }

@@ -66,23 +66,23 @@ public final class OperationParameterBuilder implements Builder {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case OperationParameter.FeatureIDs.NAME -> 0;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case OperationParameter.FeatureIDs.TYPE -> 0;
-      case OperationParameter.FeatureIDs.PARAMETERS -> 1;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<OperationParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationParameterBuilder>(1, OperationParameterBuilder::attributeIndex).add(OperationParameter.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).build();
-    private static final RelationLazyInserter<OperationParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationParameterBuilder>(2, OperationParameterBuilder::relationIndex).add(OperationParameter.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(OperationParameter.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+    private static final FeatureInserter<OperationParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationParameterBuilder>(1, Inserters::attributeIndex).add(OperationParameter.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).build();
+    private static final RelationLazyInserter<OperationParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationParameterBuilder>(2, Inserters::relationIndex).add(OperationParameter.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(OperationParameter.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case OperationParameter.FeatureIDs.NAME -> 0;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case OperationParameter.FeatureIDs.TYPE -> 0;
+        case OperationParameter.FeatureIDs.PARAMETERS -> 1;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

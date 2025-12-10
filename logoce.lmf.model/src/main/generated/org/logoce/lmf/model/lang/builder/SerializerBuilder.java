@@ -54,21 +54,21 @@ public final class SerializerBuilder implements Builder {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case Serializer.FeatureIDs.DEFAULT_VALUE -> 0;
-      case Serializer.FeatureIDs.CREATE -> 1;
-      case Serializer.FeatureIDs.CONVERT -> 2;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<SerializerBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<SerializerBuilder>(3, SerializerBuilder::attributeIndex).add(Serializer.FeatureIDs.DEFAULT_VALUE, (builder, value) -> builder.defaultValue((String) value)).add(Serializer.FeatureIDs.CREATE, (builder, value) -> builder.create((String) value)).add(Serializer.FeatureIDs.CONVERT, (builder, value) -> builder.convert((String) value)).build();
-    private static final RelationLazyInserter<SerializerBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<SerializerBuilder>(0, SerializerBuilder::relationIndex).build();
+    private static final FeatureInserter<SerializerBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<SerializerBuilder>(3, Inserters::attributeIndex).add(Serializer.FeatureIDs.DEFAULT_VALUE, (builder, value) -> builder.defaultValue((String) value)).add(Serializer.FeatureIDs.CREATE, (builder, value) -> builder.create((String) value)).add(Serializer.FeatureIDs.CONVERT, (builder, value) -> builder.convert((String) value)).build();
+    private static final RelationLazyInserter<SerializerBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<SerializerBuilder>(0, Inserters::relationIndex).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case Serializer.FeatureIDs.DEFAULT_VALUE -> 0;
+        case Serializer.FeatureIDs.CREATE -> 1;
+        case Serializer.FeatureIDs.CONVERT -> 2;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    }
   }
 }

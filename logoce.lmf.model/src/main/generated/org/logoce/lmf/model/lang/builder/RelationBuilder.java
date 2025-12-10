@@ -118,29 +118,29 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case Relation.FeatureIDs.NAME -> 0;
-      case Relation.FeatureIDs.IMMUTABLE -> 1;
-      case Relation.FeatureIDs.ID -> 2;
-      case Relation.FeatureIDs.MANY -> 3;
-      case Relation.FeatureIDs.MANDATORY -> 4;
-      case Relation.FeatureIDs.LAZY -> 5;
-      case Relation.FeatureIDs.CONTAINS -> 6;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case Relation.FeatureIDs.PARAMETERS -> 0;
-      case Relation.FeatureIDs.CONCEPT -> 1;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<RelationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder>(7, RelationBuilder::attributeIndex).add(Relation.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Relation.FeatureIDs.IMMUTABLE, (builder, value) -> builder.immutable((boolean) value)).add(Relation.FeatureIDs.ID, (builder, value) -> builder.id((int) value)).add(Relation.FeatureIDs.MANY, (builder, value) -> builder.many((boolean) value)).add(Relation.FeatureIDs.MANDATORY, (builder, value) -> builder.mandatory((boolean) value)).add(Relation.FeatureIDs.LAZY, (builder, value) -> builder.lazy((boolean) value)).add(Relation.FeatureIDs.CONTAINS, (builder, value) -> builder.contains((boolean) value)).build();
-    private static final RelationLazyInserter<RelationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder>(2, RelationBuilder::relationIndex).add(Relation.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).add(Relation.FeatureIDs.CONCEPT, (builder, value) -> builder._concept((Supplier<Concept<?>>) value)).build();
+    private static final FeatureInserter<RelationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder>(7, Inserters::attributeIndex).add(Relation.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Relation.FeatureIDs.IMMUTABLE, (builder, value) -> builder.immutable((boolean) value)).add(Relation.FeatureIDs.ID, (builder, value) -> builder.id((int) value)).add(Relation.FeatureIDs.MANY, (builder, value) -> builder.many((boolean) value)).add(Relation.FeatureIDs.MANDATORY, (builder, value) -> builder.mandatory((boolean) value)).add(Relation.FeatureIDs.LAZY, (builder, value) -> builder.lazy((boolean) value)).add(Relation.FeatureIDs.CONTAINS, (builder, value) -> builder.contains((boolean) value)).build();
+    private static final RelationLazyInserter<RelationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder>(2, Inserters::relationIndex).add(Relation.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).add(Relation.FeatureIDs.CONCEPT, (builder, value) -> builder._concept((Supplier<Concept<?>>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case Relation.FeatureIDs.NAME -> 0;
+        case Relation.FeatureIDs.IMMUTABLE -> 1;
+        case Relation.FeatureIDs.ID -> 2;
+        case Relation.FeatureIDs.MANY -> 3;
+        case Relation.FeatureIDs.MANDATORY -> 4;
+        case Relation.FeatureIDs.LAZY -> 5;
+        case Relation.FeatureIDs.CONTAINS -> 6;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case Relation.FeatureIDs.PARAMETERS -> 0;
+        case Relation.FeatureIDs.CONCEPT -> 1;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

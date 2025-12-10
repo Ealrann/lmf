@@ -48,7 +48,7 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 		final var featureCount = relations.size();
 
 		final var statementBuilder = CodeBlock.builder();
-		statementBuilder.add("new $T($L, $T::relationIndex)", inserterBuilderType.parametrized(), featureCount, builderClassName);
+		statementBuilder.add("new $T($L, Inserters::relationIndex)", inserterBuilderType.parametrized(), featureCount);
 
 		relations.stream()
 				 .map(this::buildStatement)

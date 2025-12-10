@@ -5,6 +5,7 @@ import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.model.LmDocument;
 import org.logoce.lmf.model.util.ModelRegistry;
+import test.model.carcompany.CarCompany;
 import test.model.carcompany.CarCompanyModelPackage;
 
 import java.io.IOException;
@@ -12,9 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class M1LoaderTest
 {
@@ -47,7 +46,6 @@ public final class M1LoaderTest
 
 		final var objects = loader.loadObjects(source);
 		assertEquals(1, objects.size(), "Peugeot.lm should produce a single root object");
-		assertTrue(objects.getFirst() instanceof test.model.carcompany.CarCompany,
-				   "Root object should be a CarCompany instance");
+		assertInstanceOf(CarCompany.class, objects.getFirst(), "Root object should be a CarCompany instance");
 	}
 }

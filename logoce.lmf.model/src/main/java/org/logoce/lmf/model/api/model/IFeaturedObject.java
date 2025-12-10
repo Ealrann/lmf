@@ -18,6 +18,9 @@ public interface IFeaturedObject extends ILilyEObject
 	<T> T get(Feature<?, T> feature);
 	<T> void set(Feature<?, T> feature, T value);
 
+	Object get(int featureID);
+	void set(int featureID, Object object);
+
 	default Stream<LMObject> lmStreamTree()
 	{
 		return ModelUtil.streamTree((LMObject) this);

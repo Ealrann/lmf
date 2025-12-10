@@ -113,28 +113,28 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case Attribute.FeatureIDs.NAME -> 0;
-      case Attribute.FeatureIDs.IMMUTABLE -> 1;
-      case Attribute.FeatureIDs.ID -> 2;
-      case Attribute.FeatureIDs.MANY -> 3;
-      case Attribute.FeatureIDs.MANDATORY -> 4;
-      case Attribute.FeatureIDs.DEFAULT_VALUE -> 5;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case Attribute.FeatureIDs.PARAMETERS -> 0;
-      case Attribute.FeatureIDs.DATATYPE -> 1;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<AttributeBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder>(6, AttributeBuilder::attributeIndex).add(Attribute.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Attribute.FeatureIDs.IMMUTABLE, (builder, value) -> builder.immutable((boolean) value)).add(Attribute.FeatureIDs.ID, (builder, value) -> builder.id((int) value)).add(Attribute.FeatureIDs.MANY, (builder, value) -> builder.many((boolean) value)).add(Attribute.FeatureIDs.MANDATORY, (builder, value) -> builder.mandatory((boolean) value)).add(Attribute.FeatureIDs.DEFAULT_VALUE, (builder, value) -> builder.defaultValue((String) value)).build();
-    private static final RelationLazyInserter<AttributeBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder>(2, AttributeBuilder::relationIndex).add(Attribute.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).add(Attribute.FeatureIDs.DATATYPE, (builder, value) -> builder._datatype((Supplier<Datatype<?>>) value)).build();
+    private static final FeatureInserter<AttributeBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<AttributeBuilder>(6, Inserters::attributeIndex).add(Attribute.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Attribute.FeatureIDs.IMMUTABLE, (builder, value) -> builder.immutable((boolean) value)).add(Attribute.FeatureIDs.ID, (builder, value) -> builder.id((int) value)).add(Attribute.FeatureIDs.MANY, (builder, value) -> builder.many((boolean) value)).add(Attribute.FeatureIDs.MANDATORY, (builder, value) -> builder.mandatory((boolean) value)).add(Attribute.FeatureIDs.DEFAULT_VALUE, (builder, value) -> builder.defaultValue((String) value)).build();
+    private static final RelationLazyInserter<AttributeBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<AttributeBuilder>(2, Inserters::relationIndex).add(Attribute.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).add(Attribute.FeatureIDs.DATATYPE, (builder, value) -> builder._datatype((Supplier<Datatype<?>>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case Attribute.FeatureIDs.NAME -> 0;
+        case Attribute.FeatureIDs.IMMUTABLE -> 1;
+        case Attribute.FeatureIDs.ID -> 2;
+        case Attribute.FeatureIDs.MANY -> 3;
+        case Attribute.FeatureIDs.MANDATORY -> 4;
+        case Attribute.FeatureIDs.DEFAULT_VALUE -> 5;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case Attribute.FeatureIDs.PARAMETERS -> 0;
+        case Attribute.FeatureIDs.DATATYPE -> 1;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

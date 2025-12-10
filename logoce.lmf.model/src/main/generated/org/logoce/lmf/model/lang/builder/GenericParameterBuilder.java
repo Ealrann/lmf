@@ -73,24 +73,24 @@ public final class GenericParameterBuilder implements Builder {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case GenericParameter.FeatureIDs.WILDCARD -> 0;
-      case GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE -> 1;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case GenericParameter.FeatureIDs.TYPE -> 0;
-      case GenericParameter.FeatureIDs.PARAMETERS -> 1;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>(2, GenericParameterBuilder::attributeIndex).add(GenericParameter.FeatureIDs.WILDCARD, (builder, value) -> builder.wildcard((boolean) value)).add(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE, (builder, value) -> builder.wildcardBoundType((BoundType) value)).build();
-    private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>(2, GenericParameterBuilder::relationIndex).add(GenericParameter.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(GenericParameter.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+    private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>(2, Inserters::attributeIndex).add(GenericParameter.FeatureIDs.WILDCARD, (builder, value) -> builder.wildcard((boolean) value)).add(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE, (builder, value) -> builder.wildcardBoundType((BoundType) value)).build();
+    private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>(2, Inserters::relationIndex).add(GenericParameter.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(GenericParameter.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case GenericParameter.FeatureIDs.WILDCARD -> 0;
+        case GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE -> 1;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case GenericParameter.FeatureIDs.TYPE -> 0;
+        case GenericParameter.FeatureIDs.PARAMETERS -> 1;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

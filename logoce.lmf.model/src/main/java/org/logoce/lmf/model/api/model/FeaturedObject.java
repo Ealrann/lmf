@@ -57,13 +57,39 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	@Override
 	public <T> T get(final Feature<?, T> feature)
 	{
-		return internalGet(feature);
+		return internalGet(feature.id());
+	}
+
+	@Override
+	public Object get(final int featureID)
+	{
+		return internalGet(featureID);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T, O> T internalGet(final int featureID)
+	{
+		final var getMap = (FeatureGetter<O>) getterMap();
+		return getMap.get((O) this, featureID);
 	}
 
 	@Override
 	public <T> void set(final Feature<?, T> feature, final T value)
 	{
 		internalSet(feature, value);
+	}
+
+	@Override
+	public void set(final int featureID, final Object value)
+	{
+		final var feature = lmGroup().features().get(featureIndex(featureID));
+		castSet(feature, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> void castSet(final Feature<?, T> feature, final Object value)
+	{
+		internalSet(feature, (T) value);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -81,13 +107,6 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 			structureNotify(notification);
 		}
 		super.eNotify(notification);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T, O> T internalGet(final Feature<?, T> feature)
-	{
-		final var getMap = (FeatureGetter<O>) getterMap();
-		return getMap.get((O) this, feature.id());
 	}
 
 	protected FeatureGetter<?> getterMap() {return null;}

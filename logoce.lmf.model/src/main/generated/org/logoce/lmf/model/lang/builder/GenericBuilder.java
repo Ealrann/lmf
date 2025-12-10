@@ -48,22 +48,22 @@ public final class GenericBuilder<T> implements Builder<T> {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case Generic.FeatureIDs.NAME -> 0;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case Generic.FeatureIDs.EXTENSION -> 0;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<GenericBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder>(1, GenericBuilder::attributeIndex).add(Generic.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).build();
-    private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder>(1, GenericBuilder::relationIndex).add(Generic.FeatureIDs.EXTENSION, (builder, value) -> builder.extension((Supplier<GenericExtension>) value)).build();
+    private static final FeatureInserter<GenericBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder>(1, Inserters::attributeIndex).add(Generic.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).build();
+    private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder>(1, Inserters::relationIndex).add(Generic.FeatureIDs.EXTENSION, (builder, value) -> builder.extension((Supplier<GenericExtension>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case Generic.FeatureIDs.NAME -> 0;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case Generic.FeatureIDs.EXTENSION -> 0;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }

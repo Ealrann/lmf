@@ -55,23 +55,23 @@ public final class JavaWrapperBuilder<T> implements Builder<T> {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
-  private static int attributeIndex(final int featureId) {
-    return switch (featureId) {
-      case JavaWrapper.FeatureIDs.NAME -> 0;
-      case JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME -> 1;
-      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
-    };
-  }
-
-  private static int relationIndex(final int featureId) {
-    return switch (featureId) {
-      case JavaWrapper.FeatureIDs.SERIALIZER -> 0;
-      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
-    };
-  }
-
   private static final class Inserters {
-    private static final FeatureInserter<JavaWrapperBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder>(2, JavaWrapperBuilder::attributeIndex).add(JavaWrapper.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME, (builder, value) -> builder.qualifiedClassName((String) value)).build();
-    private static final RelationLazyInserter<JavaWrapperBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder>(1, JavaWrapperBuilder::relationIndex).add(JavaWrapper.FeatureIDs.SERIALIZER, (builder, value) -> builder.serializer((Supplier<Serializer>) value)).build();
+    private static final FeatureInserter<JavaWrapperBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder>(2, Inserters::attributeIndex).add(JavaWrapper.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME, (builder, value) -> builder.qualifiedClassName((String) value)).build();
+    private static final RelationLazyInserter<JavaWrapperBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder>(1, Inserters::relationIndex).add(JavaWrapper.FeatureIDs.SERIALIZER, (builder, value) -> builder.serializer((Supplier<Serializer>) value)).build();
+
+    private static int attributeIndex(final int featureId) {
+      return switch (featureId) {
+        case JavaWrapper.FeatureIDs.NAME -> 0;
+        case JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME -> 1;
+        default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+      };
+    }
+
+    private static int relationIndex(final int featureId) {
+      return switch (featureId) {
+        case JavaWrapper.FeatureIDs.SERIALIZER -> 0;
+        default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+      };
+    }
   }
 }
