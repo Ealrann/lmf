@@ -6,7 +6,7 @@ import org.logoce.lmf.model.lang.Relation;
 
 import java.util.List;
 
-public class RelationNotificationBuilder
+public final class RelationNotificationBuilder
 {
 	private RelationNotificationBuilder()
 	{
