@@ -16,8 +16,6 @@ import org.logoce.lmf.model.lang.impl.IncludeImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
-  private static final FeatureInserter<IncludeBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder<?>>().build();
-  private static final RelationLazyInserter<IncludeBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder<?>>().add(Include.RFeatures.group, IncludeBuilder::_group).add(Include.RFeatures.parameters, IncludeBuilder::addParameter).build();
   private Supplier<Group<T>> group;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
@@ -61,12 +59,29 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case Include.FeatureIDs.GROUP -> 0;
+      case Include.FeatureIDs.PARAMETERS -> 1;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<IncludeBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<IncludeBuilder>(0, IncludeBuilder::attributeIndex).build();
+    private static final RelationLazyInserter<IncludeBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<IncludeBuilder>(2, IncludeBuilder::relationIndex).add(Include.FeatureIDs.GROUP, (builder, value) -> builder._group((Supplier<Group<?>>) value)).add(Include.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
   }
 }

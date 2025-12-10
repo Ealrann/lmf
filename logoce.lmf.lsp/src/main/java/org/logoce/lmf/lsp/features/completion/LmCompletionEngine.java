@@ -5,7 +5,6 @@ import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.logoce.lmf.lsp.LmLanguageServer;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ public final class LmCompletionEngine
 		}
 
 		final CompletionContext context = resolvedContext.get();
-		final SyntaxSnapshot syntax = context.syntax();
 		final MetaModel metaModel = context.metaModel();
 		final CompletionContextKind contextKind = context.contextKind();
 		final CompletionContext.HeaderContext header = context.header();

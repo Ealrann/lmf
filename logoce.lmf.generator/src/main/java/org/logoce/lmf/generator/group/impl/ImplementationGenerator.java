@@ -61,15 +61,23 @@ public final class ImplementationGenerator
 	{
 		final var domainType = interfaceType.raw();
 		final var features = FeatureStreams.distinctFeatures(group).toList();
-		final var methodBuilder = MethodSpec.methodBuilder("featureIndex")
-											.addAnnotation(Override.class)
-											.addModifiers(Modifier.PROTECTED)
+		// Instance override delegating to the static helper
+		final var instanceMethod = MethodSpec.methodBuilder("featureIndex")
+											 .addAnnotation(Override.class)
+											 .addModifiers(Modifier.PUBLIC)
+											 .returns(int.class)
+											 .addParameter(int.class, "featureId")
+											 .addStatement("return featureIndexStatic(featureId)");
+
+		// Static helper carrying the actual switch
+		final var staticBuilder = MethodSpec.methodBuilder("featureIndexStatic")
+											.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 											.returns(int.class)
 											.addParameter(int.class, "featureId");
 
 		if (features.isEmpty())
 		{
-			methodBuilder.addStatement("throw new IllegalArgumentException($S + featureId)",
+			staticBuilder.addStatement("throw new IllegalArgumentException($S + featureId)",
 									   "Unknown featureId: ");
 		}
 		else
@@ -88,12 +96,11 @@ public final class ImplementationGenerator
 							  "Unknown featureId: ");
 			body.add("};\n");
 
-			methodBuilder.addCode(body.build());
+			staticBuilder.addCode(body.build());
 		}
 
-		final var method = methodBuilder.build();
-
-		classBuilder.addMethod(method);
+		classBuilder.addMethod(staticBuilder.build());
+		classBuilder.addMethod(instanceMethod.build());
 	}
 
 	private void installOperationStubs(final TypeSpec.Builder classBuilder)

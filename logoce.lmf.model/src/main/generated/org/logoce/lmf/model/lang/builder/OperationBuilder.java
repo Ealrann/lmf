@@ -17,8 +17,6 @@ import org.logoce.lmf.model.lang.impl.OperationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class OperationBuilder implements Builder {
-  private static final FeatureInserter<OperationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationBuilder>().add(Operation.RFeatures.name, OperationBuilder::name).add(Operation.RFeatures.content, OperationBuilder::content).build();
-  private static final RelationLazyInserter<OperationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationBuilder>().add(Operation.RFeatures.returnType, OperationBuilder::returnType).add(Operation.RFeatures.returnTypeParameters, OperationBuilder::addReturnTypeParameter).add(Operation.RFeatures.parameters, OperationBuilder::addParameter).build();
   private String name;
   private String content;
   private Supplier<Type<?>> returnType = () -> null;
@@ -82,12 +80,34 @@ public final class OperationBuilder implements Builder {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case Operation.FeatureIDs.NAME -> 0;
+      case Operation.FeatureIDs.CONTENT -> 1;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case Operation.FeatureIDs.RETURN_TYPE -> 0;
+      case Operation.FeatureIDs.RETURN_TYPE_PARAMETERS -> 1;
+      case Operation.FeatureIDs.PARAMETERS -> 2;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<OperationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<OperationBuilder>(2, OperationBuilder::attributeIndex).add(Operation.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Operation.FeatureIDs.CONTENT, (builder, value) -> builder.content((String) value)).build();
+    private static final RelationLazyInserter<OperationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<OperationBuilder>(3, OperationBuilder::relationIndex).add(Operation.FeatureIDs.RETURN_TYPE, (builder, value) -> builder.returnType((Supplier<Type<?>>) value)).add(Operation.FeatureIDs.RETURN_TYPE_PARAMETERS, (builder, value) -> builder.addReturnTypeParameter((Supplier<GenericParameter>) value)).add(Operation.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<OperationParameter>) value)).build();
   }
 }

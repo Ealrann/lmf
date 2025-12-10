@@ -9,15 +9,13 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
-  private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>().add(Generic.RFeatures.name, Generic::name).add(Generic.RFeatures.extension, Generic::extension).build();
-  private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>().build();
   private final String name;
   private final GenericExtension extension;
 
   public GenericImpl(final String name, final GenericExtension extension) {
     this.name = name;
     this.extension = extension;
-    setContainer(extension, Generic.RFeatures.extension);
+    setContainer(extension, Generic.FeatureIDs.EXTENSION);
     eDeliver(true);
   }
 
@@ -38,20 +36,29 @@ public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
 
   @Override
   protected FeatureSetter<Generic<?>> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Generic<?>> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Generic.FeatureIDs.NAME -> 0;
       case Generic.FeatureIDs.EXTENSION -> 1;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>(2, GenericImpl::featureIndexStatic).add(Generic.FeatureIDs.NAME, Generic::name).add(Generic.FeatureIDs.EXTENSION, Generic::extension).build();
+    private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>(2, GenericImpl::featureIndexStatic).build();
   }
 }

@@ -19,10 +19,10 @@ public class GetMapMethodBuilder implements CodeBuilder<Group<?>, MethodSpec>
 		final var type = GETTER_MAP_CLASS.nest(group.adapt(GroupInterfaceType.class).parametrizedWildcard());
 
 		return MethodSpec.methodBuilder("getterMap")
-						 .addModifiers(Modifier.PROTECTED)
-						 .returns(type.parametrized())
-						 .addStatement("return GET_MAP")
-						 .addAnnotation(Override.class)
-						 .build();
+				.addModifiers(Modifier.PROTECTED)
+				.returns(type.parametrized())
+				.addStatement("return Inserters.GET_MAP")
+				.addAnnotation(Override.class)
+				.build();
 	}
 }

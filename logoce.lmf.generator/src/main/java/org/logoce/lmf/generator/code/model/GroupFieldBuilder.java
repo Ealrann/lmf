@@ -36,6 +36,12 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var constantName = GenUtils.toConstantCase(name);
 		final var initializerBuilder = CodeBlock.builder();
 
+		final var model = (MetaModel) ModelUtil.root(group);
+		final var groupFeaturesType = ClassName.get(TargetPathUtil.packageName(model),
+													model.name() + "ModelDefinition",
+													"Features",
+													group.name());
+
 		final var builderSupplierRaw = ClassName.get(BuilderSupplier.class);
 
 		initializerBuilder.add("new $T<$T>()", GROUP_BUILDER_TYPE, builderTargetType);
@@ -45,7 +51,7 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		group.includes().forEach(include -> initializerBuilder.add(".addInclude(() -> $L)",
 																   generateReferencesCodeblock(include)));
 
-		initializerBuilder.add(".addFeatures($T.Features.ALL)", interfaceType.raw());
+		initializerBuilder.add(".addFeatures($T.ALL)", groupFeaturesType);
 
 		if (!group.generics().isEmpty())
 		{

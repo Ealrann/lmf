@@ -180,8 +180,7 @@ public final class DynamicModelPackageTest
 
 		assertTrue(carCompanyContainments.stream()
 										 .anyMatch(r -> "ceo".equals(r.name()) &&
-														ModelUtil.isSubGroup(
-															 r.concept(), personGroup)),
+														ModelUtil.isSubGroup(r.concept(), personGroup)),
 				   "CarCompany should declare a containment relation 'ceo' to Person");
 
 		assertFalse(readResult.roots().isEmpty(), "Peugeot.lm should have at least one root");
@@ -190,7 +189,7 @@ public final class DynamicModelPackageTest
 
 		final var linker = new LmModelLinker<PNode>(registry, List.of(dynamicPackage));
 		final var linkDiagnostics = new java.util.ArrayList<LmDiagnostic>();
-		final var linkResult = linker.linkModel(readResult.roots(), linkDiagnostics, readResult.source());
+		linker.linkModel(readResult.roots(), linkDiagnostics, readResult.source());
 
 		assertTrue(linkDiagnostics.stream()
 								  .noneMatch(d -> d.message() != null &&

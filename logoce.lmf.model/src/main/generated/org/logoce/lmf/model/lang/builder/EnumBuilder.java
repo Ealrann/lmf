@@ -13,8 +13,6 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.EnumImpl;
 
 public final class EnumBuilder<T> implements Builder<T> {
-  private static final FeatureInserter<EnumBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder<?>>().add(Enum.RFeatures.name, EnumBuilder::name).add(Enum.RFeatures.literals, EnumBuilder::addLiteral).build();
-  private static final RelationLazyInserter<EnumBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<EnumBuilder<?>>().build();
   private String name;
   private final List<String> literals = new ArrayList<>();
 
@@ -48,12 +46,29 @@ public final class EnumBuilder<T> implements Builder<T> {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case Enum.FeatureIDs.NAME -> 0;
+      case Enum.FeatureIDs.LITERALS -> 1;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<EnumBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<EnumBuilder>(2, EnumBuilder::attributeIndex).add(Enum.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Enum.FeatureIDs.LITERALS, (builder, value) -> builder.addLiteral((String) value)).build();
+    private static final RelationLazyInserter<EnumBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<EnumBuilder>(0, EnumBuilder::relationIndex).build();
   }
 }

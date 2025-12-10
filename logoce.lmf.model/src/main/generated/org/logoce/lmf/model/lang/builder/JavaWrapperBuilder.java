@@ -12,8 +12,6 @@ import org.logoce.lmf.model.lang.Serializer;
 import org.logoce.lmf.model.lang.impl.JavaWrapperImpl;
 
 public final class JavaWrapperBuilder<T> implements Builder<T> {
-  private static final FeatureInserter<JavaWrapperBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.RFeatures.name, JavaWrapperBuilder::name).add(JavaWrapper.RFeatures.qualifiedClassName, JavaWrapperBuilder::qualifiedClassName).build();
-  private static final RelationLazyInserter<JavaWrapperBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder<?>>().add(JavaWrapper.RFeatures.serializer, JavaWrapperBuilder::serializer).build();
   private String name;
   private String qualifiedClassName;
   private Supplier<Serializer> serializer = () -> null;
@@ -48,12 +46,32 @@ public final class JavaWrapperBuilder<T> implements Builder<T> {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case JavaWrapper.FeatureIDs.NAME -> 0;
+      case JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME -> 1;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case JavaWrapper.FeatureIDs.SERIALIZER -> 0;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<JavaWrapperBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<JavaWrapperBuilder>(2, JavaWrapperBuilder::attributeIndex).add(JavaWrapper.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME, (builder, value) -> builder.qualifiedClassName((String) value)).build();
+    private static final RelationLazyInserter<JavaWrapperBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<JavaWrapperBuilder>(1, JavaWrapperBuilder::relationIndex).add(JavaWrapper.FeatureIDs.SERIALIZER, (builder, value) -> builder.serializer((Supplier<Serializer>) value)).build();
   }
 }

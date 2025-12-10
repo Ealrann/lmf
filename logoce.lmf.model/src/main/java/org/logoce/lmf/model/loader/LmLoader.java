@@ -275,6 +275,16 @@ public final class LmLoader
 						final var model = linkResult.model();
 						if (model == null)
 						{
+							// Surface diagnostics to help understand why the model is invalid.
+							for (final var diagnostic : diagnostics)
+							{
+								System.err.printf("%s:%d:%d [%s] %s%n",
+												  pm.source(),
+												  diagnostic.line(),
+												  diagnostic.column(),
+												  diagnostic.severity(),
+												  diagnostic.message());
+							}
 							throw new IllegalArgumentException("Input doesn't define a valid model: " +
 															   pm.qualifiedName());
 						}

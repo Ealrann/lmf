@@ -13,8 +13,6 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
-  private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>().add(GenericExtension.RFeatures.type, GenericExtension::type).add(GenericExtension.RFeatures.boundType, GenericExtension::boundType).add(GenericExtension.RFeatures.parameters, GenericExtension::parameters).build();
-  private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>().build();
   private final Supplier<Type<?>> type;
   private final BoundType boundType;
   private final List<GenericParameter> parameters;
@@ -24,7 +22,7 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
     this.type = type;
     this.boundType = boundType;
     this.parameters = List.copyOf(parameters);
-    setContainer(parameters, GenericExtension.RFeatures.parameters);
+    setContainer(parameters, GenericExtension.FeatureIDs.PARAMETERS);
     eDeliver(true);
   }
 
@@ -50,21 +48,30 @@ public final class GenericExtensionImpl extends FeaturedObject implements Generi
 
   @Override
   protected FeatureSetter<GenericExtension> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<GenericExtension> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case GenericExtension.FeatureIDs.TYPE -> 0;
       case GenericExtension.FeatureIDs.BOUND_TYPE -> 1;
       case GenericExtension.FeatureIDs.PARAMETERS -> 2;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<GenericExtension> GET_MAP = new FeatureGetter.Builder<GenericExtension>(3, GenericExtensionImpl::featureIndexStatic).add(GenericExtension.FeatureIDs.TYPE, GenericExtension::type).add(GenericExtension.FeatureIDs.BOUND_TYPE, GenericExtension::boundType).add(GenericExtension.FeatureIDs.PARAMETERS, GenericExtension::parameters).build();
+    private static final FeatureSetter<GenericExtension> SET_MAP = new FeatureSetter.Builder<GenericExtension>(3, GenericExtensionImpl::featureIndexStatic).build();
   }
 }

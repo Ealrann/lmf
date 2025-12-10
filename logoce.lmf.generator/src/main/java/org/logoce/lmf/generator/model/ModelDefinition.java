@@ -7,6 +7,7 @@ import org.logoce.lmf.generator.code.util.FieldBuilder;
 import org.logoce.lmf.generator.code.util.InterfaceBuilder;
 import org.logoce.lmf.generator.code.util.SubInterfaceBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
@@ -17,6 +18,7 @@ import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -42,6 +44,14 @@ public class ModelDefinition
 																				new GroupFieldBuilder(),
 																				this::streamOrderedGroup,
 																				ConstantTypes.GROUP_ALL_BUILDER);
+	private final InterfaceBuilder<Group<?>> featuresGroupInterfaceBuilder = new FieldBuilder<>(Group::name,
+																							   FeaturesFieldBuilder::new,
+																							   g -> FeatureStreams.distinctFeatures(
+																									   g),
+																							   ConstantTypes.FEATURE_ALL_BUILDER);
+	private final InterfaceBuilder<MetaModel> featuresBuilder = new SubInterfaceBuilder<>("Features",
+																						featuresGroupInterfaceBuilder,
+																						this::streamOrderedGroup);
 	private final InterfaceBuilder<Group<?>> genericInterfaceBuilder = new FieldBuilder<>(g -> GenUtils.toConstantCase(
 																										g.name()),
 																						 g -> new GenericFieldBuilder(),
@@ -63,8 +73,9 @@ public class ModelDefinition
 		this.topology = new GroupTopologyBuilder(model);
 	}
 
-	private Stream<Group<?>> streamOrderedGroup(MetaModel model)
+	private Stream<Group<?>> streamOrderedGroup(final MetaModel model)
 	{
+		Objects.requireNonNull(model);
 		return topology.stream();
 	}
 
@@ -75,6 +86,7 @@ public class ModelDefinition
 
 		definitionInterface.addType(genericBuilder.build(model));
 		definitionInterface.addType(groupBuilder.build(model));
+		definitionInterface.addType(featuresBuilder.build(model));
 		definitionInterface.addType(unitBuilder.build(model));
 		definitionInterface.addType(enumBuilder.build(model));
 		definitionInterface.addType(aliasBuilder.build(model));

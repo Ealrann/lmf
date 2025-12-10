@@ -73,7 +73,14 @@ public final class ModelReferenceResolver implements ReferenceResolver
 		return ModelUtil.streamTree(model)
 						.filter(o -> ModelUtil.isSubGroup(group, o.lmGroup()))
 						.map(o -> (T) o)
-						.filter(o -> o.get(Named.Features.NAME).equals(name))
+						.filter(o -> {
+							if (o instanceof Named named)
+							{
+								final var v = named.name();
+								return v != null && v.equals(name);
+							}
+							return false;
+						})
 						.findAny()
 						.map(o -> new ModelExplorer.StaticReferenceResolution<>(relation, o));
 	}

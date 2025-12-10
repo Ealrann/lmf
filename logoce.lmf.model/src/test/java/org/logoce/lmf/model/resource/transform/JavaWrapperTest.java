@@ -32,7 +32,7 @@ public class JavaWrapperTest
 													 .get(0);
 		final var wrapper = (JavaWrapper<?>) attribute.datatype();
 
-		assertEquals("RawFeature", wrapper.name());
-		assertEquals("org.logoce.lmf.model.api.feature.RawFeature", wrapper.qualifiedClassName());
+		assertEquals("IModelPackage", wrapper.name());
+		assertEquals("org.logoce.lmf.model.api.model.IModelPackage", wrapper.qualifiedClassName());
 	}
 }

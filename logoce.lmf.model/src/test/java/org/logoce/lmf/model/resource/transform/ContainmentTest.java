@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.resource.transform;
 
 import org.junit.jupiter.api.Test;
+import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
@@ -25,9 +26,9 @@ public class ContainmentTest
 							   .get(0);
 
 		assertEquals(model, color.lmContainer());
-		assertEquals(MetaModel.Features.ENUMS, color.lmContainingFeature());
+		assertEquals(LMCoreModelDefinition.Features.MetaModel.ENUMS, color.lmContainingFeature());
 
 		assertEquals(model, group.lmContainer());
-		assertEquals(MetaModel.Features.GROUPS, group.lmContainingFeature());
+		assertEquals(LMCoreModelDefinition.Features.MetaModel.GROUPS, group.lmContainingFeature());
 	}
 }

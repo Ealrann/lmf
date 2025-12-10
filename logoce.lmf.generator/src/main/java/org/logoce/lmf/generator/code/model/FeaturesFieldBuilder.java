@@ -59,12 +59,10 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 			BuilderInitializerUtil.appendAttributes(input,
 													initBuilder,
-													attribute -> attribute.rawFeature() != Feature.RFeatures.rawFeature &&
-																 !attribute.name().equals("id"));
+													attribute -> !attribute.name().equals("id"));
 
 			final var model = (MetaModel) ModelUtil.root(targetGroup);
 			final var domainType = ClassName.get(TargetPathUtil.packageName(model), targetGroup.name());
-			initBuilder.add(".rawFeature($T.RFeatures.$N)", domainType, name);
 			initBuilder.add(".id($T.FeatureIDs.$N)", domainType, constantName);
 
 			if (isAttribute)
@@ -78,7 +76,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						{
 							final var typeHolder = TypeResolutionUtil.resolveTypeHolder(boundType);
 							final var typeName = GenUtils.toConstantCase(boundType.name());
-							CodeBlock datatypeBlock;
+							final CodeBlock datatypeBlock;
 							if (boundType.lmContainer() instanceof MetaModel typeModel)
 							{
 								final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
@@ -104,8 +102,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						final var typeHolder = TypeResolutionUtil.resolveTypeHolder(datatype);
 						final var typeName = GenUtils.toConstantCase(datatype.name());
 
-						CodeBlock datatypeBlock;
-						if (datatype != null && typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
+						final CodeBlock datatypeBlock;
+						if (typeHolder != null && datatype.lmContainer() instanceof MetaModel typeModel)
 						{
 							final var modelDefinition = ClassName.get(TargetPathUtil.packageName(typeModel),
 																	  typeModel.name() + "ModelDefinition");
@@ -143,10 +141,13 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	{
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var groupFeaturesInterface = ClassName.get(TargetPathUtil.packageName(model),
+														 model.name() + "ModelDefinition",
+														 "Features",
+														 group.name());
 		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
 
-		return CodeBlock.of("$T.Features.$N", groupClass, constantFeatureName);
+		return CodeBlock.of("$T.$N", groupFeaturesInterface, constantFeatureName);
 	}
 
 	private static CodeBlock generateConceptCodeblock(final Concept<?> concept)

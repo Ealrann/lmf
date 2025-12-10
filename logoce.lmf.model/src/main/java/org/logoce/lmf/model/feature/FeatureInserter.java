@@ -1,7 +1,5 @@
 package org.logoce.lmf.model.feature;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
-
 import java.util.function.BiConsumer;
 
 public final class FeatureInserter<T>
@@ -14,34 +12,29 @@ public final class FeatureInserter<T>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <F> void push(final T object, final RawFeature<F, ?> feature, final F value)
+	public <F> void push(final T object, final int featureId, final F value)
 	{
-		((BiConsumer<T, F>) featureMap.getTuple(feature)
-									  .value()).accept(object, value);
-	}
-
-	public static <T> Builder<T> Builder()
-	{
-		return new Builder<>();
+		((BiConsumer<T, F>) featureMap.get(featureId)).accept(object, value);
 	}
 
 	public static final class Builder<T>
 	{
-		private final FeatureMap.Builder<BiConsumer<T, ?>> builder = new FeatureMap.Builder<>();
+		private final FeatureMap.Builder<BiConsumer<T, ?>> builder;
 
-		public Builder()
+		public Builder(final int featureCount, final FeatureIndexFunction indexFunction)
 		{
+			builder = new FeatureMap.Builder<>(featureCount, indexFunction);
+		}
+
+		public Builder<T> add(final int featureId, final BiConsumer<T, ?> function)
+		{
+			builder.add(featureId, function);
+			return this;
 		}
 
 		public FeatureInserter<T> build()
 		{
 			return new FeatureInserter<>(builder.build());
-		}
-
-		public <F> Builder<T> add(final RawFeature<F, ?> feature, final BiConsumer<T, ? extends F> function)
-		{
-			builder.add(feature, function);
-			return this;
 		}
 	}
 }

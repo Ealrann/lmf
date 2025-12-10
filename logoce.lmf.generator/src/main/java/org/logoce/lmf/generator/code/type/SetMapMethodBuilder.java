@@ -19,10 +19,10 @@ public class SetMapMethodBuilder implements CodeBuilder<Group<?>, MethodSpec>
 		final var type = SETTER_MAP_CLASS.nest(group.adapt(GroupInterfaceType.class).parametrizedWildcard());
 
 		return MethodSpec.methodBuilder("setterMap")
-						 .addModifiers(Modifier.PROTECTED)
-						 .returns(type.parametrized())
-						 .addStatement("return SET_MAP")
-						 .addAnnotation(Override.class)
-						 .build();
+				.addModifiers(Modifier.PROTECTED)
+				.returns(type.parametrized())
+				.addStatement("return Inserters.SET_MAP")
+				.addAnnotation(Override.class)
+				.build();
 	}
 }

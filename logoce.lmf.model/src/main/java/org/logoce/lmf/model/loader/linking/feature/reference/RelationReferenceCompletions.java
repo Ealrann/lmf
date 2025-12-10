@@ -1,12 +1,6 @@
 package org.logoce.lmf.model.loader.linking.feature.reference;
 
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Named;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.loader.linking.LinkNode;
 import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.loader.linking.feature.AttributeResolver;
@@ -203,7 +197,7 @@ public final class RelationReferenceCompletions
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				attrResolution.feature() == Named.Features.NAME)
+				LMCoreModelDefinition.Features.Named.NAME == attrResolution.feature())
 			{
 				return attrResolution.value();
 			}
@@ -235,15 +229,7 @@ public final class RelationReferenceCompletions
 				continue;
 			}
 
-			final Object value;
-			try
-			{
-				value = object.get(Named.Features.NAME);
-			}
-			catch (Exception e)
-			{
-				continue;
-			}
+			final Object value = object instanceof Named named ? named.name() : null;
 
 			if (value == null)
 			{

@@ -99,12 +99,6 @@ public final class ImportResolver
 					   .toList();
 	}
 
-	private static String simpleName(final String qualifiedName)
-	{
-		final int lastDot = qualifiedName.lastIndexOf('.');
-		return lastDot == -1 ? qualifiedName : qualifiedName.substring(lastDot + 1);
-	}
-
 	private static String qualifiedName(final Model model)
 	{
 		return model.domain() + "." + model.name();

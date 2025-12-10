@@ -169,6 +169,7 @@ public class TreeLazyIterator implements Spliterator<LMObject>
 					if (oldVal != null) course.remove((LMObject) oldVal);
 				}
 				case REMOVE_MANY -> course.removeAll((List<LMObject>) oldVal);
+				default -> {}
 			}
 		}
 

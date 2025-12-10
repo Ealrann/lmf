@@ -299,7 +299,7 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 
 		@Override
-		protected int featureIndex(final int featureId)
+		public int featureIndex(final int featureId)
 		{
 			return 0;
 		}

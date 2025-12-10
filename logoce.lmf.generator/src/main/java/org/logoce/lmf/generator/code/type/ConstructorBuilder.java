@@ -58,7 +58,7 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		final var feature = resolution.feature();
 		final var assignCode = ImplementationCodeUtil.assignationStatement(feature, paramSpec.name);
 
-		final var isRelation = feature instanceof Relation<?, ?> relation;
+		final var isRelation = feature instanceof Relation<?, ?>;
 		final var isContainment = isRelation && ((Relation<?, ?>) feature).contains();
 		final var manyMutableRelation = isRelation && feature.many() && !feature.immutable();
 
@@ -74,12 +74,13 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		final var feature = resolution.feature();
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var domainType = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var groupType = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var constantName = org.logoce.lmf.generator.util.GenUtils.toConstantCase(feature.name());
 
-		return CodeBlock.of("setContainer($N, $T.RFeatures.$N)",
+		return CodeBlock.of("setContainer($N, $T.FeatureIDs.$N)",
 							paramName,
-							domainType,
-							feature.name());
+							groupType,
+							constantName);
 	}
 
 	private record ParameterCode(ParameterSpec parameterSpec, CodeBlock assign, Optional<CodeBlock> notif)

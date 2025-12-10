@@ -13,8 +13,6 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
 public final class OperationImpl extends FeaturedObject implements Operation {
-  private static final FeatureGetter<Operation> GET_MAP = new FeatureGetter.Builder<Operation>().add(Operation.RFeatures.name, Operation::name).add(Operation.RFeatures.content, Operation::content).add(Operation.RFeatures.returnType, Operation::returnType).add(Operation.RFeatures.returnTypeParameters, Operation::returnTypeParameters).add(Operation.RFeatures.parameters, Operation::parameters).build();
-  private static final FeatureSetter<Operation> SET_MAP = new FeatureSetter.Builder<Operation>().build();
   private final String name;
   private final String content;
   private final Supplier<Type<?>> returnType;
@@ -29,8 +27,8 @@ public final class OperationImpl extends FeaturedObject implements Operation {
     this.returnType = returnType;
     this.returnTypeParameters = List.copyOf(returnTypeParameters);
     this.parameters = List.copyOf(parameters);
-    setContainer(returnTypeParameters, Operation.RFeatures.returnTypeParameters);
-    setContainer(parameters, Operation.RFeatures.parameters);
+    setContainer(returnTypeParameters, Operation.FeatureIDs.RETURN_TYPE_PARAMETERS);
+    setContainer(parameters, Operation.FeatureIDs.PARAMETERS);
     eDeliver(true);
   }
 
@@ -66,16 +64,15 @@ public final class OperationImpl extends FeaturedObject implements Operation {
 
   @Override
   protected FeatureSetter<Operation> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Operation> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Operation.FeatureIDs.NAME -> 0;
       case Operation.FeatureIDs.CONTENT -> 1;
@@ -84,5 +81,15 @@ public final class OperationImpl extends FeaturedObject implements Operation {
       case Operation.FeatureIDs.PARAMETERS -> 4;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Operation> GET_MAP = new FeatureGetter.Builder<Operation>(5, OperationImpl::featureIndexStatic).add(Operation.FeatureIDs.NAME, Operation::name).add(Operation.FeatureIDs.CONTENT, Operation::content).add(Operation.FeatureIDs.RETURN_TYPE, Operation::returnType).add(Operation.FeatureIDs.RETURN_TYPE_PARAMETERS, Operation::returnTypeParameters).add(Operation.FeatureIDs.PARAMETERS, Operation::parameters).build();
+    private static final FeatureSetter<Operation> SET_MAP = new FeatureSetter.Builder<Operation>(5, OperationImpl::featureIndexStatic).build();
   }
 }

@@ -1,12 +1,17 @@
 package org.logoce.lmf.model.notification.impl;
 
 import org.logoce.lmf.model.api.notification.Notification;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 
-public record RelationAddNotifiation(LMObject notifier, Feature<?, ?> feature,
+public record RelationAddNotifiation(LMObject notifier, int featureId,
 									 LMObject newValue) implements Notification
 {
+	@Override
+	public int featureId()
+	{
+		return featureId;
+	}
+
 	@Override
 	public EventType type()
 	{

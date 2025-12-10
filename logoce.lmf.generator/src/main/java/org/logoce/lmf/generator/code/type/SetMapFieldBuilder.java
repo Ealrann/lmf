@@ -1,21 +1,20 @@
 package org.logoce.lmf.generator.code.type;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupImplementationType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
-import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.GenUtils;
-import org.logoce.lmf.generator.util.TargetPathUtil;
+import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 
@@ -38,14 +37,18 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var type = SETTER_MAP_CLASS.nest(interfaceType.parametrizedWildcard());
 		final var builderType = SETTER_MAP_BUILDER_CLASS.nest(interfaceType.parametrizedWildcard());
 		final var implementationType = group.adapt(GroupImplementationType.class);
-		final var initializerBuilder = CodeBlock.builder()
-												.add("new $T()", builderType.parametrized());
 
-		FeatureStreams.distinctFeatures(group)
-					  .filter(SetMapFieldBuilder::isSingleMutable)
-					  .map(f -> f.adapt(FeatureResolution.class))
-					  .map(resolution -> buildStatement(resolution, implementationType))
-					  .forEach(initializerBuilder::add);
+		final var features = FeatureStreams.distinctFeatures(group).toList();
+		final var featureCount = features.size();
+
+		final var initializerBuilder = CodeBlock.builder()
+												.add("new $T($L, $T::featureIndexStatic)", builderType.parametrized(), featureCount, implementationType.raw());
+
+		features.stream()
+				.filter(SetMapFieldBuilder::isSingleMutable)
+				.map(f -> f.adapt(FeatureResolution.class))
+				.map(resolution -> buildStatement(resolution, implementationType))
+				.forEach(initializerBuilder::add);
 
 		initializerBuilder.add(".build()");
 
@@ -60,29 +63,33 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 	{
 		final var featureName = resolution.name();
 		final var ownerGroup = interfaceType.group;
-		final var group = resolution.hasGeneric() && resolution.feature().lmContainer() != ownerGroup
-						 ? ownerGroup
-						 : (Group<?>) resolution.feature().lmContainer();
-		final var constantGroupName = GenUtils.toConstantCase(group.name());
+		final TypeName valueType = resolution.effectiveTypeFor(ownerGroup).parametrized();
 
-		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
+		final TypeName castType;
+		if (valueType instanceof ParameterizedTypeName parameterized)
 		{
-			return CodeBlock.of(".add($T.RFeatures.$N, (object, value) -> (($T) object).$N(value))",
-								interfaceType.raw(),
-								featureName,
-								implementationType.raw(),
-								featureName);
+			final var hasTypeVariable = parameterized.typeArguments.stream()
+																   .anyMatch(TypeVariableName.class::isInstance);
+			castType = hasTypeVariable ? parameterized.rawType : valueType;
+		}
+		else if (valueType instanceof TypeVariableName)
+		{
+			castType = TypeName.OBJECT;
 		}
 		else
 		{
-			final var model = (MetaModel) ModelUtil.root(group);
-			final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
-			return CodeBlock.of(".add($T.Features.$N, (object, value) -> (($T) object).$N(value))",
-								groupClass,
-								GenUtils.toConstantCase(featureName),
-								implementationType.raw(),
-								featureName);
+			castType = valueType;
 		}
+
+		final var constantName = GenUtils.toConstantCase(featureName);
+		final var domainType = interfaceType.raw();
+
+		return CodeBlock.of(".add($T.FeatureIDs.$N, (object, value) -> (($T) object).$N(($T) value))",
+							domainType,
+							constantName,
+							implementationType.raw(),
+							featureName,
+							castType);
 	}
 
 	private static boolean isSingleMutable(final Feature<?, ?> feature)

@@ -20,8 +20,6 @@ import org.logoce.lmf.model.lang.impl.MetaModelImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class MetaModelBuilder implements Builder {
-  private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>().add(MetaModel.RFeatures.name, MetaModelBuilder::name).add(MetaModel.RFeatures.domain, MetaModelBuilder::domain).add(MetaModel.RFeatures.imports, MetaModelBuilder::addImport).add(MetaModel.RFeatures.metamodels, MetaModelBuilder::addMetamodel).add(MetaModel.RFeatures.lmPackage, MetaModelBuilder::lmPackage).add(MetaModel.RFeatures.genNamePackage, MetaModelBuilder::genNamePackage).add(MetaModel.RFeatures.extraPackage, MetaModelBuilder::extraPackage).build();
-  private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>().add(MetaModel.RFeatures.groups, MetaModelBuilder::addGroup).add(MetaModel.RFeatures.enums, MetaModelBuilder::addEnum).add(MetaModel.RFeatures.units, MetaModelBuilder::addUnit).add(MetaModel.RFeatures.aliases, MetaModelBuilder::addAliase).add(MetaModel.RFeatures.javaWrappers, MetaModelBuilder::addJavaWrapper).build();
   private String name;
   private String domain;
   private final List<String> imports = new ArrayList<>();
@@ -166,12 +164,41 @@ public final class MetaModelBuilder implements Builder {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case MetaModel.FeatureIDs.NAME -> 0;
+      case MetaModel.FeatureIDs.DOMAIN -> 1;
+      case MetaModel.FeatureIDs.IMPORTS -> 2;
+      case MetaModel.FeatureIDs.METAMODELS -> 3;
+      case MetaModel.FeatureIDs.LM_PACKAGE -> 4;
+      case MetaModel.FeatureIDs.GEN_NAME_PACKAGE -> 5;
+      case MetaModel.FeatureIDs.EXTRA_PACKAGE -> 6;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case MetaModel.FeatureIDs.GROUPS -> 0;
+      case MetaModel.FeatureIDs.ENUMS -> 1;
+      case MetaModel.FeatureIDs.UNITS -> 2;
+      case MetaModel.FeatureIDs.ALIASES -> 3;
+      case MetaModel.FeatureIDs.JAVA_WRAPPERS -> 4;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>(7, MetaModelBuilder::attributeIndex).add(MetaModel.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(MetaModel.FeatureIDs.DOMAIN, (builder, value) -> builder.domain((String) value)).add(MetaModel.FeatureIDs.IMPORTS, (builder, value) -> builder.addImport((String) value)).add(MetaModel.FeatureIDs.METAMODELS, (builder, value) -> builder.addMetamodel((String) value)).add(MetaModel.FeatureIDs.LM_PACKAGE, (builder, value) -> builder.lmPackage((IModelPackage) value)).add(MetaModel.FeatureIDs.GEN_NAME_PACKAGE, (builder, value) -> builder.genNamePackage((boolean) value)).add(MetaModel.FeatureIDs.EXTRA_PACKAGE, (builder, value) -> builder.extraPackage((String) value)).build();
+    private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>(5, MetaModelBuilder::relationIndex).add(MetaModel.FeatureIDs.GROUPS, (builder, value) -> builder.addGroup((Supplier<Group<?>>) value)).add(MetaModel.FeatureIDs.ENUMS, (builder, value) -> builder.addEnum((Supplier<Enum<?>>) value)).add(MetaModel.FeatureIDs.UNITS, (builder, value) -> builder.addUnit((Supplier<Unit<?>>) value)).add(MetaModel.FeatureIDs.ALIASES, (builder, value) -> builder.addAliase((Supplier<Alias>) value)).add(MetaModel.FeatureIDs.JAVA_WRAPPERS, (builder, value) -> builder.addJavaWrapper((Supplier<JavaWrapper<?>>) value)).build();
   }
 }

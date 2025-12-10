@@ -8,6 +8,13 @@ import java.util.function.Consumer;
 
 public interface IEMFNotifier
 {
+	void listen(Consumer<Notification> listener, int... featureIDs);
+	void sulk(Consumer<Notification> listener, int... featureIDs);
+
+	void listenNoParam(Runnable listener, int... featureIDs);
+	void sulkNoParam(Runnable listener, int... featureIDs);
+
+
 	void listen(Consumer<Notification> listener, List<Feature<?, ?>> features);
 	void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features);
 
@@ -18,7 +25,6 @@ public interface IEMFNotifier
 	{
 		listen(listener, List.of(feature));
 	}
-
 	default void sulk(Consumer<Notification> listener, Feature<?, ?> feature)
 	{
 		sulk(listener, List.of(feature));
@@ -28,7 +34,6 @@ public interface IEMFNotifier
 	{
 		listenNoParam(listener, List.of(feature));
 	}
-
 	default void sulkNoParam(Runnable listener, Feature<?, ?> feature)
 	{
 		sulkNoParam(listener, List.of(feature));

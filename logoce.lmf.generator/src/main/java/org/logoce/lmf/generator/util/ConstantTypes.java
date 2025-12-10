@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ConstantTypes
 {
@@ -40,6 +41,7 @@ public class ConstantTypes
 	public static final ClassName FEATURE_INSERTER_CLASS = ClassName.get(FeatureInserter.class);
 	public static final TypeName ARRAYLIST = ClassName.get(ArrayList.class);
 	public static final ClassName OBSERVABLE_LIST = ClassName.get(ObservableList.class);
+	public static final ClassName STREAM = ClassName.get(Stream.class);
 	public static final ClassName FEATURED_OBJECT_BUILDER = ClassName.get(IFeaturedObject.Builder.class);
 	public static final ClassName SUPPLIER = ClassName.get(Supplier.class);
 	public static final ClassName OPTIONAL = ClassName.get(Optional.class);

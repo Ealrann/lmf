@@ -14,22 +14,33 @@ subprojects {
 	version = lmfVersion
 
 	apply plugin: 'java-library'
-	apply plugin: 'checkstyle'
+	apply plugin: 'pmd'
 
 	java {
 		sourceCompatibility = JavaVersion.VERSION_25
 		targetCompatibility = JavaVersion.VERSION_25
 	}
 
-	checkstyle {
-		toolVersion = '12.2.0'
-		configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+	pmd {
+		toolVersion = '7.19.0'
+		consoleOutput = true
 		ignoreFailures = true
-		showViolations = true
+		// Use our explicit ruleset only
+		ruleSets = []
+		ruleSetFiles = files(rootProject.file('config/pmd/ruleset.xml'))
 	}
 
-	tasks.withType(Checkstyle).configureEach {
+	tasks.withType(Pmd).configureEach {
+		reports {
+			html.required.set(false)   // turn off HTML
+			xml.required = false
+		}
+	}
+
+	tasks.withType(Pmd).configureEach {
 		exclude('**/module-info.java')
+		// Exclude only the hand-written lexer from PMD; keep other generated code checked
+		exclude('**/org/logoce/lmf/model/lexer/**')
 	}
 
 	repositories {

@@ -27,11 +27,10 @@ public final class TreeToFeatureLinker
 		this.group = group;
 		final List<Feature<?, ?>> allFeatures = ModelUtil.streamAllFeatures(group).toList();
 
-		final Map<Object, Feature<?, ?>> featureMap = new LinkedHashMap<>();
-		for (final Feature<?, ?> feature : allFeatures)
+		final Map<Integer, Feature<?, ?>> featureMap = new LinkedHashMap<>();
+		for (final var feature : allFeatures)
 		{
-			final Object key = feature.rawFeature() != null ? feature.rawFeature() : feature;
-			featureMap.put(key, feature);
+			featureMap.put(feature.id(), feature);
 		}
 
 		final var features = featureMap.values().stream().toList();

@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.api.model;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -21,7 +20,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 {
 	private final List<Consumer<Notification>> structureListeners = new ArrayList<>();
 	private LMObject container;
-	private Feature<?, ?> containingFeature;
+	private int containingFeatureId = -1;
 
 	public FeaturedObject()
 	{}
@@ -35,7 +34,19 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	@Override
 	public final Relation<?, ?> lmContainingFeature()
 	{
-		return (Relation<?, ?>) containingFeature;
+		if (container == null || containingFeatureId == -1) return null;
+
+		final var group = container.lmGroup();
+		for (final var feature : group.features())
+		{
+			if (feature.id() == containingFeatureId)
+			{
+				return (Relation<?, ?>) feature;
+			}
+		}
+
+		throw new IllegalStateException("Cannot resolve containing feature id " + containingFeatureId +
+										" for group " + group.name());
 	}
 
 	private void structureNotify(final Notification notification)
@@ -64,9 +75,10 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 		final var getMap = (FeatureGetter<O>) getterMap();
 		final var setMap = (FeatureSetter<O>) setterMap();
 
-		final var oldValue = getMap.get((O) this, feature.rawFeature());
-		setMap.set((O) this, feature.rawFeature(), value);
-		final var notification = new SetNotifiation((LMObject) this, feature, value, oldValue);
+		final int featureId = feature.id();
+		final var oldValue = getMap.get((O) this, featureId);
+		setMap.set((O) this, featureId, value);
+		final var notification = new SetNotifiation((LMObject) this, feature.id(), value, oldValue);
 		if (feature instanceof Relation<?, ?> relation && relation.contains())
 		{
 			structureNotify(notification);
@@ -78,50 +90,43 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	private <T, O> T internalGet(final Feature<?, T> feature)
 	{
 		final var getMap = (FeatureGetter<O>) getterMap();
-		return getMap.get((O) this, feature.rawFeature());
+		return getMap.get((O) this, feature.id());
 	}
 
 	protected FeatureGetter<?> getterMap() {return null;}
 
 	protected FeatureSetter<?> setterMap() {return null;}
 
-	protected final <E> List<E> newObservableList(final Feature<E, ?> feature)
+	/**
+	 * Map a feature id to its stable index for this object.
+	 * Implemented by generated implementations and by DynamicModelPackage.
+	 */
+	@Override
+	public int featureIndex(final int featureId)
 	{
-		final var isRelation = feature instanceof Relation;
-		final var isContainment = feature instanceof Relation<?, ?> rel && rel.contains();
-		return new ObservableList<>(new ObservableListHandler<>(this, feature, isRelation, isContainment));
+		throw new UnsupportedOperationException("featureIndex not implemented");
 	}
 
-	// Legacy overloads for generated implementations still passing RawFeature
-	protected final void setContainer(final LMObject child, final RawFeature<?, ?> feature)
+	protected final <E> List<E> newObservableList(final int featureId,
+												  final boolean isRelation,
+												  final boolean isContainment)
+	{
+		return new ObservableList<>(new ObservableListHandler<>(this, featureId, isRelation, isContainment));
+	}
+
+	protected final void setContainer(final LMObject child, final int featureId)
 	{
 		if (child != null)
 		{
-			ContainmentUtils.setContainer((LMObject) this, child, feature.featureSupplier().get());
+			ContainmentUtils.setContainer((LMObject) this, child, featureId);
 		}
 	}
 
-	protected final void setContainer(final List<? extends LMObject> children, final RawFeature<?, ?> feature)
+	protected final void setContainer(final List<? extends LMObject> children, int featureId)
 	{
 		if (!children.isEmpty())
 		{
-			ContainmentUtils.setContainer((LMObject) this, children, feature.featureSupplier().get());
-		}
-	}
-
-	protected final void setContainer(final LMObject child, final Feature<?, ?> feature)
-	{
-		if (child != null)
-		{
-			ContainmentUtils.setContainer((LMObject) this, child, feature);
-		}
-	}
-
-	protected final void setContainer(final List<? extends LMObject> children, final Feature<?, ?> feature)
-	{
-		if (!children.isEmpty())
-		{
-			ContainmentUtils.setContainer((LMObject) this, children, feature);
+			ContainmentUtils.setContainer((LMObject) this, children, featureId);
 		}
 	}
 
@@ -138,7 +143,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	private record ObservableListHandler<E>(FeaturedObject owner,
-										   Feature<E, ?> feature,
+										   int featureId,
 										   boolean relation,
 										   boolean containment)
 			implements BiConsumer<Notification.EventType, List<E>>
@@ -166,7 +171,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 					}
 				}
 
-				notification = new SetNotifiation((LMObject) owner, feature, newValue, oldValue);
+				notification = new SetNotifiation((LMObject) owner, featureId, newValue, oldValue);
 			}
 			else
 			{
@@ -178,20 +183,20 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 				{
 					if (eventType == Notification.EventType.ADD)
 					{
-						owner.setContainer(children.getFirst(), feature);
+						owner.setContainer(children.getFirst(), featureId);
 					}
 					else
 					{
-						owner.setContainer(children, feature);
+						owner.setContainer(children, featureId);
 					}
 				}
 
 				notification = switch (eventType)
 				{
-					case ADD -> RelationNotificationBuilder.insert((LMObject) owner, feature, children.getFirst());
-					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, feature, children);
-					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner, feature, children.getFirst());
-					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, feature, children);
+					case ADD -> RelationNotificationBuilder.insert((LMObject) owner, featureId, children.getFirst());
+					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, featureId, children);
+					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner, featureId, children.getFirst());
+					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, featureId, children);
 					default -> null;
 				};
 
@@ -214,43 +219,50 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 		}
 
 		public static void setContainer(final LMObject newContainer, final LMObject child,
-										final Feature<?, ?> feature)
+										final int featureId)
 		{
-			setContainerInternal(newContainer, child, feature);
+			setContainerInternal(newContainer, child, featureId);
 		}
 
 		public static void setContainer(final LMObject newContainer,
 										final List<? extends LMObject> children,
-										final Feature<?, ?> newFeature)
+										final int featureId)
 		{
 			for (final var child : children)
 			{
-				setContainerInternal(newContainer, child, newFeature);
+				setContainerInternal(newContainer, child, featureId);
 			}
 		}
 
 		private static void setContainerInternal(final LMObject newContainer,
 												 final LMObject child,
-												 final Feature<?, ?> newFeature)
+												 final int newFeatureId)
 		{
 			final var featuredChild = (FeaturedObject) child;
 			final var oldContainer = featuredChild.container;
-			final var oldFeature = featuredChild.containingFeature;
+			final int oldFeatureId = featuredChild.containingFeatureId;
 
-			featuredChild.containingFeature = newFeature;
 			featuredChild.container = newContainer;
+			featuredChild.containingFeatureId = newFeatureId;
 
 			if (oldContainer != null)
 			{
-				final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
-																					 oldFeature,
-																					 child);
-				((FeaturedObject) oldContainer).structureNotify(oldParentNotification);
+				if (oldFeatureId != -1)
+				{
+					final var oldGroup = oldContainer.lmGroup();
+					if (oldGroup != null)
+					{
+						final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
+																							 oldFeatureId,
+																							 child);
+						((FeaturedObject) oldContainer).structureNotify(oldParentNotification);
+					}
+				}
 			}
 
 			final var childNotification = new ContainerChange(child,
-															  oldFeature,
-															  newFeature,
+															  oldFeatureId,
+															  newFeatureId,
 															  newContainer,
 															  oldContainer);
 			featuredChild.structureNotify(childNotification);

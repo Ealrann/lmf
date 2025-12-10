@@ -1,15 +1,20 @@
 package org.logoce.lmf.model.notification.impl;
 
 import org.logoce.lmf.model.api.notification.Notification;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 
 public record ContainerChange(LMObject notifier,
-							  Feature<?, ?> oldContainingFeature,
-							  Feature<?, ?> newContainingFeature,
+							  int oldFeatureId,
+							  int newFeatureId,
 							  Object newContainer,
 							  Object oldContainer) implements Notification
 {
+	@Override
+	public int featureId()
+	{
+		return newFeatureId;
+	}
+
 	@Override
 	public EventType type()
 	{
@@ -26,11 +31,5 @@ public record ContainerChange(LMObject notifier,
 	public Object oldValue()
 	{
 		return oldContainer;
-	}
-
-	@Override
-	public Feature<?, ?> feature()
-	{
-		return newContainingFeature;
 	}
 }

@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.feature;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.lang.LMObject;
 
 import java.util.function.BiConsumer;
@@ -8,42 +7,37 @@ import java.util.function.Supplier;
 
 public final class RelationLazyInserter<T>
 {
-	private final FeatureMap<BiConsumer<T, ? extends Supplier<? extends LMObject>>> featureMap;
+	private final FeatureMap<BiConsumer<T, Supplier>> featureMap;
 
-	public RelationLazyInserter(final FeatureMap<BiConsumer<T, ? extends Supplier<? extends LMObject>>> featureMap)
+	public RelationLazyInserter(final FeatureMap<BiConsumer<T, Supplier>> featureMap)
 	{
 		this.featureMap = featureMap;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <F extends LMObject> void push(final T object, final RawFeature<F, ?> relation, final Supplier<F> value)
+	public void push(final T object, final int featureId, final Supplier<? extends LMObject> value)
 	{
-		((BiConsumer<T, Supplier<F>>) featureMap.getTuple(relation).value()).accept(object, value);
-	}
-
-	public static <T> Builder<T> Builder()
-	{
-		return new Builder<>();
+		((BiConsumer<T, Supplier>) featureMap.get(featureId)).accept(object, (Supplier) value);
 	}
 
 	public static final class Builder<T>
 	{
-		private final FeatureMap.Builder<BiConsumer<T, ? extends Supplier<? extends LMObject>>> builder = new FeatureMap.Builder<>();
+		private final FeatureMap.Builder<BiConsumer<T, Supplier>> builder;
 
-		public Builder()
+		public Builder(final int featureCount, final FeatureIndexFunction indexFunction)
 		{
+			builder = new FeatureMap.Builder<>(featureCount, indexFunction);
 		}
 
+		public Builder<T> add(final int featureId, final BiConsumer<T, Supplier> function)
+		{
+			builder.add(featureId, function);
+			return this;
+		}
+		
 		public RelationLazyInserter<T> build()
 		{
 			return new RelationLazyInserter<>(builder.build());
-		}
-
-		public <F extends LMObject> Builder<T> add(final RawFeature<F, ?> relation,
-												   final BiConsumer<T, Supplier<F>> function)
-		{
-			builder.add(relation, function);
-			return this;
 		}
 	}
 }

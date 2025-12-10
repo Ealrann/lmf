@@ -14,8 +14,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T> {
-  private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>().add(Group.RFeatures.name, Group::name).add(Group.RFeatures.concrete, Group::concrete).add(Group.RFeatures.includes, Group::includes).add(Group.RFeatures.features, Group::features).add(Group.RFeatures.generics, Group::generics).add(Group.RFeatures.operations, Group::operations).add(Group.RFeatures.lmBuilder, Group::lmBuilder).build();
-  private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>().build();
   private final String name;
   private final boolean concrete;
   private final List<Include<?>> includes;
@@ -34,10 +32,10 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
     this.generics = List.copyOf(generics);
     this.operations = List.copyOf(operations);
     this.lmBuilder = lmBuilder;
-    setContainer(includes, Group.RFeatures.includes);
-    setContainer(features, Group.RFeatures.features);
-    setContainer(generics, Group.RFeatures.generics);
-    setContainer(operations, Group.RFeatures.operations);
+    setContainer(includes, Group.FeatureIDs.INCLUDES);
+    setContainer(features, Group.FeatureIDs.FEATURES);
+    setContainer(generics, Group.FeatureIDs.GENERICS);
+    setContainer(operations, Group.FeatureIDs.OPERATIONS);
     eDeliver(true);
   }
 
@@ -83,16 +81,15 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
 
   @Override
   protected FeatureSetter<Group<?>> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Group<?>> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Group.FeatureIDs.NAME -> 0;
       case Group.FeatureIDs.CONCRETE -> 1;
@@ -103,5 +100,15 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
       case Group.FeatureIDs.LM_BUILDER -> 6;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>(7, GroupImpl::featureIndexStatic).add(Group.FeatureIDs.NAME, Group::name).add(Group.FeatureIDs.CONCRETE, Group::concrete).add(Group.FeatureIDs.INCLUDES, Group::includes).add(Group.FeatureIDs.FEATURES, Group::features).add(Group.FeatureIDs.GENERICS, Group::generics).add(Group.FeatureIDs.OPERATIONS, Group::operations).add(Group.FeatureIDs.LM_BUILDER, Group::lmBuilder).build();
+    private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>(7, GroupImpl::featureIndexStatic).build();
   }
 }

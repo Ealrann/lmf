@@ -23,7 +23,7 @@
 		(-contains units [0..*] @Unit)
 		(-contains aliases [0..*] @Alias)
 		(-contains javaWrappers [0..*] @JavaWrapper)
-		(-att lmPackage /javaWrappers.1 [1..1])
+		(-att lmPackage @IModelPackage [1..1])
 		(-att genNamePackage @boolean defaultValue="true")
 		(-att extraPackage @string))
 
@@ -39,7 +39,7 @@
 		(-contains features [0..*] @Feature)
 		(-contains generics [0..*] @Generic)
 		(-contains operations [0..*] @Operation)
-		(-att lmBuilder /javaWrappers.2 [1..1]
+		(-att lmBuilder @BuilderSupplier [1..1]
 		    (parameters type=^T)))
 
 	(Definition Include
@@ -58,10 +58,7 @@
 		(-att id @int)
 		(-att name=many datatype=@boolean)
 		(-att name=mandatory datatype=@boolean)
-		(-contains parameters [0..*] @GenericParameter)
-		(-att name=rawFeature datatype=/javaWrappers.0
-		    (parameters ^UnaryType)
-		    (parameters ^EffectiveType)))
+		(-contains parameters [0..*] @GenericParameter))
 
 	(Definition Attribute
 		(includes group=@Feature
@@ -69,7 +66,7 @@
 			(parameters ^EffectiveType))
 		(Generic UnaryType)
 		(Generic EffectiveType)
-		(-refers datatype [1..1] @Datatype
+		(-refers datatype lazy [1..1] @Datatype
 		    (parameters type=^UnaryType))
 		(-att name=defaultValue /units.7))
 
@@ -181,7 +178,6 @@
 	(Alias [0..*] value="mandatory=false many")
 	(Alias [1..*] value="mandatory many")
 
-	(JavaWrapper name=RawFeature qualifiedClassName=org.logoce.lmf.model.api.feature.RawFeature)
 	(JavaWrapper name=IModelPackage qualifiedClassName=org.logoce.lmf.model.api.model.IModelPackage)
 	(JavaWrapper name=BuilderSupplier qualifiedClassName=org.logoce.lmf.model.api.model.BuilderSupplier)
 )

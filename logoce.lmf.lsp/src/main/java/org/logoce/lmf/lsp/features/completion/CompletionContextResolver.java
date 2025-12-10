@@ -170,12 +170,11 @@ final class CompletionContextResolver
 			}
 		}
 
-		final TypeUsageKind typeUsageKind = resolveTypeUsageKind(headerInfo, valueAttribute, valueRelation, relationConcept);
+		final TypeUsageKind typeUsageKind = resolveTypeUsageKind(valueAttribute, valueRelation, relationConcept);
 		return new CompletionContext.ValueContext(valueAttribute, valueRelation, relationConcept, typeUsageKind);
 	}
 
-	private static TypeUsageKind resolveTypeUsageKind(final HeaderInfo headerInfo,
-													  final Attribute<?, ?> valueAttribute,
+	private static TypeUsageKind resolveTypeUsageKind(final Attribute<?, ?> valueAttribute,
 													  final Relation<?, ?> valueRelation,
 													  final Concept<?> relationConcept)
 	{

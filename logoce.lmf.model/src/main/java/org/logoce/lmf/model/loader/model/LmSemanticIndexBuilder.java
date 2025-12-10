@@ -1,11 +1,6 @@
 package org.logoce.lmf.model.loader.model;
 
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Named;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.loader.linking.LinkNode;
 import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.loader.linking.feature.AttributeResolver;
@@ -327,8 +322,9 @@ public final class LmSemanticIndexBuilder
 					}
 
 					final var lmFeature = attrResolution.feature();
-					if (lmFeature != Model.Features.IMPORTS &&
-						lmFeature != Model.Features.METAMODELS)
+					final var featureName = lmFeature != null ? lmFeature.name() : null;
+					if (!"imports".equals(featureName) &&
+						!"metamodels".equals(featureName))
 					{
 						continue;
 					}
@@ -428,7 +424,7 @@ public final class LmSemanticIndexBuilder
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				attrResolution.feature() == Named.Features.NAME)
+				LMCoreModelDefinition.Features.Named.NAME == attrResolution.feature())
 			{
 				final var feature = attempt.feature();
 				if (feature != null && !feature.values().isEmpty())
@@ -544,8 +540,7 @@ public final class LmSemanticIndexBuilder
 		}
 	}
 
-	private static String resolveContainerPath(final LMObject object,
-											   final Map<LMObject, LinkNodeFull<?, PNode>> nodeByObject)
+	private static String resolveContainerPath(final LMObject object)
 	{
 		// Prefer the semantic containment chain (lmContainer) so that the
 		// container path is stable across documents and independent of the
@@ -609,15 +604,8 @@ public final class LmSemanticIndexBuilder
 			return null;
 		}
 
-		try
-		{
-			final Object value = named.get(Named.Features.NAME);
-			return value != null ? value.toString() : null;
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
+		final Object value = named.name();
+		return value != null ? value.toString() : null;
 	}
 
 	private static String[] resolveOwner(final Model model)
@@ -659,7 +647,7 @@ public final class LmSemanticIndexBuilder
 		}
 
 		final String[] owner = resolveOwner(model);
-		final String containerPath = resolveContainerPath(object, Map.of());
+		final String containerPath = resolveContainerPath(object);
 
 		final SymbolId id = new SymbolId(owner[0], owner[1], kind, name, containerPath);
 		symbolIds.put(object, id);

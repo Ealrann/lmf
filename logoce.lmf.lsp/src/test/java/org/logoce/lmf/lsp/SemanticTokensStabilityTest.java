@@ -12,7 +12,6 @@ import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,7 +23,6 @@ final class SemanticTokensStabilityTest
 	void headerKeywordSemanticTokenShouldCoverFullWordAfterEdit() throws Exception
 	{
 		final String uriString = "file:///workspace/Test.lm";
-		final URI uri = URI.create(uriString);
 
 		final String initialText = """
 			(MetaModel domain=test.model name=Test

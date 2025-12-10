@@ -8,8 +8,6 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class AliasImpl extends FeaturedObject implements Alias {
-  private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>().add(Alias.RFeatures.name, Alias::name).add(Alias.RFeatures.value, Alias::value).build();
-  private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>().build();
   private final String name;
   private final String value;
 
@@ -36,20 +34,29 @@ public final class AliasImpl extends FeaturedObject implements Alias {
 
   @Override
   protected FeatureSetter<Alias> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Alias> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Alias.FeatureIDs.NAME -> 0;
       case Alias.FeatureIDs.VALUE -> 1;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>(2, AliasImpl::featureIndexStatic).add(Alias.FeatureIDs.NAME, Alias::name).add(Alias.FeatureIDs.VALUE, Alias::value).build();
+    private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>(2, AliasImpl::featureIndexStatic).build();
   }
 }

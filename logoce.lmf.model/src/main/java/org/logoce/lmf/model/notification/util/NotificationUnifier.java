@@ -41,6 +41,7 @@ public final class NotificationUnifier
 					onAdd.accept(newList.get(i));
 				}
 			}
+			default -> {}
 		}
 	}
 
@@ -70,6 +71,7 @@ public final class NotificationUnifier
 					onRemove.accept(oldList.get(i));
 				}
 			}
+			default -> {}
 		}
 	}
 
@@ -101,6 +103,7 @@ public final class NotificationUnifier
 			case ADD_MANY -> onAdd.accept((List<LMObject>) notification.newValue());
 			case REMOVE -> onRemove.accept(List.of((LMObject) notification.oldValue()));
 			case REMOVE_MANY -> onRemove.accept((List<LMObject>) notification.oldValue());
+			default -> {}
 		}
 	}
 }

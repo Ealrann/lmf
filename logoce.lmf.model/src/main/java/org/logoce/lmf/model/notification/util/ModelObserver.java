@@ -94,8 +94,8 @@ public final class ModelObserver
 				if (deliver)
 				{
 					final var notif = feature.many()
-									  ? new RelationAddManyNotifiation(target, feature, List.of(value))
-									  : new RelationAddNotifiation(target, feature, value);
+									  ? new RelationAddManyNotifiation(target, feature.id(), List.of(value))
+									  : new RelationAddNotifiation(target, feature.id(), value);
 					ModelObserver.this.listener.accept(notif);
 				}
 			}
@@ -117,9 +117,9 @@ public final class ModelObserver
 				{
 					final var notif = feature.many()
 									  ? new RelationRemoveManyNotifiation(target,
-																		  feature,
+																		  feature.id(),
 																		  List.of(value))
-									  : new RelationRemoveNotifiation(target, feature, value);
+									  : new RelationRemoveNotifiation(target, feature.id(), value);
 					ModelObserver.this.listener.accept(notif);
 				}
 			}

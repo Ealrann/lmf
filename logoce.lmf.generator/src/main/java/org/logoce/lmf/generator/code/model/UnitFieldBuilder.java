@@ -20,7 +20,6 @@ public final class UnitFieldBuilder implements DefinitionFieldBuilder<Unit<?>>
 	{
 		final var name = input.name();
 		final var primitive = input.primitive();
-		final var primitiveName = primitive.name();
 		final var primitiveClass = GenUtils.resolvePrimitiveClass(primitive);
 		final var primitiveClassName = TypeName.get(primitiveClass);
 		final var typedUnit = TypeParameter.of(UNIT_TYPE, primitiveClassName.box());

@@ -3,7 +3,6 @@ package org.logoce.lmf.model.resource.transform;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.LmLoader;
 import org.logoce.lmf.model.util.ModelRegistry;
 
@@ -59,10 +58,6 @@ public class GroupTest
 							 .get(1);
 		final var carContainer = model.groups()
 									  .get(2);
-		final var genericOfContainer = container.generics()
-												.get(0);
-		final var cargoRelation = (Relation<?, ?>) container.features()
-															.get(0);
 
 		assertEquals(container,
 					 carContainer.includes()

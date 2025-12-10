@@ -19,8 +19,6 @@ import org.logoce.lmf.model.lang.impl.GroupImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GroupBuilder<T extends LMObject> implements Builder<T> {
-  private static final FeatureInserter<GroupBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder<?>>().add(Group.RFeatures.name, GroupBuilder::name).add(Group.RFeatures.concrete, GroupBuilder::concrete).add(Group.RFeatures.lmBuilder, GroupBuilder::_lmBuilder).build();
-  private static final RelationLazyInserter<GroupBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder<?>>().add(Group.RFeatures.includes, GroupBuilder::addInclude).add(Group.RFeatures.features, GroupBuilder::addFeature).add(Group.RFeatures.generics, GroupBuilder::addGeneric).add(Group.RFeatures.operations, GroupBuilder::addOperation).build();
   private String name;
   private boolean concrete;
   private final List<Supplier<Include<?>>> includes = new ArrayList<>();
@@ -120,12 +118,36 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case Group.FeatureIDs.NAME -> 0;
+      case Group.FeatureIDs.CONCRETE -> 1;
+      case Group.FeatureIDs.LM_BUILDER -> 2;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case Group.FeatureIDs.INCLUDES -> 0;
+      case Group.FeatureIDs.FEATURES -> 1;
+      case Group.FeatureIDs.GENERICS -> 2;
+      case Group.FeatureIDs.OPERATIONS -> 3;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<GroupBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder>(3, GroupBuilder::attributeIndex).add(Group.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Group.FeatureIDs.CONCRETE, (builder, value) -> builder.concrete((boolean) value)).add(Group.FeatureIDs.LM_BUILDER, (builder, value) -> builder._lmBuilder((BuilderSupplier<?>) value)).build();
+    private static final RelationLazyInserter<GroupBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder>(4, GroupBuilder::relationIndex).add(Group.FeatureIDs.INCLUDES, (builder, value) -> builder.addInclude((Supplier<Include<?>>) value)).add(Group.FeatureIDs.FEATURES, (builder, value) -> builder.addFeature((Supplier<Feature<?, ?>>) value)).add(Group.FeatureIDs.GENERICS, (builder, value) -> builder.addGeneric((Supplier<Generic<?>>) value)).add(Group.FeatureIDs.OPERATIONS, (builder, value) -> builder.addOperation((Supplier<Operation>) value)).build();
   }
 }

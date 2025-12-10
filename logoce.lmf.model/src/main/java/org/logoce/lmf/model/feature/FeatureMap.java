@@ -1,58 +1,42 @@
 package org.logoce.lmf.model.feature;
 
-import org.logoce.lmf.model.api.feature.RawFeature;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public final class FeatureMap<T>
 {
-	private final List<FeatureTuple<T, ?>> features;
+	private final T[] values;
+	private final FeatureIndexFunction indexFunction;
 
-	public FeatureMap(final List<FeatureTuple<T, ?>> features)
+	public FeatureMap(final T[] values, FeatureIndexFunction indexFunction)
 	{
-		this.features = List.copyOf(features);
+		this.values = values;
+		this.indexFunction = indexFunction;
 	}
 
-	public T get(final RawFeature<?, ?> feature)
+	public T get(final int id)
 	{
-		return getTuple(feature).value;
+		return values[indexFunction.index(id)];
 	}
-
-	@SuppressWarnings("unchecked")
-	public <F> FeatureTuple<T, F> getTuple(final RawFeature<?, F> feature)
-	{
-		for (int i = 0; i < features.size(); i++)
-		{
-			final var entry = features.get(i);
-			if (entry.feature == feature)
-			{
-				return (FeatureTuple<T, F>) entry;
-			}
-		}
-		throw new IllegalArgumentException("This Feature doesn't belong to this FeatureMap");
-	}
-
-	public record FeatureTuple<T, F>(RawFeature<?, F> feature, T value)
-	{}
 
 	public static final class Builder<T>
 	{
-		private final List<FeatureTuple<T, ?>> features = new ArrayList<>();
+		private final T[] values;
+		private final FeatureIndexFunction indexFunction;
 
-		public Builder()
+		@SuppressWarnings("unchecked")
+		public Builder(int featureCount, final FeatureIndexFunction indexFunction)
 		{
+			this.values = (T[]) new Object[featureCount];
+			this.indexFunction = indexFunction;
+		}
+
+		public Builder<T> add(int featureID, T object)
+		{
+			values[indexFunction.index(featureID)] = object;
+			return this;
 		}
 
 		public FeatureMap<T> build()
 		{
-			return new FeatureMap<>(List.copyOf(features));
-		}
-
-		public Builder<T> add(final RawFeature<?, ?> feature, final T value)
-		{
-			features.add(new FeatureTuple<>(feature, value));
-			return this;
+			return new FeatureMap<>(values, indexFunction);
 		}
 	}
 }

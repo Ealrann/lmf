@@ -30,7 +30,6 @@ public final class BuilderFeatureUtil
 	public static final AttributePushMethodBuilder ATTRIBUTE_PUSH_BUILDER = new AttributePushMethodBuilder();
 	public static final RelationPushMethodBuilder RELATION_PUSH_BUILDER = new RelationPushMethodBuilder();
 
-	@SuppressWarnings("unchecked")
 	public static CodeInstaller<FeatureResolution> buildFeatureInstallers(final TypeSpec.Builder classBuilder,
 																		  final TypeName builderType,
 																		  final Group<?> ownerGroup)
@@ -54,19 +53,20 @@ public final class BuilderFeatureUtil
 													  AttributeManyListMethodBuilder::isManyAttribute));
 	}
 
-	@SuppressWarnings("unchecked")
 	public static CodeInstaller<List<FeatureResolution>> buildTypeInstallers(final TypeSpec.Builder classBuilder,
 																			 final Group<?> group)
 	{
-		final var attributeMapBuilder = new AttributeMapFieldBuilder(group);
-		final var relationMapBuilder = new RelationMapFieldBuilder(group);
+		final var inserterMapHolderBuilder = new BuilderInserterMapHolderBuilder(group);
+		final var attributeIndexBuilder = new AttributeIndexMethodBuilder(group);
+		final var relationIndexBuilder = new RelationIndexMethodBuilder(group);
 		final var buildMethodBuilder = new BuildMethodBuilder(group);
 
 		return CodeInstaller.compose(CodeInstaller.of(buildMethodBuilder, classBuilder::addMethod),
-									 CodeInstaller.of(ATTRIBUTE_PUSH_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(RELATION_PUSH_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(attributeMapBuilder, classBuilder::addField),
-									 CodeInstaller.of(relationMapBuilder, classBuilder::addField));
+				CodeInstaller.of(ATTRIBUTE_PUSH_BUILDER, classBuilder::addMethod),
+				CodeInstaller.of(RELATION_PUSH_BUILDER, classBuilder::addMethod),
+				CodeInstaller.of(attributeIndexBuilder, classBuilder::addMethod),
+				CodeInstaller.of(relationIndexBuilder, classBuilder::addMethod),
+				CodeInstaller.of(inserterMapHolderBuilder, classBuilder::addType));
 	}
 
 	private static FeatureFieldBuilder fieldBuilder(final Group<?> ownerGroup)
@@ -148,7 +148,7 @@ public final class BuilderFeatureUtil
 		return !normalParamType.equals(rawParamType);
 	}
 
-	private static TypeName rawSetterParameterType(final FeatureResolution resolution, final Group<?> ownerGroup)
+	public static TypeName rawSetterParameterType(final FeatureResolution resolution, final Group<?> ownerGroup)
 	{
 		final var baseType = resolution.rawSingleTypeFor(ownerGroup);
 		final var feature = resolution.feature();
@@ -190,11 +190,6 @@ public final class BuilderFeatureUtil
 		final var feature = resolution.feature();
 		final var paramName = parameter.parameterName();
 		return CodeBlock.of("this.$N.add($N)", feature.name(), paramName);
-	}
-
-	private static CodeBlock assignPatternCast(final FeatureParameter parameter)
-	{
-		return assignPatternCast(parameter, null);
 	}
 
 	private static CodeBlock assignPatternCast(final FeatureParameter parameter, final Group<?> ownerGroup)

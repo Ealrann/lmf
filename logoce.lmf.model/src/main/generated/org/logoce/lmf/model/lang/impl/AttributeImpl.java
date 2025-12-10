@@ -1,7 +1,7 @@
 package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
-import org.logoce.lmf.model.api.feature.RawFeature;
+import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
@@ -13,32 +13,27 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
-  private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>().add(Attribute.RFeatures.name, Attribute::name).add(Attribute.RFeatures.immutable, Attribute::immutable).add(Attribute.RFeatures.id, Attribute::id).add(Attribute.RFeatures.many, Attribute::many).add(Attribute.RFeatures.mandatory, Attribute::mandatory).add(Attribute.RFeatures.parameters, Attribute::parameters).add(Attribute.RFeatures.rawFeature, Attribute::rawFeature).add(Attribute.RFeatures.datatype, Attribute::datatype).add(Attribute.RFeatures.defaultValue, Attribute::defaultValue).build();
-  private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>().build();
   private final String name;
   private final boolean immutable;
   private final int id;
   private final boolean many;
   private final boolean mandatory;
   private final List<GenericParameter> parameters;
-  private final RawFeature<UnaryType, EffectiveType> rawFeature;
-  private final Datatype<UnaryType> datatype;
+  private final Supplier<Datatype<UnaryType>> datatype;
   private final String defaultValue;
 
   public AttributeImpl(final String name, final boolean immutable, final int id, final boolean many,
       final boolean mandatory, final List<GenericParameter> parameters,
-      final RawFeature<UnaryType, EffectiveType> rawFeature, final Datatype<UnaryType> datatype,
-      final String defaultValue) {
+      final Supplier<Datatype<UnaryType>> datatype, final String defaultValue) {
     this.name = name;
     this.immutable = immutable;
     this.id = id;
     this.many = many;
     this.mandatory = mandatory;
     this.parameters = List.copyOf(parameters);
-    this.rawFeature = rawFeature;
     this.datatype = datatype;
     this.defaultValue = defaultValue;
-    setContainer(parameters, Feature.RFeatures.parameters);
+    setContainer(parameters, Feature.FeatureIDs.PARAMETERS);
     eDeliver(true);
   }
 
@@ -73,13 +68,8 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
   }
 
   @Override
-  public RawFeature<UnaryType, EffectiveType> rawFeature() {
-    return rawFeature;
-  }
-
-  @Override
   public Datatype<UnaryType> datatype() {
-    return datatype;
+    return datatype.get();
   }
 
   @Override
@@ -94,16 +84,15 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
 
   @Override
   protected FeatureSetter<Attribute<?, ?>> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Attribute<?, ?>> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Attribute.FeatureIDs.NAME -> 0;
       case Attribute.FeatureIDs.IMMUTABLE -> 1;
@@ -111,10 +100,19 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
       case Attribute.FeatureIDs.MANY -> 3;
       case Attribute.FeatureIDs.MANDATORY -> 4;
       case Attribute.FeatureIDs.PARAMETERS -> 5;
-      case Attribute.FeatureIDs.RAW_FEATURE -> 6;
-      case Attribute.FeatureIDs.DATATYPE -> 7;
-      case Attribute.FeatureIDs.DEFAULT_VALUE -> 8;
+      case Attribute.FeatureIDs.DATATYPE -> 6;
+      case Attribute.FeatureIDs.DEFAULT_VALUE -> 7;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>(8, AttributeImpl::featureIndexStatic).add(Attribute.FeatureIDs.NAME, Attribute::name).add(Attribute.FeatureIDs.IMMUTABLE, Attribute::immutable).add(Attribute.FeatureIDs.ID, Attribute::id).add(Attribute.FeatureIDs.MANY, Attribute::many).add(Attribute.FeatureIDs.MANDATORY, Attribute::mandatory).add(Attribute.FeatureIDs.PARAMETERS, Attribute::parameters).add(Attribute.FeatureIDs.DATATYPE, Attribute::datatype).add(Attribute.FeatureIDs.DEFAULT_VALUE, Attribute::defaultValue).build();
+    private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>(8, AttributeImpl::featureIndexStatic).build();
   }
 }

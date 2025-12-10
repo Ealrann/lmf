@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="project-rules"
+         xmlns="https://pmd.github.io/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://pmd.github.io/ruleset/2.0.0
+                             https://pmd.github.io/ruleset_2_0_0.xsd">
+
+    <description>Project PMD rules</description>
+
+    <!-- Unused imports (PMD 7) -->
+    <rule ref="category/java/codestyle.xml/UnnecessaryImport"/>
+
+    <!-- Unused locals (still valid in PMD 7) -->
+    <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
+
+    <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
+    <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
+    <rule ref="category/java/bestpractices.xml/UnusedFormalParameter"/>
+    <rule ref="category/java/bestpractices.xml/NonExhaustiveSwitch"/>
+    <rule ref="category/java/bestpractices.xml/MissingOverride"/>
+
+</ruleset>

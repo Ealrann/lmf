@@ -9,7 +9,6 @@ import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.model.api.feature.INotificationFeature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMObject;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -40,14 +39,9 @@ public class NotificationFeaturesGenerator
 				featureInterfaceBuilder.addSuperinterface(notificationFeature);
 			}
 		}
-		else if (group.name().equals("LMObject"))
-		{
-			final var notificationFeature = ClassName.get(INotificationFeature.class);
-			featureInterfaceBuilder.addSuperinterface(notificationFeature);
-		}
 		else
 		{
-			final var notificationFeature = ClassName.get(LMObject.RFeatures.class);
+			final var notificationFeature = ClassName.get(INotificationFeature.class);
 			featureInterfaceBuilder.addSuperinterface(notificationFeature);
 		}
 

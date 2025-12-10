@@ -16,8 +16,6 @@ import org.logoce.lmf.model.lang.impl.GenericParameterImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericParameterBuilder implements Builder {
-  private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>().add(GenericParameter.RFeatures.wildcard, GenericParameterBuilder::wildcard).add(GenericParameter.RFeatures.wildcardBoundType, GenericParameterBuilder::wildcardBoundType).build();
-  private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>().add(GenericParameter.RFeatures.type, GenericParameterBuilder::type).add(GenericParameter.RFeatures.parameters, GenericParameterBuilder::addParameter).build();
   private boolean wildcard;
   private BoundType wildcardBoundType;
   private Supplier<Type<?>> type;
@@ -66,12 +64,33 @@ public final class GenericParameterBuilder implements Builder {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case GenericParameter.FeatureIDs.WILDCARD -> 0;
+      case GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE -> 1;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case GenericParameter.FeatureIDs.TYPE -> 0;
+      case GenericParameter.FeatureIDs.PARAMETERS -> 1;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<GenericParameterBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericParameterBuilder>(2, GenericParameterBuilder::attributeIndex).add(GenericParameter.FeatureIDs.WILDCARD, (builder, value) -> builder.wildcard((boolean) value)).add(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE, (builder, value) -> builder.wildcardBoundType((BoundType) value)).build();
+    private static final RelationLazyInserter<GenericParameterBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericParameterBuilder>(2, GenericParameterBuilder::relationIndex).add(GenericParameter.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(GenericParameter.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
   }
 }

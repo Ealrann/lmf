@@ -14,8 +14,6 @@ import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class MetaModelImpl extends FeaturedObject implements MetaModel {
-  private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>().add(MetaModel.RFeatures.name, MetaModel::name).add(MetaModel.RFeatures.domain, MetaModel::domain).add(MetaModel.RFeatures.imports, MetaModel::imports).add(MetaModel.RFeatures.metamodels, MetaModel::metamodels).add(MetaModel.RFeatures.groups, MetaModel::groups).add(MetaModel.RFeatures.enums, MetaModel::enums).add(MetaModel.RFeatures.units, MetaModel::units).add(MetaModel.RFeatures.aliases, MetaModel::aliases).add(MetaModel.RFeatures.javaWrappers, MetaModel::javaWrappers).add(MetaModel.RFeatures.lmPackage, MetaModel::lmPackage).add(MetaModel.RFeatures.genNamePackage, MetaModel::genNamePackage).add(MetaModel.RFeatures.extraPackage, MetaModel::extraPackage).build();
-  private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>().build();
   private final String name;
   private final String domain;
   private final List<String> imports;
@@ -45,11 +43,11 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
     this.lmPackage = lmPackage;
     this.genNamePackage = genNamePackage;
     this.extraPackage = extraPackage;
-    setContainer(groups, MetaModel.RFeatures.groups);
-    setContainer(enums, MetaModel.RFeatures.enums);
-    setContainer(units, MetaModel.RFeatures.units);
-    setContainer(aliases, MetaModel.RFeatures.aliases);
-    setContainer(javaWrappers, MetaModel.RFeatures.javaWrappers);
+    setContainer(groups, MetaModel.FeatureIDs.GROUPS);
+    setContainer(enums, MetaModel.FeatureIDs.ENUMS);
+    setContainer(units, MetaModel.FeatureIDs.UNITS);
+    setContainer(aliases, MetaModel.FeatureIDs.ALIASES);
+    setContainer(javaWrappers, MetaModel.FeatureIDs.JAVA_WRAPPERS);
     eDeliver(true);
   }
 
@@ -120,16 +118,15 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
 
   @Override
   protected FeatureSetter<MetaModel> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<MetaModel> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case MetaModel.FeatureIDs.NAME -> 0;
       case MetaModel.FeatureIDs.DOMAIN -> 1;
@@ -145,5 +142,15 @@ public final class MetaModelImpl extends FeaturedObject implements MetaModel {
       case MetaModel.FeatureIDs.EXTRA_PACKAGE -> 11;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>(12, MetaModelImpl::featureIndexStatic).add(MetaModel.FeatureIDs.NAME, MetaModel::name).add(MetaModel.FeatureIDs.DOMAIN, MetaModel::domain).add(MetaModel.FeatureIDs.IMPORTS, MetaModel::imports).add(MetaModel.FeatureIDs.METAMODELS, MetaModel::metamodels).add(MetaModel.FeatureIDs.GROUPS, MetaModel::groups).add(MetaModel.FeatureIDs.ENUMS, MetaModel::enums).add(MetaModel.FeatureIDs.UNITS, MetaModel::units).add(MetaModel.FeatureIDs.ALIASES, MetaModel::aliases).add(MetaModel.FeatureIDs.JAVA_WRAPPERS, MetaModel::javaWrappers).add(MetaModel.FeatureIDs.LM_PACKAGE, MetaModel::lmPackage).add(MetaModel.FeatureIDs.GEN_NAME_PACKAGE, MetaModel::genNamePackage).add(MetaModel.FeatureIDs.EXTRA_PACKAGE, MetaModel::extraPackage).build();
+    private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>(12, MetaModelImpl::featureIndexStatic).build();
   }
 }

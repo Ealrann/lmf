@@ -3,7 +3,6 @@ package org.logoce.lmf.model.lang.builder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import org.logoce.lmf.model.api.feature.RawFeature;
 import org.logoce.lmf.model.feature.FeatureInserter;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Attribute;
@@ -16,15 +15,12 @@ import org.logoce.lmf.model.lang.impl.RelationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Builder<UnaryType, EffectiveType> {
-  private static final FeatureInserter<RelationBuilder<?, ?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder<?, ?>>().add(Relation.RFeatures.name, RelationBuilder::name).add(Relation.RFeatures.immutable, RelationBuilder::immutable).add(Relation.RFeatures.id, RelationBuilder::id).add(Relation.RFeatures.many, RelationBuilder::many).add(Relation.RFeatures.mandatory, RelationBuilder::mandatory).add(Relation.RFeatures.rawFeature, RelationBuilder::_rawFeature).add(Relation.RFeatures.lazy, RelationBuilder::lazy).add(Relation.RFeatures.contains, RelationBuilder::contains).build();
-  private static final RelationLazyInserter<RelationBuilder<?, ?>> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder<?, ?>>().add(Relation.RFeatures.parameters, RelationBuilder::addParameter).add(Relation.RFeatures.concept, RelationBuilder::_concept).build();
   private String name;
   private boolean immutable;
   private int id;
   private boolean many;
   private boolean mandatory;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
-  private RawFeature<UnaryType, EffectiveType> rawFeature;
   private Supplier<Concept<UnaryType>> concept;
   private boolean lazy;
   private boolean contains;
@@ -77,22 +73,6 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> rawFeature(
-      RawFeature<UnaryType, EffectiveType> rawFeature) {
-    this.rawFeature = rawFeature;
-    return this;
-  }
-
-  @SuppressWarnings({
-      "unchecked",
-      "rawtypes"
-  })
-  private RelationBuilder<UnaryType, EffectiveType> _rawFeature(final RawFeature<?, ?> rawFeature) {
-    this.rawFeature = (RawFeature<UnaryType, EffectiveType>) rawFeature;
-    return this;
-  }
-
-  @Override
   public RelationBuilder<UnaryType, EffectiveType> concept(Supplier<Concept<UnaryType>> concept) {
     this.concept = concept;
     return this;
@@ -122,19 +102,45 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   @Override
   public Relation<UnaryType, EffectiveType> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, id, many, mandatory, builtParameters, rawFeature, concept, lazy, contains);
+    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, id, many, mandatory, builtParameters, concept, lazy, contains);
     return built;
   }
 
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case Relation.FeatureIDs.NAME -> 0;
+      case Relation.FeatureIDs.IMMUTABLE -> 1;
+      case Relation.FeatureIDs.ID -> 2;
+      case Relation.FeatureIDs.MANY -> 3;
+      case Relation.FeatureIDs.MANDATORY -> 4;
+      case Relation.FeatureIDs.LAZY -> 5;
+      case Relation.FeatureIDs.CONTAINS -> 6;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case Relation.FeatureIDs.PARAMETERS -> 0;
+      case Relation.FeatureIDs.CONCEPT -> 1;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<RelationBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<RelationBuilder>(7, RelationBuilder::attributeIndex).add(Relation.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Relation.FeatureIDs.IMMUTABLE, (builder, value) -> builder.immutable((boolean) value)).add(Relation.FeatureIDs.ID, (builder, value) -> builder.id((int) value)).add(Relation.FeatureIDs.MANY, (builder, value) -> builder.many((boolean) value)).add(Relation.FeatureIDs.MANDATORY, (builder, value) -> builder.mandatory((boolean) value)).add(Relation.FeatureIDs.LAZY, (builder, value) -> builder.lazy((boolean) value)).add(Relation.FeatureIDs.CONTAINS, (builder, value) -> builder.contains((boolean) value)).build();
+    private static final RelationLazyInserter<RelationBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<RelationBuilder>(2, RelationBuilder::relationIndex).add(Relation.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).add(Relation.FeatureIDs.CONCEPT, (builder, value) -> builder._concept((Supplier<Concept<?>>) value)).build();
   }
 }

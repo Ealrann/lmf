@@ -107,8 +107,17 @@ public final class ModelUtil
 	{
 		if (relation.many())
 		{
-			final var list = (List<T>) element.get(relation);
-			return list.stream();
+			final var value = element.get(relation);
+			if (!(value instanceof List<?> list))
+			{
+				throw new IllegalStateException(
+						"Expected List value for relation '" + relation.name() + "' on group '" +
+						element.lmGroup().name() + "', but got: " +
+						(value == null ? "null" : value.getClass().getName()));
+			}
+			@SuppressWarnings("unchecked")
+			final var typedList = (List<T>) list;
+			return typedList.stream();
 		}
 		else
 		{

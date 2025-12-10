@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 public final class GenUtils
 {
-	public static final boolean USE_RAWFEATURE_FOR_MODEL = true;
 	public static final ClassName WILDCARD = ClassName.get("", "?");
 
 	public static TypeName parameterize(final ClassName className, final List<? extends TypeName> parameters)

@@ -97,35 +97,4 @@ public final class OperationGenerationTest
 						.addGroup(() -> group)
 						.build();
 	}
-
-	private static MetaModel buildMetaModelWithInheritedOperation()
-	{
-		final var operation = Operation.builder()
-									   .name("ping")
-									   .content("System.out.println(\"base\");\n")
-									   .build();
-
-		final Group<LMObject> baseGroup = Group.<LMObject>builder()
-											   .name("Base")
-											   .concrete(false)
-											   .addOperation(() -> operation)
-											   .build();
-
-		final var include = Include.<LMObject>builder()
-								   .group(() -> baseGroup)
-								   .build();
-
-		final Group<LMObject> derivedGroup = Group.<LMObject>builder()
-												 .name("Derived")
-												 .concrete(true)
-												 .addInclude(() -> include)
-												 .build();
-
-		return MetaModel.builder()
-						.name("OpsInheritanceModel")
-						.domain("test.operations.inheritance")
-						.addGroup(() -> baseGroup)
-						.addGroup(() -> derivedGroup)
-						.build();
-	}
 }

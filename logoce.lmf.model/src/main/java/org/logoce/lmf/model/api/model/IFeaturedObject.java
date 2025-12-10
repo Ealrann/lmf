@@ -25,6 +25,8 @@ public interface IFeaturedObject extends ILilyEObject
 	void listenStruture(Consumer<Notification> listener);
 	void sulkStructure(Consumer<Notification> listener);
 
+	int featureIndex(final int featureId);
+
 	interface Builder<T extends LMObject>
 	{
 		T build();

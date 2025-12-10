@@ -32,6 +32,11 @@ public class ImplementationCodeUtil
 		{
 			if (feature.many())
 			{
+				if (!feature.immutable())
+				{
+					throw new IllegalStateException("Cannot generate getter for lazy, many and mutable feature '"
+													+ feature.name() + '\'');
+				}
 				return List.of(CodeBlock.of("return $T.collectSuppliers($N)", ConstantTypes.BUILD_UTILS, name));
 			}
 			else

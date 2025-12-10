@@ -17,8 +17,6 @@ import org.logoce.lmf.model.lang.impl.GenericExtensionImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
 public final class GenericExtensionBuilder implements Builder {
-  private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.RFeatures.boundType, GenericExtensionBuilder::boundType).build();
-  private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>().add(GenericExtension.RFeatures.type, GenericExtensionBuilder::type).add(GenericExtension.RFeatures.parameters, GenericExtensionBuilder::addParameter).build();
   private Supplier<Type<?>> type = () -> null;
   private BoundType boundType;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
@@ -60,12 +58,32 @@ public final class GenericExtensionBuilder implements Builder {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case GenericExtension.FeatureIDs.BOUND_TYPE -> 0;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case GenericExtension.FeatureIDs.TYPE -> 0;
+      case GenericExtension.FeatureIDs.PARAMETERS -> 1;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<GenericExtensionBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericExtensionBuilder>(1, GenericExtensionBuilder::attributeIndex).add(GenericExtension.FeatureIDs.BOUND_TYPE, (builder, value) -> builder.boundType((BoundType) value)).build();
+    private static final RelationLazyInserter<GenericExtensionBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericExtensionBuilder>(2, GenericExtensionBuilder::relationIndex).add(GenericExtension.FeatureIDs.TYPE, (builder, value) -> builder.type((Supplier<Type<?>>) value)).add(GenericExtension.FeatureIDs.PARAMETERS, (builder, value) -> builder.addParameter((Supplier<GenericParameter>) value)).build();
   }
 }

@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 public final class EMFListenerMap implements IEMFNotifier
 {
@@ -55,55 +56,87 @@ public final class EMFListenerMap implements IEMFNotifier
 	@Override
 	public void listen(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
-		listenInternal(listener, features);
+		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
+	}
+
+	@Override
+	public void listen(final Consumer<Notification> listener, final int... featureIDs)
+	{
+		listenInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
 	}
 
 	@Override
 	public void listenNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
-		listenInternal(listener, features);
+		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
 
-	private void listenInternal(Object listener, List<Feature<?, ?>> features)
+	@Override
+	public void listenNoParam(final Runnable listener, final int... featureIDs)
+	{
+		listenInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
+	}
+
+	private void listenInternal(Object listener, IntStream featureIds)
 	{
 		if (listenerMap == null)
 		{
 			initNotificationMap();
 		}
 
-		for (final var feature : features)
-		{
-			registerNotificationListener(listener, feature);
-		}
+		featureIds.forEach(f -> registerNotificationListener(listener, f));
 	}
 
 	@Override
 	public void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
-		sulkInternal(listener, features);
+		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
+	}
+
+	@Override
+	public void sulk(final Consumer<Notification> listener, final int... featureIDs)
+	{
+		sulkInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
 	}
 
 	@Override
 	public void sulkNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
-		sulkInternal(listener, features);
+		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
 
-	private void sulkInternal(Object listener, List<Feature<?, ?>> features)
+	@Override
+	public void sulkNoParam(final Runnable listener, final int... featureIDs)
+	{
+		sulkInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
+	}
+
+	private void sulkInternal(Object listener, IntStream featureIds)
 	{
 		if (listenerMap != null)
 		{
-			for (final var feature : features)
-			{
-				final int featureId = feature.id();
-				final int featureIdx = indexFunction.index(featureId);
-				final var list = listenerMap[featureIdx];
-				if (list != null)
-				{
-					list.remove(listener);
-				}
-			}
+			featureIds.forEach(f -> unregisterNotificationListener(listener, f));
 		}
+	}
+
+	private void unregisterNotificationListener(final Object listener, final int featureIdx)
+	{
+		final var list = listenerMap[featureIdx];
+		if (list != null)
+		{
+			list.remove(listener);
+		}
+	}
+
+	private int featureToIndex(Feature<?, ?> feature)
+	{
+		final int featureId = feature.id();
+		return IDtoIndex(featureId);
+	}
+
+	private int IDtoIndex(int id)
+	{
+		return indexFunction.index(id);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -112,10 +145,8 @@ public final class EMFListenerMap implements IEMFNotifier
 		listenerMap = new Deque[featureCount];
 	}
 
-	private void registerNotificationListener(final Object listener, final Feature<?, ?> feature)
+	private void registerNotificationListener(final Object listener, final int featureIdx)
 	{
-		final int featureId = feature.id();
-		final int featureIdx = indexFunction.index(featureId);
 		var list = listenerMap[featureIdx];
 		if (list == null)
 		{

@@ -12,8 +12,6 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.GenericImpl;
 
 public final class GenericBuilder<T> implements Builder<T> {
-  private static final FeatureInserter<GenericBuilder<?>> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder<?>>().add(Generic.RFeatures.name, GenericBuilder::name).build();
-  private static final RelationLazyInserter<GenericBuilder<?>> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder<?>>().add(Generic.RFeatures.extension, GenericBuilder::extension).build();
   private String name;
   private Supplier<GenericExtension> extension = () -> null;
 
@@ -41,12 +39,31 @@ public final class GenericBuilder<T> implements Builder<T> {
   @Override
   public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
       final AttributeType value) {
-    ATTRIBUTE_INSERTER.push(this, attribute.rawFeature(), value);
+    Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
   public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
       final Supplier<RelationType> supplier) {
-    RELATION_INSERTER.push(this, relation.rawFeature(), supplier);
+    Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
+  }
+
+  private static int attributeIndex(final int featureId) {
+    return switch (featureId) {
+      case Generic.FeatureIDs.NAME -> 0;
+      default -> throw new IllegalArgumentException("Unknown attribute featureId: " + featureId);
+    };
+  }
+
+  private static int relationIndex(final int featureId) {
+    return switch (featureId) {
+      case Generic.FeatureIDs.EXTENSION -> 0;
+      default -> throw new IllegalArgumentException("Unknown relation featureId: " + featureId);
+    };
+  }
+
+  private static final class Inserters {
+    private static final FeatureInserter<GenericBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GenericBuilder>(1, GenericBuilder::attributeIndex).add(Generic.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).build();
+    private static final RelationLazyInserter<GenericBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GenericBuilder>(1, GenericBuilder::relationIndex).add(Generic.FeatureIDs.EXTENSION, (builder, value) -> builder.extension((Supplier<GenericExtension>) value)).build();
   }
 }

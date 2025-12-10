@@ -38,9 +38,21 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
+	public void listen(final Consumer<Notification> listener, final int... featureIDs)
+	{
+		listenerMap.listen(listener, featureIDs);
+	}
+
+	@Override
 	public final void listen(Consumer<Notification> listener, List<Feature<?, ?>> features)
 	{
 		listenerMap.listen(listener, features);
+	}
+
+	@Override
+	public void sulk(final Consumer<Notification> listener, final int... featureIDs)
+	{
+		listenerMap.sulk(listener, featureIDs);
 	}
 
 	@Override
@@ -50,9 +62,21 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
+	public void listenNoParam(Runnable listener, final int... featureIDs)
+	{
+		listenerMap.listenNoParam(listener, featureIDs);
+	}
+
+	@Override
 	public final void listenNoParam(Runnable listener, List<Feature<?, ?>> features)
 	{
 		listenerMap.listenNoParam(listener, features);
+	}
+
+	@Override
+	public void sulkNoParam(final Runnable listener, final int... featureIDs)
+	{
+		listenerMap.sulkNoParam(listener, featureIDs);
 	}
 
 	@Override

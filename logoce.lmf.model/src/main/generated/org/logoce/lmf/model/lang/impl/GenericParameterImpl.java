@@ -12,8 +12,6 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericParameterImpl extends FeaturedObject implements GenericParameter {
-  private static final FeatureGetter<GenericParameter> GET_MAP = new FeatureGetter.Builder<GenericParameter>().add(GenericParameter.RFeatures.wildcard, GenericParameter::wildcard).add(GenericParameter.RFeatures.wildcardBoundType, GenericParameter::wildcardBoundType).add(GenericParameter.RFeatures.type, GenericParameter::type).add(GenericParameter.RFeatures.parameters, GenericParameter::parameters).build();
-  private static final FeatureSetter<GenericParameter> SET_MAP = new FeatureSetter.Builder<GenericParameter>().build();
   private final boolean wildcard;
   private final BoundType wildcardBoundType;
   private final Supplier<Type<?>> type;
@@ -25,7 +23,7 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
     this.wildcardBoundType = wildcardBoundType;
     this.type = type;
     this.parameters = List.copyOf(parameters);
-    setContainer(parameters, GenericParameter.RFeatures.parameters);
+    setContainer(parameters, GenericParameter.FeatureIDs.PARAMETERS);
     eDeliver(true);
   }
 
@@ -56,16 +54,15 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
 
   @Override
   protected FeatureSetter<GenericParameter> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<GenericParameter> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case GenericParameter.FeatureIDs.WILDCARD -> 0;
       case GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE -> 1;
@@ -73,5 +70,15 @@ public final class GenericParameterImpl extends FeaturedObject implements Generi
       case GenericParameter.FeatureIDs.PARAMETERS -> 3;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<GenericParameter> GET_MAP = new FeatureGetter.Builder<GenericParameter>(4, GenericParameterImpl::featureIndexStatic).add(GenericParameter.FeatureIDs.WILDCARD, GenericParameter::wildcard).add(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE, GenericParameter::wildcardBoundType).add(GenericParameter.FeatureIDs.TYPE, GenericParameter::type).add(GenericParameter.FeatureIDs.PARAMETERS, GenericParameter::parameters).build();
+    private static final FeatureSetter<GenericParameter> SET_MAP = new FeatureSetter.Builder<GenericParameter>(4, GenericParameterImpl::featureIndexStatic).build();
   }
 }

@@ -419,12 +419,4 @@ final class GroupFeatureCompletionProvider
 		item.setDetail(detail);
 		items.add(item);
 	}
-
-	private static void addSnippetCompletion(final String snippet,
-											 final String detail,
-											 final List<CompletionItem> items,
-											 final Set<String> seenLabels)
-	{
-		addSnippetCompletion(snippet, snippet, detail, items, seenLabels);
-	}
 }

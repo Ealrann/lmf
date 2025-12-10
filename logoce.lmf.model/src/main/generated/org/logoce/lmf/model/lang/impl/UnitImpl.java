@@ -9,8 +9,6 @@ import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
-  private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>().add(Unit.RFeatures.name, Unit::name).add(Unit.RFeatures.matcher, Unit::matcher).add(Unit.RFeatures.defaultValue, Unit::defaultValue).add(Unit.RFeatures.primitive, Unit::primitive).add(Unit.RFeatures.extractor, Unit::extractor).build();
-  private static final FeatureSetter<Unit<?>> SET_MAP = new FeatureSetter.Builder<Unit<?>>().build();
   private final String name;
   private final String matcher;
   private final String defaultValue;
@@ -59,16 +57,15 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
 
   @Override
   protected FeatureSetter<Unit<?>> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Unit<?>> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Unit.FeatureIDs.NAME -> 0;
       case Unit.FeatureIDs.MATCHER -> 1;
@@ -77,5 +74,15 @@ public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
       case Unit.FeatureIDs.EXTRACTOR -> 4;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Unit<?>> GET_MAP = new FeatureGetter.Builder<Unit<?>>(5, UnitImpl::featureIndexStatic).add(Unit.FeatureIDs.NAME, Unit::name).add(Unit.FeatureIDs.MATCHER, Unit::matcher).add(Unit.FeatureIDs.DEFAULT_VALUE, Unit::defaultValue).add(Unit.FeatureIDs.PRIMITIVE, Unit::primitive).add(Unit.FeatureIDs.EXTRACTOR, Unit::extractor).build();
+    private static final FeatureSetter<Unit<?>> SET_MAP = new FeatureSetter.Builder<Unit<?>>(5, UnitImpl::featureIndexStatic).build();
   }
 }

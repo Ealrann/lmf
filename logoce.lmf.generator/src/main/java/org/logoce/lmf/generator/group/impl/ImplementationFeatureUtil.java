@@ -53,15 +53,13 @@ public final class ImplementationFeatureUtil
 	public static CodeInstaller<Group<?>> buildTypeInstallers(final GroupInterfaceType interfaceGroupType,
 															  final TypeSpec.Builder classBuilder)
 	{
-		final var getterMapFieldBuilder = new GetMapFieldBuilder(interfaceGroupType);
-		final var setterMapFieldBuilder = new SetMapFieldBuilder(interfaceGroupType);
+		final var mapHolderBuilder = new GetterSetterMapHolderBuilder(interfaceGroupType);
 
 		return CodeInstaller.compose(CodeInstaller.of(LM_GROUP_METHOD_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(SETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(GETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
-									 CodeInstaller.of(getterMapFieldBuilder, classBuilder::addField),
-									 CodeInstaller.of(setterMapFieldBuilder, classBuilder::addField),
-									 CodeInstaller.of(CONSTRUCTOR_BUILDER, classBuilder::addMethod));
+				CodeInstaller.of(SETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
+				CodeInstaller.of(GETTERMAP_METHOD_BUILDER, classBuilder::addMethod),
+				CodeInstaller.of(mapHolderBuilder, classBuilder::addType),
+				CodeInstaller.of(CONSTRUCTOR_BUILDER, classBuilder::addMethod));
 	}
 
 	private static boolean setterPredicate(final FeatureResolution f)
@@ -88,12 +86,16 @@ public final class ImplementationFeatureUtil
 
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var groupType = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		final var constantName = GenUtils.toConstantCase(feature.name());
+		final var isRelation = feature instanceof Relation<?, ?>;
+		final var isContainment = feature instanceof Relation<?, ?> relation && relation.contains();
 
-		return Optional.of(CodeBlock.of("newObservableList($T.Features.$N)",
-										groupClass,
-										constantName));
+		return Optional.of(CodeBlock.of("newObservableList($T.FeatureIDs.$N, $L, $L)",
+										groupType,
+										constantName,
+										isRelation,
+										isContainment));
 	}
 
 	private static ConstructorBuilder parameterBuilder()
@@ -130,39 +132,37 @@ public final class ImplementationFeatureUtil
 
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var domainType = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var groupType = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		final var constantName = GenUtils.toConstantCase(feature.name());
-		final var rawFeatureExpr = CodeBlock.of("$T.RFeatures.$N", domainType, feature.name());
+		final var featureIdExpr = CodeBlock.of("$T.FeatureIDs.$N", groupType, constantName);
 
 		final var oldValue = CodeBlock.of("final var oldValue = this.$N", feature.name());
 		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();
 		if (containment)
 		{
-			final var setContainer = containmentSetStatement(rawFeatureExpr, paramName);
+			final var setContainer = containmentSetStatement(featureIdExpr, paramName);
 			return List.of(oldValue,
 						   assignment,
 						   setContainer,
-						   CodeBlock.of("eNotify(new $T(this, $T.Features.$N, $N, oldValue))",
+						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
 										SET_NOTIFICATION_TYPE,
-										domainType,
-										constantName,
+										featureIdExpr,
 										paramName));
 		}
 		else
 		{
 			return List.of(oldValue,
 						   assignment,
-						   CodeBlock.of("eNotify(new $T(this, $T.Features.$N, $N, oldValue))",
+						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
 										SET_NOTIFICATION_TYPE,
-										domainType,
-										constantName,
+										featureIdExpr,
 										paramName));
 		}
 	}
 
-	private static CodeBlock containmentSetStatement(final CodeBlock rawFeatureExpr, final String paramName)
+	private static CodeBlock containmentSetStatement(final CodeBlock featureExpr, final String paramName)
 	{
-		return CodeBlock.of("setContainer($N, $L)", paramName, rawFeatureExpr);
+		return CodeBlock.of("setContainer($N, $L)", paramName, featureExpr);
 	}
 
 	private static TypeName fieldFeatureType(FeatureResolution resolution, Group<?> owner)

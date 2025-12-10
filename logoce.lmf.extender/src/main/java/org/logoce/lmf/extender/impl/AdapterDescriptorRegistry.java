@@ -15,7 +15,6 @@ public final class AdapterDescriptorRegistry implements IAdapterDescriptorRegist
 	public AdapterDescriptorRegistry()
 	{
 		final var mapBuilder = new ExtenderMapBuilder();
-		final var seenProviders = new HashSet<String>();
 
 		ServiceLoader.load(IAdapterProvider.class)
 					 .stream()

@@ -9,14 +9,11 @@ import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.GenUtils;
-import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.group.builder.BuilderFeatureUtil;
 import org.logoce.lmf.model.feature.RelationLazyInserter;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -29,33 +26,33 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 
 	private final TypeParameter inserterType;
 	private final TypeParameter inserterBuilderType;
-	private final ClassName interfaceClassName;
 	private final ClassName builderClassName;
 	private final Group<?> ownerGroup;
 
 	public RelationMapFieldBuilder(final Group<?> group)
 	{
 		this.ownerGroup = group;
-		final var interfaceType = group.adapt(GroupInterfaceType.class);
 		final var builderType = group.adapt(GroupBuilderClassType.class);
-		final var wildcardInterface = builderType.parametrizedWildcard();
-
-		interfaceClassName = interfaceType.raw();
 		builderClassName = builderType.raw();
-		inserterType = RELATION_MAP_CLASS.nest(wildcardInterface);
-		inserterBuilderType = RELATION_MAP_BUILDER_CLASS.nest(wildcardInterface);
+		inserterType = RELATION_MAP_CLASS.nest(builderClassName);
+		inserterBuilderType = RELATION_MAP_BUILDER_CLASS.nest(builderClassName);
 	}
 
 	@Override
 	public FieldSpec build(final List<FeatureResolution> featureResolutions)
 	{
-		final var statementBuilder = CodeBlock.builder();
-		statementBuilder.add("new $T()", inserterBuilderType.parametrized());
+		final var relations = featureResolutions.stream()
+												.filter(RelationMapFieldBuilder::isRelation)
+												.toList();
 
-		featureResolutions.stream()
-						  .filter(RelationMapFieldBuilder::isRelation)
-						  .map(this::buildStatement)
-						  .forEach(statementBuilder::add);
+		final var featureCount = relations.size();
+
+		final var statementBuilder = CodeBlock.builder();
+		statementBuilder.add("new $T($L, $T::relationIndex)", inserterBuilderType.parametrized(), featureCount, builderClassName);
+
+		relations.stream()
+				 .map(this::buildStatement)
+				 .forEach(statementBuilder::add);
 
 		statementBuilder.add(".build()");
 
@@ -67,32 +64,23 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 
 	private CodeBlock buildStatement(final FeatureResolution resolution)
 	{
+		final var interfaceType = ownerGroup.adapt(GroupInterfaceType.class);
+		final var domainType = interfaceType.raw();
+
 		final var methodName = MethodUtil.builderMethodName(resolution);
 		final var usesRawSetter = BuilderFeatureUtil.needsRawSetter(resolution, ownerGroup);
 		final var usedMethod = usesRawSetter ? '_' + methodName : methodName;
-		final var group = resolution.hasGeneric() && resolution.feature().lmContainer() != ownerGroup
-						  ? ownerGroup
-						  : (Group<?>) resolution.feature().lmContainer();
-		final var featureName = resolution.name();
+		final var paramType = usesRawSetter
+							  ? BuilderFeatureUtil.rawSetterParameterType(resolution, ownerGroup)
+							  : resolution.builderParameterSpec(ownerGroup).type;
 
-		if (GenUtils.USE_RAWFEATURE_FOR_MODEL)
-		{
-			return CodeBlock.of(".add($T.RFeatures.$N, $T::$N)",
-								interfaceClassName,
-								featureName,
-								builderClassName,
-								usedMethod);
-		}
-		else
-		{
-			final var model = (MetaModel) ModelUtil.root(resolution.feature());
-			final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
-			return CodeBlock.of(".add($T.Features.$N, $T::$N)",
-								groupClass,
-								GenUtils.toConstantCase(featureName),
-								builderClassName,
-								usedMethod);
-		}
+		final var constantName = GenUtils.toConstantCase(resolution.name());
+
+		return CodeBlock.of(".add($T.FeatureIDs.$N, (builder, value) -> builder.$N(($T) value))",
+							domainType,
+							constantName,
+							usedMethod,
+							paramType);
 	}
 
 	private static boolean isRelation(final FeatureResolution f)

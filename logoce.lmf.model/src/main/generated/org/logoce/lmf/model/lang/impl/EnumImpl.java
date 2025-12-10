@@ -9,8 +9,6 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
-  private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>().add(Enum.RFeatures.name, Enum::name).add(Enum.RFeatures.literals, Enum::literals).build();
-  private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>().build();
   private final String name;
   private final List<String> literals;
 
@@ -37,20 +35,29 @@ public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
 
   @Override
   protected FeatureSetter<Enum<?>> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<Enum<?>> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case Enum.FeatureIDs.NAME -> 0;
       case Enum.FeatureIDs.LITERALS -> 1;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>(2, EnumImpl::featureIndexStatic).add(Enum.FeatureIDs.NAME, Enum::name).add(Enum.FeatureIDs.LITERALS, Enum::literals).build();
+    private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>(2, EnumImpl::featureIndexStatic).build();
   }
 }

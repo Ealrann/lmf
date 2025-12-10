@@ -12,8 +12,6 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
 public final class OperationParameterImpl extends FeaturedObject implements OperationParameter {
-  private static final FeatureGetter<OperationParameter> GET_MAP = new FeatureGetter.Builder<OperationParameter>().add(OperationParameter.RFeatures.name, OperationParameter::name).add(OperationParameter.RFeatures.type, OperationParameter::type).add(OperationParameter.RFeatures.parameters, OperationParameter::parameters).build();
-  private static final FeatureSetter<OperationParameter> SET_MAP = new FeatureSetter.Builder<OperationParameter>().build();
   private final String name;
   private final Supplier<Type<?>> type;
   private final List<GenericParameter> parameters;
@@ -23,7 +21,7 @@ public final class OperationParameterImpl extends FeaturedObject implements Oper
     this.name = name;
     this.type = type;
     this.parameters = List.copyOf(parameters);
-    setContainer(parameters, OperationParameter.RFeatures.parameters);
+    setContainer(parameters, OperationParameter.FeatureIDs.PARAMETERS);
     eDeliver(true);
   }
 
@@ -49,21 +47,30 @@ public final class OperationParameterImpl extends FeaturedObject implements Oper
 
   @Override
   protected FeatureSetter<OperationParameter> setterMap() {
-    return SET_MAP;
+    return Inserters.SET_MAP;
   }
 
   @Override
   protected FeatureGetter<OperationParameter> getterMap() {
-    return GET_MAP;
+    return Inserters.GET_MAP;
   }
 
-  @Override
-  protected int featureIndex(int featureId) {
+  public static int featureIndexStatic(int featureId) {
     return switch (featureId) {
       case OperationParameter.FeatureIDs.NAME -> 0;
       case OperationParameter.FeatureIDs.TYPE -> 1;
       case OperationParameter.FeatureIDs.PARAMETERS -> 2;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<OperationParameter> GET_MAP = new FeatureGetter.Builder<OperationParameter>(3, OperationParameterImpl::featureIndexStatic).add(OperationParameter.FeatureIDs.NAME, OperationParameter::name).add(OperationParameter.FeatureIDs.TYPE, OperationParameter::type).add(OperationParameter.FeatureIDs.PARAMETERS, OperationParameter::parameters).build();
+    private static final FeatureSetter<OperationParameter> SET_MAP = new FeatureSetter.Builder<OperationParameter>(3, OperationParameterImpl::featureIndexStatic).build();
   }
 }

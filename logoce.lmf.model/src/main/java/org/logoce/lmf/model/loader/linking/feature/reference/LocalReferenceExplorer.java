@@ -135,7 +135,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 				   .map(ResolutionAttempt::resolution)
 				   .filter(AttributeResolver.AttributeResolution.class::isInstance)
 				   .map(AttributeResolver.AttributeResolution.class::cast)
-				   .filter(r -> r.feature() == Named.Features.NAME)
+				   .filter(r -> r.feature().id() == Named.FeatureIDs.NAME)
 				   .anyMatch(r -> name.equals(r.value()));
 	}
 }
