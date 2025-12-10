@@ -141,10 +141,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	{
 		final var group = (Group<?>) feature.lmContainer();
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var groupFeaturesInterface = ClassName.get(TargetPathUtil.packageName(model),
-														 model.name() + "ModelDefinition",
-														 "Features",
-														 group.name());
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var groupFeaturesInterface = groupClass.nestedClass("Features");
 		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
 
 		return CodeBlock.of("$T.$N", groupFeaturesInterface, constantFeatureName);

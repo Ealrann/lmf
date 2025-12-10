@@ -39,16 +39,16 @@ public final class NativeGenericsGenerationTest
 		final var nativeParameterContent = Files.readString(nativeParameterFile.toPath(), StandardCharsets.UTF_8);
 		assertTrue(nativeParameterContent.contains("default T getNativeValue()"),
 				   "Operations should be generated on the declaring group");
-		assertTrue(nativeParameterContent.contains("interface FeatureIDs<T extends FeatureIDs<T>> extends LMObject.FeatureIDs"),
-				   "Non-concrete group FeatureIDs interface should declare a self-typed type parameter and extend LMObject.FeatureIDs");
+		assertTrue(nativeParameterContent.contains("interface Features<T extends Features<T>> extends LMObject.Features<T>"),
+				   "Non-concrete group Features interface should declare a self-typed type parameter and extend LMObject.Features");
 
 		assertFalse(floatParamContent.contains("getNativeValue("),
 					"Operations declared on a parent group should not be redeclared on children");
 		assertFalse(floatParamContent.contains("setNativeValue("),
 					"Operations declared on a parent group should not be redeclared on children");
 
-		assertTrue(floatParamContent.contains("interface FeatureIDs<T extends FeatureIDs<T>> extends NativeParameter.FeatureIDs<T>"),
-				   "Concrete group FeatureIDs interface should keep the self-typed type parameter when extending parents");
+		assertTrue(floatParamContent.contains("interface Features<T extends Features<T>> extends NativeParameter.Features<T>"),
+				   "Concrete group Features interface should keep the self-typed type parameter when extending parents");
 
 		final var floatParamImplFile = new File(basePackageDir, "impl/FloatParameterImpl.java");
 		assertTrue(floatParamImplFile.isFile(), "FloatParameterImpl.java should be generated");

@@ -197,7 +197,7 @@ public final class RelationReferenceCompletions
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				LMCoreModelDefinition.Features.Named.NAME == attrResolution.feature())
+				Named.Features.NAME == attrResolution.feature())
 			{
 				return attrResolution.value();
 			}

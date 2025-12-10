@@ -37,10 +37,8 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		final var initializerBuilder = CodeBlock.builder();
 
 		final var model = (MetaModel) ModelUtil.root(group);
-		final var groupFeaturesType = ClassName.get(TargetPathUtil.packageName(model),
-													model.name() + "ModelDefinition",
-													"Features",
-													group.name());
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var groupFeaturesType = groupClass.nestedClass("Features");
 
 		final var builderSupplierRaw = ClassName.get(BuilderSupplier.class);
 

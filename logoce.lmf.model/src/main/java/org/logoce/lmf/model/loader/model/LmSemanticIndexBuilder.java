@@ -424,7 +424,7 @@ public final class LmSemanticIndexBuilder
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				LMCoreModelDefinition.Features.Named.NAME == attrResolution.feature())
+				Named.Features.NAME == attrResolution.feature())
 			{
 				final var feature = attempt.feature();
 				if (feature != null && !feature.values().isEmpty())
