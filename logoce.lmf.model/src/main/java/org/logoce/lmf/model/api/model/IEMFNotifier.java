@@ -23,20 +23,19 @@ public interface IEMFNotifier
 
 	default void listen(Consumer<Notification> listener, Feature<?, ?> feature)
 	{
-		listen(listener, List.of(feature));
+		listen(listener, feature.id());
 	}
 	default void sulk(Consumer<Notification> listener, Feature<?, ?> feature)
 	{
-		sulk(listener, List.of(feature));
+		sulk(listener, feature.id());
 	}
 
 	default void listenNoParam(Runnable listener, Feature<?, ?> feature)
 	{
-		listenNoParam(listener, List.of(feature));
+		listenNoParam(listener, feature.id());
 	}
 	default void sulkNoParam(Runnable listener, Feature<?, ?> feature)
 	{
-		sulkNoParam(listener, List.of(feature));
+		sulkNoParam(listener, feature.id());
 	}
 }
-

@@ -1,7 +1,8 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject.poi;
 
-import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.function.Consumer;
@@ -19,9 +20,9 @@ public final class EObjectStructurePOI implements IEObjectPOI
 	public void listen(final LMObject object)
 	{
 		final var group = object.lmGroup();
-		@SuppressWarnings("unchecked")
-		final var containmentFeatures = (java.util.List<org.logoce.lmf.model.lang.Feature<?, ?>>)
-				(java.util.List<?>) ModelUtil.streamContainmentFeatures(group).toList();
+		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group)
+												.mapToInt(Relation::id)
+												.toArray();
 		object.listen(structureChanged, containmentFeatures);
 	}
 
@@ -29,9 +30,9 @@ public final class EObjectStructurePOI implements IEObjectPOI
 	public void sulk(final LMObject object)
 	{
 		final var group = object.lmGroup();
-		@SuppressWarnings("unchecked")
-		final var containmentFeatures = (java.util.List<org.logoce.lmf.model.lang.Feature<?, ?>>)
-				(java.util.List<?>) ModelUtil.streamContainmentFeatures(group).toList();
+		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group)
+												.mapToInt(Relation::id)
+												.toArray();
 		object.sulk(structureChanged, containmentFeatures);
 	}
 }

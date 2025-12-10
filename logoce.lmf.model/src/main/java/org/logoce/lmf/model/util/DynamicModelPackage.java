@@ -257,6 +257,12 @@ public final class DynamicModelPackage implements IModelPackage
 			return containingFeature;
 		}
 
+		@Override
+		public int lmContainingFeatureID()
+		{
+			return containingFeature != null ? containingFeature.id() : -1;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public <V> V get(final Feature<?, V> feature)

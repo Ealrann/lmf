@@ -2,9 +2,6 @@ package org.logoce.lmf.model.notification.util;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Relation;
-
-import java.util.List;
 import java.util.function.Consumer;
 
 public final class ModelStructureObserver
@@ -13,14 +10,14 @@ public final class ModelStructureObserver
 	private final Consumer<LMObject> onAddedObject;
 	private final Consumer<LMObject> onRemovedObject;
 
-	public ModelStructureObserver(final Relation<?, ?> feature,
+	public ModelStructureObserver(final int feature,
 								  final Consumer<LMObject> onAddedObject,
 								  final Consumer<LMObject> onRemovedObject)
 	{
-		this(List.of(feature), onAddedObject, onRemovedObject);
+		this(new int[]{feature}, onAddedObject, onRemovedObject);
 	}
 
-	public ModelStructureObserver(final List<Relation<?, ?>> features,
+	public ModelStructureObserver(final int[] features,
 								  final Consumer<LMObject> onAddedObject,
 								  final Consumer<LMObject> onRemovedObject)
 	{

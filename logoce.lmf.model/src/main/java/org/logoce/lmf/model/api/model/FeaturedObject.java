@@ -35,18 +35,15 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	public final Relation<?, ?> lmContainingFeature()
 	{
 		if (container == null || containingFeatureId == -1) return null;
-
 		final var group = container.lmGroup();
-		for (final var feature : group.features())
-		{
-			if (feature.id() == containingFeatureId)
-			{
-				return (Relation<?, ?>) feature;
-			}
-		}
+		final int featureIndex = container.featureIndex(containingFeatureId);
+		return (Relation<?, ?>) group.features().get(featureIndex);
+	}
 
-		throw new IllegalStateException("Cannot resolve containing feature id " + containingFeatureId +
-										" for group " + group.name());
+	@Override
+	public final int lmContainingFeatureID()
+	{
+		return containingFeatureId;
 	}
 
 	private void structureNotify(final Notification notification)
@@ -143,10 +140,9 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	private record ObservableListHandler<E>(FeaturedObject owner,
-										   int featureId,
-										   boolean relation,
-										   boolean containment)
-			implements BiConsumer<Notification.EventType, List<E>>
+											int featureId,
+											boolean relation,
+											boolean containment) implements BiConsumer<Notification.EventType, List<E>>
 	{
 		@Override
 		public void accept(final Notification.EventType eventType, final List<E> elements)
@@ -162,11 +158,11 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 				switch (eventType)
 				{
-					case ADD, ADD_MANY ->
-							newValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
+					case ADD, ADD_MANY -> newValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
 					case REMOVE, REMOVE_MANY ->
 							oldValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
-					default -> {
+					default ->
+					{
 						return;
 					}
 				}
@@ -175,11 +171,10 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 			}
 			else
 			{
-				@SuppressWarnings("unchecked")
-				final var children = (List<? extends LMObject>) elements;
+				@SuppressWarnings("unchecked") final var children = (List<? extends LMObject>) elements;
 
-				if (containment && (eventType == Notification.EventType.ADD ||
-									eventType == Notification.EventType.ADD_MANY))
+				if (containment &&
+					(eventType == Notification.EventType.ADD || eventType == Notification.EventType.ADD_MANY))
 				{
 					if (eventType == Notification.EventType.ADD)
 					{
@@ -193,9 +188,11 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 
 				notification = switch (eventType)
 				{
-					case ADD -> RelationNotificationBuilder.insert((LMObject) owner, featureId, children.getFirst());
+					case ADD ->
+							RelationNotificationBuilder.insert((LMObject) owner, featureId, true, children.getFirst());
 					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, featureId, children);
-					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner, featureId, children.getFirst());
+					case REMOVE ->
+							RelationNotificationBuilder.remove((LMObject) owner, featureId, true, children.getFirst());
 					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, featureId, children);
 					default -> null;
 				};
@@ -218,8 +215,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 		{
 		}
 
-		public static void setContainer(final LMObject newContainer, final LMObject child,
-										final int featureId)
+		public static void setContainer(final LMObject newContainer, final LMObject child, final int featureId)
 		{
 			setContainerInternal(newContainer, child, featureId);
 		}
@@ -254,6 +250,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 					{
 						final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
 																							 oldFeatureId,
+																							 true,
 																							 child);
 						((FeaturedObject) oldContainer).structureNotify(oldParentNotification);
 					}

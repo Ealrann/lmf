@@ -2,9 +2,7 @@ package org.logoce.lmf.model.notification.observatory.internal.eobject;
 
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.model.api.notification.Notification;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.observatory.IAdapterObservatoryBuilder;
 import org.logoce.lmf.model.notification.observatory.IEObjectObservatoryBuilder;
 import org.logoce.lmf.model.notification.observatory.INotifierAdapterObservatoryBuilder;
@@ -117,18 +115,18 @@ public abstract class AbstractEObjectObservatory<T extends LMObject> implements 
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<LMObject> explore(final Relation<?, ?> relation)
+		public IEObjectObservatoryBuilder<LMObject> explore(final int referenceId)
 		{
-			final var child = new EObjectObservatory.Builder<>(relation, LMObject.class);
+			final var child = new EObjectObservatory.Builder<>(referenceId, LMObject.class);
 			children.add(child);
 			return child;
 		}
 
 		@Override
-		public <Y extends LMObject> IEObjectObservatoryBuilder<Y> explore(final Relation<?, ?> relation,
+		public <Y extends LMObject> IEObjectObservatoryBuilder<Y> explore(final int referenceId,
 																		  final Class<Y> cast)
 		{
-			final var child = new EObjectObservatory.Builder<>(relation, cast);
+			final var child = new EObjectObservatory.Builder<>(referenceId, cast);
 			children.add(child);
 			return child;
 		}
@@ -167,16 +165,14 @@ public abstract class AbstractEObjectObservatory<T extends LMObject> implements 
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<T> listen(final Consumer<Notification> listener,
-													final List<Feature<?, ?>> features)
+		public IEObjectObservatoryBuilder<T> listen(final Consumer<Notification> listener, final int... features)
 		{
 			pois.add(new EObjectPOI(listener, features));
 			return this;
 		}
 
 		@Override
-		public IEObjectObservatoryBuilder<T> listenNoParam(final Runnable listener,
-														   final List<Feature<?, ?>> features)
+		public IEObjectObservatoryBuilder<T> listenNoParam(final Runnable listener, final int... features)
 		{
 			pois.add(new EObjectNoParamPOI(listener, features));
 			return this;

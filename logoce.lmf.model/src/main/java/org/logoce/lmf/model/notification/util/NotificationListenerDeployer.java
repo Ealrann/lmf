@@ -1,26 +1,23 @@
 package org.logoce.lmf.model.notification.util;
 
 import org.logoce.lmf.model.api.notification.Notification;
-import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Relation;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 public final class NotificationListenerDeployer
 {
 	private final Consumer<Notification> listener;
-	private final List<Feature<?, ?>> featuresToListen;
+	private final int[] featuresToListen;
 	private final ModelStructureObserver structureObserver;
 
-	public NotificationListenerDeployer(final List<Relation<?, ?>> structuralFeatures,
+	public NotificationListenerDeployer(final int[] structuralFeatures,
 										final Consumer<Notification> listener,
-										final List<Feature<?, ?>> featuresToListen)
+										final int... featuresToListen)
 	{
 		structureObserver = new ModelStructureObserver(structuralFeatures, this::add, this::remove);
 		this.listener = listener;
-		this.featuresToListen = featuresToListen;
+		this.featuresToListen = featuresToListen.clone();
 	}
 
 	public void startDeploy(LMObject root)
@@ -43,4 +40,3 @@ public final class NotificationListenerDeployer
 		oldValue.sulk(listener, featuresToListen);
 	}
 }
-

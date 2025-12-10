@@ -1,7 +1,6 @@
 package org.logoce.lmf.model.notification.observatory.internal.eobject;
 
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.observatory.IEObjectObservatoryBuilder;
 import org.logoce.lmf.model.notification.observatory.IObservatory;
 import org.logoce.lmf.model.notification.observatory.internal.InternalObservatoryBuilder;
@@ -15,9 +14,9 @@ import java.util.List;
 public final class EObjectObservatory<T extends LMObject> extends AbstractEObjectObservatory<T>
 {
 	private final ModelStructureBulkObserver structureObserver;
-	private final Relation<?, ?> relation;
+	private final int referenceId;
 
-	public EObjectObservatory(final Relation<?, ?> relation,
+	public EObjectObservatory(final int referenceId,
 							  final Class<T> cast,
 							  final List<IObservatory> children,
 							  final List<IEObjectPOI> pois,
@@ -25,8 +24,8 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 							  final List<GatherBulkListener<T>> gatherBulkListeners)
 	{
 		super(cast, children, pois, gatherListeners, gatherBulkListeners);
-		structureObserver = new ModelStructureBulkObserver(relation, this::startObserve, this::stopObserve);
-		this.relation = relation;
+		this.referenceId = referenceId;
+		structureObserver = new ModelStructureBulkObserver(referenceId, this::startObserve, this::stopObserve);
 	}
 
 	@Override
@@ -45,18 +44,23 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 	@SuppressWarnings("SameReturnValue")
 	private boolean checkParent(final LMObject parent)
 	{
-		if (relation.contains())
+		final var group = parent.lmGroup();
+		for (final var feature : group.features())
 		{
-			return true;
+			if (feature.id() == referenceId)
+			{
+				if (feature instanceof org.logoce.lmf.model.lang.Relation<?, ?> relation && relation.contains())
+				{
+					return true;
+				}
+				throw new IllegalArgumentException("Observation failed, the explored feature " +
+												   feature.name() +
+												   " on " +
+												   group.name() +
+												   " is not a Relation.");
+			}
 		}
-		else
-		{
-			throw new IllegalArgumentException("Observation failed, the explored feature " +
-											   relation.name() +
-											   " on " +
-											   parent.lmGroup().name() +
-											   " is not a Relation.");
-		}
+		throw new IllegalArgumentException("Unknown featureId " + referenceId + " for group " + group.name());
 	}
 
 	private void startObserve(List<? extends LMObject> objects)
@@ -73,12 +77,12 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 																										IEObjectObservatoryBuilder<T>,
 																										InternalObservatoryBuilder
 	{
-		private final Relation<?, ?> relation;
+		private final int referenceId;
 
-		public Builder(Relation<?, ?> relation, Class<T> cast)
+		public Builder(int referenceId, Class<T> cast)
 		{
 			super(cast);
-			this.relation = relation;
+			this.referenceId = referenceId;
 		}
 
 		@Override
@@ -86,7 +90,7 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 		{
 			final var builtChildren = children.stream().map(InternalObservatoryBuilder::build).toList();
 
-			return new EObjectObservatory<>(relation,
+			return new EObjectObservatory<>(referenceId,
 											cast,
 											builtChildren,
 											pois,

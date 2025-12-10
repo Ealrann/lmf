@@ -27,7 +27,7 @@ public final class EMFListenerMap implements IEMFNotifier
 	{
 		if (listenerMap != null)
 		{
-			final int featureId = notification.feature().id();
+			final int featureId = notification.featureId();
 			final int featureIdx = indexFunction.index(featureId);
 			final var listeners = listenerMap[featureIdx];
 			if (listeners != null)

@@ -2,8 +2,6 @@ package org.logoce.lmf.model.notification.util;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Relation;
-
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -13,18 +11,18 @@ public final class ModelStructureBulkObserver
 	private final Consumer<List<? extends LMObject>> onAddedObjects;
 	private final Consumer<List<? extends LMObject>> onRemovedObjects;
 
-	public ModelStructureBulkObserver(final Relation<?, ?> relation,
+	public ModelStructureBulkObserver(final int referenceId,
 									  final Consumer<List<? extends LMObject>> onAddedObjects,
 									  final Consumer<List<? extends LMObject>> onRemovedObjects)
 	{
-		this(List.of(relation), onAddedObjects, onRemovedObjects);
+		this(new int[]{referenceId}, onAddedObjects, onRemovedObjects);
 	}
 
-	public ModelStructureBulkObserver(final List<Relation<?, ?>> relations,
+	public ModelStructureBulkObserver(final int[] referenceIds,
 									  final Consumer<List<? extends LMObject>> onAddedObjects,
 									  final Consumer<List<? extends LMObject>> onRemovedObjects)
 	{
-		this.observer = new ModelObserver(this::notifyChanged, relations);
+		this.observer = new ModelObserver(this::notifyChanged, referenceIds);
 		this.onAddedObjects = onAddedObjects;
 		this.onRemovedObjects = onRemovedObjects;
 	}

@@ -12,6 +12,7 @@ public interface IFeaturedObject extends ILilyEObject
 {
 	Group<?> lmGroup();
 	LMObject lmContainer();
+	int lmContainingFeatureID();
 	Relation<?, ?> lmContainingFeature();
 
 	<T> T get(Feature<?, T> feature);

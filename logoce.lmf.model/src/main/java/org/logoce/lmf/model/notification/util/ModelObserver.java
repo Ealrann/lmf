@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 public final class ModelObserver
 {
-	private final List<Relation<?, ?>> features;
+	private final int[] features;
 	private final HierarchyNotificationListener rootListener;
 	private final Consumer<Notification> listener;
 
@@ -21,13 +21,18 @@ public final class ModelObserver
 
 	public ModelObserver(final Consumer<Notification> listener, final Relation<?, ?> structuralFeature)
 	{
-		this(listener, List.of(structuralFeature));
+		this(listener, new int[]{structuralFeature.id()});
 	}
 
 	public ModelObserver(final Consumer<Notification> listener, final List<Relation<?, ?>> structuralFeatures)
 	{
+		this(listener, structuralFeatures.stream().mapToInt(Relation::id).toArray());
+	}
+
+	public ModelObserver(final Consumer<Notification> listener, final int[] structuralFeatureIds)
+	{
 		this.listener = listener;
-		this.features = List.copyOf(structuralFeatures);
+		this.features = structuralFeatureIds.clone();
 		rootListener = new HierarchyNotificationListener(0);
 	}
 
@@ -42,26 +47,26 @@ public final class ModelObserver
 	public void startObserve(LMObject root)
 	{
 		rootListener.setTarget(root);
-		root.listen(rootListener, features.get(0));
+		root.listen(rootListener, features[0]);
 	}
 
 	public void stopObserve(LMObject root)
 	{
-		root.sulk(rootListener, features.get(0));
+		root.sulk(rootListener, features[0]);
 		rootListener.unsetTarget(root);
 	}
 
 	private final class HierarchyNotificationListener implements Consumer<Notification>
 	{
 		private final int depth;
-		private final Relation<?, ?> subFeature;
+		private final int subFeatureId;
 		private final HierarchyNotificationListener childListener;
 
 		public HierarchyNotificationListener(int depth)
 		{
 			this.depth = depth;
-			this.subFeature = computeSubFeature();
-			if (depth != features.size() - 1)
+			this.subFeatureId = computeSubFeatureId();
+			if (depth != features.length - 1)
 			{
 				childListener = new HierarchyNotificationListener(depth + 1);
 			}
@@ -71,21 +76,22 @@ public final class ModelObserver
 			}
 		}
 
-		private Relation<?, ?> computeSubFeature()
+		private int computeSubFeatureId()
 		{
-			if (depth == features.size() - 1)
+			if (depth == features.length - 1)
 			{
-				return null;
+				return -1;
 			}
 			else
 			{
-				return features.get(depth + 1);
+				return features[depth + 1];
 			}
 		}
 
 		private void setTarget(LMObject target)
 		{
-			final var feature = features.get(depth);
+			final int featureId = features[depth];
+			final var feature = resolveRelation(target, featureId);
 			final var value = getValue(target, feature);
 			if (value == null) return;
 
@@ -107,7 +113,8 @@ public final class ModelObserver
 
 		private void unsetTarget(LMObject target)
 		{
-			final var feature = features.get(depth);
+			final int featureId = features[depth];
+			final var feature = resolveRelation(target, featureId);
 			final var value = getValue(target, feature);
 			if (value == null) return;
 
@@ -170,19 +177,38 @@ public final class ModelObserver
 
 		private boolean isFinalDepth()
 		{
-			return depth == features.size() - 1;
+			return depth == features.length - 1;
 		}
 
 		private void addChild(final LMObject child)
 		{
-			child.listen(childListener, subFeature);
+			child.listen(childListener, subFeatureId);
 			childListener.setTarget(child);
 		}
 
 		private void removeChild(final LMObject child)
 		{
 			childListener.unsetTarget(child);
-			child.sulk(childListener, subFeature);
+			child.sulk(childListener, subFeatureId);
+		}
+
+		private Relation<?, ?> resolveRelation(final LMObject target, final int featureId)
+		{
+			final var group = target.lmGroup();
+			for (final var feature : group.features())
+			{
+				if (feature.id() == featureId)
+				{
+					if (feature instanceof Relation<?, ?> relation)
+					{
+						return relation;
+					}
+					throw new IllegalArgumentException(
+							"Observation failed, feature " + featureId + " on group " + group.name() + " is not a Relation.");
+				}
+			}
+			throw new IllegalArgumentException(
+					"Unknown featureId " + featureId + " for group " + group.name());
 		}
 	}
 }
