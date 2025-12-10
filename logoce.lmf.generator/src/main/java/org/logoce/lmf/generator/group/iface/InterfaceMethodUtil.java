@@ -86,7 +86,7 @@ public final class InterfaceMethodUtil
 
 	public static boolean isMutableSingle(final FeatureResolution resolution)
 	{
-		final Feature<?, ?> feature = resolution.feature();
+		final Feature<?, ?, ?, ?> feature = resolution.feature();
 		return !feature.many() && !feature.immutable();
 	}
 

@@ -17,13 +17,13 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
   private final String name;
   private final boolean concrete;
   private final List<Include<?>> includes;
-  private final List<Feature<?, ?>> features;
+  private final List<Feature<?, ?, ?, ?>> features;
   private final List<Generic<?>> generics;
   private final List<Operation> operations;
   private final BuilderSupplier<T> lmBuilder;
 
   public GroupImpl(final String name, final boolean concrete, final List<Include<?>> includes,
-      final List<Feature<?, ?>> features, final List<Generic<?>> generics,
+      final List<Feature<?, ?, ?, ?>> features, final List<Generic<?>> generics,
       final List<Operation> operations, final BuilderSupplier<T> lmBuilder) {
     this.name = name;
     this.concrete = concrete;
@@ -55,7 +55,7 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject implemen
   }
 
   @Override
-  public List<Feature<?, ?>> features() {
+  public List<Feature<?, ?, ?, ?>> features() {
     return features;
   }
 

@@ -52,7 +52,7 @@ final class AttributeValueCompletionProvider
 			return List.of();
 		}
 
-		final Attribute<?, ?> attribute = context.value() != null ? context.value().attribute() : null;
+		final Attribute<?, ?, ?, ?> attribute = context.value() != null ? context.value().attribute() : null;
 		if (attribute == null)
 		{
 			LOG.debug("LMF LSP completion: attribute value – no attribute resolved from header text at uri={}, line={}, character={}",
@@ -66,7 +66,7 @@ final class AttributeValueCompletionProvider
 		return items;
 	}
 
-	private static List<CompletionItem> buildAttributeValueCompletions(final Attribute<?, ?> attribute,
+	private static List<CompletionItem> buildAttributeValueCompletions(final Attribute<?, ?, ?, ?> attribute,
 																	   final Position pos)
 	{
 		final var items = new ArrayList<CompletionItem>();

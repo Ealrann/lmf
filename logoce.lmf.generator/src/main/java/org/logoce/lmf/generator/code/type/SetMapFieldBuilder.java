@@ -92,7 +92,7 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 							castType);
 	}
 
-	private static boolean isSingleMutable(final Feature<?, ?> feature)
+	private static boolean isSingleMutable(final Feature<?, ?, ?, ?> feature)
 	{
 		return !feature.immutable() && !feature.many();
 	}

@@ -44,7 +44,7 @@ final class RelationReferenceCompletionsM1Test
 		assertFalse(linkTrees.isEmpty(), "Peugeot.lm should produce link trees");
 
 		final MetaModel carCompanyMetaModel = CarCompanyModelPackage.MODEL;
-		final Relation<?, ?> carRelation = findRelation(carCompanyMetaModel, "Person", "car");
+		final Relation<?, ?, ?, ?> carRelation = findRelation(carCompanyMetaModel, "Person", "car");
 		assertNotNull(carRelation, "Relation Person.car should be present in CarCompany meta-model");
 
 		final var candidates = RelationReferenceCompletions.collectRelationCandidates(
@@ -79,7 +79,7 @@ final class RelationReferenceCompletionsM1Test
 		assertFalse(linkTrees.isEmpty(), "Peugeot.lm should produce link trees");
 
 		final MetaModel carCompanyMetaModel = CarCompanyModelPackage.MODEL;
-		final Relation<?, ?> carRelation = findRelation(carCompanyMetaModel, "Person", "car");
+		final Relation<?, ?, ?, ?> carRelation = findRelation(carCompanyMetaModel, "Person", "car");
 		assertNotNull(carRelation, "Relation Person.car should be present in CarCompany meta-model");
 
 		final var candidates = RelationReferenceCompletions.collectRelationCandidates(
@@ -92,9 +92,9 @@ final class RelationReferenceCompletionsM1Test
 				   "Cross-model candidates '#CarCompany@Type' should be derived from CarCompany meta-model via registry");
 	}
 
-	private static Relation<?, ?> findRelation(final MetaModel metaModel,
-											   final String groupName,
-											   final String relationName)
+	private static Relation<?, ?, ?, ?> findRelation(final MetaModel metaModel,
+													 final String groupName,
+													 final String relationName)
 	{
 		for (final Group<?> group : metaModel.groups())
 		{
@@ -105,7 +105,7 @@ final class RelationReferenceCompletionsM1Test
 
 			for (final var feature : group.features())
 			{
-				if (feature instanceof Relation<?, ?> relation && relationName.equals(feature.name()))
+				if (feature instanceof Relation<?, ?, ?, ?> relation && relationName.equals(feature.name()))
 				{
 					return relation;
 				}

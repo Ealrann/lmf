@@ -24,7 +24,7 @@ public final class NodeLinker
 		this.relationResolvers = List.copyOf(relationResolvers);
 	}
 
-	public List<ResolutionAttempt<Attribute<?, ?>>> resolveAttributes(final List<PFeature> features)
+	public List<ResolutionAttempt<Attribute<?, ?, ?, ?>>> resolveAttributes(final List<PFeature> features)
 	{
 		final var runner = new TokenResolver<>(attributeResolvers, AttributeResolver::resolve);
 		final var stream = features.stream().filter(PFeature::isAttribute);
@@ -32,7 +32,7 @@ public final class NodeLinker
 		return batchResolver.resolve(stream);
 	}
 
-	public List<ResolutionAttempt<Relation<?, ?>>> resolveRelations(final LinkNodeInternal<?, ?, ?> node)
+	public List<ResolutionAttempt<Relation<?, ?, ?, ?>>> resolveRelations(final LinkNodeInternal<?, ?, ?> node)
 	{
 		final var runner = new TokenResolver<>(relationResolvers, (r, value) -> r.resolve(node, value));
 		final var stream = node.features().stream().filter(PFeature::isRelation);
@@ -40,4 +40,3 @@ public final class NodeLinker
 		return batchResolver.resolve(stream);
 	}
 }
-

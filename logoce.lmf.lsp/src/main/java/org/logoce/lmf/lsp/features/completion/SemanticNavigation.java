@@ -55,9 +55,9 @@ final class SemanticNavigation
 		return null;
 	}
 
-	static Feature<?, ?> findFeatureAtValuePosition(final SemanticSnapshot semantic,
-													final SyntaxSnapshot syntax,
-													final Position pos)
+	static Feature<?, ?, ?, ?> findFeatureAtValuePosition(final SemanticSnapshot semantic,
+														  final SyntaxSnapshot syntax,
+														  final Position pos)
 	{
 		final PNode headerNode = SyntaxNavigation.findPNodeAtOrBeforePosition(syntax, pos);
 		if (headerNode == null)
@@ -94,7 +94,7 @@ final class SemanticNavigation
 			return null;
 		}
 
-		for (final Feature<?, ?> feature : group.features())
+		for (final Feature<?, ?, ?, ?> feature : group.features())
 		{
 			if (featureName.equals(feature.name()))
 			{

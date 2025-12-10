@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
-import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.lang.Attribute;
 
@@ -26,8 +25,7 @@ public final class AttributePushMethodBuilder implements CodeBuilder<List<Featur
 	private static MethodSpec.Builder prepareBuilder()
 	{
 		final var typeVariable = TypeVariableName.get("AttributeType");
-		final var paramAttribute = TypeParameter.of(ClassName.get(Attribute.class),
-													List.of(typeVariable, GenUtils.WILDCARD));
+		final var paramAttribute = TypeParameter.of(ClassName.get(Attribute.class), 4);
 
 		return MethodSpec.methodBuilder("push")
 						 .addModifiers(Modifier.PUBLIC)

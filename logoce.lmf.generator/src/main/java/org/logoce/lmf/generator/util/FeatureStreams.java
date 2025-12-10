@@ -15,11 +15,10 @@ public final class FeatureStreams
 	{
 	}
 
-	public static Stream<Feature<?, ?>> distinctFeatures(final Group<?> group)
+	public static Stream<Feature<?, ?, ?, ?>> distinctFeatures(final Group<?> group)
 	{
-		final Set<Feature<?, ?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+		final Set<Feature<?, ?, ?, ?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
 		return ModelUtil.streamAllFeatures(group)
-						.filter(feature -> seen.add(feature));
+						.filter(feature -> seen.add((Feature<?, ?, ?, ?>) feature));
 	}
 }
-

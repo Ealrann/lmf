@@ -13,7 +13,7 @@ public final class EnumResolver<Y> extends AttributeResolver
 	private final Enum<Y> enumeration;
 
 	@SuppressWarnings("unchecked")
-	public EnumResolver(final Attribute<?, ?> attribute)
+	public EnumResolver(final Attribute<?, ?, ?, ?> attribute)
 	{
 		super(attribute);
 		enumeration = (Enum<Y>) attribute.datatype();
@@ -21,10 +21,10 @@ public final class EnumResolver<Y> extends AttributeResolver
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(final String value)
+	protected Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(final String value)
 	{
 		final var resolvedEnum = extractEnumLiteral(value, enumeration);
-		return resolvedEnum.map(enumVal -> new AttributeResolution<>((Attribute<Y, ?>) feature, enumVal));
+		return resolvedEnum.map(enumVal -> new AttributeResolution<>((Attribute<Y, ?, ?, ?>) feature, enumVal));
 	}
 
 	private Optional<Y> extractEnumLiteral(final String value, final Enum<Y> _enum)

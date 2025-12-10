@@ -49,7 +49,7 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 		{
 			if (feature.id() == referenceId)
 			{
-				if (feature instanceof org.logoce.lmf.model.lang.Relation<?, ?> relation && relation.contains())
+				if (feature instanceof org.logoce.lmf.model.lang.Relation<?, ?, ?, ?> relation && relation.contains())
 				{
 					return true;
 				}

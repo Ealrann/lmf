@@ -119,7 +119,7 @@ public class GenericTest
 		final var car = model.groups().get(1);
 		final var carContainer = model.groups().get(2);
 		final var genericOfContainer = container.generics().get(0);
-		final var cargoRelation = (Relation<?, ?>) container.features().get(0);
+		final var cargoRelation = (Relation<?, ?, ?, ?>) container.features().get(0);
 
 		assertEquals("Container", container.name());
 		assertEquals(1, container.generics().size());

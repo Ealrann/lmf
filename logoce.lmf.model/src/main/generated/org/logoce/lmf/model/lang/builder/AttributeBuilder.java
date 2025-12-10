@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.impl.AttributeImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
-public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder<UnaryType, EffectiveType> {
+public final class AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup extends LMObject> implements Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private String name;
   private boolean immutable;
   private int id;
@@ -28,51 +28,53 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> name(String name) {
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> name(String name) {
     this.name = name;
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> immutable(boolean immutable) {
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> immutable(
+      boolean immutable) {
     this.immutable = immutable;
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> id(int id) {
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> id(int id) {
     this.id = id;
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> many(boolean many) {
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> many(boolean many) {
     this.many = many;
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> mandatory(boolean mandatory) {
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> mandatory(
+      boolean mandatory) {
     this.mandatory = mandatory;
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> addParameter(
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> addParameter(
       Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> addParameters(
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> addParameters(
       final List<GenericParameter> parameters) {
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> datatype(
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> datatype(
       Supplier<Datatype<UnaryType>> datatype) {
     this.datatype = datatype;
     return this;
@@ -82,33 +84,34 @@ public final class AttributeBuilder<UnaryType, EffectiveType> implements Builder
       "unchecked",
       "rawtypes"
   })
-  private AttributeBuilder<UnaryType, EffectiveType> _datatype(
+  private AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> _datatype(
       final Supplier<Datatype<?>> datatype) {
     this.datatype = (Supplier) datatype;
     return this;
   }
 
   @Override
-  public AttributeBuilder<UnaryType, EffectiveType> defaultValue(String defaultValue) {
+  public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> defaultValue(
+      String defaultValue) {
     this.defaultValue = defaultValue;
     return this;
   }
 
   @Override
-  public Attribute<UnaryType, EffectiveType> build() {
+  public Attribute<UnaryType, EffectiveType, ListenerType, ParentGroup> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new AttributeImpl<UnaryType, EffectiveType>(name, immutable, id, many, mandatory, builtParameters, datatype, defaultValue);
+    final var built = new AttributeImpl<UnaryType, EffectiveType, ListenerType, ParentGroup>(name, immutable, id, many, mandatory, builtParameters, datatype, defaultValue);
     return built;
   }
 
   @Override
-  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
+  public <AttributeType> void push(final Attribute<?, ?, ?, ?> attribute,
       final AttributeType value) {
     Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
-  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?, ?, ?> relation,
       final Supplier<RelationType> supplier) {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }

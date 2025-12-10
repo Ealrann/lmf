@@ -44,7 +44,7 @@ final class RelationValueCompletionProvider
 		}
 
 		final var valueContext = context.value();
-		final Relation<?, ?> relationFeature = valueContext != null ? valueContext.relation() : null;
+		final Relation<?, ?, ?, ?> relationFeature = valueContext != null ? valueContext.relation() : null;
 		if (relationFeature == null)
 		{
 			return List.of();

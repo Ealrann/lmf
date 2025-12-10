@@ -34,7 +34,6 @@ public final class ImplementationFeatureUtil
 	public static final SetMapMethodBuilder SETTERMAP_METHOD_BUILDER = new SetMapMethodBuilder();
 	public static final GetMapMethodBuilder GETTERMAP_METHOD_BUILDER = new GetMapMethodBuilder();
 
-	@SuppressWarnings("unchecked")
 	public static CodeInstaller<FeatureResolution> buildFeatureInstallers(final TypeSpec.Builder classBuilder,
 																		  final Group<?> ownerGroup)
 	{
@@ -49,7 +48,6 @@ public final class ImplementationFeatureUtil
 									 CodeInstaller.of(fieldBuilder, classBuilder::addField));
 	}
 
-	@SuppressWarnings("unchecked")
 	public static CodeInstaller<Group<?>> buildTypeInstallers(final GroupInterfaceType interfaceGroupType,
 															  final TypeSpec.Builder classBuilder)
 	{
@@ -88,8 +86,8 @@ public final class ImplementationFeatureUtil
 		final var model = (MetaModel) ModelUtil.root(group);
 		final var groupType = ClassName.get(TargetPathUtil.packageName(model), group.name());
 		final var constantName = GenUtils.toConstantCase(feature.name());
-		final var isRelation = feature instanceof Relation<?, ?>;
-		final var isContainment = feature instanceof Relation<?, ?> relation && relation.contains();
+		final var isRelation = feature instanceof Relation<?, ?, ?, ?>;
+		final var isContainment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
 
 		return Optional.of(CodeBlock.of("newObservableList($T.FeatureIDs.$N, $L, $L)",
 										groupType,
@@ -137,7 +135,7 @@ public final class ImplementationFeatureUtil
 		final var featureIdExpr = CodeBlock.of("$T.FeatureIDs.$N", groupType, constantName);
 
 		final var oldValue = CodeBlock.of("final var oldValue = this.$N", feature.name());
-		final var containment = feature instanceof Relation<?, ?> relation && relation.contains();
+		final var containment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
 		if (containment)
 		{
 			final var setContainer = containmentSetStatement(featureIdExpr, paramName);

@@ -6,6 +6,7 @@ import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.OperationBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Operation extends Named {
   static Builder builder() {
@@ -26,12 +27,12 @@ public interface Operation extends Named {
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String> NAME = Named.Features.NAME;
-    Attribute<String, String> CONTENT = new AttributeBuilder<String, String>().name("content").immutable(true).id(Operation.FeatureIDs.CONTENT).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Relation<Type<?>, Type<?>> RETURN_TYPE = new RelationBuilder<Type<?>, Type<?>>().name("returnType").immutable(true).lazy(true).id(Operation.FeatureIDs.RETURN_TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
-    Relation<GenericParameter, List<GenericParameter>> RETURN_TYPE_PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("returnTypeParameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.RETURN_TYPE_PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
-    Relation<OperationParameter, List<OperationParameter>> PARAMETERS = new RelationBuilder<OperationParameter, List<OperationParameter>>().name("parameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.OPERATION_PARAMETER).build();
-    List<Feature<?, ?>> ALL = List.of(NAME, CONTENT, RETURN_TYPE, RETURN_TYPE_PARAMETERS, PARAMETERS);
+    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Operation> CONTENT = new AttributeBuilder<String, String, Listener<String>, Operation>().name("content").immutable(true).id(Operation.FeatureIDs.CONTENT).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Relation<Type<?>, Type<?>, Listener<Type<?>>, Operation> RETURN_TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, Operation>().name("returnType").immutable(true).lazy(true).id(Operation.FeatureIDs.RETURN_TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Operation> RETURN_TYPE_PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Operation>().name("returnTypeParameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.RETURN_TYPE_PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    Relation<OperationParameter, List<OperationParameter>, Listener<List<OperationParameter>>, Operation> PARAMETERS = new RelationBuilder<OperationParameter, List<OperationParameter>, Listener<List<OperationParameter>>, Operation>().name("parameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.OPERATION_PARAMETER).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, CONTENT, RETURN_TYPE, RETURN_TYPE_PARAMETERS, PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<Operation> {

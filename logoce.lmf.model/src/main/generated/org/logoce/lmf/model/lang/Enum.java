@@ -4,6 +4,7 @@ import java.util.List;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.EnumBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Enum<T> extends Datatype<T> {
   static <T> Builder<T> builder() {
@@ -18,9 +19,9 @@ public interface Enum<T> extends Datatype<T> {
   }
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {
-    Attribute<String, String> NAME = Named.Features.NAME;
-    Attribute<String, List<String>> LITERALS = new AttributeBuilder<String, List<String>>().name("literals").immutable(true).many(true).id(Enum.FeatureIDs.LITERALS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    List<Feature<?, ?>> ALL = List.of(NAME, LITERALS);
+    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    Attribute<String, List<String>, Listener<List<String>>, Enum<?>> LITERALS = new AttributeBuilder<String, List<String>, Listener<List<String>>, Enum<?>>().name("literals").immutable(true).many(true).id(Enum.FeatureIDs.LITERALS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, LITERALS);
   }
 
   interface Builder<T> extends IFeaturedObject.Builder<Enum<T>> {

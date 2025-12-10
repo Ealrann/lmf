@@ -50,17 +50,17 @@ public final class ModelUtil
 		return false;
 	}
 
-	public static Stream<Feature<?, ?>> streamAllFeatures(final Group<?> group)
+	public static Stream<Feature<?, ?, ?, ?>> streamAllFeatures(final Group<?> group)
 	{
 		return streamHierarchy(group).map(Group::features).flatMap(Collection::stream);
 	}
 
-	public static Stream<Relation<?, ?>> streamContainmentFeatures(final Group<?> group)
+	public static Stream<Relation<?, ?, ?, ?>> streamContainmentFeatures(final Group<?> group)
 	{
 		return group.features()
 					.stream()
-					.filter(feature -> feature instanceof Relation<?, ?> relation && relation.contains())
-					.map(feature -> (Relation<?, ?>) feature);
+					.filter(feature -> feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
+					.map(feature -> (Relation<?, ?, ?, ?>) feature);
 	}
 
 	public static Stream<Group<?>> streamHierarchy(Group<?> group)
@@ -95,15 +95,16 @@ public final class ModelUtil
 		final var childStream = root.lmGroup()
 									.features()
 									.stream()
-									.filter(feature -> feature instanceof Relation<?, ?> relation && relation.contains())
-									.flatMap(feature -> streamChildren(root, (Relation<LMObject, ?>) feature));
+									.filter(feature -> feature instanceof Relation<?, ?, ?, ?> relation &&
+													   relation.contains())
+									.flatMap(feature -> streamChildren(root, (Relation<LMObject, ?, ?, ?>) feature));
 
 		return Stream.concat(Stream.of(root), childStream);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static final <T extends LMObject> Stream<T> streamChildren(final LMObject element,
-																	  final Relation<T, ?> relation)
+																	  final Relation<T, ?, ?, ?> relation)
 	{
 		if (relation.many())
 		{
@@ -137,7 +138,7 @@ public final class ModelUtil
 		else return Optional.empty();
 	}
 
-	public record ChildReference(Feature<?, ?> reference, int index)
+	public record ChildReference(Feature<?, ?, ?, ?> reference, int index)
 	{
 		public static ChildReference referenceFromParent(LMObject child)
 		{

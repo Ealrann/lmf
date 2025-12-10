@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang;
 
 import java.util.List;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Datatype<T> extends Type<T> {
   interface FeatureIDs {
@@ -8,7 +9,7 @@ public interface Datatype<T> extends Type<T> {
   }
 
   interface Features<T extends Features<T>> extends Type.Features<T> {
-    Attribute<String, String> NAME = Named.Features.NAME;
-    List<Feature<?, ?>> ALL = List.of(NAME);
+    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME);
   }
 }

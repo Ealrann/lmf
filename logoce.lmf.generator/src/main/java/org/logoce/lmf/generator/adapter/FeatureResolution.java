@@ -26,14 +26,14 @@ import java.util.function.LongConsumer;
 @Adapter
 public final class FeatureResolution implements IAdapter
 {
-	public final Feature<?, ?> feature;
+	public final Feature<?, ?, ?, ?> feature;
 	public final TypeParameter singleType;
 	public final TypeParameter effectiveType;
 	public final TypeParameter rawSingleType;
 	public final TypeParameter rawEffectiveType;
 	public final boolean hasGeneric;
 
-	private FeatureResolution(final Feature<?, ?> feature)
+	private FeatureResolution(final Feature<?, ?, ?, ?> feature)
 	{
 		final var partialResolution = resolveType(feature);
 		final var effectiveType = encapsulateEffectiveType(feature, partialResolution.singleType());
@@ -47,7 +47,7 @@ public final class FeatureResolution implements IAdapter
 		this.hasGeneric = partialResolution.containsGeneric();
 	}
 
-	public Feature<?, ?> feature()
+	public Feature<?, ?, ?, ?> feature()
 	{
 		return feature;
 	}
@@ -84,7 +84,7 @@ public final class FeatureResolution implements IAdapter
 
 	public TypeParameter rawSingleTypeFor(final Group<?> owner)
 	{
-		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
 		{
 			final var bound = TypeResolutionUtil.resolveGenericBinding(generic, owner);
 			if (bound != null)
@@ -93,7 +93,7 @@ public final class FeatureResolution implements IAdapter
 			}
 		}
 
-		if (feature instanceof Relation<?, ?> relation && relation.concept() instanceof Generic<?> generic)
+		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.concept() instanceof Generic<?> generic)
 		{
 			final var extension = generic.extension();
 			if (extension != null && extension.type() != null)
@@ -122,7 +122,7 @@ public final class FeatureResolution implements IAdapter
 			return false;
 		}
 
-		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
 		{
 			return TypeResolutionUtil.resolveGenericBinding(generic, owner) != null;
 		}
@@ -137,7 +137,7 @@ public final class FeatureResolution implements IAdapter
 
 	public TypeParameter implementationType()
 	{
-		if (feature instanceof Relation<?, ?> relation && relation.lazy())
+		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.lazy())
 		{
 			final var suppliedType = singleType.nestIn(ConstantTypes.SUPPLIER);
 			return feature.many() ? suppliedType.nestIn(ConstantTypes.LIST) : suppliedType;
@@ -150,7 +150,7 @@ public final class FeatureResolution implements IAdapter
 
 	public TypeParameter implementationTypeFor(final Group<?> owner)
 	{
-		if (feature instanceof Relation<?, ?> relation && relation.lazy())
+		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.lazy())
 		{
 			final var suppliedType = resolveSingleTypeForOwner(owner).nestIn(ConstantTypes.SUPPLIER);
 			return feature.many() ? suppliedType.nestIn(ConstantTypes.LIST) : suppliedType;
@@ -168,7 +168,7 @@ public final class FeatureResolution implements IAdapter
 
 	public TypeName builderTypeFor(final Group<?> owner)
 	{
-		final var relation = feature instanceof Relation<?, ?>;
+		final var relation = feature instanceof Relation<?, ?, ?, ?>;
 		final var many = feature.many();
 		final var single = singleTypeFor(owner);
 		final var effective = effectiveTypeFor(owner);
@@ -196,7 +196,7 @@ public final class FeatureResolution implements IAdapter
 
 	public ParameterSpec builderParameterSpec(final Group<?> owner)
 	{
-		final var relation = feature instanceof Relation<?, ?>;
+		final var relation = feature instanceof Relation<?, ?, ?, ?>;
 		final var name = MethodUtil.builderSingleParameterName(this);
 		final var resolvedSingleType = resolveSingleTypeForOwner(owner);
 		final var type = relation ? resolvedSingleType.nestIn(ConstantTypes.SUPPLIER) : resolvedSingleType;
@@ -214,7 +214,7 @@ public final class FeatureResolution implements IAdapter
 		}
 		else
 		{
-			final var attribute = (Attribute<?, ?>) feature;
+			final var attribute = (Attribute<?, ?, ?, ?>) feature;
 			final var unit = (Unit<?>) attribute.datatype();
 			return switch (unit.primitive())
 			{
@@ -230,7 +230,7 @@ public final class FeatureResolution implements IAdapter
 
 	private boolean isPrimitive()
 	{
-		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Unit<?> unit)
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute && attribute.datatype() instanceof Unit<?> unit)
 		{
 			return unit.primitive() != Primitive.String;
 		}
@@ -240,7 +240,7 @@ public final class FeatureResolution implements IAdapter
 		}
 	}
 
-	private static TypeParameter encapsulateEffectiveType(final Feature<?, ?> feature, TypeParameter singleType)
+	private static TypeParameter encapsulateEffectiveType(final Feature<?, ?, ?, ?> feature, TypeParameter singleType)
 	{
 		if (feature.many())
 		{
@@ -254,7 +254,7 @@ public final class FeatureResolution implements IAdapter
 
 	private TypeParameter resolveSingleTypeForOwner(final Group<?> owner)
 	{
-		if (feature instanceof Attribute<?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute && attribute.datatype() instanceof Generic<?> generic)
 		{
 			final var bound = TypeResolutionUtil.resolveGenericBinding(generic, owner);
 			if (bound != null)
@@ -265,9 +265,9 @@ public final class FeatureResolution implements IAdapter
 		return singleType;
 	}
 
-	private static PartialFeatureResolution resolveType(final Feature<?, ?> feature)
+	private static PartialFeatureResolution resolveType(final Feature<?, ?, ?, ?> feature)
 	{
-		if (feature instanceof Attribute<?, ?> attribute)
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute)
 			{
 				final var datatype = attribute.datatype();
 				switch (datatype)
@@ -335,7 +335,7 @@ public final class FeatureResolution implements IAdapter
 			}
 			else
 			{
-				final var relation = (Relation<?, ?>) feature;
+				final var relation = (Relation<?, ?, ?, ?>) feature;
 				final var concept = relation.concept();
 				final var parameters = relation.parameters();
 				if (concept instanceof Group<?> group)

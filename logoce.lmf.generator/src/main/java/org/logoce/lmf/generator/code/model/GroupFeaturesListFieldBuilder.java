@@ -31,7 +31,7 @@ public final class GroupFeaturesListFieldBuilder implements CodeBuilder<Group<?>
 		final var initializer = CodeBlock.builder().add("$T.of(", ConstantTypes.LIST);
 
 		boolean first = true;
-		for (final Feature<?, ?> feature : FeatureStreams.distinctFeatures(group).toList())
+		for (final Feature<?, ?, ?, ?> feature : FeatureStreams.distinctFeatures(group).toList())
 		{
 			if (first) first = false;
 			else initializer.add(", ");
@@ -47,4 +47,3 @@ public final class GroupFeaturesListFieldBuilder implements CodeBuilder<Group<?>
 						.build();
 	}
 }
-

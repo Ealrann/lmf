@@ -11,14 +11,14 @@ import java.util.stream.Stream;
 public final class ModelExplorer implements IModelExplorer
 {
 	private final int parentHeight;
-	private final List<Relation<?, ?>> references;
+	private final List<Relation<?, ?, ?, ?>> references;
 
-	public ModelExplorer(List<Relation<?, ?>> references)
+	public ModelExplorer(List<Relation<?, ?, ?, ?>> references)
 	{
 		this(0, references);
 	}
 
-	public ModelExplorer(int parentHeight, List<Relation<?, ?>> references)
+	public ModelExplorer(int parentHeight, List<Relation<?, ?, ?, ?>> references)
 	{
 		this.parentHeight = parentHeight;
 		this.references = List.copyOf(references);
@@ -100,7 +100,7 @@ public final class ModelExplorer implements IModelExplorer
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Stream<LMObject> extractList(LMObject object, final Relation<?, ?> reference)
+	private static Stream<LMObject> extractList(LMObject object, final Relation<?, ?, ?, ?> reference)
 	{
 		final var val = getValue(object, reference);
 		if (val instanceof List)
@@ -113,7 +113,7 @@ public final class ModelExplorer implements IModelExplorer
 		}
 	}
 
-	private static Object getValue(LMObject target, final Relation<?, ?> reference)
+	private static Object getValue(LMObject target, final Relation<?, ?, ?, ?> reference)
 	{
 		return target.get(reference);
 	}

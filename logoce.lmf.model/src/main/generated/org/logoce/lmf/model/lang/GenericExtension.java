@@ -6,6 +6,7 @@ import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.GenericExtensionBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface GenericExtension extends LMObject {
   static Builder builder() {
@@ -23,10 +24,10 @@ public interface GenericExtension extends LMObject {
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).lazy(true).id(GenericExtension.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
-    Attribute<BoundType, BoundType> BOUND_TYPE = new AttributeBuilder<BoundType, BoundType>().name("boundType").immutable(true).id(GenericExtension.FeatureIDs.BOUND_TYPE).datatype(() -> LMCoreModelDefinition.Enums.BOUND_TYPE).build();
-    Relation<GenericParameter, List<GenericParameter>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("parameters").immutable(true).many(true).contains(true).id(GenericExtension.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
-    List<Feature<?, ?>> ALL = List.of(TYPE, BOUND_TYPE, PARAMETERS);
+    Relation<Type<?>, Type<?>, Listener<Type<?>>, GenericExtension> TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, GenericExtension>().name("type").immutable(true).lazy(true).id(GenericExtension.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
+    Attribute<BoundType, BoundType, Listener<BoundType>, GenericExtension> BOUND_TYPE = new AttributeBuilder<BoundType, BoundType, Listener<BoundType>, GenericExtension>().name("boundType").immutable(true).id(GenericExtension.FeatureIDs.BOUND_TYPE).datatype(() -> LMCoreModelDefinition.Enums.BOUND_TYPE).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, GenericExtension> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, GenericExtension>().name("parameters").immutable(true).many(true).contains(true).id(GenericExtension.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(TYPE, BOUND_TYPE, PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<GenericExtension> {

@@ -7,6 +7,8 @@ import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.MetaModelBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
+import org.logoce.lmf.model.notification.listener.BooleanListener;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface MetaModel extends Model {
   static Builder builder() {
@@ -38,19 +40,19 @@ public interface MetaModel extends Model {
   }
 
   interface Features<T extends Features<T>> extends Model.Features<T> {
-    Attribute<String, String> NAME = Named.Features.NAME;
-    Attribute<String, String> DOMAIN = Model.Features.DOMAIN;
-    Attribute<String, List<String>> IMPORTS = Model.Features.IMPORTS;
-    Attribute<String, List<String>> METAMODELS = Model.Features.METAMODELS;
-    Relation<Group<?>, List<Group<?>>> GROUPS = new RelationBuilder<Group<?>, List<Group<?>>>().name("groups").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.GROUPS).concept(() -> LMCoreModelDefinition.Groups.GROUP).build();
-    Relation<Enum<?>, List<Enum<?>>> ENUMS = new RelationBuilder<Enum<?>, List<Enum<?>>>().name("enums").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.ENUMS).concept(() -> LMCoreModelDefinition.Groups.ENUM).build();
-    Relation<Unit<?>, List<Unit<?>>> UNITS = new RelationBuilder<Unit<?>, List<Unit<?>>>().name("units").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.UNITS).concept(() -> LMCoreModelDefinition.Groups.UNIT).build();
-    Relation<Alias, List<Alias>> ALIASES = new RelationBuilder<Alias, List<Alias>>().name("aliases").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.ALIASES).concept(() -> LMCoreModelDefinition.Groups.ALIAS).build();
-    Relation<JavaWrapper<?>, List<JavaWrapper<?>>> JAVA_WRAPPERS = new RelationBuilder<JavaWrapper<?>, List<JavaWrapper<?>>>().name("javaWrappers").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.JAVA_WRAPPERS).concept(() -> LMCoreModelDefinition.Groups.JAVA_WRAPPER).build();
-    Attribute<IModelPackage, IModelPackage> LM_PACKAGE = new AttributeBuilder<IModelPackage, IModelPackage>().name("lmPackage").immutable(true).mandatory(true).id(MetaModel.FeatureIDs.LM_PACKAGE).datatype(() -> LMCoreModelDefinition.JavaWrappers.I_MODEL_PACKAGE).build();
-    Attribute<Boolean, Boolean> GEN_NAME_PACKAGE = new AttributeBuilder<Boolean, Boolean>().name("genNamePackage").immutable(true).defaultValue("true").id(MetaModel.FeatureIDs.GEN_NAME_PACKAGE).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
-    Attribute<String, String> EXTRA_PACKAGE = new AttributeBuilder<String, String>().name("extraPackage").immutable(true).id(MetaModel.FeatureIDs.EXTRA_PACKAGE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, METAMODELS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE, GEN_NAME_PACKAGE, EXTRA_PACKAGE);
+    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Model> DOMAIN = Model.Features.DOMAIN;
+    Attribute<String, List<String>, Listener<List<String>>, Model> IMPORTS = Model.Features.IMPORTS;
+    Attribute<String, List<String>, Listener<List<String>>, Model> METAMODELS = Model.Features.METAMODELS;
+    Relation<Group<?>, List<Group<?>>, Listener<List<Group<?>>>, MetaModel> GROUPS = new RelationBuilder<Group<?>, List<Group<?>>, Listener<List<Group<?>>>, MetaModel>().name("groups").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.GROUPS).concept(() -> LMCoreModelDefinition.Groups.GROUP).build();
+    Relation<Enum<?>, List<Enum<?>>, Listener<List<Enum<?>>>, MetaModel> ENUMS = new RelationBuilder<Enum<?>, List<Enum<?>>, Listener<List<Enum<?>>>, MetaModel>().name("enums").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.ENUMS).concept(() -> LMCoreModelDefinition.Groups.ENUM).build();
+    Relation<Unit<?>, List<Unit<?>>, Listener<List<Unit<?>>>, MetaModel> UNITS = new RelationBuilder<Unit<?>, List<Unit<?>>, Listener<List<Unit<?>>>, MetaModel>().name("units").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.UNITS).concept(() -> LMCoreModelDefinition.Groups.UNIT).build();
+    Relation<Alias, List<Alias>, Listener<List<Alias>>, MetaModel> ALIASES = new RelationBuilder<Alias, List<Alias>, Listener<List<Alias>>, MetaModel>().name("aliases").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.ALIASES).concept(() -> LMCoreModelDefinition.Groups.ALIAS).build();
+    Relation<JavaWrapper<?>, List<JavaWrapper<?>>, Listener<List<JavaWrapper<?>>>, MetaModel> JAVA_WRAPPERS = new RelationBuilder<JavaWrapper<?>, List<JavaWrapper<?>>, Listener<List<JavaWrapper<?>>>, MetaModel>().name("javaWrappers").immutable(true).many(true).contains(true).id(MetaModel.FeatureIDs.JAVA_WRAPPERS).concept(() -> LMCoreModelDefinition.Groups.JAVA_WRAPPER).build();
+    Attribute<IModelPackage, IModelPackage, Listener<IModelPackage>, MetaModel> LM_PACKAGE = new AttributeBuilder<IModelPackage, IModelPackage, Listener<IModelPackage>, MetaModel>().name("lmPackage").immutable(true).mandatory(true).id(MetaModel.FeatureIDs.LM_PACKAGE).datatype(() -> LMCoreModelDefinition.JavaWrappers.I_MODEL_PACKAGE).build();
+    Attribute<Boolean, Boolean, BooleanListener, MetaModel> GEN_NAME_PACKAGE = new AttributeBuilder<Boolean, Boolean, BooleanListener, MetaModel>().name("genNamePackage").immutable(true).defaultValue("true").id(MetaModel.FeatureIDs.GEN_NAME_PACKAGE).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Attribute<String, String, Listener<String>, MetaModel> EXTRA_PACKAGE = new AttributeBuilder<String, String, Listener<String>, MetaModel>().name("extraPackage").immutable(true).id(MetaModel.FeatureIDs.EXTRA_PACKAGE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, METAMODELS, GROUPS, ENUMS, UNITS, ALIASES, JAVA_WRAPPERS, LM_PACKAGE, GEN_NAME_PACKAGE, EXTRA_PACKAGE);
   }
 
   interface Builder extends IFeaturedObject.Builder<MetaModel> {

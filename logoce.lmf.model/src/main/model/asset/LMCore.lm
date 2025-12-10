@@ -54,6 +54,9 @@
 		(includes group=@Named)
 		(Generic UnaryType)
 		(Generic EffectiveType)
+		(Generic ListenerType)
+		(Generic ParentGroup
+			(extension boundType=extends type=@LMObject))
 		(-att name=immutable datatype=@boolean)
 		(-att id @int)
 		(-att name=many datatype=@boolean)
@@ -63,9 +66,14 @@
 	(Definition Attribute
 		(includes group=@Feature
 			(parameters ^UnaryType)
-			(parameters ^EffectiveType))
+			(parameters ^EffectiveType)
+			(parameters ^ListenerType)
+			(parameters ^ParentGroup))
 		(Generic UnaryType)
 		(Generic EffectiveType)
+		(Generic ListenerType)
+		(Generic ParentGroup
+			(extension boundType=extends type=@LMObject))
 		(-refers datatype lazy [1..1] @Datatype
 		    (parameters type=^UnaryType))
 		(-att name=defaultValue /units.7))
@@ -73,10 +81,15 @@
 	(Definition Relation
 		(includes group=@Feature
 			(parameters ^UnaryType)
-			(parameters ^EffectiveType))
+			(parameters ^EffectiveType)
+			(parameters ^ListenerType)
+			(parameters ^ParentGroup))
 		(Generic UnaryType
 			(extension boundType=extends type=@LMObject))
 		(Generic EffectiveType)
+		(Generic ListenerType)
+		(Generic ParentGroup
+			(extension boundType=extends type=@LMObject))
 		(-refers concept lazy [1..1] @Concept
 		    (parameters type=^UnaryType))
 		(-att lazy datatype=/units.2)

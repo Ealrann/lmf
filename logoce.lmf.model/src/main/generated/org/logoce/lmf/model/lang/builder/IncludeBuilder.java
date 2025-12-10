@@ -57,13 +57,13 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
-  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
+  public <AttributeType> void push(final Attribute<?, ?, ?, ?> attribute,
       final AttributeType value) {
     Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
-  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?, ?, ?> relation,
       final Supplier<RelationType> supplier) {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }

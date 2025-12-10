@@ -30,7 +30,11 @@ public class RelationPushMethodBuilder implements CodeBuilder<List<FeatureResolu
 		final var attributeType = ClassName.get(Relation.class);
 		final var variableName = TypeVariableName.get("RelationType", ConstantTypes.LM_OBJECT);
 		final var supplierType = ClassName.get(Supplier.class);
-		final var paramAttribute = TypeParameter.of(attributeType, List.of(variableName, GenUtils.WILDCARD));
+		final var paramAttribute = TypeParameter.of(attributeType,
+													List.of(variableName,
+															GenUtils.WILDCARD,
+															GenUtils.WILDCARD,
+															GenUtils.WILDCARD));
 		final var suppliedType = TypeParameter.of(supplierType, variableName);
 
 		return MethodSpec.methodBuilder("push")

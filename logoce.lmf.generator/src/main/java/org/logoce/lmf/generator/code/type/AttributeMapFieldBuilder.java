@@ -85,6 +85,6 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 
 	private static boolean isAttribute(final FeatureResolution f)
 	{
-		return f.feature() instanceof Attribute<?, ?>;
+		return f.feature() instanceof Attribute<?, ?, ?, ?>;
 	}
 }

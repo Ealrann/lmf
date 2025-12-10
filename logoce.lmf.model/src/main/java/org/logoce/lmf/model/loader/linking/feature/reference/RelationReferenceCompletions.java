@@ -44,7 +44,7 @@ public final class RelationReferenceCompletions
 	 */
 	public static List<RelationCandidate> collectRelationCandidates(final Model owningModel,
 																	final List<? extends LinkNode<?, PNode>> linkTrees,
-																	final Relation<?, ?> relation,
+																	final Relation<?, ?, ?, ?> relation,
 																	final ModelRegistry registry)
 	{
 		if (relation == null)
@@ -193,7 +193,7 @@ public final class RelationReferenceCompletions
 	private static String resolveNameFromLinkNode(
 		final org.logoce.lmf.model.loader.linking.tree.LinkNodeFull<?, PNode> node)
 	{
-		for (final ResolutionAttempt<org.logoce.lmf.model.lang.Attribute<?, ?>> attempt : node.attributeResolutions())
+		for (final ResolutionAttempt<org.logoce.lmf.model.lang.Attribute<?, ?, ?, ?>> attempt : node.attributeResolutions())
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&

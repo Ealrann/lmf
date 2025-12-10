@@ -44,19 +44,25 @@ public interface LMCoreModelDefinition {
     interface FEATURE {
       Generic<?> UNARY_TYPE = new GenericBuilder<>().name("UnaryType").build();
       Generic<?> EFFECTIVE_TYPE = new GenericBuilder<>().name("EffectiveType").build();
-      List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE);
+      Generic<?> LISTENER_TYPE = new GenericBuilder<>().name("ListenerType").build();
+      Generic<? extends LMObject> PARENT_GROUP = new GenericBuilder<LMObject>().name("ParentGroup").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
+      List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE, LISTENER_TYPE, PARENT_GROUP);
     }
 
     interface ATTRIBUTE {
       Generic<?> UNARY_TYPE = new GenericBuilder<>().name("UnaryType").build();
       Generic<?> EFFECTIVE_TYPE = new GenericBuilder<>().name("EffectiveType").build();
-      List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE);
+      Generic<?> LISTENER_TYPE = new GenericBuilder<>().name("ListenerType").build();
+      Generic<? extends LMObject> PARENT_GROUP = new GenericBuilder<LMObject>().name("ParentGroup").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
+      List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE, LISTENER_TYPE, PARENT_GROUP);
     }
 
     interface RELATION {
       Generic<? extends LMObject> UNARY_TYPE = new GenericBuilder<LMObject>().name("UnaryType").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
       Generic<?> EFFECTIVE_TYPE = new GenericBuilder<>().name("EffectiveType").build();
-      List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE);
+      Generic<?> LISTENER_TYPE = new GenericBuilder<>().name("ListenerType").build();
+      Generic<? extends LMObject> PARENT_GROUP = new GenericBuilder<LMObject>().name("ParentGroup").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
+      List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE, LISTENER_TYPE, PARENT_GROUP);
     }
 
     interface DATATYPE {
@@ -94,9 +100,9 @@ public interface LMCoreModelDefinition {
     Group<Concept<?>> CONCEPT = new GroupBuilder<Concept<?>>().name("Concept").addInclude(() -> new IncludeBuilder<Type<?>>().group(() -> TYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.CONCEPT.ALL.get(0)).build()).build()).addFeatures(Concept.Features.ALL).addGenerics(Generics.CONCEPT.ALL).build();
     Group<Group<?>> GROUP = new GroupBuilder<Group<?>>().name("Group").concrete(true).addInclude(() -> new IncludeBuilder<Type<?>>().group(() -> TYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.GROUP.ALL.get(0)).build()).build()).addInclude(() -> new IncludeBuilder<Concept<?>>().group(() -> CONCEPT).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.GROUP.ALL.get(0)).build()).build()).addFeatures(Group.Features.ALL).addGenerics(Generics.GROUP.ALL).lmBuilder(new BuilderSupplier<>(GroupBuilder::new)).build();
     Group<Include<?>> INCLUDE = new GroupBuilder<Include<?>>().name("Include").concrete(true).addInclude(() -> new IncludeBuilder<LMObject>().group(() -> LM_OBJECT).build()).addFeatures(Include.Features.ALL).addGenerics(Generics.INCLUDE.ALL).lmBuilder(new BuilderSupplier<>(IncludeBuilder::new)).build();
-    Group<Feature<?, ?>> FEATURE = new GroupBuilder<Feature<?, ?>>().name("Feature").addInclude(() -> new IncludeBuilder<Named>().group(() -> NAMED).build()).addFeatures(Feature.Features.ALL).addGenerics(Generics.FEATURE.ALL).build();
-    Group<Attribute<?, ?>> ATTRIBUTE = new GroupBuilder<Attribute<?, ?>>().name("Attribute").concrete(true).addInclude(() -> new IncludeBuilder<Feature<?, ?>>().group(() -> FEATURE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(0)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(1)).build()).build()).addFeatures(Attribute.Features.ALL).addGenerics(Generics.ATTRIBUTE.ALL).lmBuilder(new BuilderSupplier<>(AttributeBuilder::new)).build();
-    Group<Relation<?, ?>> RELATION = new GroupBuilder<Relation<?, ?>>().name("Relation").concrete(true).addInclude(() -> new IncludeBuilder<Feature<?, ?>>().group(() -> FEATURE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(0)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(1)).build()).build()).addFeatures(Relation.Features.ALL).addGenerics(Generics.RELATION.ALL).lmBuilder(new BuilderSupplier<>(RelationBuilder::new)).build();
+    Group<Feature<?, ?, ?, ?>> FEATURE = new GroupBuilder<Feature<?, ?, ?, ?>>().name("Feature").addInclude(() -> new IncludeBuilder<Named>().group(() -> NAMED).build()).addFeatures(Feature.Features.ALL).addGenerics(Generics.FEATURE.ALL).build();
+    Group<Attribute<?, ?, ?, ?>> ATTRIBUTE = new GroupBuilder<Attribute<?, ?, ?, ?>>().name("Attribute").concrete(true).addInclude(() -> new IncludeBuilder<Feature<?, ?, ?, ?>>().group(() -> FEATURE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(0)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(1)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(2)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(3)).build()).build()).addFeatures(Attribute.Features.ALL).addGenerics(Generics.ATTRIBUTE.ALL).lmBuilder(new BuilderSupplier<>(AttributeBuilder::new)).build();
+    Group<Relation<?, ?, ?, ?>> RELATION = new GroupBuilder<Relation<?, ?, ?, ?>>().name("Relation").concrete(true).addInclude(() -> new IncludeBuilder<Feature<?, ?, ?, ?>>().group(() -> FEATURE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(0)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(1)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(2)).build()).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(3)).build()).build()).addFeatures(Relation.Features.ALL).addGenerics(Generics.RELATION.ALL).lmBuilder(new BuilderSupplier<>(RelationBuilder::new)).build();
     Group<Operation> OPERATION = new GroupBuilder<Operation>().name("Operation").concrete(true).addInclude(() -> new IncludeBuilder<Named>().group(() -> NAMED).build()).addFeatures(Operation.Features.ALL).lmBuilder(new BuilderSupplier<>(OperationBuilder::new)).build();
     Group<OperationParameter> OPERATION_PARAMETER = new GroupBuilder<OperationParameter>().name("OperationParameter").concrete(true).addInclude(() -> new IncludeBuilder<Named>().group(() -> NAMED).build()).addFeatures(OperationParameter.Features.ALL).lmBuilder(new BuilderSupplier<>(OperationParameterBuilder::new)).build();
     Group<Datatype<?>> DATATYPE = new GroupBuilder<Datatype<?>>().name("Datatype").addInclude(() -> new IncludeBuilder<Type<?>>().group(() -> TYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.DATATYPE.ALL.get(0)).build()).build()).addFeatures(Datatype.Features.ALL).addGenerics(Generics.DATATYPE.ALL).build();

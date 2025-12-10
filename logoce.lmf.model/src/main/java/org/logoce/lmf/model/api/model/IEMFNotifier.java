@@ -15,26 +15,26 @@ public interface IEMFNotifier
 	void sulkNoParam(Runnable listener, int... featureIDs);
 
 
-	void listen(Consumer<Notification> listener, List<Feature<?, ?>> features);
-	void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features);
+	void listen(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features);
+	void sulk(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features);
 
-	void listenNoParam(Runnable listener, List<Feature<?, ?>> features);
-	void sulkNoParam(Runnable listener, List<Feature<?, ?>> features);
+	void listenNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features);
+	void sulkNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features);
 
-	default void listen(Consumer<Notification> listener, Feature<?, ?> feature)
+	default void listen(Consumer<Notification> listener, Feature<?, ?, ?, ?> feature)
 	{
 		listen(listener, feature.id());
 	}
-	default void sulk(Consumer<Notification> listener, Feature<?, ?> feature)
+	default void sulk(Consumer<Notification> listener, Feature<?, ?, ?, ?> feature)
 	{
 		sulk(listener, feature.id());
 	}
 
-	default void listenNoParam(Runnable listener, Feature<?, ?> feature)
+	default void listenNoParam(Runnable listener, Feature<?, ?, ?, ?> feature)
 	{
 		listenNoParam(listener, feature.id());
 	}
-	default void sulkNoParam(Runnable listener, Feature<?, ?> feature)
+	default void sulkNoParam(Runnable listener, Feature<?, ?, ?, ?> feature)
 	{
 		sulkNoParam(listener, feature.id());
 	}

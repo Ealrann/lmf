@@ -6,7 +6,7 @@ import org.logoce.lmf.model.lang.Relation;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record ReferenceExplorer(Relation<?, ?> reference)
+public record ReferenceExplorer(Relation<?, ?, ?, ?> reference)
 {
 	@SuppressWarnings("unchecked")
 	public Stream<LMObject> stream(LMObject object)
@@ -27,4 +27,3 @@ public record ReferenceExplorer(Relation<?, ?> reference)
 		return target.get(reference);
 	}
 }
-

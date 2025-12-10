@@ -95,9 +95,9 @@ public final class LinkNodeBuilder<I extends PNode>
 		final var containmentName = node.type().firstToken();
 		final var groupFromParent = parentGroup.features()
 											   .stream()
-											   .filter(feature -> feature instanceof Relation<?, ?> relation &&
+											   .filter(feature -> feature instanceof Relation<?, ?, ?, ?> relation &&
 																  relation.name().equals(containmentName))
-											   .map(feature -> ((Relation<?, ?>) feature).concept())
+											   .map(feature -> ((Relation<?, ?, ?, ?>) feature).concept())
 											   .findAny()
 											   .orElseThrow(() -> buildException(node, containmentName, parentGroup));
 
@@ -105,21 +105,21 @@ public final class LinkNodeBuilder<I extends PNode>
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Relation<T, ?> resolveContainmentRelation(final PGroup<I> node,
-																		   final Group<?> parentGroup,
-																		   final Group<T> childGroup)
+	private <T extends LMObject> Relation<T, ?, ?, ?> resolveContainmentRelation(final PGroup<I> node,
+																				final Group<?> parentGroup,
+																				final Group<T> childGroup)
 	{
 		final var containmentName = node.type().firstToken();
 		final var fromName = resolveFromName(parentGroup, containmentName);
-		return (Relation<T, ?>) fromName.or(() -> resolveFromGroup(parentGroup, childGroup))
-										.orElseThrow(() -> buildException(node,
-																		  parentGroup,
-																		  childGroup.name(),
-																		  containmentName));
+		return (Relation<T, ?, ?, ?>) fromName.or(() -> resolveFromGroup(parentGroup, childGroup))
+											   .orElseThrow(() -> buildException(node,
+																				 parentGroup,
+																				 childGroup.name(),
+																				 containmentName));
 	}
 
-	private <T extends LMObject> Optional<? extends Relation<?, ?>> resolveFromGroup(final Group<?> parentGroup,
-																					 final Group<T> childGroup)
+	private <T extends LMObject> Optional<? extends Relation<?, ?, ?, ?>> resolveFromGroup(final Group<?> parentGroup,
+																						   final Group<T> childGroup)
 	{
 		return metaResolvers.get(parentGroup)
 							.streamContainmentRelations()
@@ -127,7 +127,7 @@ public final class LinkNodeBuilder<I extends PNode>
 							.findAny();
 	}
 
-	private Optional<Relation<?, ?>> resolveFromName(final Group<?> parentGroup, final String containmentName)
+	private Optional<Relation<?, ?, ?, ?>> resolveFromName(final Group<?> parentGroup, final String containmentName)
 	{
 		return metaResolvers.get(parentGroup)
 							.streamContainmentRelations()

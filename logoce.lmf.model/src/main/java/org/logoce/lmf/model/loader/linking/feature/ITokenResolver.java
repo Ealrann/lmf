@@ -21,7 +21,7 @@ public interface ITokenResolver
 			this.registry = registry;
 		}
 
-		public Optional<RelationResolver> buildRelationResolver(final Relation<?, ?> relation)
+		public Optional<RelationResolver> buildRelationResolver(final Relation<?, ?, ?, ?> relation)
 		{
 			if (!relation.contains())
 			{
@@ -33,7 +33,7 @@ public interface ITokenResolver
 			}
 		}
 
-		public static Optional<AttributeResolver> buildAttributeResolver(final Attribute<?, ?> attribute)
+		public static Optional<AttributeResolver> buildAttributeResolver(final Attribute<?, ?, ?, ?> attribute)
 		{
 			if (attribute.datatype() instanceof Enum<?>)
 			{

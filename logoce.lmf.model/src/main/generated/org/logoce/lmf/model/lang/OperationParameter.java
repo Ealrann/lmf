@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.OperationParameterBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface OperationParameter extends Named {
   static Builder builder() {
@@ -21,10 +22,10 @@ public interface OperationParameter extends Named {
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String> NAME = Named.Features.NAME;
-    Relation<Type<?>, Type<?>> TYPE = new RelationBuilder<Type<?>, Type<?>>().name("type").immutable(true).mandatory(true).lazy(true).id(OperationParameter.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
-    Relation<GenericParameter, List<GenericParameter>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>>().name("parameters").immutable(true).many(true).contains(true).id(OperationParameter.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
-    List<Feature<?, ?>> ALL = List.of(NAME, TYPE, PARAMETERS);
+    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    Relation<Type<?>, Type<?>, Listener<Type<?>>, OperationParameter> TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, OperationParameter>().name("type").immutable(true).mandatory(true).lazy(true).id(OperationParameter.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, OperationParameter> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, OperationParameter>().name("parameters").immutable(true).many(true).contains(true).id(OperationParameter.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, TYPE, PARAMETERS);
   }
 
   interface Builder extends IFeaturedObject.Builder<OperationParameter> {

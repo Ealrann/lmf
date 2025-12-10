@@ -51,6 +51,6 @@ public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureR
 
 	public static boolean isManyRelation(final FeatureResolution resolution)
 	{
-		return resolution.feature() instanceof Relation<?, ?> relation && relation.many();
+		return resolution.feature() instanceof Relation<?, ?, ?, ?> relation && relation.many();
 	}
 }

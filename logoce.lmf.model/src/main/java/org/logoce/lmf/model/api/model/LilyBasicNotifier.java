@@ -44,7 +44,7 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
-	public final void listen(Consumer<Notification> listener, List<Feature<?, ?>> features)
+	public final void listen(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		listenerMap.listen(listener, features);
 	}
@@ -56,7 +56,7 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
-	public final void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features)
+	public final void sulk(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		listenerMap.sulk(listener, features);
 	}
@@ -68,7 +68,7 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
-	public final void listenNoParam(Runnable listener, List<Feature<?, ?>> features)
+	public final void listenNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		listenerMap.listenNoParam(listener, features);
 	}
@@ -80,11 +80,10 @@ public abstract class LilyBasicNotifier implements IEMFNotifier
 	}
 
 	@Override
-	public final void sulkNoParam(Runnable listener, List<Feature<?, ?>> features)
+	public final void sulkNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		listenerMap.sulkNoParam(listener, features);
 	}
 
 	public abstract Group<?> lmGroup();
 }
-

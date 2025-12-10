@@ -32,12 +32,12 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	@Override
-	public final Relation<?, ?> lmContainingFeature()
+	public final Relation<?, ?, ?, ?> lmContainingFeature()
 	{
 		if (container == null || containingFeatureId == -1) return null;
 		final var group = container.lmGroup();
 		final int featureIndex = container.featureIndex(containingFeatureId);
-		return (Relation<?, ?>) group.features().get(featureIndex);
+		return (Relation<?, ?, ?, ?>) group.features().get(featureIndex);
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	@Override
-	public <T> T get(final Feature<?, T> feature)
+	public <T> T get(final Feature<?, ?, ?, ?> feature)
 	{
 		return internalGet(feature.id());
 	}
@@ -74,9 +74,11 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	@Override
-	public <T> void set(final Feature<?, T> feature, final T value)
+	public <T> void set(final Feature<?, ?, ?, ?> feature, final T value)
 	{
-		internalSet(feature, value);
+		@SuppressWarnings("unchecked")
+		final var typedFeature = (Feature<?, T, ?, ?>) feature;
+		internalSet(typedFeature, value);
 	}
 
 	@Override
@@ -87,13 +89,13 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void castSet(final Feature<?, T> feature, final Object value)
+	private <T> void castSet(final Feature<?, ?, ?, ?> feature, final Object value)
 	{
-		internalSet(feature, (T) value);
+		internalSet((Feature<?, T, ?, ?>) feature, (T) value);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T, O> void internalSet(final Feature<?, T> feature, final T value)
+	private <T, O> void internalSet(final Feature<?, T, ?, ?> feature, final T value)
 	{
 		final var getMap = (FeatureGetter<O>) getterMap();
 		final var setMap = (FeatureSetter<O>) setterMap();
@@ -102,7 +104,7 @@ public abstract class FeaturedObject extends AdaptableStructureObject implements
 		final var oldValue = getMap.get((O) this, featureId);
 		setMap.set((O) this, featureId, value);
 		final var notification = new SetNotifiation((LMObject) this, feature.id(), value, oldValue);
-		if (feature instanceof Relation<?, ?> relation && relation.contains())
+		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
 		{
 			structureNotify(notification);
 		}

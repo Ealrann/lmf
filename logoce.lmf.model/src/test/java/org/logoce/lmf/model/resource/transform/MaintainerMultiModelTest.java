@@ -108,7 +108,7 @@ public class MaintainerMultiModelTest
 					.orElseThrow();
 	}
 
-	private static Relation<?, ?> findRelation(final Group<?> group, final String name)
+	private static Relation<?, ?, ?, ?> findRelation(final Group<?> group, final String name)
 	{
 		return group.features()
 					.stream()

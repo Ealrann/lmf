@@ -5,9 +5,8 @@ import org.logoce.lmf.model.resource.interpretation.PFeature;
 
 import java.util.NoSuchElementException;
 
-public record ResolutionAttempt<T extends Feature<?, ?>>(PFeature feature,
-														 FeatureResolution<T> resolution,
-														 NoSuchElementException exception)
+public record ResolutionAttempt<T extends Feature<?, ?, ?, ?>>(PFeature feature,
+															   FeatureResolution<T> resolution,
+															   NoSuchElementException exception)
 {
 }
-

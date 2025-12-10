@@ -9,9 +9,8 @@ import org.logoce.lmf.model.resource.parsing.PNode;
 import java.util.List;
 
 public record LinkInfo<T extends LMObject, I extends PNode>(I pNode,
-															Relation<T, ?> containingRelation,
+															Relation<T, ?, ?, ?> containingRelation,
 															List<PFeature> features,
 															ModelGroup<T> modelGroup)
 {
 }
-

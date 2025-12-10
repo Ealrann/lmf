@@ -84,13 +84,13 @@ public final class BuilderFeatureUtil
 		{
 			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
 		}
-		else if (feature instanceof Relation<?, ?> && !mandatory)
+		else if (feature instanceof Relation<?, ?, ?, ?> && !mandatory)
 		{
 			return Optional.of(CodeBlock.of("() -> null"));
 		}
 		else if (immutable && !mandatory)
 		{
-			if (feature instanceof Relation<?, ?>)
+			if (feature instanceof Relation<?, ?, ?, ?>)
 			{
 				return Optional.of(CodeBlock.of("() -> null"));
 			}
@@ -148,7 +148,7 @@ public final class BuilderFeatureUtil
 	{
 		final var baseType = resolution.rawSingleTypeFor(ownerGroup);
 		final var feature = resolution.feature();
-		final var isRelation = feature instanceof Relation<?, ?>;
+		final var isRelation = feature instanceof Relation<?, ?, ?, ?>;
 
 		if (isRelation)
 		{

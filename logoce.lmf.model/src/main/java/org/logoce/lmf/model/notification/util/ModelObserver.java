@@ -19,12 +19,12 @@ public final class ModelObserver
 
 	private boolean deliver = true;
 
-	public ModelObserver(final Consumer<Notification> listener, final Relation<?, ?> structuralFeature)
+	public ModelObserver(final Consumer<Notification> listener, final Relation<?, ?, ?, ?> structuralFeature)
 	{
 		this(listener, new int[]{structuralFeature.id()});
 	}
 
-	public ModelObserver(final Consumer<Notification> listener, final List<Relation<?, ?>> structuralFeatures)
+	public ModelObserver(final Consumer<Notification> listener, final List<Relation<?, ?, ?, ?>> structuralFeatures)
 	{
 		this(listener, structuralFeatures.stream().mapToInt(Relation::id).toArray());
 	}
@@ -137,7 +137,7 @@ public final class ModelObserver
 		}
 
 		@SuppressWarnings("unchecked")
-		private static void actOnChildren(final Relation<?, ?> feature, final Object value,
+		private static void actOnChildren(final Relation<?, ?, ?, ?> feature, final Object value,
 										  final Consumer<LMObject> action)
 		{
 			if (!feature.many())
@@ -154,7 +154,7 @@ public final class ModelObserver
 			}
 		}
 
-		private static LMObject getValue(final LMObject target, final Relation<?, ?> feature)
+		private static LMObject getValue(final LMObject target, final Relation<?, ?, ?, ?> feature)
 		{
 			return (LMObject) target.get(feature);
 		}
@@ -192,14 +192,14 @@ public final class ModelObserver
 			child.sulk(childListener, subFeatureId);
 		}
 
-		private Relation<?, ?> resolveRelation(final LMObject target, final int featureId)
+		private Relation<?, ?, ?, ?> resolveRelation(final LMObject target, final int featureId)
 		{
 			final var group = target.lmGroup();
 			for (final var feature : group.features())
 			{
 				if (feature.id() == featureId)
 				{
-					if (feature instanceof Relation<?, ?> relation)
+					if (feature instanceof Relation<?, ?, ?, ?> relation)
 					{
 						return relation;
 					}

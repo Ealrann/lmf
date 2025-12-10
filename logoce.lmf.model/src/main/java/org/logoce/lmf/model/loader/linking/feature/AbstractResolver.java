@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class AbstractResolver<T extends Feature<?, ?>> implements ITokenResolver
+public abstract class AbstractResolver<T extends Feature<?, ?, ?, ?>> implements ITokenResolver
 {
 	protected final T feature;
 
@@ -56,7 +56,7 @@ public abstract class AbstractResolver<T extends Feature<?, ?>> implements IToke
 		}
 	}
 
-	public static final class MultipleResolution<T extends Feature<?, ?>> implements FeatureResolution<T>
+	public static final class MultipleResolution<T extends Feature<?, ?, ?, ?>> implements FeatureResolution<T>
 	{
 		private final List<FeatureResolution<T>> resolutions;
 		private final T feature;
@@ -80,4 +80,3 @@ public abstract class AbstractResolver<T extends Feature<?, ?>> implements IToke
 		}
 	}
 }
-

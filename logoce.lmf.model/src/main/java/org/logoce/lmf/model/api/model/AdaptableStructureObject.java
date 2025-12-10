@@ -30,7 +30,7 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	protected final void eNotify(final Notification notification)
 	{
 		final var feature = notification.feature();
-		final boolean isContainment = feature instanceof Relation<?, ?> relation && relation.contains();
+		final boolean isContainment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
 		if (isContainment) NotificationUnifier.unifyAdded(notification, this::setupChild);
 		super.eNotify(notification);
 		if (isContainment) NotificationUnifier.unifyRemoved(notification, this::disposeChild);
@@ -171,7 +171,7 @@ public abstract class AdaptableStructureObject extends LilyBasicNotifier impleme
 	}
 
 	@SuppressWarnings("unchecked")
-	private Stream<LMObject> streamReference(Relation<?, ?> ref)
+	private Stream<LMObject> streamReference(Relation<?, ?, ?, ?> ref)
 	{
 		if (ref.many())
 		{

@@ -40,13 +40,13 @@ public record CompletionContext(
 								Group<?> headerGroup,
 								HeaderPositionKind positionKind,
 								Group<?> semanticGroup,
-								Feature<?, ?> semanticFeature,
+								Feature<?, ?, ?, ?> semanticFeature,
 								String featureName)
 	{
 	}
 
-	public record ValueContext(Attribute<?, ?> attribute,
-							   Relation<?, ?> relation,
+	public record ValueContext(Attribute<?, ?, ?, ?> attribute,
+							   Relation<?, ?, ?, ?> relation,
 							   Concept<?> relationConcept,
 							   TypeUsageKind typeUsageKind)
 	{

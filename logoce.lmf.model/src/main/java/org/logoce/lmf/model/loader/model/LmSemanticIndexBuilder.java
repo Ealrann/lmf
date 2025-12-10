@@ -153,7 +153,7 @@ public final class LmSemanticIndexBuilder
 			}
 
 			fullRoot.streamTree().forEach(node -> {
-				for (final ResolutionAttempt<Relation<?, ?>> attempt : node.relationResolutions())
+				for (final ResolutionAttempt<Relation<?, ?, ?, ?>> attempt : node.relationResolutions())
 				{
 					final var resolution = attempt.resolution();
 					final LMObject target;
@@ -237,7 +237,7 @@ public final class LmSemanticIndexBuilder
 
 				// Decide whether this header denotes a relation (for example
 				// 'ceo' in Peugeot.lm) or a type/alias (for example 'CarParc' or '-att').
-				final Relation<?, ?> containment = node.containingRelation();
+				final Relation<?, ?, ?, ?> containment = node.containingRelation();
 				LMObject target = null;
 
 				if (containment != null && headerToken.equals(containment.name()))
@@ -307,7 +307,7 @@ public final class LmSemanticIndexBuilder
 			}
 
 			fullRoot.streamTree().forEach(node -> {
-				for (final ResolutionAttempt<Attribute<?, ?>> attempt : node.attributeResolutions())
+				for (final ResolutionAttempt<Attribute<?, ?, ?, ?>> attempt : node.attributeResolutions())
 				{
 					final var feature = attempt.feature();
 					if (feature == null || feature.values().isEmpty())
@@ -420,7 +420,7 @@ public final class LmSemanticIndexBuilder
 		// instead of the header keyword ('Definition').
 		String rawName = null;
 
-		for (final ResolutionAttempt<Attribute<?, ?>> attempt : node.attributeResolutions())
+				for (final ResolutionAttempt<Attribute<?, ?, ?, ?>> attempt : node.attributeResolutions())
 		{
 			final var resolution = attempt.resolution();
 			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
@@ -585,7 +585,7 @@ public final class LmSemanticIndexBuilder
 			return SymbolKind.TYPE;
 		}
 
-		if (object instanceof org.logoce.lmf.model.lang.Feature<?, ?> ||
+		if (object instanceof org.logoce.lmf.model.lang.Feature<?, ?, ?, ?> ||
 			object instanceof org.logoce.lmf.model.lang.Generic ||
 			object instanceof org.logoce.lmf.model.lang.Operation)
 		{

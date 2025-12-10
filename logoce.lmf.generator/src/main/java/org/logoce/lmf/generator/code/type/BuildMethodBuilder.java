@@ -91,7 +91,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 				final var arg = CodeBlock.of("$N", newName);
 				return new BuildArgument(resolution, arg, Optional.of(buildBlock));
 			}
-			else if (feature instanceof Relation<?, ?> relation && !relation.lazy())
+			else if (feature instanceof Relation<?, ?, ?, ?> relation && !relation.lazy())
 			{
 				return new BuildArgument(resolution, CodeBlock.of("$N.get()", name), Optional.empty());
 
@@ -121,7 +121,7 @@ public class BuildMethodBuilder implements CodeBuilder<List<FeatureResolution>, 
 		private static boolean isSuppliedList(FeatureResolution resolution)
 		{
 			final var feature = resolution.feature();
-			return feature.many() && feature instanceof Relation<?, ?> relation && !relation.lazy();
+			return feature.many() && feature instanceof Relation<?, ?, ?, ?> relation && !relation.lazy();
 		}
 	}
 }

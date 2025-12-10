@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public final class TokenResolver<T extends Feature<?, ?>, R extends AbstractResolver<T>>
+public final class TokenResolver<T extends Feature<?, ?, ?, ?>, R extends AbstractResolver<T>>
 {
 	private final LinkedList<R> availableResolvers;
 	private final List<R> allResolvers;

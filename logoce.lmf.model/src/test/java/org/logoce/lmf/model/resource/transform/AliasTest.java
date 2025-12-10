@@ -47,8 +47,8 @@ public class AliasTest
 		final var roots = loader.loadObjects(textModel);
 
 		final var root = roots.get(0);
-		assertTrue(root instanceof Attribute<?, ?>);
-		final var att0 = (Attribute<?, ?>) root;
+		assertTrue(root instanceof Attribute<?, ?, ?, ?>);
+		final var att0 = (Attribute<?, ?, ?, ?>) root;
 
 		assertEquals("count", att0.name());
 		assertEquals(Primitive.Int, ((Unit<?>) att0.datatype()).primitive());
@@ -87,13 +87,13 @@ public class AliasTest
 		assertTrue(group1.concrete());
 		assertEquals(2, group1.features().size());
 
-		final var att0 = (Attribute<?, ?>) group1.features().get(0);
+		final var att0 = (Attribute<?, ?, ?, ?>) group1.features().get(0);
 		assertEquals("count", att0.name());
 		assertEquals(Primitive.Int, ((Unit<?>) att0.datatype()).primitive());
 		assertTrue(att0.many());
 		assertTrue(att0.immutable());
 
-		final var att1 = (Attribute<?, ?>) group1.features().get(1);
+		final var att1 = (Attribute<?, ?, ?, ?>) group1.features().get(1);
 		assertEquals("exists", att1.name());
 		assertEquals(Primitive.Boolean, ((Unit<?>) att1.datatype()).primitive());
 		assertTrue(att1.mandatory());

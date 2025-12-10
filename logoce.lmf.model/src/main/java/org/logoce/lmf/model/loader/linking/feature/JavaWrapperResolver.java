@@ -8,16 +8,15 @@ import java.util.Optional;
 
 public final class JavaWrapperResolver extends AttributeResolver
 {
-	public JavaWrapperResolver(final Attribute<?, ?> attribute)
+	public JavaWrapperResolver(final Attribute<?, ?, ?, ?> attribute)
 	{
 		super(attribute);
 		assert attribute.datatype() instanceof JavaWrapper;
 	}
 
 	@Override
-	protected Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(final String value)
+	protected Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(final String value)
 	{
 		return Optional.empty();
 	}
 }
-

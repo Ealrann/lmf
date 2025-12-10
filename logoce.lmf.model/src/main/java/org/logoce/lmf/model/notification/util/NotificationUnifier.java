@@ -80,7 +80,7 @@ public final class NotificationUnifier
 								 Consumer<List<? extends LMObject>> onAdd,
 								 Consumer<List<? extends LMObject>> onRemove)
 	{
-		assert notification.feature() instanceof Relation<?, ?>;
+		assert notification.feature() instanceof Relation<?, ?, ?, ?>;
 		switch (notification.type())
 		{
 			case SET, UNSET ->
@@ -107,4 +107,3 @@ public final class NotificationUnifier
 		}
 	}
 }
-

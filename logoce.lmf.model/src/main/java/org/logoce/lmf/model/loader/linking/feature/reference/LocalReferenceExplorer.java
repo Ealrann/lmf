@@ -17,18 +17,18 @@ import java.util.Optional;
 public final class LocalReferenceExplorer implements ReferenceResolver
 {
 	private final LinkNodeInternal<?, ?, ?> start;
-	private final Relation<?, ?> relation;
+	private final Relation<?, ?, ?, ?> relation;
 
 	private LinkNodeInternal<?, ?, ?> current;
 
-	public LocalReferenceExplorer(final LinkNodeInternal<?, ?, ?> node, final Relation<?, ?> relation)
+	public LocalReferenceExplorer(final LinkNodeInternal<?, ?, ?> node, final Relation<?, ?, ?, ?> relation)
 	{
 		this.start = node;
 		this.relation = relation;
 	}
 
 	@Override
-	public Optional<FeatureResolution<Relation<?, ?>>> resolve(final PathParser parser)
+	public Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolve(final PathParser parser)
 	{
 		current = start;
 		while (parser.hasNext())
@@ -72,7 +72,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T extends LMObject> RelationResolver.DynamicReferenceResolution<T> buildResolution(final Relation<T, ?> feature,
+	private static <T extends LMObject> RelationResolver.DynamicReferenceResolution<T> buildResolution(final Relation<T, ?, ?, ?> feature,
 																									   final org.logoce.lmf.model.loader.linking.LinkNode<?, ?> current)
 	{
 		return new RelationResolver.DynamicReferenceResolution<>(feature,

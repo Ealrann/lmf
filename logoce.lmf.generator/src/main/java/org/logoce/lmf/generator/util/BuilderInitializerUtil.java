@@ -20,7 +20,7 @@ public final class BuilderInitializerUtil
 
 	public static void appendAttributes(final IFeaturedObject source,
 										final CodeBlock.Builder initializer,
-										final Predicate<Attribute<?, ?>> attributeFilter)
+										final Predicate<Attribute<?, ?, ?, ?>> attributeFilter)
 	{
 		source.lmGroup()
 			  .features()
@@ -33,7 +33,7 @@ public final class BuilderInitializerUtil
 
 	private static void appendAttribute(final IFeaturedObject source,
 										final CodeBlock.Builder initializer,
-										final Attribute<?, ?> attribute)
+										final Attribute<?, ?, ?, ?> attribute)
 	{
 		final Object value = source.get(attribute);
 
@@ -57,7 +57,7 @@ public final class BuilderInitializerUtil
 		initializer.add(".$L($L)", attribute.name(), literalFor(value));
 	}
 
-	private static boolean shouldSkipAttribute(final Attribute<?, ?> attribute, final Object value)
+	private static boolean shouldSkipAttribute(final Attribute<?, ?, ?, ?> attribute, final Object value)
 	{
 		if (value == null) return true;
 		if (attribute.many()) return value instanceof List<?> list && list.isEmpty();

@@ -11,8 +11,9 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
+import org.logoce.lmf.model.lang.LMObject;
 
-public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObject implements Attribute<UnaryType, EffectiveType> {
+public final class AttributeImpl<UnaryType, EffectiveType, ListenerType, ParentGroup extends LMObject> extends FeaturedObject implements Attribute<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private final String name;
   private final boolean immutable;
   private final int id;
@@ -78,17 +79,17 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
   }
 
   @Override
-  public Group<Attribute<?, ?>> lmGroup() {
+  public Group<Attribute<?, ?, ?, ?>> lmGroup() {
     return LMCoreModelDefinition.Groups.ATTRIBUTE;
   }
 
   @Override
-  protected FeatureSetter<Attribute<?, ?>> setterMap() {
+  protected FeatureSetter<Attribute<?, ?, ?, ?>> setterMap() {
     return Inserters.SET_MAP;
   }
 
   @Override
-  protected FeatureGetter<Attribute<?, ?>> getterMap() {
+  protected FeatureGetter<Attribute<?, ?, ?, ?>> getterMap() {
     return Inserters.GET_MAP;
   }
 
@@ -112,7 +113,7 @@ public final class AttributeImpl<UnaryType, EffectiveType> extends FeaturedObjec
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Attribute<?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?>>(8, AttributeImpl::featureIndexStatic).add(Attribute.FeatureIDs.NAME, Attribute::name).add(Attribute.FeatureIDs.IMMUTABLE, Attribute::immutable).add(Attribute.FeatureIDs.ID, Attribute::id).add(Attribute.FeatureIDs.MANY, Attribute::many).add(Attribute.FeatureIDs.MANDATORY, Attribute::mandatory).add(Attribute.FeatureIDs.PARAMETERS, Attribute::parameters).add(Attribute.FeatureIDs.DATATYPE, Attribute::datatype).add(Attribute.FeatureIDs.DEFAULT_VALUE, Attribute::defaultValue).build();
-    private static final FeatureSetter<Attribute<?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?>>(8, AttributeImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Attribute<?, ?, ?, ?>> GET_MAP = new FeatureGetter.Builder<Attribute<?, ?, ?, ?>>(8, AttributeImpl::featureIndexStatic).add(Attribute.FeatureIDs.NAME, Attribute::name).add(Attribute.FeatureIDs.IMMUTABLE, Attribute::immutable).add(Attribute.FeatureIDs.ID, Attribute::id).add(Attribute.FeatureIDs.MANY, Attribute::many).add(Attribute.FeatureIDs.MANDATORY, Attribute::mandatory).add(Attribute.FeatureIDs.PARAMETERS, Attribute::parameters).add(Attribute.FeatureIDs.DATATYPE, Attribute::datatype).add(Attribute.FeatureIDs.DEFAULT_VALUE, Attribute::defaultValue).build();
+    private static final FeatureSetter<Attribute<?, ?, ?, ?>> SET_MAP = new FeatureSetter.Builder<Attribute<?, ?, ?, ?>>(8, AttributeImpl::featureIndexStatic).build();
   }
 }

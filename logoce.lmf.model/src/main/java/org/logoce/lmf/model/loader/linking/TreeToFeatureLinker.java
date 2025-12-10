@@ -18,16 +18,16 @@ import java.util.stream.Stream;
 
 public final class TreeToFeatureLinker
 {
-	private final List<Relation<?, ?>> containmentRelations;
+	private final List<Relation<?, ?, ?, ?>> containmentRelations;
 	private final Group<?> group;
 	private final NodeLinker nodeLinker;
 
 	public TreeToFeatureLinker(final Group<?> group, final ModelRegistry modelRegistry)
 	{
 		this.group = group;
-		final List<Feature<?, ?>> allFeatures = ModelUtil.streamAllFeatures(group).toList();
+		final List<Feature<?, ?, ?, ?>> allFeatures = ModelUtil.streamAllFeatures(group).toList();
 
-		final Map<Integer, Feature<?, ?>> featureMap = new LinkedHashMap<>();
+		final Map<Integer, Feature<?, ?, ?, ?>> featureMap = new LinkedHashMap<>();
 		for (final var feature : allFeatures)
 		{
 			featureMap.put(feature.id(), feature);
@@ -54,7 +54,7 @@ public final class TreeToFeatureLinker
 
 		containmentRelations = allFeatures.stream()
 										  .filter(Relation.class::isInstance)
-										  .map(r -> (Relation<?, ?>) r)
+										  .map(r -> (Relation<?, ?, ?, ?>) r)
 										  .filter(Relation::contains)
 										  .collect(Collectors.toUnmodifiableList());
 
@@ -66,7 +66,7 @@ public final class TreeToFeatureLinker
 		linkNode.resolveReferences(nodeLinker);
 	}
 
-	public Stream<Relation<?, ?>> streamContainmentRelations()
+	public Stream<Relation<?, ?, ?, ?>> streamContainmentRelations()
 	{
 		return containmentRelations.stream();
 	}

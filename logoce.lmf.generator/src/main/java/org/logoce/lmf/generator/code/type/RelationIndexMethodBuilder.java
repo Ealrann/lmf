@@ -29,7 +29,7 @@ public final class RelationIndexMethodBuilder implements CodeBuilder<List<Featur
 
 		final var relations = featureResolutions.stream()
 												.map(FeatureResolution::feature)
-												.filter(f -> f instanceof Relation<?, ?>)
+												.filter(f -> f instanceof Relation<?, ?, ?, ?>)
 												.toList();
 
 		final var methodBuilder = MethodSpec.methodBuilder("relationIndex")
@@ -66,4 +66,3 @@ public final class RelationIndexMethodBuilder implements CodeBuilder<List<Featur
 		return methodBuilder.build();
 	}
 }
-

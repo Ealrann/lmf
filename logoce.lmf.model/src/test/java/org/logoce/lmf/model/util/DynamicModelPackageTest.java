@@ -64,21 +64,21 @@ public final class DynamicModelPackageTest
 
 		// Car has an attribute 'brand' and CarParc has a containment relation 'cars'.
 		@SuppressWarnings("unchecked")
-		final Attribute<Object, ?> brandAttribute = (Attribute<Object, ?>) carGroup.features()
-																				   .stream()
-																				   .filter(f -> f instanceof Attribute<?, ?> &&
-																								 "brand".equals(
-																									 f.name()))
-																				   .findFirst()
-																				   .orElseThrow();
+		final Attribute<Object, Object, ?, ?> brandAttribute = (Attribute<Object, Object, ?, ?>) carGroup.features()
+																										 .stream()
+																										 .filter(f -> f instanceof Attribute<?, ?, ?, ?> &&
+																													 "brand".equals(
+																														 f.name()))
+																										 .findFirst()
+																										 .orElseThrow();
 
 		@SuppressWarnings("unchecked")
-		final Relation<LMObject, ?> carsRelation = (Relation<LMObject, ?>) carParcGroup.features()
-																					   .stream()
-																					   .filter(f -> "cars".equals(
-																						   f.name()))
-																					   .findFirst()
-																					   .orElseThrow();
+		final Relation<LMObject, ?, ?, ?> carsRelation = (Relation<LMObject, ?, ?, ?>) carParcGroup.features()
+																								   .stream()
+																								   .filter(f -> "cars".equals(
+																									   f.name()))
+																								   .findFirst()
+																								   .orElseThrow();
 
 		// Build a Car instance with a brand.
 		final var carBuilder = dynamicPackage.builder(carGroup).orElseThrow();

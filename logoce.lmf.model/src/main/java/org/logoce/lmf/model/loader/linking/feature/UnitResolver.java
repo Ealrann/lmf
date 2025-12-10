@@ -18,7 +18,7 @@ public final class UnitResolver<T> extends AttributeResolver
 	private final Unit<T> unit;
 
 	@SuppressWarnings("unchecked")
-	public UnitResolver(final Attribute<?, ?> attribute)
+	public UnitResolver(final Attribute<?, ?, ?, ?> attribute)
 	{
 		super(attribute);
 		unit = (Unit<T>) attribute.datatype();
@@ -42,13 +42,13 @@ public final class UnitResolver<T> extends AttributeResolver
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(final String value)
+	protected Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
 		if (pmatcher == null || pmatcher.matches())
 		{
 			final var extractedValue = extractValue(unit, value);
-			return Optional.of(new AttributeResolution<>((Attribute<T, ?>) feature, extractedValue));
+			return Optional.of(new AttributeResolution<>((Attribute<T, ?, ?, ?>) feature, extractedValue));
 		}
 		else
 		{
@@ -84,4 +84,3 @@ public final class UnitResolver<T> extends AttributeResolver
 		};
 	}
 }
-

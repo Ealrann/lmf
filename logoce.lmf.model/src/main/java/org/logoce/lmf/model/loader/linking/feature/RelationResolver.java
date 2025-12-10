@@ -15,25 +15,25 @@ import org.logoce.lmf.model.util.ModelRegistry;
 import java.util.List;
 import java.util.Optional;
 
-public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
+public final class RelationResolver extends AbstractResolver<Relation<?, ?, ?, ?>>
 {
 	private final ImportResolver importResolver;
 
-	public RelationResolver(final Relation<?, ?> relation, final ModelRegistry modelRegistry)
+	public RelationResolver(final Relation<?, ?, ?, ?> relation, final ModelRegistry modelRegistry)
 	{
 		super(relation);
 		this.importResolver = new ImportResolver(modelRegistry);
 		assert !relation.contains();
 	}
 
-	public Optional<FeatureResolution<Relation<?, ?>>> resolve(final LinkNodeInternal<?, ?, ?> node,
-															   final List<String> values)
+	public Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolve(final LinkNodeInternal<?, ?, ?> node,
+																	 final List<String> values)
 	{
 		return super.resolve(values, value -> internalResolve(node, value));
 	}
 
-	private Optional<FeatureResolution<Relation<?, ?>>> internalResolve(final LinkNodeInternal<?, ?, ?> node,
-																		final String value)
+	private Optional<FeatureResolution<Relation<?, ?, ?, ?>>> internalResolve(final LinkNodeInternal<?, ?, ?> node,
+																			  final String value)
 	{
 		final var parser = new PathParser(value);
 		final var resolver = buildReferenceResolver(node, parser);
@@ -57,9 +57,9 @@ public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 		}
 	}
 
-	public record DynamicReferenceResolution<T extends LMObject>(Relation<T, ?> relation,
+	public record DynamicReferenceResolution<T extends LMObject>(Relation<T, ?, ?, ?> relation,
 																 LinkNode<T, ?> linkNode) implements
-																						   FeatureResolution<Relation<?, ?>>
+																						   FeatureResolution<Relation<?, ?, ?, ?>>
 	{
 		@Override
 		public void pushValue(final IFeaturedObject.Builder<?> builder)
@@ -68,7 +68,7 @@ public final class RelationResolver extends AbstractResolver<Relation<?, ?>>
 		}
 
 		@Override
-		public Relation<T, ?> feature()
+		public Relation<T, ?, ?, ?> feature()
 		{
 			return relation;
 		}

@@ -14,12 +14,12 @@ public final class CompositeModelExplorer
 {
 	private final List<ModelExplorer> explorers;
 
-	public CompositeModelExplorer(final List<List<Relation<?, ?>>> featureLists)
+	public CompositeModelExplorer(final List<List<Relation<?, ?, ?, ?>>> featureLists)
 	{
 		this.explorers = List.copyOf(buildExplorers(featureLists));
 	}
 
-	private static List<ModelExplorer> buildExplorers(final List<List<Relation<?, ?>>> featureLists)
+	private static List<ModelExplorer> buildExplorers(final List<List<Relation<?, ?, ?, ?>>> featureLists)
 	{
 		final List<ModelExplorer> explorers = new ArrayList<>();
 		for (final var features : featureLists)

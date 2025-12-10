@@ -100,7 +100,7 @@ final class CompletionContextResolver
 		}
 
 		Group<?> semanticGroup = null;
-		Feature<?, ?> semanticFeature = null;
+		Feature<?, ?, ?, ?> semanticFeature = null;
 
 		if (semantic != null)
 		{
@@ -149,19 +149,19 @@ final class CompletionContextResolver
 			return new CompletionContext.ValueContext(null, null, null, TypeUsageKind.ANY);
 		}
 
-		Attribute<?, ?> valueAttribute = null;
-		Relation<?, ?> valueRelation = null;
+		Attribute<?, ?, ?, ?> valueAttribute = null;
+		Relation<?, ?, ?, ?> valueRelation = null;
 		Concept<?> relationConcept = null;
 
 		for (final var f : headerGroup.features())
 		{
 			if (featureName.equals(f.name()))
 			{
-				if (f instanceof Attribute<?, ?> a)
+				if (f instanceof Attribute<?, ?, ?, ?> a)
 				{
 					valueAttribute = a;
 				}
-				else if (f instanceof Relation<?, ?> r)
+				else if (f instanceof Relation<?, ?, ?, ?> r)
 				{
 					valueRelation = r;
 					relationConcept = r.concept();
@@ -174,8 +174,8 @@ final class CompletionContextResolver
 		return new CompletionContext.ValueContext(valueAttribute, valueRelation, relationConcept, typeUsageKind);
 	}
 
-	private static TypeUsageKind resolveTypeUsageKind(final Attribute<?, ?> valueAttribute,
-													  final Relation<?, ?> valueRelation,
+	private static TypeUsageKind resolveTypeUsageKind(final Attribute<?, ?, ?, ?> valueAttribute,
+													  final Relation<?, ?, ?, ?> valueRelation,
 													  final Concept<?> relationConcept)
 	{
 		if (valueRelation != null && relationConcept != null)

@@ -83,7 +83,7 @@ final class GroupFeatureCompletionProvider
 	}
 
 	private static List<CompletionItem> buildGroupFeatureCompletions(final Group<?> group,
-																	 final Set<Feature<?, ?>> usedFeatures)
+																	 final Set<Feature<?, ?, ?, ?>> usedFeatures)
 	{
 		final var items = new ArrayList<CompletionItem>();
 
@@ -94,16 +94,16 @@ final class GroupFeatureCompletionProvider
 
 		final boolean isOperationGroup = "Operation".equals(group.name()) || "OperationParameter".equals(group.name());
 
-		for (final Feature<?, ?> feature : group.features())
+		for (final Feature<?, ?, ?, ?> feature : group.features())
 		{
 			LOG.debug("LMF LSP completion: inspecting feature '{}' (class={}) used={} contains={} isOperationGroup={}",
 					  feature.name(),
 					  feature.getClass().getSimpleName(),
 					  usedFeatures != null && usedFeatures.contains(feature),
-					  feature instanceof Relation<?, ?> r && r.contains(),
+					  feature instanceof Relation<?, ?, ?, ?> r && r.contains(),
 					  isOperationGroup);
 
-			if (!isOperationGroup && feature instanceof Relation<?, ?> relation && relation.contains())
+			if (!isOperationGroup && feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
 			{
 				// Containment relations are handled separately via dedicated
 				// child completion logic.
@@ -124,7 +124,7 @@ final class GroupFeatureCompletionProvider
 			final var item = new CompletionItem(name);
 
 			final boolean isBooleanAttribute =
-				feature instanceof Attribute<?, ?> attr && attr.datatype() == LMCoreModelDefinition.Units.BOOLEAN;
+				feature instanceof Attribute<?, ?, ?, ?> attr && attr.datatype() == LMCoreModelDefinition.Units.BOOLEAN;
 
 			if (!isBooleanAttribute)
 			{
@@ -138,9 +138,9 @@ final class GroupFeatureCompletionProvider
 		return items;
 	}
 
-	private static Set<Feature<?, ?>> findUsedFeaturesAtPosition(final SemanticSnapshot semantic,
-																 final SyntaxSnapshot syntax,
-																 final Position pos)
+	private static Set<Feature<?, ?, ?, ?>> findUsedFeaturesAtPosition(final SemanticSnapshot semantic,
+																	   final SyntaxSnapshot syntax,
+																	   final Position pos)
 	{
 		if (semantic == null || syntax == null)
 		{
@@ -153,14 +153,14 @@ final class GroupFeatureCompletionProvider
 			return Set.of();
 		}
 
-		final Set<Feature<?, ?>> used = new HashSet<>();
+		final Set<Feature<?, ?, ?, ?>> used = new HashSet<>();
 
-		for (final ResolutionAttempt<Attribute<?, ?>> attempt : linkNode.attributeResolutions())
+		for (final ResolutionAttempt<Attribute<?, ?, ?, ?>> attempt : linkNode.attributeResolutions())
 		{
-			final FeatureResolution<Attribute<?, ?>> resolution = attempt.resolution();
+			final FeatureResolution<Attribute<?, ?, ?, ?>> resolution = attempt.resolution();
 			if (resolution != null)
 			{
-				final Feature<?, ?> feature = resolution.feature();
+				final Feature<?, ?, ?, ?> feature = resolution.feature();
 				if (feature != null)
 				{
 					used.add(feature);
@@ -168,12 +168,12 @@ final class GroupFeatureCompletionProvider
 			}
 		}
 
-		for (final ResolutionAttempt<Relation<?, ?>> attempt : linkNode.relationResolutions())
+		for (final ResolutionAttempt<Relation<?, ?, ?, ?>> attempt : linkNode.relationResolutions())
 		{
-			final FeatureResolution<Relation<?, ?>> resolution = attempt.resolution();
+			final FeatureResolution<Relation<?, ?, ?, ?>> resolution = attempt.resolution();
 			if (resolution != null)
 			{
-				final Feature<?, ?> feature = resolution.feature();
+				final Feature<?, ?, ?, ?> feature = resolution.feature();
 				if (feature != null)
 				{
 					used.add(feature);
@@ -191,10 +191,10 @@ final class GroupFeatureCompletionProvider
 		final Set<String> seenLabels = new HashSet<>();
 
 		// 1) Resolve containment relations and their concrete target groups.
-		final var containmentRelations = new ArrayList<Relation<?, ?>>();
-		for (final Feature<?, ?> feature : group.features())
+		final var containmentRelations = new ArrayList<Relation<?, ?, ?, ?>>();
+		for (final Feature<?, ?, ?, ?> feature : group.features())
 		{
-			if (feature instanceof Relation<?, ?> relation && relation.contains())
+			if (feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
 			{
 				containmentRelations.add(relation);
 			}
@@ -233,9 +233,9 @@ final class GroupFeatureCompletionProvider
 
 		// Map each containment relation to the list of concrete groups that can
 		// appear as children for that relation.
-		final var relationToConcreteGroups = new java.util.LinkedHashMap<Relation<?, ?>, List<Group<?>>>();
+		final var relationToConcreteGroups = new java.util.LinkedHashMap<Relation<?, ?, ?, ?>, List<Group<?>>>();
 
-		for (final Relation<?, ?> relation : containmentRelations)
+		for (final Relation<?, ?, ?, ?> relation : containmentRelations)
 		{
 			final Concept<?> concept = relation.concept();
 			if (concept == null)
@@ -320,7 +320,7 @@ final class GroupFeatureCompletionProvider
 		//    mandatory features of the target group.
 		for (final var entry : relationToConcreteGroups.entrySet())
 		{
-			final Relation<?, ?> relation = entry.getKey();
+			final Relation<?, ?, ?, ?> relation = entry.getKey();
 			final List<Group<?>> concreteGroups = entry.getValue();
 
 			final String featureName = relation.name();
@@ -377,14 +377,14 @@ final class GroupFeatureCompletionProvider
 				return;
 			}
 
-			if (feature instanceof Attribute<?, ?> attribute)
+			if (feature instanceof Attribute<?, ?, ?, ?> attribute)
 			{
 				if (attribute.mandatory())
 				{
 					mandatoryFeatureNames.add(name + "=");
 				}
 			}
-			else if (feature instanceof Relation<?, ?> relation)
+			else if (feature instanceof Relation<?, ?, ?, ?> relation)
 			{
 				if (relation.mandatory() && !relation.contains())
 				{

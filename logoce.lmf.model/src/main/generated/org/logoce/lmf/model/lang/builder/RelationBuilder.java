@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.Relation.Builder;
 import org.logoce.lmf.model.lang.impl.RelationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
-public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> implements Builder<UnaryType, EffectiveType> {
+public final class RelationBuilder<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup extends LMObject> implements Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private String name;
   private boolean immutable;
   private int id;
@@ -29,51 +29,54 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> name(String name) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> name(String name) {
     this.name = name;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> immutable(boolean immutable) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> immutable(
+      boolean immutable) {
     this.immutable = immutable;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> id(int id) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> id(int id) {
     this.id = id;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> many(boolean many) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> many(boolean many) {
     this.many = many;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> mandatory(boolean mandatory) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> mandatory(
+      boolean mandatory) {
     this.mandatory = mandatory;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> addParameter(
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> addParameter(
       Supplier<GenericParameter> parameter) {
     this.parameters.add(parameter);
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> addParameters(
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> addParameters(
       final List<GenericParameter> parameters) {
     parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> concept(Supplier<Concept<UnaryType>> concept) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> concept(
+      Supplier<Concept<UnaryType>> concept) {
     this.concept = concept;
     return this;
   }
@@ -82,38 +85,40 @@ public final class RelationBuilder<UnaryType extends LMObject, EffectiveType> im
       "unchecked",
       "rawtypes"
   })
-  private RelationBuilder<UnaryType, EffectiveType> _concept(final Supplier<Concept<?>> concept) {
+  private RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> _concept(
+      final Supplier<Concept<?>> concept) {
     this.concept = (Supplier) concept;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> lazy(boolean lazy) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> lazy(boolean lazy) {
     this.lazy = lazy;
     return this;
   }
 
   @Override
-  public RelationBuilder<UnaryType, EffectiveType> contains(boolean contains) {
+  public RelationBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> contains(
+      boolean contains) {
     this.contains = contains;
     return this;
   }
 
   @Override
-  public Relation<UnaryType, EffectiveType> build() {
+  public Relation<UnaryType, EffectiveType, ListenerType, ParentGroup> build() {
     final var builtParameters = BuildUtils.collectSuppliers(parameters);
-    final var built = new RelationImpl<UnaryType, EffectiveType>(name, immutable, id, many, mandatory, builtParameters, concept, lazy, contains);
+    final var built = new RelationImpl<UnaryType, EffectiveType, ListenerType, ParentGroup>(name, immutable, id, many, mandatory, builtParameters, concept, lazy, contains);
     return built;
   }
 
   @Override
-  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
+  public <AttributeType> void push(final Attribute<?, ?, ?, ?> attribute,
       final AttributeType value) {
     Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
-  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?, ?, ?> relation,
       final Supplier<RelationType> supplier) {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }

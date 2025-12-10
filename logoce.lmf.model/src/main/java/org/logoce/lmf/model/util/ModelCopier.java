@@ -43,11 +43,11 @@ public final class ModelCopier
 
 		for (final var feature : group.features())
 		{
-			if (feature instanceof Attribute<?, ?> attribute)
+			if (feature instanceof Attribute<?, ?, ?, ?> attribute)
 			{
 				copyAttribute(builder, source, attribute);
 			}
-			else if (feature instanceof Relation<?, ?> relation)
+			else if (feature instanceof Relation<?, ?, ?, ?> relation)
 			{
 				if (relation.contains())
 				{
@@ -68,9 +68,9 @@ public final class ModelCopier
 	@SuppressWarnings("unchecked")
 	private static <T extends LMObject> void copyAttribute(final IFeaturedObject.Builder<T> builder,
 														   final LMObject source,
-														   final Attribute<?, ?> attribute)
+														   final Attribute<?, ?, ?, ?> attribute)
 	{
-		final var typedAttribute = (Attribute<Object, ?>) attribute;
+		final var typedAttribute = (Attribute<Object, ?, ?, ?>) attribute;
 		final var value = source.get(typedAttribute);
 		if (value == null)
 		{
@@ -93,9 +93,9 @@ public final class ModelCopier
 	@SuppressWarnings("unchecked")
 	private LMObject copyContainmentRelation(final IFeaturedObject.Builder<?> builder,
 											 final LMObject source,
-											 final Relation<?, ?> relation)
+											 final Relation<?, ?, ?, ?> relation)
 	{
-		final var typedRelation = (Relation<LMObject, ?>) relation;
+		final var typedRelation = (Relation<LMObject, ?, ?, ?>) relation;
 		final var value = source.get(typedRelation);
 
 		if (value == null)
@@ -124,9 +124,9 @@ public final class ModelCopier
 	@SuppressWarnings("unchecked")
 	private static void copyNonContainmentRelation(final IFeaturedObject.Builder<?> builder,
 												   final LMObject source,
-												   final Relation<?, ?> relation)
+												   final Relation<?, ?, ?, ?> relation)
 	{
-		final var typedRelation = (Relation<LMObject, ?>) relation;
+		final var typedRelation = (Relation<LMObject, ?, ?, ?>) relation;
 		final var value = source.get(typedRelation);
 
 		if (typedRelation.many())
@@ -160,12 +160,12 @@ public final class ModelCopier
 
 			for (final var feature : group.features())
 			{
-				if (!(feature instanceof Relation<?, ?> relation) || relation.contains())
+				if (!(feature instanceof Relation<?, ?, ?, ?> relation) || relation.contains())
 				{
 					continue;
 				}
 
-				final var typedRelation = (Relation<LMObject, ?>) relation;
+				final var typedRelation = (Relation<LMObject, ?, ?, ?>) relation;
 				final var originalValue = source.get(typedRelation);
 				if (originalValue == null)
 				{
@@ -188,7 +188,7 @@ public final class ModelCopier
 				{
 					final var originalTarget = (LMObject) originalValue;
 					final var mapped = copies.getOrDefault(originalTarget, originalTarget);
-					copy.set((Feature<?, LMObject>) typedRelation, mapped);
+					copy.set((Feature<?, LMObject, ?, ?>) typedRelation, mapped);
 				}
 			}
 		}

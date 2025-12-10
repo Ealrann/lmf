@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang;
 
 import java.util.List;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Named extends LMObject {
   String name();
@@ -11,7 +12,7 @@ public interface Named extends LMObject {
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    Attribute<String, String> NAME = new AttributeBuilder<String, String>().name("name").immutable(true).mandatory(true).id(Named.FeatureIDs.NAME).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    List<Feature<?, ?>> ALL = List.of(NAME);
+    Attribute<String, String, Listener<String>, Named> NAME = new AttributeBuilder<String, String, Listener<String>, Named>().name("name").immutable(true).mandatory(true).id(Named.FeatureIDs.NAME).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME);
   }
 }

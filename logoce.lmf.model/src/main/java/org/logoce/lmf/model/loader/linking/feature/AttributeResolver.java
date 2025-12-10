@@ -7,26 +7,26 @@ import org.logoce.lmf.model.loader.linking.FeatureResolution;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AttributeResolver extends AbstractResolver<Attribute<?, ?>>
+public abstract class AttributeResolver extends AbstractResolver<Attribute<?, ?, ?, ?>>
 {
-	protected AttributeResolver(final Attribute<?, ?> attribute)
+	protected AttributeResolver(final Attribute<?, ?, ?, ?> attribute)
 	{
 		super(attribute);
 	}
 
-	public final Optional<FeatureResolution<Attribute<?, ?>>> resolve(final List<String> values)
+	public final Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> resolve(final List<String> values)
 	{
 		return super.resolve(values, this::internalResolve);
 	}
 
-	protected abstract Optional<FeatureResolution<Attribute<?, ?>>> internalResolve(String value);
+	protected abstract Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(String value);
 
-	public static final class AttributeResolution<Y> implements FeatureResolution<Attribute<?, ?>>
+	public static final class AttributeResolution<Y> implements FeatureResolution<Attribute<?, ?, ?, ?>>
 	{
-		private final Attribute<Y, ?> attribute;
+		private final Attribute<Y, ?, ?, ?> attribute;
 		private final Y value;
 
-		public AttributeResolution(final Attribute<Y, ?> attribute, final Y value)
+		public AttributeResolution(final Attribute<Y, ?, ?, ?> attribute, final Y value)
 		{
 			this.attribute = attribute;
 			this.value = value;
@@ -39,7 +39,7 @@ public abstract class AttributeResolver extends AbstractResolver<Attribute<?, ?>
 		}
 
 		@Override
-		public Attribute<Y, ?> feature()
+		public Attribute<Y, ?, ?, ?> feature()
 		{
 			return attribute;
 		}
@@ -50,4 +50,3 @@ public abstract class AttributeResolver extends AbstractResolver<Attribute<?, ?>
 		}
 	}
 }
-

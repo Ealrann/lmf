@@ -25,7 +25,7 @@ public interface LinkNodeInternal<T extends LMObject, I extends PNode, S extends
 	S root();
 
 	@Override
-	Relation<T, ?> containingRelation();
+	Relation<T, ?, ?, ?> containingRelation();
 
 	@Override
 	Group<T> group();

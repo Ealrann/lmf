@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public final class BatchResolver<T extends Feature<?, ?>>
+public final class BatchResolver<T extends Feature<?, ?, ?, ?>>
 {
 	private final TokenResolver<T, ?> runner;
 	private final List<ResolutionAttempt<T>> resolutions = new ArrayList<>();

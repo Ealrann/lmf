@@ -4,6 +4,7 @@ import java.util.List;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.SerializerBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Serializer extends LMObject {
   static Builder builder() {
@@ -21,10 +22,10 @@ public interface Serializer extends LMObject {
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    Attribute<String, String> DEFAULT_VALUE = new AttributeBuilder<String, String>().name("defaultValue").immutable(true).id(Serializer.FeatureIDs.DEFAULT_VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Attribute<String, String> CREATE = new AttributeBuilder<String, String>().name("create").immutable(true).mandatory(true).id(Serializer.FeatureIDs.CREATE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Attribute<String, String> CONVERT = new AttributeBuilder<String, String>().name("convert").immutable(true).mandatory(true).id(Serializer.FeatureIDs.CONVERT).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    List<Feature<?, ?>> ALL = List.of(DEFAULT_VALUE, CREATE, CONVERT);
+    Attribute<String, String, Listener<String>, Serializer> DEFAULT_VALUE = new AttributeBuilder<String, String, Listener<String>, Serializer>().name("defaultValue").immutable(true).id(Serializer.FeatureIDs.DEFAULT_VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<String, String, Listener<String>, Serializer> CREATE = new AttributeBuilder<String, String, Listener<String>, Serializer>().name("create").immutable(true).mandatory(true).id(Serializer.FeatureIDs.CREATE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<String, String, Listener<String>, Serializer> CONVERT = new AttributeBuilder<String, String, Listener<String>, Serializer>().name("convert").immutable(true).mandatory(true).id(Serializer.FeatureIDs.CONVERT).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(DEFAULT_VALUE, CREATE, CONVERT);
   }
 
   interface Builder extends IFeaturedObject.Builder<Serializer> {

@@ -54,7 +54,7 @@ public final class EMFListenerMap implements IEMFNotifier
 	}
 
 	@Override
-	public void listen(Consumer<Notification> listener, List<Feature<?, ?>> features)
+	public void listen(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
@@ -66,7 +66,7 @@ public final class EMFListenerMap implements IEMFNotifier
 	}
 
 	@Override
-	public void listenNoParam(Runnable listener, List<Feature<?, ?>> features)
+	public void listenNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
@@ -88,7 +88,7 @@ public final class EMFListenerMap implements IEMFNotifier
 	}
 
 	@Override
-	public void sulk(Consumer<Notification> listener, List<Feature<?, ?>> features)
+	public void sulk(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
@@ -100,7 +100,7 @@ public final class EMFListenerMap implements IEMFNotifier
 	}
 
 	@Override
-	public void sulkNoParam(Runnable listener, List<Feature<?, ?>> features)
+	public void sulkNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
 	{
 		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
@@ -128,7 +128,7 @@ public final class EMFListenerMap implements IEMFNotifier
 		}
 	}
 
-	private int featureToIndex(Feature<?, ?> feature)
+	private int featureToIndex(Feature<?, ?, ?, ?> feature)
 	{
 		final int featureId = feature.id();
 		return IDtoIndex(featureId);

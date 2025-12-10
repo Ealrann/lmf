@@ -16,6 +16,6 @@ public record SetNotifiation(LMObject notifier, int featureId, Object newValue,
 	@Override
 	public EventType type()
 	{
-		return feature() instanceof Relation<?, ?> && newValue == null ? EventType.UNSET : EventType.SET;
+		return feature() instanceof Relation<?, ?, ?, ?> && newValue == null ? EventType.UNSET : EventType.SET;
 	}
 }

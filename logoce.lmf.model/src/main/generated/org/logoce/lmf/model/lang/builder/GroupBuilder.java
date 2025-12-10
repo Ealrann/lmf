@@ -22,7 +22,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   private String name;
   private boolean concrete;
   private final List<Supplier<Include<?>>> includes = new ArrayList<>();
-  private final List<Supplier<Feature<?, ?>>> features = new ArrayList<>();
+  private final List<Supplier<Feature<?, ?, ?, ?>>> features = new ArrayList<>();
   private final List<Supplier<Generic<?>>> generics = new ArrayList<>();
   private final List<Supplier<Operation>> operations = new ArrayList<>();
   private BuilderSupplier<T> lmBuilder;
@@ -55,14 +55,14 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
-  public GroupBuilder<T> addFeature(Supplier<Feature<?, ?>> feature) {
+  public GroupBuilder<T> addFeature(Supplier<Feature<?, ?, ?, ?>> feature) {
     this.features.add(feature);
     return this;
   }
 
   @Override
-  public GroupBuilder<T> addFeatures(final List<Feature<?, ?>> features) {
-    features.stream().map(value -> (Supplier<Feature<?, ?>>) () -> value).forEach(this.features::add);
+  public GroupBuilder<T> addFeatures(final List<Feature<?, ?, ?, ?>> features) {
+    features.stream().map(value -> (Supplier<Feature<?, ?, ?, ?>>) () -> value).forEach(this.features::add);
     return this;
   }
 
@@ -116,20 +116,20 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
   }
 
   @Override
-  public <AttributeType> void push(final Attribute<AttributeType, ?> attribute,
+  public <AttributeType> void push(final Attribute<?, ?, ?, ?> attribute,
       final AttributeType value) {
     Inserters.ATTRIBUTE_INSERTER.push(this, attribute.id(), value);
   }
 
   @Override
-  public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+  public <RelationType extends LMObject> void push(final Relation<RelationType, ?, ?, ?> relation,
       final Supplier<RelationType> supplier) {
     Inserters.RELATION_INSERTER.push(this, relation.id(), supplier);
   }
 
   private static final class Inserters {
     private static final FeatureInserter<GroupBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<GroupBuilder>(3, Inserters::attributeIndex).add(Group.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(Group.FeatureIDs.CONCRETE, (builder, value) -> builder.concrete((boolean) value)).add(Group.FeatureIDs.LM_BUILDER, (builder, value) -> builder._lmBuilder((BuilderSupplier<?>) value)).build();
-    private static final RelationLazyInserter<GroupBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder>(4, Inserters::relationIndex).add(Group.FeatureIDs.INCLUDES, (builder, value) -> builder.addInclude((Supplier<Include<?>>) value)).add(Group.FeatureIDs.FEATURES, (builder, value) -> builder.addFeature((Supplier<Feature<?, ?>>) value)).add(Group.FeatureIDs.GENERICS, (builder, value) -> builder.addGeneric((Supplier<Generic<?>>) value)).add(Group.FeatureIDs.OPERATIONS, (builder, value) -> builder.addOperation((Supplier<Operation>) value)).build();
+    private static final RelationLazyInserter<GroupBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<GroupBuilder>(4, Inserters::relationIndex).add(Group.FeatureIDs.INCLUDES, (builder, value) -> builder.addInclude((Supplier<Include<?>>) value)).add(Group.FeatureIDs.FEATURES, (builder, value) -> builder.addFeature((Supplier<Feature<?, ?, ?, ?>>) value)).add(Group.FeatureIDs.GENERICS, (builder, value) -> builder.addGeneric((Supplier<Generic<?>>) value)).add(Group.FeatureIDs.OPERATIONS, (builder, value) -> builder.addOperation((Supplier<Operation>) value)).build();
 
     private static int attributeIndex(final int featureId) {
       return switch (featureId) {

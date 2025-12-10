@@ -13,7 +13,7 @@ public class DefaultValueUtil
 {
 	public static Optional<CodeBlock> resolveDefaultValue(final FeatureResolution resolution)
 	{
-		final var attribute = (Attribute<?, ?>) resolution.feature();
+		final var attribute = (Attribute<?, ?, ?, ?>) resolution.feature();
 		final var defaultValue = attribute.defaultValue();
 		final var dataType = attribute.datatype();
 

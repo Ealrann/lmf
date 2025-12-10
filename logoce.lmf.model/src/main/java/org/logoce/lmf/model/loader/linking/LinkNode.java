@@ -12,13 +12,13 @@ public interface LinkNode<T extends LMObject, I extends PNode>
 {
 	I pNode();
 
-	Relation<T, ?> containingRelation();
+	Relation<T, ?, ?, ?> containingRelation();
 
 	Group<T> group();
 
-	List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions();
+	List<ResolutionAttempt<Attribute<?, ?, ?, ?>>> attributeResolutions();
 
-	List<ResolutionAttempt<Relation<?, ?>>> relationResolutions();
+	List<ResolutionAttempt<Relation<?, ?, ?, ?>>> relationResolutions();
 
 	LinkNode<?, I> parent();
 
@@ -26,4 +26,3 @@ public interface LinkNode<T extends LMObject, I extends PNode>
 
 	T build();
 }
-

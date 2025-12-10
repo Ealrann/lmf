@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ImplementationCodeUtil
 {
-	public static CodeBlock assignationStatement(final Feature<?, ?> feature, final String paramName)
+	public static CodeBlock assignationStatement(final Feature<?, ?, ?, ?> feature, final String paramName)
 	{
 		if (feature.many())
 		{
@@ -28,7 +28,7 @@ public class ImplementationCodeUtil
 	{
 		final var name = parameter.parameterName();
 		final var feature = parameter.feature().feature();
-		if (feature instanceof Relation<?, ?> relation && relation.lazy())
+		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.lazy())
 		{
 			if (feature.many())
 			{

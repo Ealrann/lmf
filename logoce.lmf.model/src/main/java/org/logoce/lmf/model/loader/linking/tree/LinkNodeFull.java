@@ -24,15 +24,15 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	private final LinkInfo<T, I> info;
 	private final IFeaturedObject.Builder<T> builder;
 
-	private final List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions;
-	private List<ResolutionAttempt<Relation<?, ?>>> relationResolutions;
+	private final List<ResolutionAttempt<Attribute<?, ?, ?, ?>>> attributeResolutions;
+	private List<ResolutionAttempt<Relation<?, ?, ?, ?>>> relationResolutions;
 	private T builtObject = null;
 
 	private static final ThreadLocal<Set<LinkNodeFull<?, ?>>> BUILD_STACK = ThreadLocal.withInitial(HashSet::new);
 
 	public LinkNodeFull(final LinkInfo<T, I> info,
 						final LinkNodeFull<?, I> parent,
-						final List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions,
+						final List<ResolutionAttempt<Attribute<?, ?, ?, ?>>> attributeResolutions,
 						final Function<LinkNodeFull<?, I>, List<LinkNodeFull<?, I>>> childrenBuilder)
 	{
 		super(parent, childrenBuilder);
@@ -48,13 +48,13 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	}
 
 	@Override
-	public List<ResolutionAttempt<Attribute<?, ?>>> attributeResolutions()
+	public List<ResolutionAttempt<Attribute<?, ?, ?, ?>>> attributeResolutions()
 	{
 		return attributeResolutions;
 	}
 
 	@Override
-	public List<ResolutionAttempt<Relation<?, ?>>> relationResolutions()
+	public List<ResolutionAttempt<Relation<?, ?, ?, ?>>> relationResolutions()
 	{
 		return relationResolutions;
 	}
@@ -174,7 +174,7 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	}
 
 	@Override
-	public Relation<T, ?> containingRelation()
+	public Relation<T, ?, ?, ?> containingRelation()
 	{
 		return info.containingRelation();
 	}

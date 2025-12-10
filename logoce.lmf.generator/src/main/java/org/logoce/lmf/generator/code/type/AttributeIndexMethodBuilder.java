@@ -29,7 +29,7 @@ public final class AttributeIndexMethodBuilder implements CodeBuilder<List<Featu
 
 		final var attributes = featureResolutions.stream()
 												 .map(FeatureResolution::feature)
-												 .filter(f -> f instanceof Attribute<?, ?>)
+												 .filter(f -> f instanceof Attribute<?, ?, ?, ?>)
 												 .toList();
 
 		final var methodBuilder = MethodSpec.methodBuilder("attributeIndex")

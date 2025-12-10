@@ -110,11 +110,11 @@ public final class InterfaceGenerator
 
 		featureResolutions.stream().map(methodBuilder::build).forEach(builderTypeBuilder::addMethod);
 		featureResolutions.stream()
-						  .filter(f -> f.feature() instanceof Relation<?, ?> relation && relation.many())
+						  .filter(f -> f.feature() instanceof Relation<?, ?, ?, ?> relation && relation.many())
 						  .map(manyRelationMethodBuilder::build)
 						  .forEach(builderTypeBuilder::addMethod);
 		featureResolutions.stream()
-						  .filter(f -> f.feature() instanceof Attribute<?, ?> attribute && attribute.many())
+						  .filter(f -> f.feature() instanceof Attribute<?, ?, ?, ?> attribute && attribute.many())
 						  .map(manyAttributeMethodBuilder::build)
 						  .forEach(builderTypeBuilder::addMethod);
 

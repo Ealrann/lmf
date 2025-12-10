@@ -28,8 +28,8 @@ public class JavaWrapperTest
 
 		final var group = model.groups()
 							   .get(0);
-		final var attribute = (Attribute<?, ?>) group.features()
-													 .get(0);
+		final var attribute = (Attribute<?, ?, ?, ?>) group.features()
+														 .get(0);
 		final var wrapper = (JavaWrapper<?>) attribute.datatype();
 
 		assertEquals("IModelPackage", wrapper.name());

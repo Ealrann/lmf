@@ -84,7 +84,7 @@ public final class DynamicModelPackage implements IModelPackage
 	private static final class DynamicBuilder<T extends LMObject> implements IFeaturedObject.Builder<T>
 	{
 		private final Group<T> group;
-		private final Map<Feature<?, ?>, Object> values = new HashMap<>();
+		private final Map<Feature<?, ?, ?, ?>, Object> values = new HashMap<>();
 		private final List<ChildRelation> pendingChildren = new ArrayList<>();
 
 		private DynamicBuilder(final Group<T> group)
@@ -108,7 +108,7 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 
 		@Override
-		public <AttributeType> void push(final Attribute<AttributeType, ?> feature, final AttributeType value)
+		public <AttributeType> void push(final Attribute<?, ?, ?, ?> feature, final AttributeType value)
 		{
 			if (feature == null) return;
 
@@ -129,7 +129,7 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 
 		@Override
-		public <RelationType extends LMObject> void push(final Relation<RelationType, ?> relation,
+		public <RelationType extends LMObject> void push(final Relation<RelationType, ?, ?, ?> relation,
 														final Supplier<RelationType> supplier)
 		{
 			if (relation == null || supplier == null) return;
@@ -163,23 +163,23 @@ public final class DynamicModelPackage implements IModelPackage
 
 	private static final class ChildRelation
 	{
-		private final Relation<?, ?> relation;
+		private final Relation<?, ?, ?, ?> relation;
 		private final LMObject child;
 		private final boolean many;
 
-		private ChildRelation(final Relation<?, ?> relation, final LMObject child, final boolean many)
+		private ChildRelation(final Relation<?, ?, ?, ?> relation, final LMObject child, final boolean many)
 		{
 			this.relation = relation;
 			this.child = child;
 			this.many = many;
 		}
 
-		static ChildRelation single(final Relation<?, ?> relation, final LMObject child)
+		static ChildRelation single(final Relation<?, ?, ?, ?> relation, final LMObject child)
 		{
 			return new ChildRelation(relation, child, false);
 		}
 
-		static ChildRelation many(final Relation<?, ?> relation, final LMObject child)
+		static ChildRelation many(final Relation<?, ?, ?, ?> relation, final LMObject child)
 		{
 			return new ChildRelation(relation, child, true);
 		}
@@ -197,11 +197,11 @@ public final class DynamicModelPackage implements IModelPackage
 		implements LMObject, Model, Named
 	{
 		private final Group<T> group;
-		private final Map<Feature<?, ?>, Object> values;
+		private final Map<Feature<?, ?, ?, ?>, Object> values;
 		private LMObject container;
-		private Relation<?, ?> containingFeature;
+		private Relation<?, ?, ?, ?> containingFeature;
 
-		private DynamicLMObject(final Group<T> group, final Map<Feature<?, ?>, Object> initialValues)
+		private DynamicLMObject(final Group<T> group, final Map<Feature<?, ?, ?, ?>, Object> initialValues)
 		{
 			this.group = Objects.requireNonNull(group, "group");
 			this.values = new HashMap<>(initialValues);
@@ -216,14 +216,14 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public String name()
 		{
-			final Attribute<String, ?> nameAttribute = findAttribute("name");
+			final Attribute<String, ?, ?, ?> nameAttribute = findAttribute("name");
 			return nameAttribute == null ? null : (String) get(nameAttribute);
 		}
 
 		@Override
 		public String domain()
 		{
-			final Attribute<String, ?> domainAttribute = findAttribute("domain");
+			final Attribute<String, ?, ?, ?> domainAttribute = findAttribute("domain");
 			return domainAttribute == null ? null : (String) get(domainAttribute);
 		}
 
@@ -231,7 +231,7 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public java.util.List<String> imports()
 		{
-			final Attribute<java.util.List<String>, ?> importsAttribute = findAttribute("imports");
+			final Attribute<java.util.List<String>, ?, ?, ?> importsAttribute = findAttribute("imports");
 			return importsAttribute == null ? java.util.List.of()
 											: (java.util.List<String>) get(importsAttribute);
 		}
@@ -240,7 +240,7 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public java.util.List<String> metamodels()
 		{
-			final Attribute<java.util.List<String>, ?> metamodelsAttribute = findAttribute("metamodels");
+			final Attribute<java.util.List<String>, ?, ?, ?> metamodelsAttribute = findAttribute("metamodels");
 			return metamodelsAttribute == null ? java.util.List.of()
 											   : (java.util.List<String>) get(metamodelsAttribute);
 		}
@@ -252,7 +252,7 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 
 		@Override
-		public Relation<?, ?> lmContainingFeature()
+		public Relation<?, ?, ?, ?> lmContainingFeature()
 		{
 			return containingFeature;
 		}
@@ -265,7 +265,7 @@ public final class DynamicModelPackage implements IModelPackage
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <V> V get(final Feature<?, V> feature)
+		public <V> V get(final Feature<?, ?, ?, ?> feature)
 		{
 			if (feature == null) return null;
 
@@ -284,18 +284,18 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public Object get(final int featureID)
 		{
-			for (final Feature<?, ?> feature : group.features())
+			for (final Feature<?, ?, ?, ?> feature : group.features())
 			{
 				if (feature.id() == featureID)
 				{
-					return get((Feature<?, Object>) feature);
+					return get((Feature<?, ?, ?, ?>) feature);
 				}
 			}
 			throw new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name());
 		}
 
 		@Override
-		public <V> void set(final Feature<?, V> feature, final V value)
+		public <V> void set(final Feature<?, ?, ?, ?> feature, final V value)
 		{
 			if (feature == null) return;
 
@@ -305,12 +305,12 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public void set(final int featureID, final Object value)
 		{
-			for (final Feature<?, ?> feature : group.features())
+			for (final Feature<?, ?, ?, ?> feature : group.features())
 			{
 				if (feature.id() == featureID)
 				{
 					@SuppressWarnings("unchecked")
-					final Feature<?, Object> typedFeature = (Feature<?, Object>) feature;
+					final Feature<?, Object, ?, ?> typedFeature = (Feature<?, Object, ?, ?>) feature;
 					set(typedFeature, value);
 					return;
 				}
@@ -319,15 +319,15 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 
 		@SuppressWarnings("unchecked")
-		private <V> Attribute<V, ?> findAttribute(final String attributeName)
+		private <V> Attribute<V, ?, ?, ?> findAttribute(final String attributeName)
 		{
 			if (attributeName == null) return null;
 
-			for (final Feature<?, ?> feature : group.features())
+			for (final Feature<?, ?, ?, ?> feature : group.features())
 			{
-				if (feature instanceof Attribute<?, ?> attribute && attributeName.equals(attribute.name()))
+				if (feature instanceof Attribute<?, ?, ?, ?> attribute && attributeName.equals(attribute.name()))
 				{
-					return (Attribute<V, ?>) attribute;
+					return (Attribute<V, ?, ?, ?>) attribute;
 				}
 			}
 			return null;
@@ -352,7 +352,7 @@ public final class DynamicModelPackage implements IModelPackage
 			// See listenStruture.
 		}
 
-		private void setContainer(final LMObject child, final Relation<?, ?> relation, final boolean many)
+		private void setContainer(final LMObject child, final Relation<?, ?, ?, ?> relation, final boolean many)
 		{
 			if (!(child instanceof DynamicLMObject<?> dynamicChild)) return;
 

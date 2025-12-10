@@ -15,7 +15,7 @@ import java.util.Optional;
 public final class ModelReferenceResolver implements ReferenceResolver
 {
 	private final Model model;
-	private final Relation<?, ?> relation;
+	private final Relation<?, ?, ?, ?> relation;
 
 	/**
 	 * Marker interface for static model reference resolutions that point to a
@@ -23,19 +23,19 @@ public final class ModelReferenceResolver implements ReferenceResolver
 	 * consumers (for example the semantic index builder) to extract the target
 	 * object without depending on the internal {@link ModelExplorer} type.
 	 */
-	public interface StaticResolution extends FeatureResolution<Relation<?, ?>>
+	public interface StaticResolution extends FeatureResolution<Relation<?, ?, ?, ?>>
 	{
 		LMObject value();
 	}
 
-	public ModelReferenceResolver(final Model model, final Relation<?, ?> relation)
+	public ModelReferenceResolver(final Model model, final Relation<?, ?, ?, ?> relation)
 	{
 		this.model = model;
 		this.relation = relation;
 	}
 
 	@Override
-	public Optional<FeatureResolution<Relation<?, ?>>> resolve(final PathParser pathParser)
+	public Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolve(final PathParser pathParser)
 	{
 		final var firstStep = pathParser.next();
 
@@ -66,8 +66,8 @@ public final class ModelReferenceResolver implements ReferenceResolver
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?>>> resolveName(final String name,
-																						 final Relation<T, ?> relation)
+	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolveName(final String name,
+																							 final Relation<T, ?, ?, ?> relation)
 	{
 		final var group = (Group<?>) relation.concept();
 		return ModelUtil.streamTree(model)
@@ -110,18 +110,21 @@ public final class ModelReferenceResolver implements ReferenceResolver
 
 			if (index != null)
 			{
-				final var featureValue = current.get((Relation<?, List<? extends LMObject>>) feature);
+				@SuppressWarnings("unchecked")
+				final var featureValue = (List<? extends LMObject>) current.get(
+						(Relation<?, List<? extends LMObject>, ?, ?>) feature);
 				current = featureValue.get(index);
 			}
 			else
 			{
-				final var featureValue = current.get((Relation<?, ? extends LMObject>) feature);
+				final var featureValue = (LMObject) current.get(
+						(Relation<?, ? extends LMObject, ?, ?>) feature);
 				current = featureValue;
 			}
 		}
 
 		@SuppressWarnings("unchecked")
-		public <T extends Relation<?, ?>> Optional<FeatureResolution<Relation<?, ?>>> build(final T relation)
+		public <T extends Relation<?, ?, ?, ?>> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> build(final T relation)
 		{
 			final var concept = relation.concept();
 			if (concept instanceof Group<?> group && ModelUtil.isSubGroup(group, current.lmGroup()))
@@ -134,17 +137,17 @@ public final class ModelReferenceResolver implements ReferenceResolver
 			}
 		}
 
-		private static <Y extends LMObject> StaticReferenceResolution<Y, Relation<Y, ?>> buildInternal(final Relation<?, ?> relation,
+		private static <Y extends LMObject> StaticReferenceResolution<Y, Relation<Y, ?, ?, ?>> buildInternal(final Relation<?, ?, ?, ?> relation,
 																									   final Y object)
 		{
 			@SuppressWarnings("unchecked")
-			final var typedRelation = (Relation<Y, ?>) relation;
+			final var typedRelation = (Relation<Y, ?, ?, ?>) relation;
 			return new StaticReferenceResolution<>(typedRelation, object);
 		}
 
-		public record StaticReferenceResolution<Y extends LMObject, T extends Relation<Y, ?>>(T relation,
-																							  Y value) implements
-																									   FeatureResolution<Relation<?, ?>>,
+		public record StaticReferenceResolution<Y extends LMObject, T extends Relation<Y, ?, ?, ?>>(T relation,
+																									Y value) implements
+																									   FeatureResolution<Relation<?, ?, ?, ?>>,
 																									   StaticResolution
 		{
 			@Override

@@ -49,15 +49,15 @@ public class WeakTypingTest
 					 group1.features()
 						   .size());
 
-		final var att0 = (Attribute<?, ?>) group1.features()
-												 .get(0);
+		final var att0 = (Attribute<?, ?, ?, ?>) group1.features()
+													 .get(0);
 		assertEquals("count", att0.name());
 		assertEquals(Primitive.Int, ((Unit<?>) att0.datatype()).primitive());
 		assertTrue(att0.many());
 		assertTrue(att0.immutable());
 
-		final var att1 = (Attribute<?, ?>) group1.features()
-												 .get(1);
+		final var att1 = (Attribute<?, ?, ?, ?>) group1.features()
+													 .get(1);
 		assertEquals("exists", att1.name());
 		assertEquals(Primitive.Boolean, ((Unit<?>) att1.datatype()).primitive());
 		assertTrue(att1.mandatory());

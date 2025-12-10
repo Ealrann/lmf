@@ -15,7 +15,7 @@ public class NotificationFeatureBuilder
 		this.group = group;
 	}
 
-	public EnumSpec buildSpec(final Feature<?, ?> feature)
+	public EnumSpec buildSpec(final Feature<?, ?, ?, ?> feature)
 	{
 		final var parent = (Group<?>) feature.lmContainer();
 		final var local = parent == group;

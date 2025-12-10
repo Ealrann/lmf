@@ -58,8 +58,8 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		final var feature = resolution.feature();
 		final var assignCode = ImplementationCodeUtil.assignationStatement(feature, paramSpec.name);
 
-		final var isRelation = feature instanceof Relation<?, ?>;
-		final var isContainment = isRelation && ((Relation<?, ?>) feature).contains();
+		final var isRelation = feature instanceof Relation<?, ?, ?, ?>;
+		final var isContainment = isRelation && ((Relation<?, ?, ?, ?>) feature).contains();
 		final var manyMutableRelation = isRelation && feature.many() && !feature.immutable();
 
 		return new ParameterCode(paramSpec,

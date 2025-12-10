@@ -34,11 +34,11 @@ public class NamedReferenceTest
 		assertEquals("Info", group0.name());
 		assertEquals(2, group0.features().size());
 
-		final var att0 = (Attribute<?, ?>) group0.features().get(0);
+		final var att0 = (Attribute<?, ?, ?, ?>) group0.features().get(0);
 		assertEquals("age", att0.name());
 		assertEquals(Primitive.Int, ((Unit<?>) att0.datatype()).primitive());
 
-		final var att1 = (Attribute<?, ?>) group0.features().get(1);
+		final var att1 = (Attribute<?, ?, ?, ?>) group0.features().get(1);
 		assertEquals("isNice", att1.name());
 		assertEquals(Primitive.Boolean, ((Unit<?>) att1.datatype()).primitive());
 
@@ -46,7 +46,7 @@ public class NamedReferenceTest
 		assertEquals("Object", group1.name());
 		assertEquals(1, group1.features().size());
 
-		final var rel1 = (Relation<?, ?>) group1.features().get(0);
+		final var rel1 = (Relation<?, ?, ?, ?>) group1.features().get(0);
 		assertEquals("info", rel1.name());
 		assertEquals(group0, rel1.concept());
 	}

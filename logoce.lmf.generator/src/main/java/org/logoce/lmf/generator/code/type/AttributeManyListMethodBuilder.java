@@ -46,7 +46,7 @@ public final class AttributeManyListMethodBuilder implements CodeBuilder<Feature
 
 	public static boolean isManyAttribute(final FeatureResolution resolution)
 	{
-		return resolution.feature() instanceof Attribute<?, ?> attribute && attribute.many();
+		return resolution.feature() instanceof Attribute<?, ?, ?, ?> attribute && attribute.many();
 	}
 
 	private static TypeName boxIfPrimitive(final TypeName type)

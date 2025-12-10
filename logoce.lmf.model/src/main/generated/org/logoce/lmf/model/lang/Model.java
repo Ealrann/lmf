@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang;
 
 import java.util.List;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
+import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Model extends Named {
   String domain();
@@ -16,10 +17,10 @@ public interface Model extends Named {
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String> NAME = Named.Features.NAME;
-    Attribute<String, String> DOMAIN = new AttributeBuilder<String, String>().name("domain").immutable(true).mandatory(true).id(Model.FeatureIDs.DOMAIN).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Attribute<String, List<String>> IMPORTS = new AttributeBuilder<String, List<String>>().name("imports").immutable(true).many(true).id(Model.FeatureIDs.IMPORTS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Attribute<String, List<String>> METAMODELS = new AttributeBuilder<String, List<String>>().name("metamodels").immutable(true).many(true).id(Model.FeatureIDs.METAMODELS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    List<Feature<?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, METAMODELS);
+    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Model> DOMAIN = new AttributeBuilder<String, String, Listener<String>, Model>().name("domain").immutable(true).mandatory(true).id(Model.FeatureIDs.DOMAIN).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<String, List<String>, Listener<List<String>>, Model> IMPORTS = new AttributeBuilder<String, List<String>, Listener<List<String>>, Model>().name("imports").immutable(true).many(true).id(Model.FeatureIDs.IMPORTS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<String, List<String>, Listener<List<String>>, Model> METAMODELS = new AttributeBuilder<String, List<String>, Listener<List<String>>, Model>().name("metamodels").immutable(true).many(true).id(Model.FeatureIDs.METAMODELS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, DOMAIN, IMPORTS, METAMODELS);
   }
 }

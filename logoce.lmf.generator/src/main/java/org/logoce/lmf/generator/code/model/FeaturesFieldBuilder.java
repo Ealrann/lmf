@@ -3,6 +3,7 @@ package org.logoce.lmf.generator.code.model;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.TypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.util.*;
 import org.logoce.lmf.model.lang.*;
@@ -11,9 +12,10 @@ import org.logoce.lmf.model.lang.builder.RelationBuilder;
 import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Feature<?, ?>>
+public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Feature<?, ?, ?, ?>>
 {
 	public static final ClassName ATTRIBUTE_TYPE = ClassName.get(Attribute.class);
 	public static final ClassName ATTRIBUTE_BUILDER_TYPE = ClassName.get(AttributeBuilder.class);
@@ -28,32 +30,38 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	}
 
 	@Override
-	public FieldSpec build(Feature<?, ?> input)
+	public FieldSpec build(Feature<?, ?, ?, ?> input)
 	{
 		final var name = input.name();
-		final var parentGroup = (Group<?>) input.lmContainer();
 		final var resolvedFeature = input.adapt(FeatureResolution.class);
+		final var declaringGroup = resolveDeclaringGroup(input);
 		final var specializeInherited = resolvedFeature.requiresOwnerSpecialization(group);
-		final Group<?> targetGroup = specializeInherited ? group : parentGroup;
+		final Group<?> targetGroup = specializeInherited ? group : declaringGroup;
 		final var constantName = GenUtils.toConstantCase(name);
-		final var types = List.of(resolvedFeature.rawSingleTypeFor(targetGroup).parametrizedWildcard(),
-								  resolvedFeature.rawEffectiveTypeFor(targetGroup).parametrizedWildcard());
-		final var isAttribute = input instanceof Attribute<?, ?>;
+		final var rawSingleType = resolvedFeature.rawSingleTypeFor(targetGroup).parametrizedWildcard();
+		final var rawEffectiveType = resolvedFeature.rawEffectiveTypeFor(targetGroup).parametrizedWildcard();
+		final var listenerType = resolveListenerType(input, rawEffectiveType);
+		final List<TypeName> baseBuilderTypes = List.of(rawSingleType, rawEffectiveType);
+
+		final var parentGroupType = resolveParentGroupType(declaringGroup);
+		final var builderTypes = builderTypeArguments(input, baseBuilderTypes, listenerType, parentGroupType);
+		final var featureTypes = featureTypeArguments(input, builderTypes);
+		final var isAttribute = input instanceof Attribute<?, ?, ?, ?>;
 		final var mainType = isAttribute
-							 ? TypeParameter.of(ATTRIBUTE_TYPE, types)
-							 : TypeParameter.of(RELATION_TYPE, types);
+							 ? TypeParameter.of(ATTRIBUTE_TYPE, featureTypes)
+							 : TypeParameter.of(RELATION_TYPE, featureTypes);
 
 		final var initBuilder = CodeBlock.builder();
 
-		if (!specializeInherited && group != parentGroup)
+		if (!specializeInherited && group != declaringGroup)
 		{
 			initBuilder.add(parentInitializer(input));
 		}
 		else
 		{
 			final var builderType = isAttribute
-									? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, types)
-									: TypeParameter.of(RELATION_BUILDER_TYPE, types);
+									? TypeParameter.of(ATTRIBUTE_BUILDER_TYPE, builderTypes)
+									: TypeParameter.of(RELATION_BUILDER_TYPE, builderTypes);
 
 			initBuilder.add("new $T()", builderType.parametrized());
 
@@ -61,13 +69,13 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 													initBuilder,
 													attribute -> !attribute.name().equals("id"));
 
-			final var model = (MetaModel) ModelUtil.root(targetGroup);
-			final var domainType = ClassName.get(TargetPathUtil.packageName(model), targetGroup.name());
-			initBuilder.add(".id($T.FeatureIDs.$N)", domainType, constantName);
+			final var model = (MetaModel) ModelUtil.root(declaringGroup);
+			final var declaringGroupType = ClassName.get(TargetPathUtil.packageName(model), declaringGroup.name());
+			initBuilder.add(".id($T.FeatureIDs.$N)", declaringGroupType, constantName);
 
 			if (isAttribute)
 			{
-				final var attribute = (Attribute<?, ?>) input;
+				final var attribute = (Attribute<?, ?, ?, ?>) input;
 				final var datatype = attribute.datatype();
 				if (datatype instanceof Generic<?> generic)
 				{
@@ -119,7 +127,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			}
 			else
 			{
-				final var relation = (Relation<?, ?>) input;
+				final var relation = (Relation<?, ?, ?, ?>) input;
 				final var conceptBlock = generateConceptCodeblock(relation.concept());
 
 				initBuilder.add(".concept($L)", conceptBlock);
@@ -137,15 +145,150 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 						.build();
 	}
 
-	private static CodeBlock parentInitializer(final Feature<?, ?> feature)
+	private static List<TypeName> builderTypeArguments(final Feature<?, ?, ?, ?> feature,
+													   final List<TypeName> baseTypes,
+													   final TypeName listenerType,
+													   final TypeName parentGroupType)
 	{
-		final var group = (Group<?>) feature.lmContainer();
-		final var model = (MetaModel) ModelUtil.root(group);
-		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), group.name());
+		final var featureGenericArity = 4;
+		if (featureGenericArity <= baseTypes.size())
+		{
+			return baseTypes;
+		}
+
+		if (!(feature instanceof Attribute<?, ?, ?, ?>) && !(feature instanceof Relation<?, ?, ?, ?>))
+		{
+			return baseTypes;
+		}
+
+		final var result = new ArrayList<TypeName>(featureGenericArity);
+		result.addAll(baseTypes);
+		result.add(listenerType);
+		result.add(parentGroupType);
+		return result;
+	}
+
+	private static List<TypeName> featureTypeArguments(final Feature<?, ?, ?, ?> feature,
+													   final List<TypeName> baseTypes)
+	{
+		final var featureGenericArity = 4;
+		if (featureGenericArity <= baseTypes.size())
+		{
+			return baseTypes;
+		}
+
+		if (!(feature instanceof Attribute<?, ?, ?, ?>) && !(feature instanceof Relation<?, ?, ?, ?>))
+		{
+			return baseTypes;
+		}
+
+		final var result = new ArrayList<TypeName>(featureGenericArity);
+		result.addAll(baseTypes);
+
+		for (int i = baseTypes.size(); i < featureGenericArity; i++)
+		{
+			result.add(GenUtils.WILDCARD);
+		}
+
+		return result;
+	}
+
+	private static CodeBlock parentInitializer(final Feature<?, ?, ?, ?> feature)
+	{
+		final var declaringGroup = resolveDeclaringGroup(feature);
+		final var model = (MetaModel) ModelUtil.root(declaringGroup);
+		final var groupClass = ClassName.get(TargetPathUtil.packageName(model), declaringGroup.name());
 		final var groupFeaturesInterface = groupClass.nestedClass("Features");
 		final var constantFeatureName = GenUtils.toConstantCase(feature.name());
 
 		return CodeBlock.of("$T.$N", groupFeaturesInterface, constantFeatureName);
+	}
+
+	private static TypeName resolveListenerType(final Feature<?, ?, ?, ?> feature,
+												final TypeName rawEffectiveType)
+	{
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute)
+		{
+			final var datatype = attribute.datatype();
+			if (datatype instanceof Unit<?> unit && !attribute.many())
+			{
+				return switch (unit.primitive())
+				{
+					case Boolean -> ClassName.get("org.logoce.lmf.model.notification.listener", "BooleanListener");
+					case Int -> ClassName.get("org.logoce.lmf.model.notification.listener", "IntListener");
+					case Long -> ClassName.get("org.logoce.lmf.model.notification.listener", "LongListener");
+					case Float -> ClassName.get("org.logoce.lmf.model.notification.listener", "FloatListener");
+					case Double -> ClassName.get("org.logoce.lmf.model.notification.listener", "DoubleListener");
+					case String ->
+							GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+												  List.of(ClassName.get(String.class)));
+				};
+			}
+
+			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+										 List.of(rawEffectiveType.box()));
+		}
+
+		if (feature instanceof Relation<?, ?, ?, ?> relation && !relation.many())
+		{
+			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+										 List.of(rawEffectiveType.box()));
+		}
+
+		return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+									 List.of(rawEffectiveType.box()));
+	}
+
+	private static TypeName resolveParentGroupType(final Group<?> declaringGroup)
+	{
+		final var model = (MetaModel) ModelUtil.root(declaringGroup);
+		final var rawType = ClassName.get(TargetPathUtil.packageName(model), declaringGroup.name());
+		final var genericCount = declaringGroup.generics().size();
+		if (genericCount == 0)
+		{
+			return rawType;
+		}
+		return GenUtils.parameterize(rawType, GenUtils.wildcardList(genericCount));
+	}
+
+	private static Group<?> resolveDeclaringGroup(final Feature<?, ?, ?, ?> feature)
+	{
+		final var containerGroup = (Group<?>) feature.lmContainer();
+		final var model = (MetaModel) ModelUtil.root(containerGroup);
+		final List<Group<?>> owners = new ArrayList<>();
+
+		for (final var group : model.groups())
+		{
+			if (group.features().contains(feature))
+			{
+				owners.add(group);
+			}
+		}
+
+		if (owners.isEmpty())
+		{
+			return containerGroup;
+		}
+
+		for (final var candidate : owners)
+		{
+			boolean hasParent = false;
+			for (final var other : owners)
+			{
+				if (other != candidate && ModelUtil.isSubGroup(other, candidate))
+				{
+					hasParent = true;
+					break;
+				}
+			}
+
+			if (!hasParent)
+			{
+				return candidate;
+			}
+		}
+
+		return containerGroup;
 	}
 
 	private static CodeBlock generateConceptCodeblock(final Concept<?> concept)

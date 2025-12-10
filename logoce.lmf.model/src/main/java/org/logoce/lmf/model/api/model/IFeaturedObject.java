@@ -13,10 +13,10 @@ public interface IFeaturedObject extends ILilyEObject
 	Group<?> lmGroup();
 	LMObject lmContainer();
 	int lmContainingFeatureID();
-	Relation<?, ?> lmContainingFeature();
+	Relation<?, ?, ?, ?> lmContainingFeature();
 
-	<T> T get(Feature<?, T> feature);
-	<T> void set(Feature<?, T> feature, T value);
+	<T> T get(Feature<?, ?, ?, ?> feature);
+	<T> void set(Feature<?, ?, ?, ?> feature, T value);
 
 	Object get(int featureID);
 	void set(int featureID, Object object);
@@ -35,7 +35,9 @@ public interface IFeaturedObject extends ILilyEObject
 	{
 		T build();
 
-		<AttributeType> void push(Attribute<AttributeType, ?> feature, AttributeType value);
-		<RelationType extends LMObject> void push(Relation<RelationType, ?> relation, Supplier<RelationType> supplier);
+		<AttributeType> void push(Attribute<?, ?, ?, ?> feature, AttributeType value);
+
+		<RelationType extends LMObject> void push(Relation<RelationType, ?, ?, ?> relation,
+												  Supplier<RelationType> supplier);
 	}
 }

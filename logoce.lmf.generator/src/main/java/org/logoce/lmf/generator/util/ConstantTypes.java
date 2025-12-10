@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public class ConstantTypes
 {
 	public static final ClassName LIST = ClassName.get(List.class);
-	public static final TypeParameter FEATURE = TypeParameter.of(ClassName.get(Feature.class), 2);
+	public static final TypeParameter FEATURE = TypeParameter.of(ClassName.get(Feature.class), 4);
 	public static final TypeParameter GROUP = TypeParameter.of(ClassName.get(Group.class), 1);
 	public static final TypeParameter GENERIC = TypeParameter.of(ClassName.get(Generic.class), 1);
 	public static final TypeParameter UNIT = TypeParameter.of(ClassName.get(Unit.class), 1);

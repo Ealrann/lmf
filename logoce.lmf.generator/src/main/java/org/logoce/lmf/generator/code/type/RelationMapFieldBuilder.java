@@ -85,6 +85,6 @@ public class RelationMapFieldBuilder implements CodeBuilder<List<FeatureResoluti
 
 	private static boolean isRelation(final FeatureResolution f)
 	{
-		return f.feature() instanceof Relation<?, ?>;
+		return f.feature() instanceof Relation<?, ?, ?, ?>;
 	}
 }
