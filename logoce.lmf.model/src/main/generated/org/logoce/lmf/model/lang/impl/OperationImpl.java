@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
-public final class OperationImpl extends FeaturedObject implements Operation {
+public final class OperationImpl extends FeaturedObject<Operation.Features<?>> implements Operation {
   private final String name;
   private final String content;
   private final Supplier<Type<?>> returnType;

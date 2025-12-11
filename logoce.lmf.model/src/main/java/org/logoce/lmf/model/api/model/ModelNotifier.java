@@ -3,21 +3,21 @@ package org.logoce.lmf.model.api.model;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.notification.util.EMFListenerMap;
+import org.logoce.lmf.model.notification.util.ModelListenerMap;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class LilyBasicNotifier implements IEMFNotifier
+public abstract class LilyBasicNotifier implements IModelNotifier
 {
-	private final EMFListenerMap listenerMap;
+	private final ModelListenerMap listenerMap;
 
 	private boolean deliver;
 
 	public LilyBasicNotifier()
 	{
 		final int featureCount = 100;
-		listenerMap = new EMFListenerMap(featureCount, this::featureIndex);
+		listenerMap = new ModelListenerMap(featureCount, this::featureIndex);
 	}
 
 	abstract protected int featureIndex(int featureId);

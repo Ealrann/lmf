@@ -22,8 +22,8 @@ public interface Include<T extends LMObject> extends LMObject {
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    Relation<Group<?>, Group<?>, Listener<Group<?>>, Include<?>> GROUP = new RelationBuilder<Group<?>, Group<?>, Listener<Group<?>>, Include<?>>().name("group").immutable(true).mandatory(true).lazy(true).id(Include.FeatureIDs.GROUP).concept(() -> LMCoreModelDefinition.Groups.GROUP).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.INCLUDE.ALL.get(0)).build()).build();
-    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Include<?>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Include<?>>().name("parameters").immutable(true).many(true).contains(true).id(Include.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    Relation<Group<?>, Group<?>, Listener<Group<?>>, Features<?>> GROUP = new RelationBuilder<Group<?>, Group<?>, Listener<Group<?>>, Features<?>>().name("group").immutable(true).mandatory(true).lazy(true).id(Include.FeatureIDs.GROUP).concept(() -> LMCoreModelDefinition.Groups.GROUP).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.INCLUDE.ALL.get(0)).build()).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>>().name("parameters").immutable(true).many(true).contains(true).id(Include.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(GROUP, PARAMETERS);
   }
 

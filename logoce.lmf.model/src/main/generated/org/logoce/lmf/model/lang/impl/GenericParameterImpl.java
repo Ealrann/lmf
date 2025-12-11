@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
-public final class GenericParameterImpl extends FeaturedObject implements GenericParameter {
+public final class GenericParameterImpl extends FeaturedObject<GenericParameter.Features<?>> implements GenericParameter {
   private final boolean wildcard;
   private final BoundType wildcardBoundType;
   private final Supplier<Type<?>> type;

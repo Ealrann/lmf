@@ -43,8 +43,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		final var listenerType = resolveListenerType(input, rawEffectiveType);
 		final List<TypeName> baseBuilderTypes = List.of(rawSingleType, rawEffectiveType);
 
-		final var parentGroupType = resolveParentGroupType(declaringGroup);
-		final var builderTypes = builderTypeArguments(input, baseBuilderTypes, listenerType, parentGroupType);
+		final var ownerType = resolveOwnerFeaturesType(declaringGroup);
+		final var builderTypes = builderTypeArguments(input, baseBuilderTypes, listenerType, ownerType);
 		final var featureTypes = featureTypeArguments(input, builderTypes);
 		final var isAttribute = input instanceof Attribute<?, ?, ?, ?>;
 		final var mainType = isAttribute
@@ -55,7 +55,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 		if (!specializeInherited && group != declaringGroup)
 		{
-			initBuilder.add(parentInitializer(input));
+			initBuilder.add("$L", parentInitializer(input));
 		}
 		else
 		{
@@ -148,7 +148,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	private static List<TypeName> builderTypeArguments(final Feature<?, ?, ?, ?> feature,
 													   final List<TypeName> baseTypes,
 													   final TypeName listenerType,
-													   final TypeName parentGroupType)
+													   final TypeName ownerType)
 	{
 		final var featureGenericArity = 4;
 		if (featureGenericArity <= baseTypes.size())
@@ -164,7 +164,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		final var result = new ArrayList<TypeName>(featureGenericArity);
 		result.addAll(baseTypes);
 		result.add(listenerType);
-		result.add(parentGroupType);
+		result.add(ownerType);
 		return result;
 	}
 
@@ -237,18 +237,6 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 
 		return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
 									 List.of(rawEffectiveType.box()));
-	}
-
-	private static TypeName resolveParentGroupType(final Group<?> declaringGroup)
-	{
-		final var model = (MetaModel) ModelUtil.root(declaringGroup);
-		final var rawType = ClassName.get(TargetPathUtil.packageName(model), declaringGroup.name());
-		final var genericCount = declaringGroup.generics().size();
-		if (genericCount == 0)
-		{
-			return rawType;
-		}
-		return GenUtils.parameterize(rawType, GenUtils.wildcardList(genericCount));
 	}
 
 	private static Group<?> resolveDeclaringGroup(final Feature<?, ?, ?, ?> feature)
@@ -335,6 +323,14 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		return CodeBlock.builder()
 						.add("$T.Generics.$N.ALL.get($L)", modelDefinition, constantName, index)
 						.build();
+	}
+
+	private static TypeName resolveOwnerFeaturesType(final Group<?> declaringGroup)
+	{
+		final var model = (MetaModel) ModelUtil.root(declaringGroup);
+		final var ownerType = ClassName.get(TargetPathUtil.packageName(model), declaringGroup.name());
+		final var featuresType = ownerType.nestedClass("Features");
+		return GenUtils.parameterize(featuresType, List.of(GenUtils.WILDCARD));
 	}
 
 	private static CodeBlock generateGenericsCodeblock(final Concept<?> concept)

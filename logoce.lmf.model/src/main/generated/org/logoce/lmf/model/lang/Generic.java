@@ -20,8 +20,8 @@ public interface Generic<T> extends Concept<T>, Datatype<T> {
   }
 
   interface Features<T extends Features<T>> extends Concept.Features<T>, Datatype.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Relation<GenericExtension, GenericExtension, Listener<GenericExtension>, Generic<?>> EXTENSION = new RelationBuilder<GenericExtension, GenericExtension, Listener<GenericExtension>, Generic<?>>().name("extension").immutable(true).contains(true).id(Generic.FeatureIDs.EXTENSION).concept(() -> LMCoreModelDefinition.Groups.GENERIC_EXTENSION).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Relation<GenericExtension, GenericExtension, Listener<GenericExtension>, Features<?>> EXTENSION = new RelationBuilder<GenericExtension, GenericExtension, Listener<GenericExtension>, Features<?>>().name("extension").immutable(true).contains(true).id(Generic.FeatureIDs.EXTENSION).concept(() -> LMCoreModelDefinition.Groups.GENERIC_EXTENSION).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, EXTENSION);
   }
 

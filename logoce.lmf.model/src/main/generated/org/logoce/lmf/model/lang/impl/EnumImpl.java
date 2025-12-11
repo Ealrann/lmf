@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
-public final class EnumImpl<T> extends FeaturedObject implements Enum<T> {
+public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implements Enum<T> {
   private final String name;
   private final List<String> literals;
 

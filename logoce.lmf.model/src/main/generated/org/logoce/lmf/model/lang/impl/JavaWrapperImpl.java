@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.JavaWrapper;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
-public final class JavaWrapperImpl<T> extends FeaturedObject implements JavaWrapper<T> {
+public final class JavaWrapperImpl<T> extends FeaturedObject<JavaWrapper.Features<?>> implements JavaWrapper<T> {
   private final String name;
   private final String qualifiedClassName;
   private final Serializer serializer;

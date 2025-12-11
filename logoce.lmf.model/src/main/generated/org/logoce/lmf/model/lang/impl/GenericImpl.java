@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.GenericExtension;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
-public final class GenericImpl<T> extends FeaturedObject implements Generic<T> {
+public final class GenericImpl<T> extends FeaturedObject<Generic.Features<?>> implements Generic<T> {
   private final String name;
   private final GenericExtension extension;
 

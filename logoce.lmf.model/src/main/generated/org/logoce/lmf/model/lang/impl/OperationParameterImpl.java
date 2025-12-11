@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
-public final class OperationParameterImpl extends FeaturedObject implements OperationParameter {
+public final class OperationParameterImpl extends FeaturedObject<OperationParameter.Features<?>> implements OperationParameter {
   private final String name;
   private final Supplier<Type<?>> type;
   private final List<GenericParameter> parameters;

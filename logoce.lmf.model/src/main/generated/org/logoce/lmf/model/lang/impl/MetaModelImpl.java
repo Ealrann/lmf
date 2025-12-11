@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
-public final class MetaModelImpl extends FeaturedObject implements MetaModel {
+public final class MetaModelImpl extends FeaturedObject<MetaModel.Features<?>> implements MetaModel {
   private final String name;
   private final String domain;
   private final List<String> imports;

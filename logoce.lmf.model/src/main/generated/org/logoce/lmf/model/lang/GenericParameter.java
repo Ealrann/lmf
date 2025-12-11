@@ -27,10 +27,10 @@ public interface GenericParameter extends LMObject {
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {
-    Attribute<Boolean, Boolean, BooleanListener, GenericParameter> WILDCARD = new AttributeBuilder<Boolean, Boolean, BooleanListener, GenericParameter>().name("wildcard").immutable(true).id(GenericParameter.FeatureIDs.WILDCARD).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
-    Attribute<BoundType, BoundType, Listener<BoundType>, GenericParameter> WILDCARD_BOUND_TYPE = new AttributeBuilder<BoundType, BoundType, Listener<BoundType>, GenericParameter>().name("wildcardBoundType").immutable(true).id(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE).datatype(() -> LMCoreModelDefinition.Enums.BOUND_TYPE).build();
-    Relation<Type<?>, Type<?>, Listener<Type<?>>, GenericParameter> TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, GenericParameter>().name("type").immutable(true).mandatory(true).lazy(true).id(GenericParameter.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
-    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, GenericParameter> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, GenericParameter>().name("parameters").immutable(true).many(true).contains(true).id(GenericParameter.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    Attribute<Boolean, Boolean, BooleanListener, Features<?>> WILDCARD = new AttributeBuilder<Boolean, Boolean, BooleanListener, Features<?>>().name("wildcard").immutable(true).id(GenericParameter.FeatureIDs.WILDCARD).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Attribute<BoundType, BoundType, Listener<BoundType>, Features<?>> WILDCARD_BOUND_TYPE = new AttributeBuilder<BoundType, BoundType, Listener<BoundType>, Features<?>>().name("wildcardBoundType").immutable(true).id(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE).datatype(() -> LMCoreModelDefinition.Enums.BOUND_TYPE).build();
+    Relation<Type<?>, Type<?>, Listener<Type<?>>, Features<?>> TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, Features<?>>().name("type").immutable(true).mandatory(true).lazy(true).id(GenericParameter.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>>().name("parameters").immutable(true).many(true).contains(true).id(GenericParameter.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(WILDCARD, WILDCARD_BOUND_TYPE, TYPE, PARAMETERS);
   }
 

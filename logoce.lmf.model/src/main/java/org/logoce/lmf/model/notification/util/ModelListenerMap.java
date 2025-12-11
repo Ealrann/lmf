@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.notification.util;
 
-import org.logoce.lmf.model.api.model.IEMFNotifier;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.Feature;
 
@@ -10,14 +10,14 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-public final class EMFListenerMap implements IEMFNotifier
+public final class ModelListenerMap implements IModelNotifier
 {
 	private final int featureCount;
 	private final IndexFunction indexFunction;
 
 	private Deque<Object>[] listenerMap = null;
 
-	public EMFListenerMap(int featureCount, IndexFunction indexFunction)
+	public ModelListenerMap(int featureCount, IndexFunction indexFunction)
 	{
 		this.featureCount = featureCount;
 		this.indexFunction = indexFunction;

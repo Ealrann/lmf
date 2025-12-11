@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupImplementationType;
@@ -12,6 +13,7 @@ import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.OperationUtil;
+import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Operation;
@@ -19,6 +21,7 @@ import org.logoce.lmf.model.lang.OperationParameter;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
+import java.util.List;
 
 public final class ImplementationGenerator
 {
@@ -37,7 +40,7 @@ public final class ImplementationGenerator
 		final var interfaceType = group.adapt(GroupInterfaceType.class);
 		final var implementationType = group.adapt(GroupImplementationType.class);
 		final var classBuilder = implementationType.classSpecBuilder()
-												   .superclass(FEATURE_OBJECT_TYPE)
+												   .superclass(resolveFeaturedSuperclass(interfaceType))
 												   .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 		final var featureInstallers = ImplementationFeatureUtil.buildFeatureInstallers(classBuilder, group);
 		final var typeInstallers = ImplementationFeatureUtil.buildTypeInstallers(interfaceType, classBuilder);
@@ -109,6 +112,14 @@ public final class ImplementationGenerator
 					  .stream()
 					  .map(operation -> buildOperationStub(operation, group))
 					  .forEach(classBuilder::addMethod);
+	}
+
+	private static TypeName resolveFeaturedSuperclass(final GroupInterfaceType interfaceType)
+	{
+		final var featuresType = GenUtils.parameterize(interfaceType.raw().nestedClass("Features"),
+													  List.of(GenUtils.WILDCARD));
+		final var featuredType = TypeParameter.of(FEATURE_OBJECT_TYPE, featuresType);
+		return featuredType.parametrized();
 	}
 
 	private static MethodSpec buildOperationStub(final Operation operation, final Group<?> owner)

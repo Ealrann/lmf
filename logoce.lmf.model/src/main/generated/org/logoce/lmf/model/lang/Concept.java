@@ -9,7 +9,7 @@ public interface Concept<T> extends Type<T> {
   }
 
   interface Features<T extends Features<T>> extends Type.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME);
   }
 }

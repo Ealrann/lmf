@@ -8,7 +8,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Primitive;
 import org.logoce.lmf.model.lang.Unit;
 
-public final class UnitImpl<T> extends FeaturedObject implements Unit<T> {
+public final class UnitImpl<T> extends FeaturedObject<Unit.Features<?>> implements Unit<T> {
   private final String name;
   private final String matcher;
   private final String defaultValue;

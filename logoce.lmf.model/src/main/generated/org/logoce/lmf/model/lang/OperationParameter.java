@@ -22,9 +22,9 @@ public interface OperationParameter extends Named {
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Relation<Type<?>, Type<?>, Listener<Type<?>>, OperationParameter> TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, OperationParameter>().name("type").immutable(true).mandatory(true).lazy(true).id(OperationParameter.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
-    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, OperationParameter> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, OperationParameter>().name("parameters").immutable(true).many(true).contains(true).id(OperationParameter.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Relation<Type<?>, Type<?>, Listener<Type<?>>, Features<?>> TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, Features<?>>().name("type").immutable(true).mandatory(true).lazy(true).id(OperationParameter.FeatureIDs.TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>>().name("parameters").immutable(true).many(true).contains(true).id(OperationParameter.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, TYPE, PARAMETERS);
   }
 

@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
-public final class RelationImpl<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup extends LMObject> extends FeaturedObject implements Relation<UnaryType, EffectiveType, ListenerType, ParentGroup> {
+public final class RelationImpl<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> extends FeaturedObject<Relation.Features<?>> implements Relation<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private final String name;
   private final boolean immutable;
   private final int id;

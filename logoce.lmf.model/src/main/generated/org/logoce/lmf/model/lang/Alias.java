@@ -19,8 +19,8 @@ public interface Alias extends Named {
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Attribute<String, String, Listener<String>, Alias> VALUE = new AttributeBuilder<String, String, Listener<String>, Alias>().name("value").immutable(true).mandatory(true).id(Alias.FeatureIDs.VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Features<?>> VALUE = new AttributeBuilder<String, String, Listener<String>, Features<?>>().name("value").immutable(true).mandatory(true).id(Alias.FeatureIDs.VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, VALUE);
   }
 

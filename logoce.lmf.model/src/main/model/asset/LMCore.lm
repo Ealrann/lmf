@@ -55,8 +55,7 @@
 		(Generic UnaryType)
 		(Generic EffectiveType)
 		(Generic ListenerType)
-		(Generic ParentGroup
-			(extension boundType=extends type=@LMObject))
+		(Generic ParentGroup)
 		(-att name=immutable datatype=@boolean)
 		(-att id @int)
 		(-att name=many datatype=@boolean)
@@ -72,8 +71,7 @@
 		(Generic UnaryType)
 		(Generic EffectiveType)
 		(Generic ListenerType)
-		(Generic ParentGroup
-			(extension boundType=extends type=@LMObject))
+		(Generic ParentGroup)
 		(-refers datatype lazy [1..1] @Datatype
 		    (parameters type=^UnaryType))
 		(-att name=defaultValue /units.7))
@@ -88,8 +86,7 @@
 			(extension boundType=extends type=@LMObject))
 		(Generic EffectiveType)
 		(Generic ListenerType)
-		(Generic ParentGroup
-			(extension boundType=extends type=@LMObject))
+		(Generic ParentGroup)
 		(-refers concept lazy [1..1] @Concept
 		    (parameters type=^UnaryType))
 		(-att lazy datatype=/units.2)

@@ -6,14 +6,13 @@ import org.logoce.lmf.model.lang.Feature;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface IEMFNotifier
+public interface IModelNotifier
 {
 	void listen(Consumer<Notification> listener, int... featureIDs);
 	void sulk(Consumer<Notification> listener, int... featureIDs);
 
 	void listenNoParam(Runnable listener, int... featureIDs);
 	void sulkNoParam(Runnable listener, int... featureIDs);
-
 
 	void listen(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features);
 	void sulk(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features);

@@ -9,9 +9,9 @@ import org.logoce.lmf.generator.code.util.FieldBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TypeParameter;
+import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.notification.api.IFeatures;
 
 public final class GroupFeaturesGenerator
 {
@@ -44,24 +44,15 @@ public final class GroupFeaturesGenerator
 			for (final var superInterface : group.includes())
 			{
 				final var parentGroup = superInterface.group();
-				final var sameMetaModel = parentGroup.lmContainer() == group.lmContainer();
 				final var parentFeatures = ClassName.get("", parentGroup.name() + ".Features");
-
-				if (sameMetaModel)
-				{
-					final var typed = TypeParameter.of(parentFeatures, variableTypeName);
-					featuresBuilder.addSuperinterface(typed.parametrized());
-				}
-				else
-				{
-					featuresBuilder.addSuperinterface(parentFeatures);
-				}
+				final var typed = TypeParameter.of(parentFeatures, variableTypeName);
+				featuresBuilder.addSuperinterface(typed.parametrized());
 			}
 		}
 		else if (group.name().equals("LMObject"))
 		{
-			final var iFeatures = ClassName.get(IFeatures.class);
-			final var typed = TypeParameter.of(iFeatures, variableTypeName);
+			final var baseFeatures = ClassName.get(IFeaturedObject.class).nestedClass("Features");
+			final var typed = TypeParameter.of(baseFeatures, variableTypeName);
 			featuresBuilder.addSuperinterface(typed.parametrized());
 		}
 		else

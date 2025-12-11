@@ -25,11 +25,11 @@ public interface Unit<T> extends Datatype<T> {
   }
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Attribute<String, String, Listener<String>, Unit<?>> MATCHER = new AttributeBuilder<String, String, Listener<String>, Unit<?>>().name("matcher").immutable(true).id(Unit.FeatureIDs.MATCHER).datatype(() -> LMCoreModelDefinition.Units.MATCHER).build();
-    Attribute<String, String, Listener<String>, Unit<?>> DEFAULT_VALUE = new AttributeBuilder<String, String, Listener<String>, Unit<?>>().name("defaultValue").immutable(true).id(Unit.FeatureIDs.DEFAULT_VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Attribute<Primitive, Primitive, Listener<Primitive>, Unit<?>> PRIMITIVE = new AttributeBuilder<Primitive, Primitive, Listener<Primitive>, Unit<?>>().name("primitive").immutable(true).defaultValue("String").id(Unit.FeatureIDs.PRIMITIVE).datatype(() -> LMCoreModelDefinition.Enums.PRIMITIVE).build();
-    Attribute<String, String, Listener<String>, Unit<?>> EXTRACTOR = new AttributeBuilder<String, String, Listener<String>, Unit<?>>().name("extractor").immutable(true).id(Unit.FeatureIDs.EXTRACTOR).datatype(() -> LMCoreModelDefinition.Units.EXTRACTOR).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Features<?>> MATCHER = new AttributeBuilder<String, String, Listener<String>, Features<?>>().name("matcher").immutable(true).id(Unit.FeatureIDs.MATCHER).datatype(() -> LMCoreModelDefinition.Units.MATCHER).build();
+    Attribute<String, String, Listener<String>, Features<?>> DEFAULT_VALUE = new AttributeBuilder<String, String, Listener<String>, Features<?>>().name("defaultValue").immutable(true).id(Unit.FeatureIDs.DEFAULT_VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<Primitive, Primitive, Listener<Primitive>, Features<?>> PRIMITIVE = new AttributeBuilder<Primitive, Primitive, Listener<Primitive>, Features<?>>().name("primitive").immutable(true).defaultValue("String").id(Unit.FeatureIDs.PRIMITIVE).datatype(() -> LMCoreModelDefinition.Enums.PRIMITIVE).build();
+    Attribute<String, String, Listener<String>, Features<?>> EXTRACTOR = new AttributeBuilder<String, String, Listener<String>, Features<?>>().name("extractor").immutable(true).id(Unit.FeatureIDs.EXTRACTOR).datatype(() -> LMCoreModelDefinition.Units.EXTRACTOR).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, MATCHER, DEFAULT_VALUE, PRIMITIVE, EXTRACTOR);
   }
 

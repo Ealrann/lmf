@@ -11,9 +11,8 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.GenericParameter;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
-import org.logoce.lmf.model.lang.LMObject;
 
-public final class AttributeImpl<UnaryType, EffectiveType, ListenerType, ParentGroup extends LMObject> extends FeaturedObject implements Attribute<UnaryType, EffectiveType, ListenerType, ParentGroup> {
+public final class AttributeImpl<UnaryType, EffectiveType, ListenerType, ParentGroup> extends FeaturedObject<Attribute.Features<?>> implements Attribute<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private final String name;
   private final boolean immutable;
   private final int id;

@@ -10,8 +10,8 @@ import org.logoce.lmf.model.notification.listener.BooleanListener;
 import org.logoce.lmf.model.notification.listener.IntListener;
 import org.logoce.lmf.model.notification.listener.Listener;
 
-public interface Relation<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup extends LMObject> extends Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> {
-  static <UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup extends LMObject> Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> builder(
+public interface Relation<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> extends Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> {
+  static <UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> builder(
       ) {
     return new RelationBuilder<>();
   }
@@ -33,19 +33,19 @@ public interface Relation<UnaryType extends LMObject, EffectiveType, ListenerTyp
   }
 
   interface Features<T extends Features<T>> extends Feature.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Attribute<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>> IMMUTABLE = Feature.Features.IMMUTABLE;
-    Attribute<Integer, Integer, IntListener, Feature<?, ?, ?, ?>> ID = Feature.Features.ID;
-    Attribute<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>> MANY = Feature.Features.MANY;
-    Attribute<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>> MANDATORY = Feature.Features.MANDATORY;
-    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Feature<?, ?, ?, ?>> PARAMETERS = Feature.Features.PARAMETERS;
-    Relation<Concept<?>, Concept<?>, Listener<Concept<?>>, Relation<?, ?, ?, ?>> CONCEPT = new RelationBuilder<Concept<?>, Concept<?>, Listener<Concept<?>>, Relation<?, ?, ?, ?>>().name("concept").immutable(true).mandatory(true).lazy(true).id(Relation.FeatureIDs.CONCEPT).concept(() -> LMCoreModelDefinition.Groups.CONCEPT).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(0)).build()).build();
-    Attribute<Boolean, Boolean, BooleanListener, Relation<?, ?, ?, ?>> LAZY = new AttributeBuilder<Boolean, Boolean, BooleanListener, Relation<?, ?, ?, ?>>().name("lazy").immutable(true).id(Relation.FeatureIDs.LAZY).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
-    Attribute<Boolean, Boolean, BooleanListener, Relation<?, ?, ?, ?>> CONTAINS = new AttributeBuilder<Boolean, Boolean, BooleanListener, Relation<?, ?, ?, ?>>().name("contains").immutable(true).id(Relation.FeatureIDs.CONTAINS).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Attribute<Boolean, Boolean, BooleanListener, Feature.Features<?>> IMMUTABLE = Feature.Features.IMMUTABLE;
+    Attribute<Integer, Integer, IntListener, Feature.Features<?>> ID = Feature.Features.ID;
+    Attribute<Boolean, Boolean, BooleanListener, Feature.Features<?>> MANY = Feature.Features.MANY;
+    Attribute<Boolean, Boolean, BooleanListener, Feature.Features<?>> MANDATORY = Feature.Features.MANDATORY;
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Feature.Features<?>> PARAMETERS = Feature.Features.PARAMETERS;
+    Relation<Concept<?>, Concept<?>, Listener<Concept<?>>, Features<?>> CONCEPT = new RelationBuilder<Concept<?>, Concept<?>, Listener<Concept<?>>, Features<?>>().name("concept").immutable(true).mandatory(true).lazy(true).id(Relation.FeatureIDs.CONCEPT).concept(() -> LMCoreModelDefinition.Groups.CONCEPT).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.RELATION.ALL.get(0)).build()).build();
+    Attribute<Boolean, Boolean, BooleanListener, Features<?>> LAZY = new AttributeBuilder<Boolean, Boolean, BooleanListener, Features<?>>().name("lazy").immutable(true).id(Relation.FeatureIDs.LAZY).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Attribute<Boolean, Boolean, BooleanListener, Features<?>> CONTAINS = new AttributeBuilder<Boolean, Boolean, BooleanListener, Features<?>>().name("contains").immutable(true).id(Relation.FeatureIDs.CONTAINS).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, IMMUTABLE, ID, MANY, MANDATORY, PARAMETERS, CONCEPT, LAZY, CONTAINS);
   }
 
-  interface Builder<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup extends LMObject> extends IFeaturedObject.Builder<Relation<UnaryType, EffectiveType, ListenerType, ParentGroup>> {
+  interface Builder<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> extends IFeaturedObject.Builder<Relation<UnaryType, EffectiveType, ListenerType, ParentGroup>> {
     Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> name(String name);
     Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> immutable(boolean immutable);
     Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> id(int id);

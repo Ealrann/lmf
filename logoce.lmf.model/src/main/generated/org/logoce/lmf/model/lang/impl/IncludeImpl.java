@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.Include;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 
-public final class IncludeImpl<T extends LMObject> extends FeaturedObject implements Include<T> {
+public final class IncludeImpl<T extends LMObject> extends FeaturedObject<Include.Features<?>> implements Include<T> {
   private final Supplier<Group<T>> group;
   private final List<GenericParameter> parameters;
 

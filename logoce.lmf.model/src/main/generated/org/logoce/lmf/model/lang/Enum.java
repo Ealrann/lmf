@@ -19,8 +19,8 @@ public interface Enum<T> extends Datatype<T> {
   }
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Attribute<String, List<String>, Listener<List<String>>, Enum<?>> LITERALS = new AttributeBuilder<String, List<String>, Listener<List<String>>, Enum<?>>().name("literals").immutable(true).many(true).id(Enum.FeatureIDs.LITERALS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Attribute<String, List<String>, Listener<List<String>>, Features<?>> LITERALS = new AttributeBuilder<String, List<String>, Listener<List<String>>, Features<?>>().name("literals").immutable(true).many(true).id(Enum.FeatureIDs.LITERALS).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, LITERALS);
   }
 

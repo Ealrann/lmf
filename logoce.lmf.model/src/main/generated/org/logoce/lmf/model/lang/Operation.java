@@ -27,11 +27,11 @@ public interface Operation extends Named {
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Attribute<String, String, Listener<String>, Operation> CONTENT = new AttributeBuilder<String, String, Listener<String>, Operation>().name("content").immutable(true).id(Operation.FeatureIDs.CONTENT).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
-    Relation<Type<?>, Type<?>, Listener<Type<?>>, Operation> RETURN_TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, Operation>().name("returnType").immutable(true).lazy(true).id(Operation.FeatureIDs.RETURN_TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
-    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Operation> RETURN_TYPE_PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Operation>().name("returnTypeParameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.RETURN_TYPE_PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
-    Relation<OperationParameter, List<OperationParameter>, Listener<List<OperationParameter>>, Operation> PARAMETERS = new RelationBuilder<OperationParameter, List<OperationParameter>, Listener<List<OperationParameter>>, Operation>().name("parameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.OPERATION_PARAMETER).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Attribute<String, String, Listener<String>, Features<?>> CONTENT = new AttributeBuilder<String, String, Listener<String>, Features<?>>().name("content").immutable(true).id(Operation.FeatureIDs.CONTENT).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
+    Relation<Type<?>, Type<?>, Listener<Type<?>>, Features<?>> RETURN_TYPE = new RelationBuilder<Type<?>, Type<?>, Listener<Type<?>>, Features<?>>().name("returnType").immutable(true).lazy(true).id(Operation.FeatureIDs.RETURN_TYPE).concept(() -> LMCoreModelDefinition.Groups.TYPE).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>> RETURN_TYPE_PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>>().name("returnTypeParameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.RETURN_TYPE_PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    Relation<OperationParameter, List<OperationParameter>, Listener<List<OperationParameter>>, Features<?>> PARAMETERS = new RelationBuilder<OperationParameter, List<OperationParameter>, Listener<List<OperationParameter>>, Features<?>>().name("parameters").immutable(true).many(true).contains(true).id(Operation.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.OPERATION_PARAMETER).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, CONTENT, RETURN_TYPE, RETURN_TYPE_PARAMETERS, PARAMETERS);
   }
 

@@ -13,7 +13,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 
-public final class GroupImpl<T extends LMObject> extends FeaturedObject implements Group<T> {
+public final class GroupImpl<T extends LMObject> extends FeaturedObject<Group.Features<?>> implements Group<T> {
   private final String name;
   private final boolean concrete;
   private final List<Include<?>> includes;

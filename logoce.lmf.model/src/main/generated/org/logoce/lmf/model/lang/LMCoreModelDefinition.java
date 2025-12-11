@@ -45,7 +45,7 @@ public interface LMCoreModelDefinition {
       Generic<?> UNARY_TYPE = new GenericBuilder<>().name("UnaryType").build();
       Generic<?> EFFECTIVE_TYPE = new GenericBuilder<>().name("EffectiveType").build();
       Generic<?> LISTENER_TYPE = new GenericBuilder<>().name("ListenerType").build();
-      Generic<? extends LMObject> PARENT_GROUP = new GenericBuilder<LMObject>().name("ParentGroup").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
+      Generic<?> PARENT_GROUP = new GenericBuilder<>().name("ParentGroup").build();
       List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE, LISTENER_TYPE, PARENT_GROUP);
     }
 
@@ -53,7 +53,7 @@ public interface LMCoreModelDefinition {
       Generic<?> UNARY_TYPE = new GenericBuilder<>().name("UnaryType").build();
       Generic<?> EFFECTIVE_TYPE = new GenericBuilder<>().name("EffectiveType").build();
       Generic<?> LISTENER_TYPE = new GenericBuilder<>().name("ListenerType").build();
-      Generic<? extends LMObject> PARENT_GROUP = new GenericBuilder<LMObject>().name("ParentGroup").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
+      Generic<?> PARENT_GROUP = new GenericBuilder<>().name("ParentGroup").build();
       List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE, LISTENER_TYPE, PARENT_GROUP);
     }
 
@@ -61,7 +61,7 @@ public interface LMCoreModelDefinition {
       Generic<? extends LMObject> UNARY_TYPE = new GenericBuilder<LMObject>().name("UnaryType").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
       Generic<?> EFFECTIVE_TYPE = new GenericBuilder<>().name("EffectiveType").build();
       Generic<?> LISTENER_TYPE = new GenericBuilder<>().name("ListenerType").build();
-      Generic<? extends LMObject> PARENT_GROUP = new GenericBuilder<LMObject>().name("ParentGroup").extension(() -> new GenericExtensionBuilder().type(() -> LMCoreModelDefinition.Groups.LM_OBJECT).boundType(BoundType.Extends).build()).build();
+      Generic<?> PARENT_GROUP = new GenericBuilder<>().name("ParentGroup").build();
       List<Generic<?>> ALL = List.of(UNARY_TYPE, EFFECTIVE_TYPE, LISTENER_TYPE, PARENT_GROUP);
     }
 

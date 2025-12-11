@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
-public final class GenericExtensionImpl extends FeaturedObject implements GenericExtension {
+public final class GenericExtensionImpl extends FeaturedObject<GenericExtension.Features<?>> implements GenericExtension {
   private final Supplier<Type<?>> type;
   private final BoundType boundType;
   private final List<GenericParameter> parameters;

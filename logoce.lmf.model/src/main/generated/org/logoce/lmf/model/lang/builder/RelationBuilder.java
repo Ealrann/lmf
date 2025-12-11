@@ -14,7 +14,7 @@ import org.logoce.lmf.model.lang.Relation.Builder;
 import org.logoce.lmf.model.lang.impl.RelationImpl;
 import org.logoce.lmf.model.util.BuildUtils;
 
-public final class RelationBuilder<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup extends LMObject> implements Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> {
+public final class RelationBuilder<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> implements Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private String name;
   private boolean immutable;
   private int id;

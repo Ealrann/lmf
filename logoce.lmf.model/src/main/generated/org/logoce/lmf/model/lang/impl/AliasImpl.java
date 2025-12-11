@@ -7,7 +7,7 @@ import org.logoce.lmf.model.lang.Alias;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
-public final class AliasImpl extends FeaturedObject implements Alias {
+public final class AliasImpl extends FeaturedObject<Alias.Features<?>> implements Alias {
   private final String name;
   private final String value;
 

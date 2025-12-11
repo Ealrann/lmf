@@ -7,7 +7,7 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
-public final class SerializerImpl extends FeaturedObject implements Serializer {
+public final class SerializerImpl extends FeaturedObject<Serializer.Features<?>> implements Serializer {
   private final String defaultValue;
   private final String create;
   private final String convert;

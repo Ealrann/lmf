@@ -7,7 +7,7 @@ import org.logoce.lmf.model.notification.listener.BooleanListener;
 import org.logoce.lmf.model.notification.listener.IntListener;
 import org.logoce.lmf.model.notification.listener.Listener;
 
-public interface Feature<UnaryType, EffectiveType, ListenerType, ParentGroup extends LMObject> extends Named {
+public interface Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> extends Named {
   boolean immutable();
   int id();
   boolean many();
@@ -24,12 +24,12 @@ public interface Feature<UnaryType, EffectiveType, ListenerType, ParentGroup ext
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
-    Attribute<String, String, Listener<String>, Named> NAME = Named.Features.NAME;
-    Attribute<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>> IMMUTABLE = new AttributeBuilder<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>>().name("immutable").immutable(true).id(Feature.FeatureIDs.IMMUTABLE).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
-    Attribute<Integer, Integer, IntListener, Feature<?, ?, ?, ?>> ID = new AttributeBuilder<Integer, Integer, IntListener, Feature<?, ?, ?, ?>>().name("id").immutable(true).id(Feature.FeatureIDs.ID).datatype(() -> LMCoreModelDefinition.Units.INT).build();
-    Attribute<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>> MANY = new AttributeBuilder<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>>().name("many").immutable(true).id(Feature.FeatureIDs.MANY).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
-    Attribute<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>> MANDATORY = new AttributeBuilder<Boolean, Boolean, BooleanListener, Feature<?, ?, ?, ?>>().name("mandatory").immutable(true).id(Feature.FeatureIDs.MANDATORY).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
-    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Feature<?, ?, ?, ?>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Feature<?, ?, ?, ?>>().name("parameters").immutable(true).many(true).contains(true).id(Feature.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
+    Attribute<String, String, Listener<String>, Named.Features<?>> NAME = Named.Features.NAME;
+    Attribute<Boolean, Boolean, BooleanListener, Features<?>> IMMUTABLE = new AttributeBuilder<Boolean, Boolean, BooleanListener, Features<?>>().name("immutable").immutable(true).id(Feature.FeatureIDs.IMMUTABLE).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Attribute<Integer, Integer, IntListener, Features<?>> ID = new AttributeBuilder<Integer, Integer, IntListener, Features<?>>().name("id").immutable(true).id(Feature.FeatureIDs.ID).datatype(() -> LMCoreModelDefinition.Units.INT).build();
+    Attribute<Boolean, Boolean, BooleanListener, Features<?>> MANY = new AttributeBuilder<Boolean, Boolean, BooleanListener, Features<?>>().name("many").immutable(true).id(Feature.FeatureIDs.MANY).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Attribute<Boolean, Boolean, BooleanListener, Features<?>> MANDATORY = new AttributeBuilder<Boolean, Boolean, BooleanListener, Features<?>>().name("mandatory").immutable(true).id(Feature.FeatureIDs.MANDATORY).datatype(() -> LMCoreModelDefinition.Units.BOOLEAN).build();
+    Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>> PARAMETERS = new RelationBuilder<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Features<?>>().name("parameters").immutable(true).many(true).contains(true).id(Feature.FeatureIDs.PARAMETERS).concept(() -> LMCoreModelDefinition.Groups.GENERIC_PARAMETER).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, IMMUTABLE, ID, MANY, MANDATORY, PARAMETERS);
   }
 }
