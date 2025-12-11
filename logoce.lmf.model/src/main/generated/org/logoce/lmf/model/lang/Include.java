@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.lang.builder.IncludeBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
@@ -13,6 +14,8 @@ public interface Include<T extends LMObject> extends LMObject {
     return new IncludeBuilder<>();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   Group<T> group();
   List<GenericParameter> parameters();
 

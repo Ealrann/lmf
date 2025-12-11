@@ -28,7 +28,7 @@ public final class ImplementationFeatureUtil
 {
 	private static final Modifier[] MODIFIERS = {Modifier.PUBLIC};
 	private static final ClassName SET_NOTIFICATION_TYPE = ClassName.get(
-			"org.logoce.lmf.model.notification.impl", "SetNotifiation");
+			"org.logoce.lmf.model.notification.impl", "SetNotification");
 	private static final ConstructorBuilder CONSTRUCTOR_BUILDER = ImplementationFeatureUtil.parameterBuilder();
 	public static final LMGroupMethodBuilder LM_GROUP_METHOD_BUILDER = new LMGroupMethodBuilder();
 	public static final SetMapMethodBuilder SETTERMAP_METHOD_BUILDER = new SetMapMethodBuilder();
@@ -136,14 +136,16 @@ public final class ImplementationFeatureUtil
 
 		final var oldValue = CodeBlock.of("final var oldValue = this.$N", feature.name());
 		final var containment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
+		final var containmentFlag = containment ? CodeBlock.of("true") : CodeBlock.of("false");
 		if (containment)
 		{
 			final var setContainer = containmentSetStatement(featureIdExpr, paramName);
 			return List.of(oldValue,
 						   assignment,
 						   setContainer,
-						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
+						   CodeBlock.of("eNotify(new $T(this, $L, $L, $N, oldValue))",
 										SET_NOTIFICATION_TYPE,
+										containmentFlag,
 										featureIdExpr,
 										paramName));
 		}
@@ -151,8 +153,9 @@ public final class ImplementationFeatureUtil
 		{
 			return List.of(oldValue,
 						   assignment,
-						   CodeBlock.of("eNotify(new $T(this, $L, $N, oldValue))",
+						   CodeBlock.of("eNotify(new $T(this, $L, $L, $N, oldValue))",
 										SET_NOTIFICATION_TYPE,
+										containmentFlag,
 										featureIdExpr,
 										paramName));
 		}

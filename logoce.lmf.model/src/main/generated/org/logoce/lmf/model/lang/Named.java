@@ -1,10 +1,13 @@
 package org.logoce.lmf.model.lang;
 
 import java.util.List;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Named extends LMObject {
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   String name();
 
   interface FeatureIDs {

@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.GenericExtensionBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
@@ -13,6 +14,8 @@ public interface GenericExtension extends LMObject {
     return new GenericExtensionBuilder();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   Type<?> type();
   BoundType boundType();
   List<GenericParameter> parameters();

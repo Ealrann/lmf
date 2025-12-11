@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public interface IFeaturedObject extends IModelNotifier, IAdaptable
+public interface IFeaturedObject extends IAdaptable
 {
 	Group<?> lmGroup();
 	LMObject lmContainer();
@@ -46,6 +46,7 @@ public interface IFeaturedObject extends IModelNotifier, IAdaptable
 	<T extends IAdapter> T adaptGeneric(Class<? extends IAdapter> type);
 	<T extends IAdapter> T adaptNotNullGeneric(Class<? extends IAdapter> type);
 
+	IModelNotifier<? extends Features<?>> notifier();
 
 	interface Features<T extends IFeatures<T>> extends IFeatures<T>
 	{}

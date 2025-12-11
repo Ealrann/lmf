@@ -20,7 +20,7 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group)
 												.mapToInt(Relation::id)
 												.toArray();
-		object.listenNoParam(listener, containmentFeatures);
+		object.notifier().listenNoParam(listener, containmentFeatures);
 	}
 
 	@Override
@@ -30,6 +30,6 @@ public final class EObjectStructureNoParamPOI implements IEObjectPOI
 		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group)
 												.mapToInt(Relation::id)
 												.toArray();
-		object.sulkNoParam(listener, containmentFeatures);
+		object.notifier().sulkNoParam(listener, containmentFeatures);
 	}
 }

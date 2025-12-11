@@ -3,6 +3,8 @@ package org.logoce.lmf.model.lang.impl;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Concept;
@@ -14,6 +16,8 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> extends FeaturedObject<Relation.Features<?>> implements Relation<UnaryType, EffectiveType, ListenerType, ParentGroup> {
+  private static final int FEATURE_COUNT = 9;
+  private final ModelNotifier<Relation.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final boolean immutable;
   private final int id;
@@ -37,7 +41,12 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType, Liste
     this.lazy = lazy;
     this.contains = contains;
     setContainer(parameters, Feature.FeatureIDs.PARAMETERS);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Relation.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -121,7 +130,7 @@ public final class RelationImpl<UnaryType extends LMObject, EffectiveType, Liste
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Relation<?, ?, ?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?, ?, ?>>(9, RelationImpl::featureIndexStatic).add(Relation.FeatureIDs.NAME, Relation::name).add(Relation.FeatureIDs.IMMUTABLE, Relation::immutable).add(Relation.FeatureIDs.ID, Relation::id).add(Relation.FeatureIDs.MANY, Relation::many).add(Relation.FeatureIDs.MANDATORY, Relation::mandatory).add(Relation.FeatureIDs.PARAMETERS, Relation::parameters).add(Relation.FeatureIDs.CONCEPT, Relation::concept).add(Relation.FeatureIDs.LAZY, Relation::lazy).add(Relation.FeatureIDs.CONTAINS, Relation::contains).build();
-    private static final FeatureSetter<Relation<?, ?, ?, ?>> SET_MAP = new FeatureSetter.Builder<Relation<?, ?, ?, ?>>(9, RelationImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Relation<?, ?, ?, ?>> GET_MAP = new FeatureGetter.Builder<Relation<?, ?, ?, ?>>(FEATURE_COUNT, RelationImpl::featureIndexStatic).add(Relation.FeatureIDs.NAME, Relation::name).add(Relation.FeatureIDs.IMMUTABLE, Relation::immutable).add(Relation.FeatureIDs.ID, Relation::id).add(Relation.FeatureIDs.MANY, Relation::many).add(Relation.FeatureIDs.MANDATORY, Relation::mandatory).add(Relation.FeatureIDs.PARAMETERS, Relation::parameters).add(Relation.FeatureIDs.CONCEPT, Relation::concept).add(Relation.FeatureIDs.LAZY, Relation::lazy).add(Relation.FeatureIDs.CONTAINS, Relation::contains).build();
+    private static final FeatureSetter<Relation<?, ?, ?, ?>> SET_MAP = new FeatureSetter.Builder<Relation<?, ?, ?, ?>>(FEATURE_COUNT, RelationImpl::featureIndexStatic).build();
   }
 }

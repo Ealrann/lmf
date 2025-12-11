@@ -1,6 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Generic;
@@ -9,6 +11,8 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class GenericImpl<T> extends FeaturedObject<Generic.Features<?>> implements Generic<T> {
+  private static final int FEATURE_COUNT = 2;
+  private final ModelNotifier<Generic.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final GenericExtension extension;
 
@@ -16,7 +20,12 @@ public final class GenericImpl<T> extends FeaturedObject<Generic.Features<?>> im
     this.name = name;
     this.extension = extension;
     setContainer(extension, Generic.FeatureIDs.EXTENSION);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Generic.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -58,7 +67,7 @@ public final class GenericImpl<T> extends FeaturedObject<Generic.Features<?>> im
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>(2, GenericImpl::featureIndexStatic).add(Generic.FeatureIDs.NAME, Generic::name).add(Generic.FeatureIDs.EXTENSION, Generic::extension).build();
-    private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>(2, GenericImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Generic<?>> GET_MAP = new FeatureGetter.Builder<Generic<?>>(FEATURE_COUNT, GenericImpl::featureIndexStatic).add(Generic.FeatureIDs.NAME, Generic::name).add(Generic.FeatureIDs.EXTENSION, Generic::extension).build();
+    private static final FeatureSetter<Generic<?>> SET_MAP = new FeatureSetter.Builder<Generic<?>>(FEATURE_COUNT, GenericImpl::featureIndexStatic).build();
   }
 }

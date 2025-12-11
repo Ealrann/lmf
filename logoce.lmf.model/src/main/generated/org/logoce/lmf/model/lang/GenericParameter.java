@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
@@ -14,6 +15,8 @@ public interface GenericParameter extends LMObject {
     return new GenericParameterBuilder();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   boolean wildcard();
   BoundType wildcardBoundType();
   Type<?> type();

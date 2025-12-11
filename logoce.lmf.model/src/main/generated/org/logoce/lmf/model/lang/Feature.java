@@ -1,6 +1,7 @@
 package org.logoce.lmf.model.lang;
 
 import java.util.List;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
 import org.logoce.lmf.model.notification.listener.BooleanListener;
@@ -8,6 +9,8 @@ import org.logoce.lmf.model.notification.listener.IntListener;
 import org.logoce.lmf.model.notification.listener.Listener;
 
 public interface Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> extends Named {
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   boolean immutable();
   int id();
   boolean many();

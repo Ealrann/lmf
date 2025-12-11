@@ -5,7 +5,9 @@ import org.logoce.lmf.model.lang.LMObject;
 
 import java.util.List;
 
-public record RelationAddManyNotifiation(LMObject notifier, int featureId,
+public record RelationAddManyNotifiation(LMObject notifier,
+										 boolean isContainment,
+										 int featureId,
 										 List<? extends LMObject> newValues) implements Notification
 {
 	@Override

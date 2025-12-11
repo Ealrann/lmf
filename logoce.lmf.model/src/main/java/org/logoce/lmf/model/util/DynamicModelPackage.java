@@ -1,6 +1,6 @@
 package org.logoce.lmf.model.util;
 
-import org.logoce.lmf.model.api.model.AdaptableStructureObject;
+import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.Attribute;
@@ -12,9 +12,10 @@ import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Feature;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -193,18 +194,22 @@ public final class DynamicModelPackage implements IModelPackage
 	/**
 	 * Minimal LMObject implementation that stores feature values in a map.
 	 */
-	private static final class DynamicLMObject<T extends LMObject> extends AdaptableStructureObject
+	private static final class DynamicLMObject<T extends LMObject> extends FeaturedObject<IFeaturedObject.Features<?>>
 		implements LMObject, Model, Named
 	{
 		private final Group<T> group;
 		private final Map<Feature<?, ?, ?, ?>, Object> values;
-		private LMObject container;
-		private Relation<?, ?, ?, ?> containingFeature;
+		private final List<Feature<?, ?, ?, ?>> allFeatures;
+		private final Map<Integer, Integer> featureIndexById;
+		private final ModelNotifier<Model.Features<?>> notifier;
 
 		private DynamicLMObject(final Group<T> group, final Map<Feature<?, ?, ?, ?>, Object> initialValues)
 		{
 			this.group = Objects.requireNonNull(group, "group");
 			this.values = new HashMap<>(initialValues);
+			this.allFeatures = collectFeatures(group);
+			this.featureIndexById = buildFeatureIndex(allFeatures);
+			this.notifier = new ModelNotifier<>(allFeatures.size(), this::featureIndex);
 		}
 
 		@Override
@@ -245,24 +250,6 @@ public final class DynamicModelPackage implements IModelPackage
 											   : (java.util.List<String>) get(metamodelsAttribute);
 		}
 
-		@Override
-		public LMObject lmContainer()
-		{
-			return container;
-		}
-
-		@Override
-		public Relation<?, ?, ?, ?> lmContainingFeature()
-		{
-			return containingFeature;
-		}
-
-		@Override
-		public int lmContainingFeatureID()
-		{
-			return containingFeature != null ? containingFeature.id() : -1;
-		}
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public <V> V get(final Feature<?, ?, ?, ?> feature)
@@ -284,7 +271,7 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public Object get(final int featureID)
 		{
-			for (final Feature<?, ?, ?, ?> feature : group.features())
+			for (final Feature<?, ?, ?, ?> feature : allFeatures)
 			{
 				if (feature.id() == featureID)
 				{
@@ -305,7 +292,7 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public void set(final int featureID, final Object value)
 		{
-			for (final Feature<?, ?, ?, ?> feature : group.features())
+			for (final Feature<?, ?, ?, ?> feature : allFeatures)
 			{
 				if (feature.id() == featureID)
 				{
@@ -336,28 +323,22 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public int featureIndex(final int featureId)
 		{
-			return 0;
+			final Integer index = featureIndexById.get(featureId);
+			if (index != null) return index;
+			throw new IllegalArgumentException("Unknown featureId " + featureId + " for group " + group.name());
 		}
 
 		@Override
-		public void listenStruture(final Consumer<org.logoce.lmf.model.api.notification.Notification> listener)
+		public IModelNotifier.Impl<? extends Model.Features<?>> notifier()
 		{
-			// Dynamic objects are not expected to participate in structure notifications
-			// in tooling scenarios; use the base EMF-style listener APIs instead.
-		}
-
-		@Override
-		public void sulkStructure(final Consumer<org.logoce.lmf.model.api.notification.Notification> listener)
-		{
-			// See listenStruture.
+			return notifier;
 		}
 
 		private void setContainer(final LMObject child, final Relation<?, ?, ?, ?> relation, final boolean many)
 		{
-			if (!(child instanceof DynamicLMObject<?> dynamicChild)) return;
+			if (!(child instanceof DynamicLMObject<?>)) return;
 
-			dynamicChild.container = this;
-			dynamicChild.containingFeature = relation;
+			ContainmentUtils.setContainer(this, child, relation.id());
 
 			if (many)
 			{
@@ -373,6 +354,27 @@ public final class DynamicModelPackage implements IModelPackage
 			{
 				values.put(relation, child);
 			}
+		}
+
+		private static List<Feature<?, ?, ?, ?>> collectFeatures(final Group<?> group)
+		{
+			final Set<Feature<?, ?, ?, ?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+			final List<Feature<?, ?, ?, ?>> features = new ArrayList<>();
+			ModelUtil.streamAllFeatures(group)
+					 .map(Feature.class::cast)
+					 .filter(seen::add)
+					 .forEach(features::add);
+			return features;
+		}
+
+		private static Map<Integer, Integer> buildFeatureIndex(final List<Feature<?, ?, ?, ?>> features)
+		{
+			final Map<Integer, Integer> index = new HashMap<>(features.size());
+			for (int i = 0; i < features.size(); i++)
+			{
+				index.put(features.get(i).id(), i);
+			}
+			return index;
 		}
 	}
 }

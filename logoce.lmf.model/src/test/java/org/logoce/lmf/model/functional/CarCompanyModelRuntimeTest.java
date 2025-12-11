@@ -125,8 +125,8 @@ public class CarCompanyModelRuntimeTest
 		final Consumer<Notification> companyListener = companyNotifications::add;
 		final Consumer<Notification> carListener = carNotifications::add;
 
-		company.listen(companyListener, CarCompany.Features.PARCS);
-		car.listen(carListener, Car.Features.PASSENGERS);
+		company.notifier().listen(companyListener, CarCompany.Features.PARCS);
+		car.notifier().listen(carListener, Car.Features.PASSENGERS);
 
 		final var newPassenger = new PersonImpl("Passenger");
 		car.passengers().add(newPassenger);
@@ -148,7 +148,7 @@ public class CarCompanyModelRuntimeTest
 
 		final var previousCarNotificationCount = carNotifications.size();
 
-		car.sulk(carListener, Car.Features.PASSENGERS);
+		car.notifier().sulk(carListener, Car.Features.PASSENGERS);
 
 		car.passengers().add(new PersonImpl("Another Passenger"));
 

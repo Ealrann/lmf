@@ -2,6 +2,7 @@ package org.logoce.lmf.model.lang;
 
 import java.util.List;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.UnitBuilder;
 import org.logoce.lmf.model.notification.listener.Listener;
@@ -11,6 +12,8 @@ public interface Unit<T> extends Datatype<T> {
     return new UnitBuilder<>();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   String matcher();
   String defaultValue();
   Primitive primitive();

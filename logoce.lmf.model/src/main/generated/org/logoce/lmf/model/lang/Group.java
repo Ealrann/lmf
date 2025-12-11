@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.lang.builder.GroupBuilder;
@@ -16,6 +17,8 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
     return new GroupBuilder<>();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   boolean concrete();
   List<Include<?>> includes();
   List<Feature<?, ?, ?, ?>> features();

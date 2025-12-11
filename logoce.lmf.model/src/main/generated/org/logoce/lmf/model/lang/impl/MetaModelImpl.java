@@ -2,7 +2,9 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.api.model.IModelPackage;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Alias;
@@ -14,6 +16,8 @@ import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Unit;
 
 public final class MetaModelImpl extends FeaturedObject<MetaModel.Features<?>> implements MetaModel {
+  private static final int FEATURE_COUNT = 12;
+  private final ModelNotifier<MetaModel.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final String domain;
   private final List<String> imports;
@@ -48,7 +52,12 @@ public final class MetaModelImpl extends FeaturedObject<MetaModel.Features<?>> i
     setContainer(units, MetaModel.FeatureIDs.UNITS);
     setContainer(aliases, MetaModel.FeatureIDs.ALIASES);
     setContainer(javaWrappers, MetaModel.FeatureIDs.JAVA_WRAPPERS);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<MetaModel.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -150,7 +159,7 @@ public final class MetaModelImpl extends FeaturedObject<MetaModel.Features<?>> i
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>(12, MetaModelImpl::featureIndexStatic).add(MetaModel.FeatureIDs.NAME, MetaModel::name).add(MetaModel.FeatureIDs.DOMAIN, MetaModel::domain).add(MetaModel.FeatureIDs.IMPORTS, MetaModel::imports).add(MetaModel.FeatureIDs.METAMODELS, MetaModel::metamodels).add(MetaModel.FeatureIDs.GROUPS, MetaModel::groups).add(MetaModel.FeatureIDs.ENUMS, MetaModel::enums).add(MetaModel.FeatureIDs.UNITS, MetaModel::units).add(MetaModel.FeatureIDs.ALIASES, MetaModel::aliases).add(MetaModel.FeatureIDs.JAVA_WRAPPERS, MetaModel::javaWrappers).add(MetaModel.FeatureIDs.LM_PACKAGE, MetaModel::lmPackage).add(MetaModel.FeatureIDs.GEN_NAME_PACKAGE, MetaModel::genNamePackage).add(MetaModel.FeatureIDs.EXTRA_PACKAGE, MetaModel::extraPackage).build();
-    private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>(12, MetaModelImpl::featureIndexStatic).build();
+    private static final FeatureGetter<MetaModel> GET_MAP = new FeatureGetter.Builder<MetaModel>(FEATURE_COUNT, MetaModelImpl::featureIndexStatic).add(MetaModel.FeatureIDs.NAME, MetaModel::name).add(MetaModel.FeatureIDs.DOMAIN, MetaModel::domain).add(MetaModel.FeatureIDs.IMPORTS, MetaModel::imports).add(MetaModel.FeatureIDs.METAMODELS, MetaModel::metamodels).add(MetaModel.FeatureIDs.GROUPS, MetaModel::groups).add(MetaModel.FeatureIDs.ENUMS, MetaModel::enums).add(MetaModel.FeatureIDs.UNITS, MetaModel::units).add(MetaModel.FeatureIDs.ALIASES, MetaModel::aliases).add(MetaModel.FeatureIDs.JAVA_WRAPPERS, MetaModel::javaWrappers).add(MetaModel.FeatureIDs.LM_PACKAGE, MetaModel::lmPackage).add(MetaModel.FeatureIDs.GEN_NAME_PACKAGE, MetaModel::genNamePackage).add(MetaModel.FeatureIDs.EXTRA_PACKAGE, MetaModel::extraPackage).build();
+    private static final FeatureSetter<MetaModel> SET_MAP = new FeatureSetter.Builder<MetaModel>(FEATURE_COUNT, MetaModelImpl::featureIndexStatic).build();
   }
 }

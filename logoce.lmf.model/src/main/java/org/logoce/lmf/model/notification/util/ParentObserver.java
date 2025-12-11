@@ -51,7 +51,7 @@ public final class ParentObserver
 			final var container = source.lmContainer();
 			assert container !=
 				   null; // cannot deal with this case. Please stop listen parent before removing an object.
-			container.listen(containerListener, source.lmContainingFeatureID());
+			container.notifier().listen(containerListener, source.lmContainingFeatureID());
 		}
 
 		public void uninstall()
@@ -59,7 +59,7 @@ public final class ParentObserver
 			final var container = source.lmContainer();
 			if (container != null)
 			{
-				container.sulk(containerListener, source.lmContainingFeatureID());
+				container.notifier().sulk(containerListener, source.lmContainingFeatureID());
 			}
 		}
 
@@ -71,10 +71,10 @@ public final class ParentObserver
 			if (oldParent != newParent)
 			{
 				final int oldContainingFeatureId = notification.featureId();
-				oldParent.sulk(containerListener, oldContainingFeatureId);
+				oldParent.notifier().sulk(containerListener, oldContainingFeatureId);
 				if (newParent != null)
 				{
-					newParent.listen(containerListener, source.lmContainingFeatureID());
+					newParent.notifier().listen(containerListener, source.lmContainingFeatureID());
 				}
 				listener.accept(oldParent, newParent);
 			}

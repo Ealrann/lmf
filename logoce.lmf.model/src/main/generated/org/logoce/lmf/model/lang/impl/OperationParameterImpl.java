@@ -3,6 +3,8 @@ package org.logoce.lmf.model.lang.impl;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.GenericParameter;
@@ -12,6 +14,8 @@ import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Type;
 
 public final class OperationParameterImpl extends FeaturedObject<OperationParameter.Features<?>> implements OperationParameter {
+  private static final int FEATURE_COUNT = 3;
+  private final ModelNotifier<OperationParameter.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final Supplier<Type<?>> type;
   private final List<GenericParameter> parameters;
@@ -22,7 +26,12 @@ public final class OperationParameterImpl extends FeaturedObject<OperationParame
     this.type = type;
     this.parameters = List.copyOf(parameters);
     setContainer(parameters, OperationParameter.FeatureIDs.PARAMETERS);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<OperationParameter.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -70,7 +79,7 @@ public final class OperationParameterImpl extends FeaturedObject<OperationParame
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<OperationParameter> GET_MAP = new FeatureGetter.Builder<OperationParameter>(3, OperationParameterImpl::featureIndexStatic).add(OperationParameter.FeatureIDs.NAME, OperationParameter::name).add(OperationParameter.FeatureIDs.TYPE, OperationParameter::type).add(OperationParameter.FeatureIDs.PARAMETERS, OperationParameter::parameters).build();
-    private static final FeatureSetter<OperationParameter> SET_MAP = new FeatureSetter.Builder<OperationParameter>(3, OperationParameterImpl::featureIndexStatic).build();
+    private static final FeatureGetter<OperationParameter> GET_MAP = new FeatureGetter.Builder<OperationParameter>(FEATURE_COUNT, OperationParameterImpl::featureIndexStatic).add(OperationParameter.FeatureIDs.NAME, OperationParameter::name).add(OperationParameter.FeatureIDs.TYPE, OperationParameter::type).add(OperationParameter.FeatureIDs.PARAMETERS, OperationParameter::parameters).build();
+    private static final FeatureSetter<OperationParameter> SET_MAP = new FeatureSetter.Builder<OperationParameter>(FEATURE_COUNT, OperationParameterImpl::featureIndexStatic).build();
   }
 }

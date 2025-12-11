@@ -16,12 +16,12 @@ public final class EObjectNoParamPOI implements IEObjectPOI
 	@Override
 	public void listen(final LMObject object)
 	{
-		object.listenNoParam(listener, features);
+		object.notifier().listenNoParam(listener, features);
 	}
 
 	@Override
 	public void sulk(final LMObject object)
 	{
-		object.sulkNoParam(listener, features);
+		object.notifier().sulkNoParam(listener, features);
 	}
 }

@@ -11,28 +11,30 @@ import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.impl.ContainerChange;
 import org.logoce.lmf.model.notification.impl.RelationNotificationBuilder;
-import org.logoce.lmf.model.notification.impl.SetNotifiation;
+import org.logoce.lmf.model.notification.impl.SetNotification;
 import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.notification.util.NotificationUnifier;
 import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.oldlogoce.TreeLazyIterator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> extends LilyBasicNotifier implements
-																									  IFeaturedObject
+public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> implements IFeaturedObject
 {
-	private final List<Consumer<Notification>> structureListeners = new ArrayList<>();
 	private LMObject container;
 	private int containingFeatureId = -1;
+	private BasicAdapterManager extenderManager = null;
+	private boolean loaded = false;
 
 	public FeaturedObject()
 	{}
+
+	@Override
+	public abstract IModelNotifier.Impl<? extends IFeaturedObject.Features<?>> notifier();
 
 	@Override
 	public final LMObject lmContainer()
@@ -53,14 +55,6 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 	public final int lmContainingFeatureID()
 	{
 		return containingFeatureId;
-	}
-
-	private void structureNotify(final Notification notification)
-	{
-		for (final var listener : structureListeners)
-		{
-			listener.accept(notification);
-		}
 	}
 
 	@Override
@@ -109,14 +103,11 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 		final var setMap = (FeatureSetter<O>) setterMap();
 
 		final int featureId = feature.id();
+		final boolean contains = feature instanceof Relation<?, ?, ?, ?> rel && rel.contains();
 		final var oldValue = getMap.get((O) this, featureId);
 		setMap.set((O) this, featureId, value);
-		final var notification = new SetNotifiation((LMObject) this, feature.id(), value, oldValue);
-		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
-		{
-			structureNotify(notification);
-		}
-		super.eNotify(notification);
+		final var notification = new SetNotification((LMObject) this, contains, feature.id(), value, oldValue);
+		eNotify(notification);
 	}
 
 	protected FeatureGetter<?> getterMap() {return null;}
@@ -159,28 +150,24 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 	@Override
 	public final void listenStruture(final Consumer<Notification> listener)
 	{
-		structureListeners.add(listener);
+		notifier().listenStructure(listener);
 	}
 
 	@Override
 	public final void sulkStructure(final Consumer<Notification> listener)
 	{
-		structureListeners.remove(listener);
+		notifier().sulkStructure(listener);
 	}
 
 	private static final String CANNOT_FIND_ADAPTER = "Cannot find adapter [%s] for class [%s]";
 	private static final String CANNOT_FIND_IDENTIFIED_ADAPTER = "Cannot find adapter [%s] (id = %s) for class [%s]";
 
-	private BasicAdapterManager extenderManager = null;
-	private boolean loaded = false;
 
-	@Override
 	protected final void eNotify(final Notification notification)
 	{
-		final var feature = notification.feature();
-		final boolean isContainment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
+		final boolean isContainment = notification.isContainment();
 		if (isContainment) NotificationUnifier.unifyAdded(notification, this::setupChild);
-		super.eNotify(notification);
+		notifier().notify(notification);
 		if (isContainment) NotificationUnifier.unifyRemoved(notification, this::disposeChild);
 	}
 
@@ -357,7 +344,7 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 					}
 				}
 
-				notification = new SetNotifiation((LMObject) owner, featureId, newValue, oldValue);
+				notification = new SetNotification((LMObject) owner, containment, featureId, newValue, oldValue);
 			}
 			else
 			{
@@ -378,21 +365,24 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 
 				notification = switch (eventType)
 				{
-					case ADD ->
-							RelationNotificationBuilder.insert((LMObject) owner, featureId, true, children.getFirst());
-					case ADD_MANY -> RelationNotificationBuilder.insert((LMObject) owner, featureId, children);
-					case REMOVE ->
-							RelationNotificationBuilder.remove((LMObject) owner, featureId, true, children.getFirst());
-					case REMOVE_MANY -> RelationNotificationBuilder.remove((LMObject) owner, featureId, children);
+					case ADD -> RelationNotificationBuilder.insert((LMObject) owner,
+																   featureId,
+																   containment,
+																   true,
+																   children.getFirst());
+					case ADD_MANY ->
+							RelationNotificationBuilder.insert((LMObject) owner, featureId, containment, children);
+					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner,
+																	  featureId,
+																	  containment,
+																	  true,
+																	  children.getFirst());
+					case REMOVE_MANY ->
+							RelationNotificationBuilder.remove((LMObject) owner, featureId, containment, children);
 					default -> null;
 				};
 
 				if (notification == null) return;
-
-				if (containment)
-				{
-					owner.structureNotify(notification);
-				}
 			}
 
 			owner.eNotify(notification);
@@ -441,8 +431,9 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 						final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
 																							 oldFeatureId,
 																							 true,
+																							 true,
 																							 child);
-						((FeaturedObject<?>) oldContainer).structureNotify(oldParentNotification);
+						((FeaturedObject<?>) oldContainer).eNotify(oldParentNotification);
 					}
 				}
 			}
@@ -452,7 +443,7 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> exte
 															  newFeatureId,
 															  newContainer,
 															  oldContainer);
-			featuredChild.structureNotify(childNotification);
+			featuredChild.eNotify(childNotification);
 		}
 	}
 }

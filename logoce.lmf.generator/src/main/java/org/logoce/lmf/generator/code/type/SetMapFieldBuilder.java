@@ -39,10 +39,11 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var implementationType = group.adapt(GroupImplementationType.class);
 
 		final var features = FeatureStreams.distinctFeatures(group).toList();
-		final var featureCount = features.size();
 
 		final var initializerBuilder = CodeBlock.builder()
-												.add("new $T($L, $T::featureIndexStatic)", builderType.parametrized(), featureCount, implementationType.raw());
+												.add("new $T(FEATURE_COUNT, $T::featureIndexStatic)",
+													 builderType.parametrized(),
+													 implementationType.raw());
 
 		features.stream()
 				.filter(SetMapFieldBuilder::isSingleMutable)

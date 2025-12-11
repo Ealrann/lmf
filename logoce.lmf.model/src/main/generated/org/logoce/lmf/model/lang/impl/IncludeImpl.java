@@ -3,6 +3,8 @@ package org.logoce.lmf.model.lang.impl;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.GenericParameter;
@@ -12,6 +14,8 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.LMObject;
 
 public final class IncludeImpl<T extends LMObject> extends FeaturedObject<Include.Features<?>> implements Include<T> {
+  private static final int FEATURE_COUNT = 2;
+  private final ModelNotifier<Include.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final Supplier<Group<T>> group;
   private final List<GenericParameter> parameters;
 
@@ -19,7 +23,12 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject<Includ
     this.group = group;
     this.parameters = List.copyOf(parameters);
     setContainer(parameters, Include.FeatureIDs.PARAMETERS);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Include.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -61,7 +70,7 @@ public final class IncludeImpl<T extends LMObject> extends FeaturedObject<Includ
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Include<?>> GET_MAP = new FeatureGetter.Builder<Include<?>>(2, IncludeImpl::featureIndexStatic).add(Include.FeatureIDs.GROUP, Include::group).add(Include.FeatureIDs.PARAMETERS, Include::parameters).build();
-    private static final FeatureSetter<Include<?>> SET_MAP = new FeatureSetter.Builder<Include<?>>(2, IncludeImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Include<?>> GET_MAP = new FeatureGetter.Builder<Include<?>>(FEATURE_COUNT, IncludeImpl::featureIndexStatic).add(Include.FeatureIDs.GROUP, Include::group).add(Include.FeatureIDs.PARAMETERS, Include::parameters).build();
+    private static final FeatureSetter<Include<?>> SET_MAP = new FeatureSetter.Builder<Include<?>>(FEATURE_COUNT, IncludeImpl::featureIndexStatic).build();
   }
 }

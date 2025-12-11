@@ -1,6 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Alias;
@@ -8,13 +10,20 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class AliasImpl extends FeaturedObject<Alias.Features<?>> implements Alias {
+  private static final int FEATURE_COUNT = 2;
+  private final ModelNotifier<Alias.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final String value;
 
   public AliasImpl(final String name, final String value) {
     this.name = name;
     this.value = value;
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Alias.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -56,7 +65,7 @@ public final class AliasImpl extends FeaturedObject<Alias.Features<?>> implement
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>(2, AliasImpl::featureIndexStatic).add(Alias.FeatureIDs.NAME, Alias::name).add(Alias.FeatureIDs.VALUE, Alias::value).build();
-    private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>(2, AliasImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Alias> GET_MAP = new FeatureGetter.Builder<Alias>(FEATURE_COUNT, AliasImpl::featureIndexStatic).add(Alias.FeatureIDs.NAME, Alias::name).add(Alias.FeatureIDs.VALUE, Alias::value).build();
+    private static final FeatureSetter<Alias> SET_MAP = new FeatureSetter.Builder<Alias>(FEATURE_COUNT, AliasImpl::featureIndexStatic).build();
   }
 }

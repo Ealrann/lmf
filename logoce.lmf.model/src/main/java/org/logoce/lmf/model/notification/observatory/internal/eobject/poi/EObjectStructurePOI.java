@@ -23,7 +23,7 @@ public final class EObjectStructurePOI implements IEObjectPOI
 		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group)
 												.mapToInt(Relation::id)
 												.toArray();
-		object.listen(structureChanged, containmentFeatures);
+		object.notifier().listen(structureChanged, containmentFeatures);
 	}
 
 	@Override
@@ -33,6 +33,6 @@ public final class EObjectStructurePOI implements IEObjectPOI
 		final var containmentFeatures = ModelUtil.streamContainmentFeatures(group)
 												.mapToInt(Relation::id)
 												.toArray();
-		object.sulk(structureChanged, containmentFeatures);
+		object.notifier().sulk(structureChanged, containmentFeatures);
 	}
 }

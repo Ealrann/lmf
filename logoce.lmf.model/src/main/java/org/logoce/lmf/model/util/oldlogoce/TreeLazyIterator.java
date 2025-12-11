@@ -183,7 +183,7 @@ public class TreeLazyIterator implements Spliterator<LMObject>
 					final var val = element.get(feature);
 					if (feature.many()) course.addAll((List<LMObject>) val);
 					else if (val != null) course.add((LMObject) val);
-					element.listen(listener, feature);
+					element.notifier().listen(listener, feature);
 				});
 			}
 
@@ -191,7 +191,7 @@ public class TreeLazyIterator implements Spliterator<LMObject>
 			{
 				final var group = element.lmGroup();
 				ModelUtil.streamContainmentFeatures(group).forEach(feature -> {
-					element.sulk(listener, feature);
+					element.notifier().sulk(listener, feature);
 				});
 			}
 		}

@@ -2,6 +2,8 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Enum;
@@ -9,13 +11,20 @@ import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implements Enum<T> {
+  private static final int FEATURE_COUNT = 2;
+  private final ModelNotifier<Enum.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final List<String> literals;
 
   public EnumImpl(final String name, final List<String> literals) {
     this.name = name;
     this.literals = List.copyOf(literals);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Enum.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -57,7 +66,7 @@ public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implemen
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>(2, EnumImpl::featureIndexStatic).add(Enum.FeatureIDs.NAME, Enum::name).add(Enum.FeatureIDs.LITERALS, Enum::literals).build();
-    private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>(2, EnumImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>(FEATURE_COUNT, EnumImpl::featureIndexStatic).add(Enum.FeatureIDs.NAME, Enum::name).add(Enum.FeatureIDs.LITERALS, Enum::literals).build();
+    private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>(FEATURE_COUNT, EnumImpl::featureIndexStatic).build();
   }
 }

@@ -1,9 +1,12 @@
 package org.logoce.lmf.generator.group.iface;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupBuilderInterfaceType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
@@ -11,12 +14,14 @@ import org.logoce.lmf.generator.code.feature.FeatureMethodBuilder;
 import org.logoce.lmf.generator.code.type.InterfaceBuildMethodBuilder;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
+import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -67,6 +72,8 @@ public final class InterfaceGenerator
 			interfaceBuilder.addType(builderInterface);
 			interfaceBuilder.addMethod(buildMethod.build(group));
 		}
+
+		interfaceBuilder.addMethod(buildNotifierMethod(groupType));
 
 		featureResolutions.stream()
 						  .filter(this::matchGroup)
@@ -154,5 +161,22 @@ public final class InterfaceGenerator
 		}
 
 		return methodBuilder.build();
+	}
+
+	private MethodSpec buildNotifierMethod(final GroupInterfaceType interfaceType)
+	{
+		final var featuresType = resolveFeaturesType(interfaceType);
+		final var returnType = com.squareup.javapoet.ParameterizedTypeName.get(ClassName.get(IModelNotifier.class),
+																			  WildcardTypeName.subtypeOf(featuresType));
+		return MethodSpec.methodBuilder("notifier")
+						 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+						 .addAnnotation(Override.class)
+						 .returns(returnType)
+						 .build();
+	}
+
+	private static TypeName resolveFeaturesType(final GroupInterfaceType interfaceType)
+	{
+		return GenUtils.parameterize(interfaceType.raw().nestedClass("Features"), List.of(GenUtils.WILDCARD));
 	}
 }

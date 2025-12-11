@@ -4,8 +4,11 @@ import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 
-public record SetNotifiation(LMObject notifier, int featureId, Object newValue,
-							 Object oldValue) implements Notification
+public record SetNotification(LMObject notifier,
+							  boolean isContainment,
+							  int featureId,
+							  Object newValue,
+							  Object oldValue) implements Notification
 {
 	@Override
 	public int featureId()

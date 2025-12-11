@@ -3,6 +3,8 @@ package org.logoce.lmf.model.lang.impl;
 import java.util.List;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Feature;
@@ -14,6 +16,8 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Operation;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject<Group.Features<?>> implements Group<T> {
+  private static final int FEATURE_COUNT = 7;
+  private final ModelNotifier<Group.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final boolean concrete;
   private final List<Include<?>> includes;
@@ -36,7 +40,12 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject<Group.Fe
     setContainer(features, Group.FeatureIDs.FEATURES);
     setContainer(generics, Group.FeatureIDs.GENERICS);
     setContainer(operations, Group.FeatureIDs.OPERATIONS);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Group.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -108,7 +117,7 @@ public final class GroupImpl<T extends LMObject> extends FeaturedObject<Group.Fe
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>(7, GroupImpl::featureIndexStatic).add(Group.FeatureIDs.NAME, Group::name).add(Group.FeatureIDs.CONCRETE, Group::concrete).add(Group.FeatureIDs.INCLUDES, Group::includes).add(Group.FeatureIDs.FEATURES, Group::features).add(Group.FeatureIDs.GENERICS, Group::generics).add(Group.FeatureIDs.OPERATIONS, Group::operations).add(Group.FeatureIDs.LM_BUILDER, Group::lmBuilder).build();
-    private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>(7, GroupImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Group<?>> GET_MAP = new FeatureGetter.Builder<Group<?>>(FEATURE_COUNT, GroupImpl::featureIndexStatic).add(Group.FeatureIDs.NAME, Group::name).add(Group.FeatureIDs.CONCRETE, Group::concrete).add(Group.FeatureIDs.INCLUDES, Group::includes).add(Group.FeatureIDs.FEATURES, Group::features).add(Group.FeatureIDs.GENERICS, Group::generics).add(Group.FeatureIDs.OPERATIONS, Group::operations).add(Group.FeatureIDs.LM_BUILDER, Group::lmBuilder).build();
+    private static final FeatureSetter<Group<?>> SET_MAP = new FeatureSetter.Builder<Group<?>>(FEATURE_COUNT, GroupImpl::featureIndexStatic).build();
   }
 }

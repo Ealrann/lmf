@@ -1,6 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Group;
@@ -8,6 +10,8 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
 public final class SerializerImpl extends FeaturedObject<Serializer.Features<?>> implements Serializer {
+  private static final int FEATURE_COUNT = 3;
+  private final ModelNotifier<Serializer.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String defaultValue;
   private final String create;
   private final String convert;
@@ -16,7 +20,12 @@ public final class SerializerImpl extends FeaturedObject<Serializer.Features<?>>
     this.defaultValue = defaultValue;
     this.create = create;
     this.convert = convert;
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<Serializer.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -64,7 +73,7 @@ public final class SerializerImpl extends FeaturedObject<Serializer.Features<?>>
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Serializer> GET_MAP = new FeatureGetter.Builder<Serializer>(3, SerializerImpl::featureIndexStatic).add(Serializer.FeatureIDs.DEFAULT_VALUE, Serializer::defaultValue).add(Serializer.FeatureIDs.CREATE, Serializer::create).add(Serializer.FeatureIDs.CONVERT, Serializer::convert).build();
-    private static final FeatureSetter<Serializer> SET_MAP = new FeatureSetter.Builder<Serializer>(3, SerializerImpl::featureIndexStatic).build();
+    private static final FeatureGetter<Serializer> GET_MAP = new FeatureGetter.Builder<Serializer>(FEATURE_COUNT, SerializerImpl::featureIndexStatic).add(Serializer.FeatureIDs.DEFAULT_VALUE, Serializer::defaultValue).add(Serializer.FeatureIDs.CREATE, Serializer::create).add(Serializer.FeatureIDs.CONVERT, Serializer::convert).build();
+    private static final FeatureSetter<Serializer> SET_MAP = new FeatureSetter.Builder<Serializer>(FEATURE_COUNT, SerializerImpl::featureIndexStatic).build();
   }
 }

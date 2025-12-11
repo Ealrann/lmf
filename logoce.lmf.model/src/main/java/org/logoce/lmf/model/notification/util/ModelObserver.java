@@ -47,12 +47,12 @@ public final class ModelObserver
 	public void startObserve(LMObject root)
 	{
 		rootListener.setTarget(root);
-		root.listen(rootListener, features[0]);
+		root.notifier().listen(rootListener, features[0]);
 	}
 
 	public void stopObserve(LMObject root)
 	{
-		root.sulk(rootListener, features[0]);
+		root.notifier().sulk(rootListener, features[0]);
 		rootListener.unsetTarget(root);
 	}
 
@@ -100,8 +100,11 @@ public final class ModelObserver
 				if (deliver)
 				{
 					final var notif = feature.many()
-									  ? new RelationAddManyNotifiation(target, feature.id(), List.of(value))
-									  : new RelationAddNotifiation(target, feature.id(), value);
+									  ? new RelationAddManyNotifiation(target,
+																	   feature.contains(),
+																	   feature.id(),
+																	   List.of(value))
+									  : new RelationAddNotifiation(target, feature.contains(), feature.id(), value);
 					ModelObserver.this.listener.accept(notif);
 				}
 			}
@@ -124,9 +127,10 @@ public final class ModelObserver
 				{
 					final var notif = feature.many()
 									  ? new RelationRemoveManyNotifiation(target,
+																		  feature.contains(),
 																		  feature.id(),
 																		  List.of(value))
-									  : new RelationRemoveNotifiation(target, feature.id(), value);
+									  : new RelationRemoveNotifiation(target, feature.contains(), feature.id(), value);
 					ModelObserver.this.listener.accept(notif);
 				}
 			}
@@ -137,7 +141,8 @@ public final class ModelObserver
 		}
 
 		@SuppressWarnings("unchecked")
-		private static void actOnChildren(final Relation<?, ?, ?, ?> feature, final Object value,
+		private static void actOnChildren(final Relation<?, ?, ?, ?> feature,
+										  final Object value,
 										  final Consumer<LMObject> action)
 		{
 			if (!feature.many())
@@ -182,14 +187,14 @@ public final class ModelObserver
 
 		private void addChild(final LMObject child)
 		{
-			child.listen(childListener, subFeatureId);
+			child.notifier().listen(childListener, subFeatureId);
 			childListener.setTarget(child);
 		}
 
 		private void removeChild(final LMObject child)
 		{
 			childListener.unsetTarget(child);
-			child.sulk(childListener, subFeatureId);
+			child.notifier().sulk(childListener, subFeatureId);
 		}
 
 		private Relation<?, ?, ?, ?> resolveRelation(final LMObject target, final int featureId)
@@ -203,12 +208,14 @@ public final class ModelObserver
 					{
 						return relation;
 					}
-					throw new IllegalArgumentException(
-							"Observation failed, feature " + featureId + " on group " + group.name() + " is not a Relation.");
+					throw new IllegalArgumentException("Observation failed, feature " +
+													   featureId +
+													   " on group " +
+													   group.name() +
+													   " is not a Relation.");
 				}
 			}
-			throw new IllegalArgumentException(
-					"Unknown featureId " + featureId + " for group " + group.name());
+			throw new IllegalArgumentException("Unknown featureId " + featureId + " for group " + group.name());
 		}
 	}
 }

@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.OperationParameterBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
 import org.logoce.lmf.model.notification.listener.Listener;
@@ -12,6 +13,8 @@ public interface OperationParameter extends Named {
     return new OperationParameterBuilder();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   Type<?> type();
   List<GenericParameter> parameters();
 

@@ -32,11 +32,11 @@ public final class NotificationListenerDeployer
 
 	private void add(LMObject newValue)
 	{
-		newValue.listen(listener, featuresToListen);
+		newValue.notifier().listen(listener, featuresToListen);
 	}
 
 	private void remove(LMObject oldValue)
 	{
-		oldValue.sulk(listener, featuresToListen);
+		oldValue.notifier().sulk(listener, featuresToListen);
 	}
 }

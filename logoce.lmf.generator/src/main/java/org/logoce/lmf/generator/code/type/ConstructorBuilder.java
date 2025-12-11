@@ -41,7 +41,7 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 				.map(Optional::get)
 				.forEach(constructor::addStatement);
 
-		constructor.addStatement("eDeliver(true)");
+		constructor.addStatement("notifier.eDeliver(true)");
 
 		return constructor.build();
 	}

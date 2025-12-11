@@ -32,4 +32,10 @@ public record ContainerChange(LMObject notifier,
 	{
 		return oldContainer;
 	}
+
+	@Override
+	public boolean isContainment()
+	{
+		return true;
+	}
 }

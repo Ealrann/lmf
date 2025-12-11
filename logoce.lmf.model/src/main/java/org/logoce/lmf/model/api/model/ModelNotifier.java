@@ -2,88 +2,229 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.notification.util.ModelListenerMap;
+import org.logoce.lmf.notification.api.IFeatures;
 
+import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
-public abstract class LilyBasicNotifier implements IModelNotifier
+public final class ModelNotifier<Type extends IFeatures<?>> implements IModelNotifier.Impl<Type>
 {
-	private final ModelListenerMap listenerMap;
+	private final int featureCount;
+	private final IndexFunction indexFunction;
 
+	private Deque<Object>[] listenerMap = null;
+	private Deque<Object> structureListeners = null;
 	private boolean deliver;
 
-	public LilyBasicNotifier()
+	public ModelNotifier(int featureCount, IndexFunction indexFunction)
 	{
-		final int featureCount = 100;
-		listenerMap = new ModelListenerMap(featureCount, this::featureIndex);
+		this.featureCount = featureCount;
+		this.indexFunction = indexFunction;
 	}
 
-	abstract protected int featureIndex(int featureId);
-
-	protected void eNotify(final Notification notification)
-	{
-		if (eDeliver()) listenerMap.notify(notification);
-	}
-
+	@Override
 	public boolean eDeliver()
 	{
 		return deliver;
 	}
 
+	@Override
 	public void eDeliver(boolean deliver)
 	{
 		this.deliver = deliver;
 	}
 
 	@Override
-	public void listen(final Consumer<Notification> listener, final int... featureIDs)
+	public void notify(Notification notification)
 	{
-		listenerMap.listen(listener, featureIDs);
+		if (!eDeliver()) return;
+
+		if (structureListeners != null && notification.isContainment())
+		{
+			notify(structureListeners, notification);
+		}
+
+		if (listenerMap != null)
+		{
+			final int featureId = notification.featureId();
+			if (featureId >= 0)
+			{
+				final int featureIdx = indexFunction.index(featureId);
+				final var listeners = listenerMap[featureIdx];
+				if (listeners != null)
+				{
+					notify(listeners, notification);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void notify(final Deque<Object> notificationListeners, final Notification notification)
+	{
+		for (final var listener : notificationListeners)
+		{
+			if (listener instanceof Runnable runnable)
+			{
+				runnable.run();
+			}
+			else
+			{
+				((Consumer<Notification>) listener).accept(notification);
+			}
+		}
 	}
 
 	@Override
-	public final void listen(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
+	public void listen(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
 	{
-		listenerMap.listen(listener, features);
+		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
+	}
+
+	@Override
+	public void listen(final Consumer<Notification> listener, final int... featureIDs)
+	{
+		listenInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
+	}
+
+	@Override
+	public void listenNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
+	{
+		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
+	}
+
+	@Override
+	public void listenNoParam(final Runnable listener, final int... featureIDs)
+	{
+		listenInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
+	}
+
+	private void listenInternal(Object listener, IntStream featureIds)
+	{
+		if (listenerMap == null)
+		{
+			initNotificationMap();
+		}
+
+		featureIds.forEach(f -> registerNotificationListener(listener, f));
+	}
+
+	@Override
+	public void sulk(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
+	{
+		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
 
 	@Override
 	public void sulk(final Consumer<Notification> listener, final int... featureIDs)
 	{
-		listenerMap.sulk(listener, featureIDs);
+		sulkInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
 	}
 
 	@Override
-	public final void sulk(Consumer<Notification> listener, List<Feature<?, ?, ?, ?>> features)
+	public void sulkNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
 	{
-		listenerMap.sulk(listener, features);
-	}
-
-	@Override
-	public void listenNoParam(Runnable listener, final int... featureIDs)
-	{
-		listenerMap.listenNoParam(listener, featureIDs);
-	}
-
-	@Override
-	public final void listenNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
-	{
-		listenerMap.listenNoParam(listener, features);
+		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
 
 	@Override
 	public void sulkNoParam(final Runnable listener, final int... featureIDs)
 	{
-		listenerMap.sulkNoParam(listener, featureIDs);
+		sulkInternal(listener, IntStream.of(featureIDs).map(this::IDtoIndex));
+	}
+
+	private void sulkInternal(Object listener, IntStream featureIds)
+	{
+		if (listenerMap != null)
+		{
+			featureIds.forEach(f -> unregisterNotificationListener(listener, f));
+		}
 	}
 
 	@Override
-	public final void sulkNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features)
+	public void listenStructure(Consumer<Notification> listener)
 	{
-		listenerMap.sulkNoParam(listener, features);
+		listenStructureInternal(listener);
 	}
 
-	public abstract Group<?> lmGroup();
+	@Override
+	public void sulkStructure(Consumer<Notification> listener)
+	{
+		sulkStructureInternal(listener);
+	}
+
+	@Override
+	public void listenStructureNoParam(Runnable listener)
+	{
+		listenStructureInternal(listener);
+	}
+
+	@Override
+	public void sulkStructureNoParam(Runnable listener)
+	{
+		sulkStructureInternal(listener);
+	}
+
+	private void unregisterNotificationListener(final Object listener, final int featureIdx)
+	{
+		final var list = listenerMap[featureIdx];
+		if (list != null)
+		{
+			list.remove(listener);
+		}
+	}
+
+	private int featureToIndex(Feature<?, ?, ?, ?> feature)
+	{
+		final int featureId = feature.id();
+		return IDtoIndex(featureId);
+	}
+
+	private int IDtoIndex(int id)
+	{
+		return indexFunction.index(id);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void initNotificationMap()
+	{
+		listenerMap = new Deque[featureCount];
+	}
+
+	private void registerNotificationListener(final Object listener, final int featureIdx)
+	{
+		var list = listenerMap[featureIdx];
+		if (list == null)
+		{
+			list = new ConcurrentLinkedDeque<>();
+			listenerMap[featureIdx] = list;
+		}
+		list.add(listener);
+	}
+
+	private void listenStructureInternal(Object listener)
+	{
+		if (structureListeners == null)
+		{
+			structureListeners = new ConcurrentLinkedDeque<>();
+		}
+		structureListeners.add(listener);
+	}
+
+	private void sulkStructureInternal(Object listener)
+	{
+		if (structureListeners != null)
+		{
+			structureListeners.remove(listener);
+		}
+	}
+
+	@FunctionalInterface
+	public interface IndexFunction
+	{
+		int index(int id);
+	}
 }

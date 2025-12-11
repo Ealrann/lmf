@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
@@ -16,6 +17,8 @@ public interface Relation<UnaryType extends LMObject, EffectiveType, ListenerTyp
     return new RelationBuilder<>();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   Concept<UnaryType> concept();
   boolean lazy();
   boolean contains();

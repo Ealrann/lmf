@@ -3,6 +3,7 @@ package org.logoce.lmf.model.lang;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.MetaModelBuilder;
@@ -15,6 +16,8 @@ public interface MetaModel extends Model {
     return new MetaModelBuilder();
   }
 
+  @Override
+  IModelNotifier<? extends Features<?>> notifier();
   List<Group<?>> groups();
   List<Enum<?>> enums();
   List<Unit<?>> units();

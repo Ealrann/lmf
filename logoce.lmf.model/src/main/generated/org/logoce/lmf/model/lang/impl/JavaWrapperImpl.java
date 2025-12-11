@@ -1,6 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Group;
@@ -9,6 +11,8 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Serializer;
 
 public final class JavaWrapperImpl<T> extends FeaturedObject<JavaWrapper.Features<?>> implements JavaWrapper<T> {
+  private static final int FEATURE_COUNT = 3;
+  private final ModelNotifier<JavaWrapper.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final String qualifiedClassName;
   private final Serializer serializer;
@@ -19,7 +23,12 @@ public final class JavaWrapperImpl<T> extends FeaturedObject<JavaWrapper.Feature
     this.qualifiedClassName = qualifiedClassName;
     this.serializer = serializer;
     setContainer(serializer, JavaWrapper.FeatureIDs.SERIALIZER);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<JavaWrapper.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -67,7 +76,7 @@ public final class JavaWrapperImpl<T> extends FeaturedObject<JavaWrapper.Feature
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>(3, JavaWrapperImpl::featureIndexStatic).add(JavaWrapper.FeatureIDs.NAME, JavaWrapper::name).add(JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME, JavaWrapper::qualifiedClassName).add(JavaWrapper.FeatureIDs.SERIALIZER, JavaWrapper::serializer).build();
-    private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>(3, JavaWrapperImpl::featureIndexStatic).build();
+    private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>(FEATURE_COUNT, JavaWrapperImpl::featureIndexStatic).add(JavaWrapper.FeatureIDs.NAME, JavaWrapper::name).add(JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME, JavaWrapper::qualifiedClassName).add(JavaWrapper.FeatureIDs.SERIALIZER, JavaWrapper::serializer).build();
+    private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>(FEATURE_COUNT, JavaWrapperImpl::featureIndexStatic).build();
   }
 }

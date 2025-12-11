@@ -19,12 +19,12 @@ public final class EObjectPOI implements IEObjectPOI
 	@Override
 	public void listen(final LMObject object)
 	{
-		object.listen(listener, features);
+		object.notifier().listen(listener, features);
 	}
 
 	@Override
 	public void sulk(final LMObject object)
 	{
-		object.sulk(listener, features);
+		object.notifier().sulk(listener, features);
 	}
 }

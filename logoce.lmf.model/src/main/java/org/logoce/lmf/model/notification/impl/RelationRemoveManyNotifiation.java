@@ -6,6 +6,7 @@ import org.logoce.lmf.model.lang.LMObject;
 import java.util.List;
 
 public record RelationRemoveManyNotifiation(LMObject notifier,
+											boolean isContainment,
 											int featureId,
 											List<? extends LMObject> oldValues) implements Notification
 {

@@ -2,11 +2,12 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.Feature;
+import org.logoce.lmf.notification.api.IFeatures;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface IModelNotifier
+public interface IModelNotifier<Type extends IFeatures<?>>
 {
 	void listen(Consumer<Notification> listener, int... featureIDs);
 	void sulk(Consumer<Notification> listener, int... featureIDs);
@@ -19,6 +20,12 @@ public interface IModelNotifier
 
 	void listenNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features);
 	void sulkNoParam(Runnable listener, List<Feature<?, ?, ?, ?>> features);
+
+	void listenStructure(Consumer<Notification> listener);
+	void sulkStructure(Consumer<Notification> listener);
+
+	void listenStructureNoParam(Runnable listener);
+	void sulkStructureNoParam(Runnable listener);
 
 	default void listen(Consumer<Notification> listener, Feature<?, ?, ?, ?> feature)
 	{
@@ -36,5 +43,12 @@ public interface IModelNotifier
 	default void sulkNoParam(Runnable listener, Feature<?, ?, ?, ?> feature)
 	{
 		sulkNoParam(listener, feature.id());
+	}
+
+	interface Impl<Type extends IFeatures<?>> extends IModelNotifier<Type>
+	{
+		void notify(Notification notification);
+		boolean eDeliver();
+		void eDeliver(boolean deliver);
 	}
 }

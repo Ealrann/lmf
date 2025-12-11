@@ -11,19 +11,11 @@ public interface Notification
 	default Feature<?, ?, ?, ?> feature()
 	{
 		final var notifier = notifier();
-		if (notifier == null) return null;
-
+		final int featureIdx = notifier.featureIndex(featureId());
 		final var group = notifier.lmGroup();
-		for (final var feature : group.features())
-		{
-			if (feature.id() == featureId())
-			{
-				return feature;
-			}
-		}
-
-		throw new IllegalStateException("Unknown featureId " + featureId() + " for group " + group.name());
+		return group.features().get(featureIdx);
 	}
+	boolean isContainment();
 	int featureId();
 	EventType type();
 	default Object oldValue() {return null;}

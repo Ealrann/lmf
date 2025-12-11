@@ -3,6 +3,8 @@ package org.logoce.lmf.model.lang.impl;
 import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.IModelNotifier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.BoundType;
@@ -12,6 +14,8 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 import org.logoce.lmf.model.lang.Type;
 
 public final class GenericParameterImpl extends FeaturedObject<GenericParameter.Features<?>> implements GenericParameter {
+  private static final int FEATURE_COUNT = 4;
+  private final ModelNotifier<GenericParameter.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
   private final boolean wildcard;
   private final BoundType wildcardBoundType;
   private final Supplier<Type<?>> type;
@@ -24,7 +28,12 @@ public final class GenericParameterImpl extends FeaturedObject<GenericParameter.
     this.type = type;
     this.parameters = List.copyOf(parameters);
     setContainer(parameters, GenericParameter.FeatureIDs.PARAMETERS);
-    eDeliver(true);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<GenericParameter.Features<?>> notifier() {
+    return notifier;
   }
 
   @Override
@@ -78,7 +87,7 @@ public final class GenericParameterImpl extends FeaturedObject<GenericParameter.
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<GenericParameter> GET_MAP = new FeatureGetter.Builder<GenericParameter>(4, GenericParameterImpl::featureIndexStatic).add(GenericParameter.FeatureIDs.WILDCARD, GenericParameter::wildcard).add(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE, GenericParameter::wildcardBoundType).add(GenericParameter.FeatureIDs.TYPE, GenericParameter::type).add(GenericParameter.FeatureIDs.PARAMETERS, GenericParameter::parameters).build();
-    private static final FeatureSetter<GenericParameter> SET_MAP = new FeatureSetter.Builder<GenericParameter>(4, GenericParameterImpl::featureIndexStatic).build();
+    private static final FeatureGetter<GenericParameter> GET_MAP = new FeatureGetter.Builder<GenericParameter>(FEATURE_COUNT, GenericParameterImpl::featureIndexStatic).add(GenericParameter.FeatureIDs.WILDCARD, GenericParameter::wildcard).add(GenericParameter.FeatureIDs.WILDCARD_BOUND_TYPE, GenericParameter::wildcardBoundType).add(GenericParameter.FeatureIDs.TYPE, GenericParameter::type).add(GenericParameter.FeatureIDs.PARAMETERS, GenericParameter::parameters).build();
+    private static final FeatureSetter<GenericParameter> SET_MAP = new FeatureSetter.Builder<GenericParameter>(FEATURE_COUNT, GenericParameterImpl::featureIndexStatic).build();
   }
 }
