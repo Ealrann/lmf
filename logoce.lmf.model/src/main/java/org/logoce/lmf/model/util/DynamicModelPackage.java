@@ -338,7 +338,7 @@ public final class DynamicModelPackage implements IModelPackage
 		{
 			if (!(child instanceof DynamicLMObject<?>)) return;
 
-			ContainmentUtils.setContainer(this, child, relation.id());
+			setContainer(child, relation.id());
 
 			if (many)
 			{

@@ -9,26 +9,21 @@ import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.notification.impl.ContainerChange;
-import org.logoce.lmf.model.notification.impl.RelationNotificationBuilder;
-import org.logoce.lmf.model.notification.impl.SetNotification;
 import org.logoce.lmf.model.notification.list.ObservableList;
 import org.logoce.lmf.model.notification.util.NotificationUnifier;
 import org.logoce.lmf.model.util.ModelUtil;
-import org.logoce.lmf.model.util.oldlogoce.TreeLazyIterator;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> implements IFeaturedObject
 {
-	private LMObject container;
-	private int containingFeatureId = -1;
+	LMObject container;
+	int containingFeatureId = -1;
 	private BasicAdapterManager extenderManager = null;
-	private boolean loaded = false;
+	boolean loaded = false;
 
 	public FeaturedObject()
 	{}
@@ -121,14 +116,14 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 												  final boolean isRelation,
 												  final boolean isContainment)
 	{
-		return new ObservableList<>(new ObservableListHandler<>(this, featureId, isRelation, isContainment));
+		return new ObservableList<>(ObservableListSupport.handler(this, featureId, isRelation, isContainment));
 	}
 
 	protected final void setContainer(final LMObject child, final int featureId)
 	{
 		if (child != null)
 		{
-			ContainmentUtils.setContainer((LMObject) this, child, featureId);
+			ContainmentSupport.setContainer((LMObject) this, child, featureId);
 		}
 	}
 
@@ -136,7 +131,7 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 	{
 		if (!children.isEmpty())
 		{
-			ContainmentUtils.setContainer((LMObject) this, children, featureId);
+			ContainmentSupport.setContainer((LMObject) this, children, featureId);
 		}
 	}
 
@@ -253,41 +248,18 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 
 	public final void loadExtenderManager()
 	{
-		treeIterator().forEachRemaining(object -> ((FeaturedObject<?>) object).load());
+		AdapterLifecycleSupport.loadExtenderManager(this);
 	}
 
 	public final void disposeExtenderManager()
 	{
-		treeIterator().forEachRemaining(object -> ((FeaturedObject<?>) object).dispose());
-	}
-
-	private void load()
-	{
-		if (!loaded)
-		{
-			loaded = true;
-			adapterManager().load();
-		}
-	}
-
-	private void dispose()
-	{
-		if (loaded)
-		{
-			adapterManager().dispose();
-			loaded = false;
-		}
+		AdapterLifecycleSupport.disposeExtenderManager(this);
 	}
 
 	@Override
 	public final Stream<LMObject> streamTree()
 	{
-		return StreamSupport.stream(treeIterator(), false);
-	}
-
-	private TreeLazyIterator treeIterator()
-	{
-		return new TreeLazyIterator((LMObject) this);
+		return StreamSupport.stream(AdapterLifecycleSupport.treeIterator(this), false);
 	}
 
 	@Override
@@ -301,142 +273,11 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 	{
 		if (ref.many())
 		{
-			return ((List<LMObject>) ((LMObject) this).get(ref)).stream();
+			return ((List<LMObject>) this.get(ref)).stream();
 		}
 		else
 		{
-			return Stream.ofNullable((LMObject) ((LMObject) this).get(ref));
-		}
-	}
-
-	private record ObservableListHandler<E>(FeaturedObject<?> owner,
-											int featureId,
-											boolean relation,
-											boolean containment) implements BiConsumer<Notification.EventType, List<E>>
-	{
-		@Override
-		public void accept(final Notification.EventType eventType, final List<E> elements)
-		{
-			if (elements.isEmpty()) return;
-
-			final Notification notification;
-
-			if (!relation)
-			{
-				Object newValue = null;
-				Object oldValue = null;
-
-				switch (eventType)
-				{
-					case ADD, ADD_MANY -> newValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
-					case REMOVE, REMOVE_MANY ->
-							oldValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
-					default ->
-					{
-						return;
-					}
-				}
-
-				notification = new SetNotification((LMObject) owner, containment, featureId, newValue, oldValue);
-			}
-			else
-			{
-				@SuppressWarnings("unchecked") final var children = (List<? extends LMObject>) elements;
-
-				if (containment &&
-					(eventType == Notification.EventType.ADD || eventType == Notification.EventType.ADD_MANY))
-				{
-					if (eventType == Notification.EventType.ADD)
-					{
-						owner.setContainer(children.getFirst(), featureId);
-					}
-					else
-					{
-						owner.setContainer(children, featureId);
-					}
-				}
-
-				notification = switch (eventType)
-				{
-					case ADD -> RelationNotificationBuilder.insert((LMObject) owner,
-																   featureId,
-																   containment,
-																   true,
-																   children.getFirst());
-					case ADD_MANY ->
-							RelationNotificationBuilder.insert((LMObject) owner, featureId, containment, children);
-					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner,
-																	  featureId,
-																	  containment,
-																	  true,
-																	  children.getFirst());
-					case REMOVE_MANY ->
-							RelationNotificationBuilder.remove((LMObject) owner, featureId, containment, children);
-					default -> null;
-				};
-
-				if (notification == null) return;
-			}
-
-			owner.eNotify(notification);
-		}
-	}
-
-	protected static final class ContainmentUtils
-	{
-		private ContainmentUtils()
-		{
-		}
-
-		public static void setContainer(final LMObject newContainer, final LMObject child, final int featureId)
-		{
-			setContainerInternal(newContainer, child, featureId);
-		}
-
-		public static void setContainer(final LMObject newContainer,
-										final List<? extends LMObject> children,
-										final int featureId)
-		{
-			for (final var child : children)
-			{
-				setContainerInternal(newContainer, child, featureId);
-			}
-		}
-
-		private static void setContainerInternal(final LMObject newContainer,
-												 final LMObject child,
-												 final int newFeatureId)
-		{
-			final var featuredChild = (FeaturedObject<?>) child;
-			final var oldContainer = featuredChild.container;
-			final int oldFeatureId = featuredChild.containingFeatureId;
-
-			featuredChild.container = newContainer;
-			featuredChild.containingFeatureId = newFeatureId;
-
-			if (oldContainer != null)
-			{
-				if (oldFeatureId != -1)
-				{
-					final var oldGroup = oldContainer.lmGroup();
-					if (oldGroup != null)
-					{
-						final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
-																							 oldFeatureId,
-																							 true,
-																							 true,
-																							 child);
-						((FeaturedObject<?>) oldContainer).eNotify(oldParentNotification);
-					}
-				}
-			}
-
-			final var childNotification = new ContainerChange(child,
-															  oldFeatureId,
-															  newFeatureId,
-															  newContainer,
-															  oldContainer);
-			featuredChild.eNotify(childNotification);
+			return Stream.ofNullable(this.get(ref));
 		}
 	}
 }
