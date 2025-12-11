@@ -99,15 +99,8 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 	@SuppressWarnings("unchecked")
 	private <T, O> void internalSet(final Feature<?, T, ?, ?> feature, final T value)
 	{
-		final var getMap = (FeatureGetter<O>) getterMap();
 		final var setMap = (FeatureSetter<O>) setterMap();
-
-		final int featureId = feature.id();
-		final boolean contains = feature instanceof Relation<?, ?, ?, ?> rel && rel.contains();
-		final var oldValue = getMap.get((O) this, featureId);
-		setMap.set((O) this, featureId, value);
-		final var notification = new SetNotification((LMObject) this, contains, feature.id(), value, oldValue);
-		eNotify(notification);
+		setMap.set((O) this, feature.id(), value);
 	}
 
 	protected FeatureGetter<?> getterMap() {return null;}

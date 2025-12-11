@@ -50,14 +50,11 @@ public final class ModelNotifier<Type extends IFeatures<?>> implements IModelNot
 		if (listenerMap != null)
 		{
 			final int featureId = notification.featureId();
-			if (featureId >= 0)
+			final int featureIdx = indexFunction.index(featureId);
+			final var listeners = listenerMap[featureIdx];
+			if (listeners != null)
 			{
-				final int featureIdx = indexFunction.index(featureId);
-				final var listeners = listenerMap[featureIdx];
-				if (listeners != null)
-				{
-					notify(listeners, notification);
-				}
+				notify(listeners, notification);
 			}
 		}
 	}
