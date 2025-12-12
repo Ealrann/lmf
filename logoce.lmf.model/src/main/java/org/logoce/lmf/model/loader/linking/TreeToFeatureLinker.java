@@ -9,9 +9,9 @@ import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
 import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.model.util.ModelRegistry;
 
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,13 +27,8 @@ public final class TreeToFeatureLinker
 		this.group = group;
 		final List<Feature<?, ?, ?, ?>> allFeatures = ModelUtil.streamAllFeatures(group).toList();
 
-		final Map<Integer, Feature<?, ?, ?, ?>> featureMap = new LinkedHashMap<>();
-		for (final var feature : allFeatures)
-		{
-			featureMap.put(feature.id(), feature);
-		}
-
-		final var features = featureMap.values().stream().toList();
+		final var seen = Collections.newSetFromMap(new IdentityHashMap<Feature<?, ?, ?, ?>, Boolean>());
+		final var features = allFeatures.stream().filter(seen::add).toList();
 		final var tokenResolverBuilder = new ITokenResolver.Builder(modelRegistry);
 
 		final var attributeResolvers = features.stream()
@@ -52,7 +47,7 @@ public final class TreeToFeatureLinker
 											  .map(Optional::get)
 											  .toList();
 
-		containmentRelations = allFeatures.stream()
+		containmentRelations = features.stream()
 										  .filter(Relation.class::isInstance)
 										  .map(r -> (Relation<?, ?, ?, ?>) r)
 										  .filter(Relation::contains)

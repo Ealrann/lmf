@@ -45,8 +45,13 @@ public final class DynamicModelPackageTest
 
 		final var metaModel = (MetaModel) document.model();
 
-		// Build a dynamic package for this meta-model (no generated Package on this classpath).
-		final var dynamicPackage = new DynamicModelPackage(metaModel);
+		assertNotNull(metaModel.lmPackage(), "Loaded MetaModel should have a package");
+		assertInstanceOf(DynamicModelPackage.class,
+						 metaModel.lmPackage(),
+						 "Loaded MetaModel should be assigned a DynamicModelPackage");
+
+		final var dynamicPackage = (DynamicModelPackage) metaModel.lmPackage();
+		assertSame(metaModel, dynamicPackage.model(), "DynamicModelPackage should be bound to the loaded MetaModel");
 
 		@SuppressWarnings("unchecked")
 		final Group<LMObject> carGroup = (Group<LMObject>) metaModel.groups()
@@ -120,7 +125,10 @@ public final class DynamicModelPackageTest
 		assertTrue(carCompanyDoc.model() instanceof MetaModel, "Loaded CarCompany should be a MetaModel");
 
 		final var carCompanyMetaModel = (MetaModel) carCompanyDoc.model();
-		final var dynamicPackage = new DynamicModelPackage(carCompanyMetaModel);
+		assertNotNull(carCompanyMetaModel.lmPackage(), "Loaded CarCompany meta-model should have a package");
+		assertInstanceOf(DynamicModelPackage.class,
+						 carCompanyMetaModel.lmPackage(),
+						 "Loaded CarCompany meta-model should be assigned a DynamicModelPackage");
 
 		final var registryBuilder = new ModelRegistry.Builder();
 		registryBuilder.register(LMCoreModelPackage.MODEL);
@@ -187,7 +195,7 @@ public final class DynamicModelPackageTest
 		assertTrue(diagnostics.stream().noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
 				   "Peugeot.lm parse diagnostics should not contain errors");
 
-		final var linker = new LmModelLinker<PNode>(registry, List.of(dynamicPackage));
+		final var linker = new LmModelLinker<PNode>(registry, List.of(carCompanyMetaModel.lmPackage()));
 		final var linkDiagnostics = new java.util.ArrayList<LmDiagnostic>();
 		linker.linkModel(readResult.roots(), linkDiagnostics, readResult.source());
 

@@ -196,8 +196,25 @@ public final class WorkspaceRebuilder
 			LOG.debug("LMF LSP analyzeDocument start: uri={}, textLength={}", state.uri(), state.text().length());
 			final String text = state.text();
 
-			final var loader = new LmLoader(workspaceIndex.modelRegistry());
-			final var doc = loader.loadModel(text);
+			final var reader = new LmTreeReader();
+			final var diagnostics = new ArrayList<LmDiagnostic>();
+			final var readResult = reader.read(text, diagnostics);
+			final var roots = readResult.roots();
+
+			final var registryBuilder = new ModelRegistry.Builder(workspaceIndex.modelRegistry());
+			if (!roots.isEmpty())
+			{
+				final var node = roots.getFirst().data();
+				final var domain = ModelHeaderUtil.resolveDomain(node);
+				final var name = ModelHeaderUtil.resolveName(node);
+				if (domain != null && !domain.isBlank() && name != null && !name.isBlank())
+				{
+					registryBuilder.remove(domain + "." + name);
+				}
+			}
+
+			final var loader = new LmLoader(registryBuilder.build());
+			final var doc = loader.loadModel(readResult, diagnostics);
 
 			final var syntaxSnapshot = new SyntaxSnapshot(
 				List.of(),

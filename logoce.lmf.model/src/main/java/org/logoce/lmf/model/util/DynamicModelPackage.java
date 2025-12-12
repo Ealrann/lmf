@@ -1,6 +1,5 @@
 package org.logoce.lmf.model.util;
 
-import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IFeaturedObject;
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.Attribute;
@@ -8,37 +7,69 @@ import org.logoce.lmf.model.lang.Enum;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
  * Lightweight {@link IModelPackage} implementation backed directly by a {@link MetaModel}.
  * <p>
  * This is intended for tooling/LSP scenarios where no generated {@code *Package}
- * class is available on the classpath. It provides minimal, map-backed
+ * class is available. It provides minimal, map-backed
  * {@link LMObject} instances with containers wired via LMCore {@link Relation}
  * metadata. Only the parts of the runtime needed by the linker and navigation
  * helpers are implemented.
  */
 public final class DynamicModelPackage implements IModelPackage
 {
-	private final MetaModel metaModel;
+	private final AtomicReference<MetaModel> metaModelRef;
 
 	public DynamicModelPackage(final MetaModel metaModel)
 	{
-		this.metaModel = Objects.requireNonNull(metaModel, "metaModel");
+		this.metaModelRef = new AtomicReference<>(Objects.requireNonNull(metaModel, "metaModel"));
+	}
+
+	private DynamicModelPackage()
+	{
+		this.metaModelRef = new AtomicReference<>();
+	}
+
+	public static DynamicModelPackage unbound()
+	{
+		return new DynamicModelPackage();
+	}
+
+	public void bind(final MetaModel metaModel)
+	{
+		final var candidate = Objects.requireNonNull(metaModel, "metaModel");
+		final var existing = metaModelRef.get();
+
+		if (existing == null)
+		{
+			metaModelRef.compareAndSet(null, candidate);
+			return;
+		}
+
+		if (existing != candidate)
+		{
+			throw new IllegalStateException("DynamicModelPackage already bound to " +
+											existing.domain() +
+											"." +
+											existing.name());
+		}
 	}
 
 	@Override
 	public MetaModel model()
 	{
+		final var metaModel = metaModelRef.get();
+		if (metaModel == null)
+		{
+			throw new IllegalStateException("DynamicModelPackage is not bound to a MetaModel");
+		}
 		return metaModel;
 	}
 
@@ -46,6 +77,12 @@ public final class DynamicModelPackage implements IModelPackage
 	public <T extends LMObject> Optional<IFeaturedObject.Builder<T>> builder(final Group<T> group)
 	{
 		if (group == null) return Optional.empty();
+
+		final var metaModel = metaModelRef.get();
+		if (metaModel == null)
+		{
+			return Optional.empty();
+		}
 
 		// Only groups from this meta-model are supported; foreign groups fall back
 		// to the caller's existing packages (for example LMCorePackage).
@@ -85,7 +122,7 @@ public final class DynamicModelPackage implements IModelPackage
 	private static final class DynamicBuilder<T extends LMObject> implements IFeaturedObject.Builder<T>
 	{
 		private final Group<T> group;
-		private final Map<Feature<?, ?, ?, ?>, Object> values = new HashMap<>();
+		private final Map<Feature<?, ?, ?, ?>, Object> values = new IdentityHashMap<>();
 		private final List<ChildRelation> pendingChildren = new ArrayList<>();
 
 		private DynamicBuilder(final Group<T> group)
@@ -96,7 +133,7 @@ public final class DynamicModelPackage implements IModelPackage
 		@Override
 		public T build()
 		{
-			final var object = new DynamicLMObject<>(group, values);
+			final var object = new DynamicFeaturedObject(group, values);
 
 			for (final ChildRelation relation : pendingChildren)
 			{
@@ -162,10 +199,10 @@ public final class DynamicModelPackage implements IModelPackage
 		}
 	}
 
-	private static final class ChildRelation
-	{
-		private final Relation<?, ?, ?, ?> relation;
-		private final LMObject child;
+		private static final class ChildRelation
+		{
+			private final Relation<?, ?, ?, ?> relation;
+			private final LMObject child;
 		private final boolean many;
 
 		private ChildRelation(final Relation<?, ?, ?, ?> relation, final LMObject child, final boolean many)
@@ -185,196 +222,9 @@ public final class DynamicModelPackage implements IModelPackage
 			return new ChildRelation(relation, child, true);
 		}
 
-		void attachTo(final DynamicLMObject<?> parent)
+		void attachTo(final DynamicFeaturedObject parent)
 		{
-			parent.setContainer(child, relation, many);
-		}
-	}
-
-	/**
-	 * Minimal LMObject implementation that stores feature values in a map.
-	 */
-	private static final class DynamicLMObject<T extends LMObject> extends FeaturedObject<IFeaturedObject.Features<?>>
-		implements LMObject, Model, Named
-	{
-		private final Group<T> group;
-		private final Map<Feature<?, ?, ?, ?>, Object> values;
-		private final List<Feature<?, ?, ?, ?>> allFeatures;
-		private final Map<Integer, Integer> featureIndexById;
-		private final ModelNotifier<Model.Features<?>> notifier;
-
-		private DynamicLMObject(final Group<T> group, final Map<Feature<?, ?, ?, ?>, Object> initialValues)
-		{
-			this.group = Objects.requireNonNull(group, "group");
-			this.values = new HashMap<>(initialValues);
-			this.allFeatures = collectFeatures(group);
-			this.featureIndexById = buildFeatureIndex(allFeatures);
-			this.notifier = new ModelNotifier<>(allFeatures.size(), this::featureIndex);
-		}
-
-		@Override
-		public Group<T> lmGroup()
-		{
-			return group;
-		}
-
-		@Override
-		public String name()
-		{
-			final Attribute<String, ?, ?, ?> nameAttribute = findAttribute("name");
-			return nameAttribute == null ? null : (String) get(nameAttribute);
-		}
-
-		@Override
-		public String domain()
-		{
-			final Attribute<String, ?, ?, ?> domainAttribute = findAttribute("domain");
-			return domainAttribute == null ? null : (String) get(domainAttribute);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public java.util.List<String> imports()
-		{
-			final Attribute<java.util.List<String>, ?, ?, ?> importsAttribute = findAttribute("imports");
-			return importsAttribute == null ? java.util.List.of()
-											: (java.util.List<String>) get(importsAttribute);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public java.util.List<String> metamodels()
-		{
-			final Attribute<java.util.List<String>, ?, ?, ?> metamodelsAttribute = findAttribute("metamodels");
-			return metamodelsAttribute == null ? java.util.List.of()
-											   : (java.util.List<String>) get(metamodelsAttribute);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <V> V get(final Feature<?, ?, ?, ?> feature)
-		{
-			if (feature == null) return null;
-
-			if (feature.many())
-			{
-				@SuppressWarnings("unchecked")
-				final V list = (V) values.computeIfAbsent(feature, k -> new ArrayList<>());
-				return list;
-			}
-
-			@SuppressWarnings("unchecked")
-			final V value = (V) values.get(feature);
-			return value;
-		}
-
-		@Override
-		public Object get(final int featureID)
-		{
-			for (final Feature<?, ?, ?, ?> feature : allFeatures)
-			{
-				if (feature.id() == featureID)
-				{
-					return get((Feature<?, ?, ?, ?>) feature);
-				}
-			}
-			throw new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name());
-		}
-
-		@Override
-		public <V> void set(final Feature<?, ?, ?, ?> feature, final V value)
-		{
-			if (feature == null) return;
-
-			values.put(feature, value);
-		}
-
-		@Override
-		public void set(final int featureID, final Object value)
-		{
-			for (final Feature<?, ?, ?, ?> feature : allFeatures)
-			{
-				if (feature.id() == featureID)
-				{
-					@SuppressWarnings("unchecked")
-					final Feature<?, Object, ?, ?> typedFeature = (Feature<?, Object, ?, ?>) feature;
-					set(typedFeature, value);
-					return;
-				}
-			}
-			throw new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name());
-		}
-
-		@SuppressWarnings("unchecked")
-		private <V> Attribute<V, ?, ?, ?> findAttribute(final String attributeName)
-		{
-			if (attributeName == null) return null;
-
-			for (final Feature<?, ?, ?, ?> feature : group.features())
-			{
-				if (feature instanceof Attribute<?, ?, ?, ?> attribute && attributeName.equals(attribute.name()))
-				{
-					return (Attribute<V, ?, ?, ?>) attribute;
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public int featureIndex(final int featureId)
-		{
-			final Integer index = featureIndexById.get(featureId);
-			if (index != null) return index;
-			throw new IllegalArgumentException("Unknown featureId " + featureId + " for group " + group.name());
-		}
-
-		@Override
-		public IModelNotifier.Impl<? extends Model.Features<?>> notifier()
-		{
-			return notifier;
-		}
-
-		private void setContainer(final LMObject child, final Relation<?, ?, ?, ?> relation, final boolean many)
-		{
-			if (!(child instanceof DynamicLMObject<?>)) return;
-
-			setContainer(child, relation.id());
-
-			if (many)
-			{
-				@SuppressWarnings("unchecked")
-				final List<LMObject> list = (List<LMObject>) values.computeIfAbsent(relation,
-																					k -> new ArrayList<>());
-				if (!list.contains(child))
-				{
-					list.add(child);
-				}
-			}
-			else
-			{
-				values.put(relation, child);
-			}
-		}
-
-		private static List<Feature<?, ?, ?, ?>> collectFeatures(final Group<?> group)
-		{
-			final Set<Feature<?, ?, ?, ?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
-			final List<Feature<?, ?, ?, ?>> features = new ArrayList<>();
-			ModelUtil.streamAllFeatures(group)
-					 .map(Feature.class::cast)
-					 .filter(seen::add)
-					 .forEach(features::add);
-			return features;
-		}
-
-		private static Map<Integer, Integer> buildFeatureIndex(final List<Feature<?, ?, ?, ?>> features)
-		{
-			final Map<Integer, Integer> index = new HashMap<>(features.size());
-			for (int i = 0; i < features.size(); i++)
-			{
-				index.put(features.get(i).id(), i);
-			}
-			return index;
+			parent.attachContainment(relation, child, many);
 		}
 	}
 }

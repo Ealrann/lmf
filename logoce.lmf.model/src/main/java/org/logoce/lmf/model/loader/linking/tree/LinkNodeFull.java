@@ -1,9 +1,11 @@
 package org.logoce.lmf.model.loader.linking.tree;
 
 import org.logoce.lmf.model.api.model.IFeaturedObject;
+import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.loader.linking.FeatureResolution;
 import org.logoce.lmf.model.loader.linking.LinkException;
@@ -11,6 +13,7 @@ import org.logoce.lmf.model.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.model.loader.linking.linker.NodeLinker;
 import org.logoce.lmf.model.resource.interpretation.PFeature;
 import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.model.util.DynamicModelPackage;
 import org.logoce.lmf.model.util.tree.AbstractTree;
 
 import java.util.HashSet;
@@ -27,6 +30,7 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 	private final List<ResolutionAttempt<Attribute<?, ?, ?, ?>>> attributeResolutions;
 	private List<ResolutionAttempt<Relation<?, ?, ?, ?>>> relationResolutions;
 	private T builtObject = null;
+	private IModelPackage injectedMetaModelPackage = null;
 
 	private static final ThreadLocal<Set<LinkNodeFull<?, ?>>> BUILD_STACK = ThreadLocal.withInitial(HashSet::new);
 
@@ -89,11 +93,14 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 
 			try
 			{
+				injectMetaModelPackageIfNeeded();
+
 				streamChildren().forEach(this::injectContainment);
 				attributeResolutions.forEach(this::install);
 				relationResolutions.forEach(this::install);
 
 				builtObject = builder.build();
+				bindInjectedMetaModelPackageIfNeeded();
 			}
 			catch (LinkException e)
 			{
@@ -132,6 +139,25 @@ public final class LinkNodeFull<T extends LMObject, I extends PNode> extends Abs
 			}
 		}
 		return builtObject;
+	}
+
+	private void injectMetaModelPackageIfNeeded()
+	{
+		if (builder instanceof MetaModel.Builder metaModelBuilder)
+		{
+			final var dynamicPackage = DynamicModelPackage.unbound();
+			this.injectedMetaModelPackage = dynamicPackage;
+			metaModelBuilder.lmPackage(dynamicPackage);
+		}
+	}
+
+	private void bindInjectedMetaModelPackageIfNeeded()
+	{
+		if (injectedMetaModelPackage instanceof DynamicModelPackage dynamic &&
+			builtObject instanceof MetaModel metaModel)
+		{
+			dynamic.bind(metaModel);
+		}
 	}
 
 	private void install(final ResolutionAttempt<?> tokenResolution)

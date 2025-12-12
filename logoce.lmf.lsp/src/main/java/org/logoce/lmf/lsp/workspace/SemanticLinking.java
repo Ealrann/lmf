@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Helper for semantic-only linking in the LSP.
@@ -47,7 +46,7 @@ final class SemanticLinking
 		for (final MetaModel mm : activeMetaModels)
 		{
 			final IModelPackage pkg = tryResolveModelPackage(mm);
-			if (pkg != null && metaModelPackages.stream().noneMatch(p -> p.getClass().equals(pkg.getClass())))
+			if (pkg != null && metaModelPackages.stream().map(IModelPackage::model).noneMatch(m -> sameModel(m, mm)))
 			{
 				metaModelPackages.add(pkg);
 			}
@@ -69,51 +68,23 @@ final class SemanticLinking
 
 	private static IModelPackage tryResolveModelPackage(final MetaModel metaModel)
 	{
-		// Mirror MetaModelPackages.resolveModelPackage but swallow errors so that
-		// semantic-only linking can fall back gracefully when generated packages
-		// are not on the classpath.
-		final StringBuilder pkg = new StringBuilder(metaModel.domain());
-
-		final String extra = metaModel.extraPackage();
-		if (extra != null && !extra.isBlank())
+		if (metaModel == null)
 		{
-			pkg.append('.').append(extra);
-		}
-
-		if (metaModel.genNamePackage())
-		{
-			pkg.append('.').append(metaModel.name().toLowerCase(Locale.ROOT));
-		}
-
-		final String className = pkg + "." + metaModel.name() + "Package";
-
-		try
-		{
-			final Class<?> clazz = Class.forName(className);
-			if (!IModelPackage.class.isAssignableFrom(clazz))
-			{
-				return null;
-			}
-
-			@SuppressWarnings("unchecked")
-			final Class<? extends IModelPackage> typed = (Class<? extends IModelPackage>) clazz;
-
-			try
-			{
-				final var instanceField = typed.getField("Instance");
-				return (IModelPackage) instanceField.get(null);
-			}
-			catch (NoSuchFieldException e)
-			{
-				return typed.getDeclaredConstructor().newInstance();
-			}
-		}
-		catch (Exception e)
-		{
-			LOG.debug("Cannot resolve model package for metamodel {}.{}: {}",
-					  metaModel.domain(), metaModel.name(), e.getMessage());
 			return null;
 		}
+
+		final var pkg = metaModel.lmPackage();
+		if (pkg == null)
+		{
+			LOG.debug("Meta-model {}.{} has no lmPackage", metaModel.domain(), metaModel.name());
+		}
+		return pkg;
+	}
+
+	private static boolean sameModel(final MetaModel left, final MetaModel right)
+	{
+		if (left == right) return true;
+		if (left == null || right == null) return false;
+		return left.name().equals(right.name()) && left.domain().equals(right.domain());
 	}
 }
-

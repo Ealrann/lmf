@@ -5,8 +5,6 @@ import org.logoce.lmf.model.util.IntModelExplorer;
 import test.model.carcompany.*;
 import test.model.carcompany.impl.PersonImpl;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class IntModelExplorerTest

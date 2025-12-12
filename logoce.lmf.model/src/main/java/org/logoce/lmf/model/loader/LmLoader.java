@@ -56,7 +56,11 @@ public final class LmLoader
 		final var diagnostics = new ArrayList<LmDiagnostic>();
 		final var treeReader = new LmTreeReader();
 		final var readResult = treeReader.read(source, diagnostics);
+		return loadModel(readResult, diagnostics);
+	}
 
+	public LmDocument loadModel(final LmTreeReader.ReadResult readResult, final List<LmDiagnostic> diagnostics)
+	{
 		final List<Tree<PNode>> roots = readResult.roots();
 		if (roots.isEmpty())
 		{
@@ -86,7 +90,29 @@ public final class LmLoader
 										  d.message()));
 		}
 
-		return new LmDocument(linkResult.model(),
+		final var model = linkResult.model();
+		if (model != null)
+		{
+			final var qualifiedName = qualifiedName(model);
+			if (qualifiedName != null &&
+				!qualifiedName.equals(qualifiedName(LMCoreModelPackage.MODEL)) &&
+				effectiveRegistry.getModel(qualifiedName) != null)
+			{
+				diagnostics.add(new LmDiagnostic(1,
+												1,
+												1,
+												0,
+												LmDiagnostic.Severity.ERROR,
+												"Model already exists in registry: " + qualifiedName));
+				return new LmDocument(null,
+									  List.copyOf(diagnostics),
+									  roots,
+									  readResult.source(),
+									  linkResult.trees());
+			}
+		}
+
+		return new LmDocument(model,
 							  List.copyOf(diagnostics),
 							  roots,
 							  readResult.source(),
@@ -114,9 +140,16 @@ public final class LmLoader
 			}
 		}
 
-		final List<Model> models = MultiModelSupport.buildAll(parsedModels, baseRegistry);
+		final var builderBase = new ModelRegistry.Builder(baseRegistry);
+		for (final var pm : parsedModels)
+		{
+			builderBase.remove(pm.qualifiedName());
+		}
+		final var effectiveBase = builderBase.build();
 
-		final var builder = new ModelRegistry.Builder(baseRegistry);
+		final List<Model> models = MultiModelSupport.buildAll(parsedModels, effectiveBase);
+
+		final var builder = new ModelRegistry.Builder(effectiveBase);
 		for (final Model model : models)
 		{
 			builder.register(model);
@@ -152,6 +185,22 @@ public final class LmLoader
 
 		final var linker = new LmModelLinker<PNode>(modelRegistry, metaPackages);
 		final var linkResult = linker.linkModelStrict(roots);
+
+		final var duplicate = linkResult.roots()
+										.stream()
+										.filter(Model.class::isInstance)
+										.map(Model.class::cast)
+										.map(LmLoader::qualifiedName)
+										.filter(q -> q != null &&
+													 !q.equals(qualifiedName(LMCoreModelPackage.MODEL)) &&
+													 modelRegistry.getModel(q) != null)
+										.findFirst()
+										.orElse(null);
+		if (duplicate != null)
+		{
+			throw new IllegalStateException("Model already exists in registry: " + duplicate);
+		}
+
 		return linkResult.roots();
 	}
 
@@ -342,14 +391,20 @@ public final class LmLoader
 
 		private static String domainName(final Model model)
 		{
-			if (model instanceof MetaModel mm)
-			{
-				return mm.domain() + "." + mm.name();
-			}
-			else
-			{
-				return model.name();
-			}
+			return qualifiedName(model);
 		}
+	}
+
+	private static String qualifiedName(final Model model)
+	{
+		if (model == null) return null;
+
+		final var domain = model.domain();
+		final var name = model.name();
+		if (domain == null || domain.isBlank())
+		{
+			return name;
+		}
+		return domain + "." + name;
 	}
 }

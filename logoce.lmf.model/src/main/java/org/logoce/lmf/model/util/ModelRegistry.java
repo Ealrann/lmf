@@ -1,7 +1,6 @@
 package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 
 import java.util.HashMap;
@@ -38,7 +37,13 @@ public final class ModelRegistry implements IModelRegistry
 
 	private static String domainName(final Model model)
 	{
-		return model instanceof MetaModel mm ? mm.domain() + "." + mm.name() : model.name();
+		final var domain = model.domain();
+		final var name = model.name();
+		if (domain == null || domain.isBlank())
+		{
+			return name;
+		}
+		return domain + "." + name;
 	}
 
 	@Override
@@ -70,13 +75,30 @@ public final class ModelRegistry implements IModelRegistry
 		{
 			for (final var model : models)
 			{
-				modelMap.put(ModelRegistry.domainName(model), model);
+				register(model);
 			}
 		}
 
 		public void register(final Model model)
 		{
-			modelMap.put(ModelRegistry.domainName(model), model);
+			final var qualifiedName = ModelRegistry.domainName(model);
+			if (modelMap.containsKey(qualifiedName))
+			{
+				throw new IllegalStateException("Model already registered: " + qualifiedName);
+			}
+			modelMap.put(qualifiedName, model);
+		}
+
+		public void remove(final String qualifiedName)
+		{
+			if (qualifiedName == null) return;
+			modelMap.remove(qualifiedName);
+		}
+
+		public void remove(final String domain, final String name)
+		{
+			if (domain == null || name == null) return;
+			modelMap.remove(domain + "." + name);
 		}
 
 		@Override

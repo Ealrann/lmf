@@ -1,0 +1,4 @@
+(CarCompany domain=test.model name=PeugeotCompanyWithReference metamodels=test.model.CarCompany
+	(ceo name=Macron car=@peugeot1)
+	(CarParc
+		(Car name=peugeot1 brand=Peugeot)))
