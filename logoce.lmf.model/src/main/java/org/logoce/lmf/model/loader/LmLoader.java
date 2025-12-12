@@ -3,7 +3,6 @@ package org.logoce.lmf.model.loader;
 import org.logoce.lmf.model.api.model.IModelPackage;
 import org.logoce.lmf.model.lang.LMCoreModelPackage;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.MetaModel;
 import org.logoce.lmf.model.lang.Model;
 import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.model.loader.linking.LmModelLinker;

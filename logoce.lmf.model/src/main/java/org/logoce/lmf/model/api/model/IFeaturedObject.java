@@ -2,12 +2,10 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.extender.api.IAdaptable;
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.util.ModelUtil;
 import org.logoce.lmf.notification.api.IFeatures;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -27,9 +25,6 @@ public interface IFeaturedObject extends IAdaptable
 	{
 		return ModelUtil.streamTree((LMObject) this);
 	}
-
-	void listenStruture(Consumer<Notification> listener);
-	void sulkStructure(Consumer<Notification> listener);
 
 	int featureIndex(final int featureId);
 

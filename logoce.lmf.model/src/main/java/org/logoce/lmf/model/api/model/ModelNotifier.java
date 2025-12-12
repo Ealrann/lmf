@@ -2,8 +2,16 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.Feature;
+import org.logoce.lmf.model.notification.listener.BooleanListener;
+import org.logoce.lmf.model.notification.listener.DoubleListener;
+import org.logoce.lmf.model.notification.listener.FloatListener;
+import org.logoce.lmf.model.notification.listener.IModelListener;
+import org.logoce.lmf.model.notification.listener.IntListener;
+import org.logoce.lmf.model.notification.listener.Listener;
+import org.logoce.lmf.model.notification.listener.LongListener;
 import org.logoce.lmf.notification.api.IFeatures;
 
+import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -44,23 +52,36 @@ public final class ModelNotifier<Type extends IFeatures<?>> implements IModelNot
 
 		if (structureListeners != null && notification.isContainment())
 		{
-			notify(structureListeners, notification);
+			dispatchStructureListeners(structureListeners, notification);
 		}
 
 		if (listenerMap != null)
 		{
 			final int featureId = notification.featureId();
-			final int featureIdx = indexFunction.index(featureId);
+			final int featureIdx = resolveFeatureIndex(featureId, notification);
+			if (featureIdx < 0) return;
+
 			final var listeners = listenerMap[featureIdx];
-			if (listeners != null)
+			if (listeners == null) return;
+
+			final var group = notification.notifier().lmGroup();
+			final Feature<?, ?, ?, ?> feature;
+			try
 			{
-				notify(listeners, notification);
+				feature = group.features().get(featureIdx);
 			}
+			catch (RuntimeException e)
+			{
+				dispatchListeners(listeners, notification, null);
+				return;
+			}
+
+			dispatchListeners(listeners, notification, feature);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void notify(final Deque<Object> notificationListeners, final Notification notification)
+	private static void dispatchStructureListeners(final Deque<Object> notificationListeners,
+												  final Notification notification)
 	{
 		for (final var listener : notificationListeners)
 		{
@@ -70,9 +91,138 @@ public final class ModelNotifier<Type extends IFeatures<?>> implements IModelNot
 			}
 			else
 			{
-				((Consumer<Notification>) listener).accept(notification);
+				@SuppressWarnings("unchecked") final var notificationConsumer = (Consumer<Notification>) listener;
+				notificationConsumer.accept(notification);
 			}
 		}
+	}
+
+	private static void dispatchListeners(final Deque<Object> listeners,
+										 final Notification notification,
+										 final Feature<?, ?, ?, ?> feature)
+	{
+		for (final var listener : listeners)
+		{
+			if (listener instanceof Runnable runnable)
+			{
+				runnable.run();
+			}
+			else if (listener instanceof Consumer<?> consumer)
+			{
+				@SuppressWarnings("unchecked") final var notificationConsumer = (Consumer<Notification>) consumer;
+				notificationConsumer.accept(notification);
+			}
+			else if (listener instanceof IModelListener modelListener)
+			{
+				dispatchModelListener(modelListener, feature, notification);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void dispatchModelListener(final IModelListener listener,
+											 final Feature<?, ?, ?, ?> feature,
+											 final Notification notification)
+	{
+		if (feature == null) return;
+
+		if (listener instanceof Listener<?> typedListener)
+		{
+			final var oldValue = normalizeValue(feature, notification.oldValue());
+			final var newValue = normalizeValue(feature, notification.newValue());
+			((Listener<Object>) typedListener).notify(oldValue, newValue);
+			return;
+		}
+
+		if (feature.many()) return;
+
+		final var oldValue = notification.oldValue();
+		final var newValue = notification.newValue();
+
+		if (listener instanceof BooleanListener booleanListener)
+		{
+			booleanListener.notify((Boolean) oldValue, (Boolean) newValue);
+		}
+		else if (listener instanceof IntListener intListener)
+		{
+			intListener.notify((Integer) oldValue, (Integer) newValue);
+		}
+		else if (listener instanceof LongListener longListener)
+		{
+			longListener.notify((Long) oldValue, (Long) newValue);
+		}
+		else if (listener instanceof FloatListener floatListener)
+		{
+			floatListener.notify((Float) oldValue, (Float) newValue);
+		}
+		else if (listener instanceof DoubleListener doubleListener)
+		{
+			doubleListener.notify((Double) oldValue, (Double) newValue);
+		}
+	}
+
+	private static Object normalizeValue(final Feature<?, ?, ?, ?> feature, final Object value)
+	{
+		if (!feature.many())
+		{
+			return value;
+		}
+
+		if (value == null)
+		{
+			return List.of();
+		}
+
+		if (value instanceof List<?>)
+		{
+			return value;
+		}
+
+		return List.of(value);
+	}
+
+	private int resolveFeatureIndex(final int featureId, final Notification notification)
+	{
+		try
+		{
+			return indexFunction.index(featureId);
+		}
+		catch (RuntimeException e)
+		{
+			if (notification.type() == Notification.EventType.CONTAINER)
+			{
+				return -1;
+			}
+			throw e;
+		}
+	}
+
+	@Override
+	public <Callback extends IModelListener> void listen(final Callback listener,
+														 final Feature<?, ?, ? super Callback, ? super Type> feature)
+	{
+		listenInternal(listener, IntStream.of(feature.id()).map(this::IDtoIndex));
+	}
+
+	@Override
+	public <Callback extends IModelListener> void listen(final Callback listener,
+														 final Collection<? extends Feature<?, ?, ? super Callback, ? super Type>> features)
+	{
+		listenInternal(listener, features.stream().mapToInt(this::featureToIndex));
+	}
+
+	@Override
+	public <Callback extends IModelListener> void sulk(final Callback listener,
+													   final Feature<?, ?, ? super Callback, ? super Type> feature)
+	{
+		sulkInternal(listener, IntStream.of(feature.id()).map(this::IDtoIndex));
+	}
+
+	@Override
+	public <Callback extends IModelListener> void sulk(final Callback listener,
+													   final Collection<? extends Feature<?, ?, ? super Callback, ? super Type>> features)
+	{
+		sulkInternal(listener, features.stream().mapToInt(this::featureToIndex));
 	}
 
 	@Override

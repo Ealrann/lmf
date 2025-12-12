@@ -4,20 +4,10 @@ import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.IAdapterManager;
 import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.model.lang.*;
+import org.logoce.lmf.model.notification.listener.IModelListener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -79,21 +69,23 @@ public final class DynamicFeaturedObject implements Model
 
 		if (feature.many())
 		{
-			@SuppressWarnings("unchecked")
-			final V list = (V) values.computeIfAbsent(feature, ignored -> new ArrayList<>());
+			@SuppressWarnings("unchecked") final V list = (V) values.computeIfAbsent(feature,
+																					 ignored -> new ArrayList<>());
 			return list;
 		}
 
-		@SuppressWarnings("unchecked")
-		final V value = (V) values.get(feature);
+		@SuppressWarnings("unchecked") final V value = (V) values.get(feature);
 		return value;
 	}
 
 	@Override
 	public Object get(final int featureID)
 	{
-		return findFeatureById(featureID).map(this::get).orElseThrow(() ->
-			new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name()));
+		return findFeatureById(featureID).map(this::get)
+										 .orElseThrow(() -> new IllegalArgumentException("Unknown featureId " +
+																						 featureID +
+																						 " for group " +
+																						 group.name()));
 	}
 
 	@Override
@@ -106,8 +98,8 @@ public final class DynamicFeaturedObject implements Model
 	@Override
 	public void set(final int featureID, final Object object)
 	{
-		final var feature = findFeatureById(featureID).orElseThrow(() ->
-			new IllegalArgumentException("Unknown featureId " + featureID + " for group " + group.name()));
+		final var feature = findFeatureById(featureID).orElseThrow(() -> new IllegalArgumentException(
+				"Unknown featureId " + featureID + " for group " + group.name()));
 		set(feature, object);
 	}
 
@@ -128,19 +120,8 @@ public final class DynamicFeaturedObject implements Model
 	@Override
 	public IModelNotifier.Impl<? extends Features<?>> notifier()
 	{
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		final IModelNotifier.Impl<? extends Features<?>> typed = (IModelNotifier.Impl) NOOP_NOTIFIER;
+		@SuppressWarnings({"rawtypes", "unchecked"}) final IModelNotifier.Impl<? extends Features<?>> typed = (IModelNotifier.Impl) NOOP_NOTIFIER;
 		return typed;
-	}
-
-	@Override
-	public void listenStruture(final Consumer<Notification> listener)
-	{
-	}
-
-	@Override
-	public void sulkStructure(final Consumer<Notification> listener)
-	{
 	}
 
 	@Override
@@ -215,8 +196,7 @@ public final class DynamicFeaturedObject implements Model
 		if (value == null) return List.of();
 		if (value instanceof List<?> list)
 		{
-			@SuppressWarnings("unchecked")
-			final var typed = (List<String>) list;
+			@SuppressWarnings("unchecked") final var typed = (List<String>) list;
 			return typed;
 		}
 		throw new IllegalStateException("Expected List value for 'imports' on group '" +
@@ -235,8 +215,7 @@ public final class DynamicFeaturedObject implements Model
 		if (value == null) return List.of();
 		if (value instanceof List<?> list)
 		{
-			@SuppressWarnings("unchecked")
-			final var typed = (List<String>) list;
+			@SuppressWarnings("unchecked") final var typed = (List<String>) list;
 			return typed;
 		}
 		throw new IllegalStateException("Expected List value for 'metamodels' on group '" +
@@ -254,8 +233,8 @@ public final class DynamicFeaturedObject implements Model
 
 		if (many)
 		{
-			@SuppressWarnings("unchecked")
-			final var list = (List<LMObject>) values.computeIfAbsent(relation, ignored -> new ArrayList<>());
+			@SuppressWarnings("unchecked") final var list = (List<LMObject>) values.computeIfAbsent(relation,
+																									ignored -> new ArrayList<>());
 			if (!list.contains(child))
 			{
 				list.add(child);
@@ -334,6 +313,26 @@ public final class DynamicFeaturedObject implements Model
 
 		@Override
 		public void sulk(final Consumer listener, final int... featureIDs)
+		{
+		}
+
+		@Override
+		public void listen(final IModelListener listener, final Feature feature)
+		{
+		}
+
+		@Override
+		public void listen(final IModelListener listener, final Collection collection)
+		{
+		}
+
+		@Override
+		public void sulk(final IModelListener listener, final Feature feature)
+		{
+		}
+
+		@Override
+		public void sulk(final IModelListener listener, final Collection collection)
 		{
 		}
 

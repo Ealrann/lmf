@@ -14,7 +14,6 @@ import org.logoce.lmf.model.notification.util.NotificationUnifier;
 import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -135,21 +134,8 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 		}
 	}
 
-	@Override
-	public final void listenStruture(final Consumer<Notification> listener)
-	{
-		notifier().listenStructure(listener);
-	}
-
-	@Override
-	public final void sulkStructure(final Consumer<Notification> listener)
-	{
-		notifier().sulkStructure(listener);
-	}
-
 	private static final String CANNOT_FIND_ADAPTER = "Cannot find adapter [%s] for class [%s]";
 	private static final String CANNOT_FIND_IDENTIFIED_ADAPTER = "Cannot find adapter [%s] (id = %s) for class [%s]";
-
 
 	protected final void eNotify(final Notification notification)
 	{
