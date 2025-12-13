@@ -2,9 +2,9 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Feature;
@@ -17,7 +17,7 @@ import org.logoce.lmf.model.lang.Operation;
 
 public final class GroupImpl<T extends LMObject> extends FeaturedObject<Group.Features<?>> implements Group<T> {
   private static final int FEATURE_COUNT = 7;
-  private final ModelNotifier<Group.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Group.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final boolean concrete;
   private final List<Include<?>> includes;

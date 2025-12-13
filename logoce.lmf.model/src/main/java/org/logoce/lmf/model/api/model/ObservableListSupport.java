@@ -2,8 +2,6 @@ package org.logoce.lmf.model.api.model;
 
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.notification.impl.RelationNotificationBuilder;
-import org.logoce.lmf.model.notification.impl.SetNotification;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -35,27 +33,7 @@ final class ObservableListSupport
 		{
 			if (elements.isEmpty()) return;
 
-			final Notification notification;
-
-			if (!relation)
-			{
-				Object newValue = null;
-				Object oldValue = null;
-
-				switch (eventType)
-				{
-					case ADD, ADD_MANY -> newValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
-					case REMOVE, REMOVE_MANY ->
-							oldValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
-					default ->
-					{
-						return;
-					}
-				}
-
-				notification = new SetNotification((LMObject) owner, containment, featureId, newValue, oldValue);
-			}
-			else
+			if (relation)
 			{
 				@SuppressWarnings("unchecked") final var children = (List<? extends LMObject>) elements;
 
@@ -71,30 +49,46 @@ final class ObservableListSupport
 						owner.setContainer(children, featureId);
 					}
 				}
-
-				notification = switch (eventType)
-				{
-					case ADD -> RelationNotificationBuilder.insert((LMObject) owner,
-																   featureId,
-																   containment,
-																   true,
-																   children.getFirst());
-					case ADD_MANY ->
-							RelationNotificationBuilder.insert((LMObject) owner, featureId, containment, children);
-					case REMOVE -> RelationNotificationBuilder.remove((LMObject) owner,
-																	  featureId,
-																	  containment,
-																	  true,
-																	  children.getFirst());
-					case REMOVE_MANY ->
-							RelationNotificationBuilder.remove((LMObject) owner, featureId, containment, children);
-					default -> null;
-				};
-
-				if (notification == null) return;
 			}
 
-			owner.eNotify(notification);
+			Object newValue = null;
+			Object oldValue = null;
+			if (!relation)
+			{
+				switch (eventType)
+				{
+					case ADD, ADD_MANY -> newValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
+					case REMOVE, REMOVE_MANY ->
+							oldValue = elements.size() == 1 ? elements.getFirst() : List.copyOf(elements);
+					default ->
+					{
+						return;
+					}
+				}
+			}
+			else
+			{
+				@SuppressWarnings("unchecked") final var children = (List<? extends LMObject>) elements;
+				switch (eventType)
+				{
+					case ADD -> newValue = children.getFirst();
+					case ADD_MANY -> newValue = children;
+					case REMOVE -> oldValue = children.getFirst();
+					case REMOVE_MANY ->
+					{
+						oldValue = children;
+						newValue = List.of();
+					}
+					default ->
+					{
+						return;
+					}
+				}
+			}
+
+			if (containment) owner.beforeContainmentNotify(eventType, oldValue, newValue);
+			owner.notifier().notify(featureId, containment, true, eventType, oldValue, newValue);
+			if (containment) owner.afterContainmentNotify(eventType, oldValue, newValue);
 		}
 	}
 }

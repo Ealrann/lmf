@@ -2,9 +2,9 @@ package org.logoce.lmf.model.functional;
 
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
@@ -13,7 +13,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.lang.builder.AttributeBuilder;
 import org.logoce.lmf.model.lang.builder.RelationBuilder;
-import org.logoce.lmf.model.notification.impl.SetNotification;
 import org.logoce.lmf.model.notification.listener.Listener;
 
 import java.util.ArrayList;
@@ -128,7 +127,9 @@ public final class TypedListenerNotificationTest
 														  .build();
 
 		private static final int FEATURE_COUNT = 3;
-		private final ModelNotifier<LMObject.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+		private final ModelNotifier<LMObject.Features<?>> notifier = new ModelNotifier<>(this,
+																						 FEATURE_COUNT,
+																						 this::featureIndex);
 
 		private String value;
 		private final List<String> values = newObservableList(VALUES_ID, false, false);
@@ -168,7 +169,7 @@ public final class TypedListenerNotificationTest
 		{
 			final var oldValue = value;
 			value = newValue;
-			eNotify(new SetNotification(this, false, VALUE_ID, newValue, oldValue));
+			notifier.notify(VALUE_ID, false, false, oldValue, newValue);
 		}
 
 		List<String> values()

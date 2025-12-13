@@ -16,12 +16,12 @@ import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.OperationUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.model.api.model.FeaturedObject;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Operation;
 import org.logoce.lmf.model.lang.OperationParameter;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -176,7 +176,7 @@ public final class ImplementationGenerator
 	{
 		final var notifierType = TypeParameter.of(ClassName.get(ModelNotifier.class), featuresType);
 		final var notifierField = FieldSpec.builder(notifierType.parametrized(), "notifier", Modifier.PRIVATE, Modifier.FINAL)
-										   .initializer("new $T<>(FEATURE_COUNT, this::featureIndex)",
+										   .initializer("new $T<>(this, FEATURE_COUNT, this::featureIndex)",
 														ClassName.get(ModelNotifier.class))
 										   .build();
 		classBuilder.addField(notifierField);

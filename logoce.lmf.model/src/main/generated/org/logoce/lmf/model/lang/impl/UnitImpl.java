@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Group;
@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.Unit;
 
 public final class UnitImpl<T> extends FeaturedObject<Unit.Features<?>> implements Unit<T> {
   private static final int FEATURE_COUNT = 5;
-  private final ModelNotifier<Unit.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Unit.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final String matcher;
   private final String defaultValue;

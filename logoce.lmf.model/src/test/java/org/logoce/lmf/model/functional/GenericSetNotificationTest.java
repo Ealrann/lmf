@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.BuilderSupplier;
-import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.api.model.ModelNotifier;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Feature;
 import org.logoce.lmf.model.lang.Group;
@@ -53,24 +53,6 @@ public final class GenericSetNotificationTest
 		assertSame("a", notification.oldValue(), "Old value should be the previous value");
 	}
 
-	private record TestNotification(LMObject notifier,
-									int featureId,
-									Object newValue,
-									Object oldValue) implements Notification
-	{
-		@Override
-		public boolean isContainment()
-		{
-			return false;
-		}
-
-		@Override
-		public EventType type()
-		{
-			return EventType.SET;
-		}
-	}
-
 	private static final class DummyObject extends FeaturedObject<LMObject.Features<?>> implements LMObject
 	{
 		static final int VALUE_FEATURE_ID = -42;
@@ -86,7 +68,8 @@ public final class GenericSetNotificationTest
 														  .build();
 
 		private static final int FEATURE_COUNT = 1;
-		private final ModelNotifier<LMObject.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT,
+		private final ModelNotifier<LMObject.Features<?>> notifier = new ModelNotifier<>(this,
+																						 FEATURE_COUNT,
 																						 this::featureIndex);
 		private String value;
 
@@ -117,7 +100,7 @@ public final class GenericSetNotificationTest
 		{
 			final var oldValue = this.value;
 			this.value = newValue;
-			eNotify(new TestNotification(this, VALUE_FEATURE_ID, newValue, oldValue));
+			notifier.notify(VALUE_FEATURE_ID, false, false, oldValue, newValue);
 		}
 
 		@Override

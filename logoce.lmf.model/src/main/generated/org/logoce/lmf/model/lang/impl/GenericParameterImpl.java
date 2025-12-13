@@ -2,9 +2,9 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
 import java.util.function.Supplier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.BoundType;
@@ -15,7 +15,7 @@ import org.logoce.lmf.model.lang.Type;
 
 public final class GenericParameterImpl extends FeaturedObject<GenericParameter.Features<?>> implements GenericParameter {
   private static final int FEATURE_COUNT = 4;
-  private final ModelNotifier<GenericParameter.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<GenericParameter.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final boolean wildcard;
   private final BoundType wildcardBoundType;
   private final Supplier<Type<?>> type;

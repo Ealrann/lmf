@@ -2,9 +2,9 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
 import java.util.function.Supplier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.GenericParameter;
@@ -16,7 +16,7 @@ import org.logoce.lmf.model.lang.Type;
 
 public final class OperationImpl extends FeaturedObject<Operation.Features<?>> implements Operation {
   private static final int FEATURE_COUNT = 5;
-  private final ModelNotifier<Operation.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Operation.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final String content;
   private final Supplier<Type<?>> returnType;

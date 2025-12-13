@@ -10,7 +10,6 @@ import org.logoce.lmf.model.lang.LMObject;
 import org.logoce.lmf.model.lang.Named;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.notification.list.ObservableList;
-import org.logoce.lmf.model.notification.util.NotificationUnifier;
 import org.logoce.lmf.model.util.ModelUtil;
 
 import java.util.List;
@@ -137,12 +136,82 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 	private static final String CANNOT_FIND_ADAPTER = "Cannot find adapter [%s] for class [%s]";
 	private static final String CANNOT_FIND_IDENTIFIED_ADAPTER = "Cannot find adapter [%s] (id = %s) for class [%s]";
 
-	protected final void eNotify(final Notification notification)
+	protected final void beforeContainmentNotify(final Notification.EventType eventType,
+												 final Object oldValue,
+												 final Object newValue)
 	{
-		final boolean isContainment = notification.isContainment();
-		if (isContainment) NotificationUnifier.unifyAdded(notification, this::setupChild);
-		notifier().notify(notification);
-		if (isContainment) NotificationUnifier.unifyRemoved(notification, this::disposeChild);
+		switch (eventType)
+		{
+			case SET, UNSET ->
+			{
+				if (newValue != oldValue && newValue instanceof LMObject child)
+				{
+					setupChild(child);
+				}
+			}
+			case ADD ->
+			{
+				if (newValue instanceof LMObject child)
+				{
+					setupChild(child);
+				}
+			}
+			case ADD_MANY ->
+			{
+				if (newValue instanceof List<?> newList)
+				{
+					for (final var element : newList)
+					{
+						if (element instanceof LMObject child)
+						{
+							setupChild(child);
+						}
+					}
+				}
+			}
+			default ->
+			{
+			}
+		}
+	}
+
+	protected final void afterContainmentNotify(final Notification.EventType eventType,
+												final Object oldValue,
+												final Object newValue)
+	{
+		switch (eventType)
+		{
+			case SET, UNSET ->
+			{
+				if (newValue != oldValue && oldValue instanceof LMObject child)
+				{
+					disposeChild(child);
+				}
+			}
+			case REMOVE ->
+			{
+				if (oldValue instanceof LMObject child)
+				{
+					disposeChild(child);
+				}
+			}
+			case REMOVE_MANY ->
+			{
+				if (oldValue instanceof List<?> oldList)
+				{
+					for (final var element : oldList)
+					{
+						if (element instanceof LMObject child)
+						{
+							disposeChild(child);
+						}
+					}
+				}
+			}
+			default ->
+			{
+			}
+		}
 	}
 
 	private void setupChild(IFeaturedObject notifier)

@@ -15,8 +15,11 @@ import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
+import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.model.lang.Unit;
 import org.logoce.lmf.model.lang.Relation;
 import org.logoce.lmf.model.util.ModelUtil;
 
@@ -27,8 +30,7 @@ import java.util.Optional;
 public final class ImplementationFeatureUtil
 {
 	private static final Modifier[] MODIFIERS = {Modifier.PUBLIC};
-	private static final ClassName SET_NOTIFICATION_TYPE = ClassName.get(
-			"org.logoce.lmf.model.notification.impl", "SetNotification");
+	private static final ClassName NOTIFICATION_TYPE = ClassName.get(Notification.class);
 	private static final ConstructorBuilder CONSTRUCTOR_BUILDER = ImplementationFeatureUtil.parameterBuilder();
 	public static final LMGroupMethodBuilder LM_GROUP_METHOD_BUILDER = new LMGroupMethodBuilder();
 	public static final SetMapMethodBuilder SETTERMAP_METHOD_BUILDER = new SetMapMethodBuilder();
@@ -135,35 +137,81 @@ public final class ImplementationFeatureUtil
 		final var featureIdExpr = CodeBlock.of("$T.FeatureIDs.$N", groupType, constantName);
 
 		final var oldValue = CodeBlock.of("final var oldValue = this.$N", feature.name());
-		final var containment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
-		final var containmentFlag = containment ? CodeBlock.of("true") : CodeBlock.of("false");
-		if (containment)
+		final boolean isRelation = feature instanceof Relation<?, ?, ?, ?>;
+		final boolean isContainment = feature instanceof Relation<?, ?, ?, ?> relation && relation.contains();
+
+		final var statements = new java.util.ArrayList<CodeBlock>(7);
+		statements.add(oldValue);
+
+		if (isRelation)
 		{
-			final var setContainer = containmentSetStatement(featureIdExpr, paramName);
-			return List.of(oldValue,
-						   assignment,
-						   setContainer,
-						   CodeBlock.of("eNotify(new $T(this, $L, $L, $N, oldValue))",
-										SET_NOTIFICATION_TYPE,
-										containmentFlag,
-										featureIdExpr,
-										paramName));
+			statements.add(CodeBlock.of("final var eventType = $N == null ? $T.EventType.UNSET : $T.EventType.SET",
+										paramName,
+										NOTIFICATION_TYPE,
+										NOTIFICATION_TYPE));
 		}
-		else
+
+		statements.add(assignment);
+
+		if (isContainment)
 		{
-			return List.of(oldValue,
-						   assignment,
-						   CodeBlock.of("eNotify(new $T(this, $L, $L, $N, oldValue))",
-										SET_NOTIFICATION_TYPE,
-										containmentFlag,
-										featureIdExpr,
-										paramName));
+			statements.add(containmentSetStatement(featureIdExpr, paramName));
+			statements.add(CodeBlock.of("beforeContainmentNotify(eventType, oldValue, $N)", paramName));
 		}
+
+		statements.add(notifyStatement(feature, featureIdExpr, paramName, isRelation, isContainment));
+
+		if (isContainment)
+		{
+			statements.add(CodeBlock.of("afterContainmentNotify(eventType, oldValue, $N)", paramName));
+		}
+
+		return List.copyOf(statements);
 	}
 
 	private static CodeBlock containmentSetStatement(final CodeBlock featureExpr, final String paramName)
 	{
 		return CodeBlock.of("setContainer($N, $L)", paramName, featureExpr);
+	}
+
+	private static CodeBlock notifyStatement(final org.logoce.lmf.model.lang.Feature<?, ?, ?, ?> feature,
+											 final CodeBlock featureIdExpr,
+											 final String paramName,
+											 final boolean isRelation,
+											 final boolean isContainment)
+	{
+		if (feature instanceof Attribute<?, ?, ?, ?> attribute && attribute.datatype() instanceof Unit<?> unit)
+		{
+			return switch (unit.primitive())
+			{
+				case Boolean -> CodeBlock.of("notifier.notifyBoolean($L, false, false, oldValue, $N)",
+											 featureIdExpr,
+											 paramName);
+				case Int -> CodeBlock.of("notifier.notifyInt($L, false, false, oldValue, $N)", featureIdExpr, paramName);
+				case Long -> CodeBlock.of("notifier.notifyLong($L, false, false, oldValue, $N)",
+										  featureIdExpr,
+										  paramName);
+				case Float -> CodeBlock.of("notifier.notifyFloat($L, false, false, oldValue, $N)",
+										   featureIdExpr,
+										   paramName);
+				case Double -> CodeBlock.of("notifier.notifyDouble($L, false, false, oldValue, $N)",
+											featureIdExpr,
+											paramName);
+				case String -> CodeBlock.of("notifier.notify($L, false, false, oldValue, $N)",
+											featureIdExpr,
+											paramName);
+			};
+		}
+
+		if (isRelation)
+		{
+			return CodeBlock.of("notifier.notify($L, $L, false, eventType, oldValue, $N)",
+								featureIdExpr,
+								isContainment,
+								paramName);
+		}
+
+		return CodeBlock.of("notifier.notify($L, false, false, oldValue, $N)", featureIdExpr, paramName);
 	}
 
 	private static TypeName fieldFeatureType(FeatureResolution resolution, Group<?> owner)

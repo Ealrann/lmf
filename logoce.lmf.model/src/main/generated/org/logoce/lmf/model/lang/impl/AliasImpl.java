@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Alias;
@@ -11,7 +11,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class AliasImpl extends FeaturedObject<Alias.Features<?>> implements Alias {
   private static final int FEATURE_COUNT = 2;
-  private final ModelNotifier<Alias.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Alias.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final String value;
 

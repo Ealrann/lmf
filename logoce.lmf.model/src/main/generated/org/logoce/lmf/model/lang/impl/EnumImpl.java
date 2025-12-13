@@ -1,9 +1,9 @@
 package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Enum;
@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implements Enum<T> {
   private static final int FEATURE_COUNT = 2;
-  private final ModelNotifier<Enum.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Enum.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final List<String> literals;
 

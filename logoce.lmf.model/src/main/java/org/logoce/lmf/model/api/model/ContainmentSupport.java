@@ -1,8 +1,7 @@
 package org.logoce.lmf.model.api.model;
 
+import org.logoce.lmf.model.api.notification.Notification;
 import org.logoce.lmf.model.lang.LMObject;
-import org.logoce.lmf.model.notification.impl.ContainerChange;
-import org.logoce.lmf.model.notification.impl.RelationNotificationBuilder;
 
 import java.util.List;
 
@@ -44,20 +43,17 @@ final class ContainmentSupport
 
 		if (oldContainer != null && oldFeatureId != -1 && oldContainer.lmGroup() != null)
 		{
-			final var oldParentNotification = RelationNotificationBuilder.remove(oldContainer,
-																				oldFeatureId,
-																				true,
-																				true,
-																				child);
-			((FeaturedObject<?>) oldContainer).eNotify(oldParentNotification);
+			final var oldParent = (FeaturedObject<?>) oldContainer;
+			oldParent.beforeContainmentNotify(Notification.EventType.REMOVE, child, null);
+			oldParent.notifier().notify(oldFeatureId, true, true, Notification.EventType.REMOVE, child, null);
+			oldParent.afterContainmentNotify(Notification.EventType.REMOVE, child, null);
 		}
 
-		final var childNotification = new ContainerChange(child,
-														 oldFeatureId,
-														 newFeatureId,
-														 newContainer,
-														 oldContainer);
-		featuredChild.eNotify(childNotification);
+		featuredChild.notifier().notify(newFeatureId,
+										true,
+										false,
+										Notification.EventType.CONTAINER,
+										oldContainer,
+										newContainer);
 	}
 }
-

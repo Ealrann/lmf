@@ -57,8 +57,53 @@ public interface IModelNotifier<Type extends IFeatures<?>>
 
 	interface Impl<Type extends IFeatures<?>> extends IModelNotifier<Type>
 	{
-		void notify(Notification notification);
 		boolean eDeliver();
 		void eDeliver(boolean deliver);
+
+		void notify(int featureId,
+					boolean isContainment,
+					boolean isMany,
+					Notification.EventType eventType,
+					Object oldValue,
+					Object newValue);
+
+		default void notify(final int featureId,
+							final boolean isContainment,
+							final boolean isMany,
+							final Object oldValue,
+							final Object newValue)
+		{
+			notify(featureId, isContainment, isMany, Notification.EventType.SET, oldValue, newValue);
+		}
+
+		void notifyInt(int featureId,
+					   boolean isContainment,
+					   boolean isMany,
+					   int oldValue,
+					   int newValue);
+
+		void notifyLong(int featureId,
+						boolean isContainment,
+						boolean isMany,
+						long oldValue,
+						long newValue);
+
+		void notifyBoolean(int featureId,
+						   boolean isContainment,
+						   boolean isMany,
+						   boolean oldValue,
+						   boolean newValue);
+
+		void notifyFloat(int featureId,
+						 boolean isContainment,
+						 boolean isMany,
+						 float oldValue,
+						 float newValue);
+
+		void notifyDouble(int featureId,
+						  boolean isContainment,
+						  boolean isMany,
+						  double oldValue,
+						  double newValue);
 	}
 }

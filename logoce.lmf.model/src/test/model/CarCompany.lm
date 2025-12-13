@@ -8,6 +8,8 @@
 		(includes group=@Entity)
 		(-att name=brand datatype=@Brand [1..1] defaultValue="Peugeot")
 		(+contains name=passengers @Person [0..*])
+		(+att age datatype=#LMCore@int)
+        (+att weight datatype=#LMCore@float)
 	)
 
 	(Definition CarParc

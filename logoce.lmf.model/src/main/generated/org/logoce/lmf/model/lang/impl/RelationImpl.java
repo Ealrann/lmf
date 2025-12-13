@@ -2,9 +2,9 @@ package org.logoce.lmf.model.lang.impl;
 
 import java.util.List;
 import java.util.function.Supplier;
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Concept;
@@ -17,7 +17,7 @@ import org.logoce.lmf.model.lang.Relation;
 
 public final class RelationImpl<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> extends FeaturedObject<Relation.Features<?>> implements Relation<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   private static final int FEATURE_COUNT = 9;
-  private final ModelNotifier<Relation.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Relation.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final boolean immutable;
   private final int id;

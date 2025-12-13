@@ -2,8 +2,8 @@ package org.logoce.lmf.model.util;
 
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.IAdapterManager;
-import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.api.notification.Notification;
+import org.logoce.lmf.model.api.model.IModelNotifier;
 import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.model.notification.listener.IModelListener;
 
@@ -290,11 +290,6 @@ public final class DynamicFeaturedObject implements Model
 		private boolean deliver = true;
 
 		@Override
-		public void notify(final Notification notification)
-		{
-		}
-
-		@Override
 		public boolean eDeliver()
 		{
 			return deliver;
@@ -304,6 +299,61 @@ public final class DynamicFeaturedObject implements Model
 		public void eDeliver(final boolean deliver)
 		{
 			this.deliver = deliver;
+		}
+
+		@Override
+		public void notify(final int featureId,
+						   final boolean isContainment,
+						   final boolean isMany,
+						   final Notification.EventType eventType,
+						   final Object oldValue,
+						   final Object newValue)
+		{
+		}
+
+		@Override
+		public void notifyInt(final int featureId,
+							  final boolean isContainment,
+							  final boolean isMany,
+							  final int oldValue,
+							  final int newValue)
+		{
+		}
+
+		@Override
+		public void notifyLong(final int featureId,
+							   final boolean isContainment,
+							   final boolean isMany,
+							   final long oldValue,
+							   final long newValue)
+		{
+		}
+
+		@Override
+		public void notifyBoolean(final int featureId,
+								  final boolean isContainment,
+								  final boolean isMany,
+								  final boolean oldValue,
+								  final boolean newValue)
+		{
+		}
+
+		@Override
+		public void notifyFloat(final int featureId,
+								final boolean isContainment,
+								final boolean isMany,
+								final float oldValue,
+								final float newValue)
+		{
+		}
+
+		@Override
+		public void notifyDouble(final int featureId,
+								 final boolean isContainment,
+								 final boolean isMany,
+								 final double oldValue,
+								 final double newValue)
+		{
 		}
 
 		@Override

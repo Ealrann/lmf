@@ -1,8 +1,8 @@
 package org.logoce.lmf.model.lang.impl;
 
+import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.api.model.FeaturedObject;
 import org.logoce.lmf.model.api.model.IModelNotifier;
-import org.logoce.lmf.model.api.model.ModelNotifier;
 import org.logoce.lmf.model.feature.FeatureGetter;
 import org.logoce.lmf.model.feature.FeatureSetter;
 import org.logoce.lmf.model.lang.Generic;
@@ -12,7 +12,7 @@ import org.logoce.lmf.model.lang.LMCoreModelDefinition;
 
 public final class GenericImpl<T> extends FeaturedObject<Generic.Features<?>> implements Generic<T> {
   private static final int FEATURE_COUNT = 2;
-  private final ModelNotifier<Generic.Features<?>> notifier = new ModelNotifier<>(FEATURE_COUNT, this::featureIndex);
+  private final ModelNotifier<Generic.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final GenericExtension extension;
 
