@@ -1,0 +1,82 @@
+package org.logoce.lmf.core.lang.impl;
+
+import org.logoce.lmf.core.api.model.ModelNotifier;
+import org.logoce.lmf.core.api.model.FeaturedObject;
+import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.feature.FeatureGetter;
+import org.logoce.lmf.core.feature.FeatureSetter;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.JavaWrapper;
+import org.logoce.lmf.core.lang.LMCoreModelDefinition;
+import org.logoce.lmf.core.lang.Serializer;
+
+public final class JavaWrapperImpl<T> extends FeaturedObject<JavaWrapper.Features<?>> implements JavaWrapper<T> {
+  private static final int FEATURE_COUNT = 3;
+  private final ModelNotifier<JavaWrapper.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
+  private final String name;
+  private final String qualifiedClassName;
+  private final Serializer serializer;
+
+  public JavaWrapperImpl(final String name, final String qualifiedClassName,
+      final Serializer serializer) {
+    this.name = name;
+    this.qualifiedClassName = qualifiedClassName;
+    this.serializer = serializer;
+    setContainer(serializer, JavaWrapper.FeatureIDs.SERIALIZER);
+    notifier.eDeliver(true);
+  }
+
+  @Override
+  public IModelNotifier.Impl<JavaWrapper.Features<?>> notifier() {
+    return notifier;
+  }
+
+  @Override
+  public String name() {
+    return name;
+  }
+
+  @Override
+  public String qualifiedClassName() {
+    return qualifiedClassName;
+  }
+
+  @Override
+  public Serializer serializer() {
+    return serializer;
+  }
+
+  @Override
+  public Group<JavaWrapper<?>> lmGroup() {
+    return LMCoreModelDefinition.Groups.JAVA_WRAPPER;
+  }
+
+  @Override
+  protected FeatureSetter<JavaWrapper<?>> setterMap() {
+    return Inserters.SET_MAP;
+  }
+
+  @Override
+  protected FeatureGetter<JavaWrapper<?>> getterMap() {
+    return Inserters.GET_MAP;
+  }
+
+  public static int featureIndexStatic(int featureId) {
+    return switch (featureId) {
+      case JavaWrapper.FeatureIDs.NAME -> 0;
+      case JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME -> 1;
+      case JavaWrapper.FeatureIDs.SERIALIZER -> 2;
+      default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+    };
+  }
+
+  @Override
+  public int featureIndex(int featureId) {
+    return featureIndexStatic(featureId);
+  }
+
+  private static final class Inserters {
+    private static final FeatureGetter<JavaWrapper<?>> GET_MAP = new FeatureGetter.Builder<JavaWrapper<?>>(FEATURE_COUNT, JavaWrapperImpl::featureIndexStatic).add(JavaWrapper.FeatureIDs.NAME, JavaWrapper::name).add(JavaWrapper.FeatureIDs.QUALIFIED_CLASS_NAME, JavaWrapper::qualifiedClassName).add(JavaWrapper.FeatureIDs.SERIALIZER, JavaWrapper::serializer).build();
+    private static final FeatureSetter<JavaWrapper<?>> SET_MAP = new FeatureSetter.Builder<JavaWrapper<?>>(FEATURE_COUNT, JavaWrapperImpl::featureIndexStatic).build();
+  }
+}

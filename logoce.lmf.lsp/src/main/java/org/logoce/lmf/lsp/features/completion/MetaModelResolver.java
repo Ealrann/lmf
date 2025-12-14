@@ -1,13 +1,13 @@
 package org.logoce.lmf.lsp.features.completion;
 
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.tree.Tree;
+import org.logoce.lmf.core.lang.LMCoreModelPackage;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Model;
+import org.logoce.lmf.core.loader.parsing.ModelHeaderUtil;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.util.tree.Tree;
 
 import java.util.ArrayList;
 import java.util.List;

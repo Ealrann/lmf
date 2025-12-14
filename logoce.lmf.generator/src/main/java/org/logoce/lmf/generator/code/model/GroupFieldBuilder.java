@@ -5,6 +5,10 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
+
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.Include;
+import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.generator.adapter.GroupBuilderClassType;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
@@ -13,11 +17,10 @@ import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
-import org.logoce.lmf.model.api.model.BuilderSupplier;
-import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.builder.GroupBuilder;
-import org.logoce.lmf.model.lang.builder.IncludeBuilder;
-import org.logoce.lmf.model.util.ModelUtil;
+import org.logoce.lmf.core.api.model.BuilderSupplier;
+import org.logoce.lmf.core.lang.builder.GroupBuilder;
+import org.logoce.lmf.core.lang.builder.IncludeBuilder;
+import org.logoce.lmf.core.util.ModelUtil;
 
 public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {

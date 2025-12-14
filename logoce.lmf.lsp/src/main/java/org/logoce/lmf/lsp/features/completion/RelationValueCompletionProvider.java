@@ -5,12 +5,14 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.logoce.lmf.core.loader.linking.LinkNode;
+import org.logoce.lmf.core.resource.parsing.PNode;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.loader.linking.feature.reference.RelationReferenceCompletions;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.core.lang.Model;
+import org.logoce.lmf.core.lang.Relation;
+import org.logoce.lmf.core.loader.linking.feature.reference.RelationReferenceCompletions;
+import org.logoce.lmf.core.util.ModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ final class RelationValueCompletionProvider
 
 		final SemanticSnapshot semantic = context.semantic();
 		final Model owningModel = semantic != null ? semantic.model() : null;
-		final List<? extends org.logoce.lmf.model.loader.linking.LinkNode<?, org.logoce.lmf.model.resource.parsing.PNode>> linkTrees =
+		final List<? extends LinkNode<?, PNode>> linkTrees =
 			semantic != null ? semantic.linkTrees() : List.of();
 		final ModelRegistry registry = context.server().workspaceIndex().modelRegistry();
 		final var candidates = RelationReferenceCompletions.collectRelationCandidates(

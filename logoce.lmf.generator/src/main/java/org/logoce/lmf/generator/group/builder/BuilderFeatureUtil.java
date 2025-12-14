@@ -16,9 +16,9 @@ import org.logoce.lmf.generator.code.type.RelationManyListMethodBuilder;
 import org.logoce.lmf.generator.code.type.AttributeManyListMethodBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.DefaultValueUtil;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.Relation;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

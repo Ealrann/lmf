@@ -3,13 +3,13 @@ package org.logoce.lmf.lsp.features.completion;
 import org.eclipse.lsp4j.Position;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.linking.LmModelLinker;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.ModelRegistry;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,7 +26,7 @@ final class HeaderInfoMetaModelResolutionTest
 	void headerInfoUsesActiveMetaModelForM1Root() throws Exception
 	{
 		// 1) Build the CarCompany meta-model from its M2 definition.
-		final var carCompanyPath = Path.of("..", "logoce.lmf.model", "src", "test", "model", "CarCompany.lm");
+		final var carCompanyPath = Path.of("..", "logoce.lmf.core", "src", "test", "model", "CarCompany.lm");
 		final var carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 
 		final var carDiagnostics = new ArrayList<LmDiagnostic>();
@@ -40,7 +40,7 @@ final class HeaderInfoMetaModelResolutionTest
 		final MetaModel carCompanyMetaModel = (MetaModel) carLinkResult.model();
 
 		// 2) Parse the Peugeot M1 model and build a SyntaxSnapshot for header inspection.
-		final var peugeotPath = Path.of("..", "logoce.lmf.model", "src", "test", "model", "Peugeot.lm");
+		final var peugeotPath = Path.of("..", "logoce.lmf.core", "src", "test", "model", "Peugeot.lm");
 		final var peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
 
 		final var peugeotDiagnostics = new ArrayList<LmDiagnostic>();
@@ -64,4 +64,3 @@ final class HeaderInfoMetaModelResolutionTest
 		assertEquals("CarCompany", headerGroup.name(), "Header group name should be 'CarCompany'");
 	}
 }
-

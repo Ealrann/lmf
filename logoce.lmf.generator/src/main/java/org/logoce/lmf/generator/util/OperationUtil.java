@@ -2,14 +2,14 @@ package org.logoce.lmf.generator.util;
 
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.GenericParameter;
-import org.logoce.lmf.model.lang.Include;
-import org.logoce.lmf.model.lang.Operation;
-import org.logoce.lmf.model.lang.OperationParameter;
-import org.logoce.lmf.model.lang.Type;
-import org.logoce.lmf.model.lang.Generic;
-import org.logoce.lmf.model.lang.BoundType;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.GenericParameter;
+import org.logoce.lmf.core.lang.Include;
+import org.logoce.lmf.core.lang.Operation;
+import org.logoce.lmf.core.lang.OperationParameter;
+import org.logoce.lmf.core.lang.Type;
+import org.logoce.lmf.core.lang.Generic;
+import org.logoce.lmf.core.lang.BoundType;
 
 import java.util.List;
 

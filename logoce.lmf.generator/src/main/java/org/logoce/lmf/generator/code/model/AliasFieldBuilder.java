@@ -4,8 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
-import org.logoce.lmf.model.lang.Alias;
-import org.logoce.lmf.model.lang.builder.AliasBuilder;
+import org.logoce.lmf.core.lang.Alias;
+import org.logoce.lmf.core.lang.builder.AliasBuilder;
 
 public final class AliasFieldBuilder implements DefinitionFieldBuilder<Alias>
 {

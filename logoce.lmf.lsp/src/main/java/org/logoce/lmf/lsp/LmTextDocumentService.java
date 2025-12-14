@@ -30,6 +30,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
+import org.logoce.lmf.core.util.TextPositions;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
 import org.logoce.lmf.lsp.state.LmDocumentState;
@@ -62,14 +63,16 @@ public final class LmTextDocumentService implements TextDocumentService
 		final URI uri = URI.create(doc.getUri());
 		final int version = doc.getVersion();
 		final String text = doc.getText();
+		final String effectiveText = text != null ? text : "";
 
-		LOG.debug("LMF LSP didOpen: uri={}, version={}, textLength={}", uri, version,
-				  text != null ? text.length() : 0);
+		LOG.info("LMF LSP didOpen: uri={}, version={}, textLength={}", uri, version,
+				 effectiveText.length());
 
 		server.worker().execute(() -> {
-			final var state = new LmDocumentState(uri, version, text);
+			final var state = new LmDocumentState(uri, version, effectiveText);
 			server.workspaceIndex().putDocument(state);
 			server.rebuildWorkspace();
+			server.refreshSemanticTokensIfSupported("didOpen");
 		});
 	}
 
@@ -87,80 +90,90 @@ public final class LmTextDocumentService implements TextDocumentService
 			return;
 		}
 
-		final var lastChange = changes.getLast();
-		final boolean hasRange = lastChange.getRange() != null;
-		final int textLength = lastChange.getText() != null ? lastChange.getText().length() : 0;
-
-		LOG.debug("LMF LSP didChange: uri={}, version={}, changeCount={}, lastChangeHasRange={}, lastChangeTextLength={}",
-				  uri, version, changes.size(), hasRange, textLength);
-
-		final String newText = lastChange.getText();
-		if (newText == null)
+		if (changes.size() > 1)
 		{
-			return;
+			LOG.info("LMF LSP didChange: uri={}, version={}, changeCount={} (applying sequentially)",
+					 uri, version, changes.size());
 		}
 
 		server.worker().execute(() -> {
 			final var index = server.workspaceIndex();
 			final var existing = index.getDocument(uri);
-			if (existing != null)
+			final var state = existing != null ? existing : new LmDocumentState(uri, version, "");
+			state.setVersion(version);
+
+			String updatedText = state.text();
+			if (updatedText == null)
 			{
-				existing.setVersion(version);
-				final var oldText = existing.text();
-				final String effectiveText;
-
-				if (hasRange && oldText != null)
-				{
-					final var range = lastChange.getRange();
-					final int startOffset =
-						org.logoce.lmf.model.util.TextPositions.offsetFor(
-							oldText,
-							range.getStart().getLine() + 1,
-							range.getStart().getCharacter() + 1);
-					final int endOffset =
-						org.logoce.lmf.model.util.TextPositions.offsetFor(
-							oldText,
-							range.getEnd().getLine() + 1,
-							range.getEnd().getCharacter() + 1);
-
-					if (startOffset >= 0 && endOffset >= startOffset &&
-						endOffset <= oldText.length())
-					{
-						final var sb = new StringBuilder();
-						sb.append(oldText, 0, startOffset);
-						sb.append(newText);
-						if (endOffset < oldText.length())
-						{
-							sb.append(oldText, endOffset, oldText.length());
-						}
-						effectiveText = sb.toString();
-					}
-					else
-					{
-						// Fallback: if offsets cannot be computed, treat change text as full document.
-						effectiveText = newText;
-					}
-				}
-				else
-				{
-					effectiveText = newText;
-				}
-
-				existing.setText(effectiveText);
+				updatedText = "";
 			}
-			else
+			for (final var change : changes)
 			{
-				final var state = new LmDocumentState(uri, version, newText);
+				updatedText = applyChange(uri, updatedText, change);
+			}
+
+			state.setText(updatedText);
+			if (existing == null)
+			{
 				index.putDocument(state);
 			}
+
 			server.rebuildWorkspace();
 		});
+	}
+
+	private static String applyChange(final URI uri,
+									  final String currentText,
+									  final TextDocumentContentChangeEvent change)
+	{
+		final String newText = change.getText();
+		if (newText == null)
+		{
+			return currentText;
+		}
+
+		final var range = change.getRange();
+		if (range == null)
+		{
+			return newText;
+		}
+
+		final int startOffset =
+			TextPositions.offsetFor(
+				currentText,
+				range.getStart().getLine() + 1,
+				range.getStart().getCharacter() + 1);
+		final int endOffset =
+			TextPositions.offsetFor(
+				currentText,
+				range.getEnd().getLine() + 1,
+				range.getEnd().getCharacter() + 1);
+
+		if (startOffset < 0 || endOffset < startOffset || endOffset > currentText.length())
+		{
+			LOG.warn("LMF LSP didChange: uri={} invalid range ({}:{})-({}:{}) for textLength={}, applying as full document",
+					 uri,
+					 range.getStart().getLine(), range.getStart().getCharacter(),
+					 range.getEnd().getLine(), range.getEnd().getCharacter(),
+					 currentText.length());
+			return newText;
+		}
+
+		final var sb = new StringBuilder();
+		sb.append(currentText, 0, startOffset);
+		sb.append(newText);
+		if (endOffset < currentText.length())
+		{
+			sb.append(currentText, endOffset, currentText.length());
+		}
+		return sb.toString();
 	}
 
 	@Override
 	public void didClose(final DidCloseTextDocumentParams params)
 	{
 		final URI uri = URI.create(params.getTextDocument().getUri());
+		LOG.info("LMF LSP didClose: uri={}", uri);
 		server.worker().execute(() -> server.workspaceIndex().removeDocument(uri));
 	}
 

@@ -1,0 +1,241 @@
+## 1. What IntelliJ’s LSP client currently does with semantic tokens
+
+From the official IntelliJ LSP docs:
+
+* Semantic highlighting is implemented via `textDocument/semanticTokens/full` and was added only in **2024.2.2**.([JetBrains Marketplace][1])
+* LSP support is actively evolving and many details are still being fixed across 2024.2–2025.3.([The JetBrains Blog][2])
+* Debugging LSP requires enabling `#com.intellij.platform.lsp` in “Help | Diagnostic Tools | Debug Log Settings…”.([JetBrains Marketplace][1])
+
+Release notes for various JetBrains IDEs mention multiple bugs specifically around semantic highlighting (disappearing, blinking, not respecting settings) and under **Core. LSP**: “LSP API: support semantic highlighting”.([ComponentSource][3])
+So semantic tokens support is new and clearly still a bit fragile on the client side.
+
+Important: JetBrains LSP **does not yet support** `workspace/semanticTokens/refresh` for all cases. Several Vue/LSP YouTrack entries show messages like “Semantic tokens refresh is not supported by the client”.([youtrack.jetbrains.com][4])
+So you cannot rely on server-initiated refresh to make IntelliJ re-request tokens.
+
+---
+
+## 2. A very similar real-world problem: server errors on `semanticTokens/full`
+
+The QML LS + Android Studio case (LSP4IJ, but on top of JetBrains IDEs) is close to your scenario:
+
+* After JetBrains 2024.2.1, syntax highlighting broke whenever there was an error in the file.
+* Logs showed:
+  `Received response 'textDocument/semanticTokens/full - (20)' ... Error: { "code": -32800, "message": "Cannot proceed: current QML document is invalid!" }`([GitHub][5])
+* I.e. the server returned an **error response** instead of (possibly partial/empty) tokens when the document was invalid.
+
+That confirms two things:
+
+1. JetBrains is actively using `textDocument/semanticTokens/full` for highlighting.
+2. If the server responds with an error instead of a valid `SemanticTokens` payload, the client can behave badly (here: highlighting “breaks on error”).
+
+Your description says you continue to compute semantic tokens even when parsing/linking fails, and regression tests show you correctly recompute them after error→fix. So you’re in a better place than that QML server — but the similarity (error period + weird client state) is a red flag.
+
+---
+
+## 3. How the LSP spec expects semantic tokens + refresh to work
+
+Relevant bits from the LSP 3.17 spec:
+
+* `textDocument/semanticTokens/full` (and variants) always returns a **valid list of tokens** whenever the client asks. It should not normally fail just because the file is syntactically invalid.
+* `workspace/semanticTokens/refresh` is **server → client**. Server uses it to say “something changed globally, please re-request tokens for all relevant documents.”([Microsoft GitHub][6])
+
+Because JetBrains doesn’t fully support `semanticTokens/refresh` yet, they instead appear to rely on their own logic (file open, edits, maybe caret moves) to decide *when* to issue `semanticTokens/full` requests. That logic is opaque and still in flux.
+
+---
+
+## 4. What your symptoms strongly suggest
+
+Your observations:
+
+1. For `LMCore.lm`:
+
+   * On first open: one `semanticTokensFull` call, tokens ok.
+   * Break header → many `analyzeDocument` calls, with model errors.
+   * Fix header → `analyzeDocument` runs, model valid again, **no new `semanticTokensFull`** call logged.
+   * Visual effect: header keyword color remains partially stale (last char uncolored / keyword fully uncolored).
+
+2. For other files like `Peugeot.lm`:
+
+   * You see repeated `semanticTokensFull` calls as expected.
+
+3. After full IDE restart:
+
+   * LSP server restarts.
+   * Open `.lm` editor shows no orange headers.
+   * Server logs show `analyzeDocument` running.
+   * Still **no `semanticTokensFull` request** for that file in the new session; other files do get them.
+
+Given the external information + your logs, the most plausible categories of issues are:
+
+### 4.1 Client-side bug / heuristic in JetBrains LSP
+
+Because semantic tokens support is quite new and has multiple known bugs in different IDEs, a JetBrains-side bug is very credible:
+
+* There is at least one issue “LSP: IndexOutOfBoundsException from decodeSemanticTokens()” in the Core. LSP subsystem, clearly about decoding the `data` array from servers.([youtrack.jetbrains.com][7])
+* Release notes show multiple problems where semantic highlighting either doesn’t refresh correctly or doesn’t respect user actions.([ComponentSource][3])
+
+It is quite plausible that:
+
+* For some document + token sequence, JetBrains hits an internal exception when decoding or applying semantic tokens.
+* After that exception, their LSP layer disables semantic tokens for that *specific file / session* (or doesn’t schedule further requests).
+* On the next restart, some state (e.g. cached “no semantic provider here” or some other guard) prevents re-issuing the request for that same file until a particular trigger happens.
+
+The fact that **other `.lm` files keep working** strongly suggests a per-file or per-URI cache/guard on the IntelliJ side, not a general configuration error.
+
+### 4.2 Semantic token data shape / invariants
+
+Even if your Rust tests validate internal logic, the important part is: *does the data you actually send over JSON-RPC always satisfy the spec invariants?*
+
+If at any point — especially during an “invalid” parse state — your server sends a `SemanticTokens.data` array that violates the spec, IntelliJ’s `decodeSemanticTokens()` could throw:
+
+* Token line/character deltas must not go negative.
+* Tokens must be ordered by position.
+* Ranges must be within document bounds.
+* Your legend indices must be within the arrays of token types/modifiers in `semanticTokensProvider.legend`.([Microsoft GitHub][6])
+
+From the outside:
+
+* QML LS bug (#780) shows that when server misbehaves on `semanticTokens/full`, JetBrains behaviour around highlighting can get broken.([GitHub][5])
+* There is at least one JetBrains issue referencing IndexOutOfBounds during `decodeSemanticTokens`, which would be exactly what you get with malformed `data`.([youtrack.jetbrains.com][7])
+
+If that happens once for `LMCore.lm`, IntelliJ could:
+
+* Stop asking for further tokens for that document (it “knows” tokens are broken there).
+* On restart, some invariants around initial highlighting passes may mean it never gets to the “request tokens” stage for that document until some trigger (e.g. disabling/re-enabling semantic highlighting, or editing in a particular way).
+
+This matches your symptom: correct tokens **would be computed** by your server after error→fix, but the client never asks again because it previously tripped on your data.
+
+---
+
+## 5. Concrete actions I would take next
+
+Given the above, I’d treat this as: “most likely a JetBrains client bug triggered by some corner-case in our semantic tokens.”
+
+### 5.1 Inspect IntelliJ’s LSP logs for this file
+
+Enable detailed logging in IntelliJ:
+
+1. `Help | Diagnostic Tools | Debug Log Settings…`
+2. Add:
+   `#com.intellij.platform.lsp`
+   Optionally add more granular categories if needed (check class names in attached sources).([JetBrains Marketplace][1])
+
+Then:
+
+* Reproduce the scenario on `LMCore.lm`:
+
+  * Open file → note first `textDocument/semanticTokens/full`.
+  * Break header.
+  * Fix header.
+* Look into `idea.log` for:
+
+  * Any `IndexOutOfBoundsException` or `IllegalArgumentException` mentioning semantic tokens, `decodeSemanticTokens`, or `LspSemantic…`.
+  * Any “disabling semantic highlighting” log line or similar for that file.
+
+If you see such an exception, you know it’s triggered by **your data** even if the server-side Rust logs look fine.
+
+### 5.2 Temporarily harden the server: “never fail, never send weird tokens”
+
+For debugging, you can make the semantic tokens provider ultra-defensive:
+
+1. When the syntax snapshot is in any “bad” state (parse error, linking failure, or missing AST node), return a **known-good trivial result**:
+
+   * Either `SemanticTokens { data: vec![], result_id: None }` (no tokens), or
+   * Tokens for a very small, safe subset (e.g., only the first header keyword, computed from a hand-checked span).
+
+2. Explicitly validate the outgoing token stream before sending:
+
+   * Reconstruct absolute positions from the deltas and check they are inside the document length and sorted.
+   * Verify every `token_type` index < `legend.tokenTypes.len()`, same for modifiers.([pygls.readthedocs.io][8])
+
+3. Ensure that you **never** respond with an LSP error (`code != 0`) for semantic tokens, even when the document is invalid. Just send fewer tokens (or none).
+
+If, with this defensive behaviour, IntelliJ starts requesting new tokens reliably after error→fix for `LMCore.lm`, it confirms that the original symptom was triggered by some malformed token sequence in the “invalid header” phase.
+
+### 5.3 Double-check server capabilities and legend
+
+Make sure your `initialize` response advertises semantic tokens in a minimal but correct way, aligned with what JetBrains currently supports:
+
+* Prefer:
+
+  ```json
+  "semanticTokensProvider": {
+    "legend": {
+      "tokenTypes": [ "keyword", "type", "parameter", ... ],
+      "tokenModifiers": [ "definition", "readonly", ... ]
+    },
+    "full": true
+  }
+  ```
+
+* Do **not** set `full: { "delta": true }` unless you actually implement `textDocument/semanticTokens/full/delta`.
+
+* If you don’t implement `textDocument/semanticTokens/range`, omit `range` entirely.
+
+JetBrains’ docs explicitly say they support `textDocument/semanticTokens/full`; they don’t mention delta or range support yet.([JetBrains Marketplace][1])
+If you advertise delta/range incorrectly, the client may try paths you don’t handle, then decide “semantic tokens are broken here”.
+
+### 5.4 Try to reproduce with a smaller example + another client
+
+To isolate whether it’s *only* IntelliJ:
+
+* Create a minimal `.lm` file reproducing the header break/fix behaviour.
+* Test the same LSP server with:
+
+  * VS Code (native LSP client).
+  * Another LSP client (e.g. Neovim’s built-in client or `lsp4ij` if you have that set up).([GitHub][9])
+
+If all other clients refresh tokens correctly across error→fix cycles, the problem is almost certainly on JetBrains’ side (but still probably triggered by some edge case in your data).
+
+If *another* client also stops refreshing semantic tokens for that file, the problem is almost certainly in your token encoding or capabilities.
+
+### 5.5 If everything looks correct on your side → file a JetBrains issue
+
+If:
+
+* Your token stream is always valid (you now validate it yourself),
+* You never send errors for semantic tokens,
+* You have client logs showing that *after* an error/fix cycle, IntelliJ simply never calls `textDocument/semanticTokens/full` again for that file (while still doing so for others),
+
+then this is almost certainly a JetBrains bug in `Core. LSP` / semantic tokens.
+
+Given they’re actively evolving LSP support and already have issues around semantic highlighting and decode failures,([youtrack.jetbrains.com][7])
+the best path is to open a YouTrack ticket with:
+
+* IDE version (e.g. IntelliJ IDEA 2025.3 RC / 2025.2.x).
+* Minimal plugin + minimal language server setup (so they can reproduce).
+* `idea.log` snippet with LSP debug output for the failing file (especially around the time where you would expect a new `semanticTokens/full` request but don’t see one).
+* Exact reproduction steps (open LMCore.lm, break header, fix header, etc.).
+
+---
+
+## 6. Short summary / working hypothesis
+
+Based on recent docs and issues:
+
+* JetBrains’ semantic tokens support is relatively new and has known bugs/glitches across 2024.2–2025.3.
+* There are explicit reports of semantic highlighting misbehaving when servers send problematic `semanticTokens/full` responses (including errors instead of data).([GitHub][5])
+* Your symptom (client stops asking for tokens for a specific file after an error/fix cycle and after restart) is consistent with:
+
+  * A semantic tokens decode failure or similar client-side error for that file at some point, and
+  * IntelliJ then not rescheduling semantic tokens for that document in that session.
+
+I would therefore:
+
+1. Turn on IntelliJ LSP debug logging and look specifically for exceptions around `semanticTokens` for `LMCore.lm`.
+2. Harden the server: never send invalid/partial ranges, never respond with errors, validate `data` before sending.
+3. Re-test the scenario.
+4. If the client still never re-requests tokens for that file despite everything being clean, treat it as a JetBrains bug and open a YouTrack issue with logs and a reduced reproducer.
+
+If you want, you can paste your `initialize` capabilities and a sample `SemanticTokens` JSON payload (for a small `.lm` file), and I can sanity-check them against the spec.
+
+[1]: https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html "Language Server Protocol (LSP) | IntelliJ Platform Plugin SDK"
+[2]: https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/ "Language Server Protocol (LSP) for Plugin Developers | The JetBrains Platform Blog"
+[3]: https://www.componentsource.com/ko/product/goland/releases/2858116?utm_source=chatgpt.com "GoLand 2024.2.2"
+[4]: https://youtrack.jetbrains.com/projects/WEB/issues/WEB-69073/vue-language-server2.1.2-Inlay-hint-refresh-is-not-supported-by-the-client-and-Vue-Semantic-tokens-refresh-is-not-supported-by?utm_source=chatgpt.com "Inlay hint refresh is not supported by the client and Vue"
+[5]: https://github.com/redhat-developer/lsp4ij/issues/780 "Syntax Highlighting breaks since Jetbrains version 2024.2.1 on error · Issue #780 · redhat-developer/lsp4ij · GitHub"
+[6]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/?utm_source=chatgpt.com "Language Server Protocol Specification - 3.17"
+[7]: https://youtrack.jetbrains.com/projects/IJPL/issues/IJPL-209937/LSP-IndexOutOfBoundsException-from-decodeSemanticTokens?utm_source=chatgpt.com "LSP: IndexOutOfBoundsException from decodeSemanticTokens()"
+[8]: https://pygls.readthedocs.io/en/latest/protocol/howto/interpret-semantic-tokens.html?utm_source=chatgpt.com "How To Interpret Semantic Tokens - pygls v2.0.0"
+[9]: https://github.com/redhat-developer/lsp4ij/issues/238?utm_source=chatgpt.com "Support for `textDocument/semanticTokens` · Issue #238"
+

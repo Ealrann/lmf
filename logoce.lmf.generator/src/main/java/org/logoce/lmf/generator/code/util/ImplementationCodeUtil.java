@@ -3,8 +3,8 @@ package org.logoce.lmf.generator.code.util;
 import com.squareup.javapoet.CodeBlock;
 import org.logoce.lmf.generator.code.feature.FeatureParameter;
 import org.logoce.lmf.generator.util.ConstantTypes;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.core.lang.Feature;
+import org.logoce.lmf.core.lang.Relation;
 
 import java.util.List;
 

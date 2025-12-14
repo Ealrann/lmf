@@ -7,7 +7,7 @@ application {
 }
 
 dependencies {
-	implementation project(':logoce.lmf.model')
+	implementation project(':logoce.lmf.core')
 
 	implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0'
 	implementation 'org.slf4j:slf4j-api:2.0.13'

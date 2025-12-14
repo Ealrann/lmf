@@ -4,6 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import org.logoce.lmf.adapter.api.Adapter;
+import org.logoce.lmf.core.lang.*;
+import org.logoce.lmf.core.lang.Enum;
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.ModelExtender;
 import org.logoce.lmf.generator.code.feature.MethodUtil;
@@ -11,8 +13,6 @@ import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
-import org.logoce.lmf.model.lang.Enum;
-import org.logoce.lmf.model.lang.*;
 import org.logoce.lmf.notification.api.BooleanConsumer;
 import org.logoce.lmf.notification.api.FloatConsumer;
 
@@ -341,7 +341,7 @@ public final class FeatureResolution implements IAdapter
 				if (concept instanceof Group<?> group)
 				{
 					final var containsGeneric = parameters.stream()
-														   .map(org.logoce.lmf.model.lang.GenericParameter::type)
+														   .map(GenericParameter::type)
 														   .anyMatch(Generic.class::isInstance);
 					final var typeParameter = TypeResolutionUtil.parametrizedType(group, parameters);
 					return new PartialFeatureResolution(typeParameter,

@@ -3,7 +3,7 @@ package org.logoce.lmf.generator.util;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import org.logoce.lmf.model.lang.Primitive;
+import org.logoce.lmf.core.lang.Primitive;
 
 import java.util.Arrays;
 import java.util.List;

@@ -5,10 +5,10 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.util.ModelUtil;
+import org.logoce.lmf.core.lang.Feature;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.util.ModelUtil;
 
 public final class FeatureIdFieldBuilder implements DefinitionFieldBuilder<Feature<?, ?, ?, ?>>
 {

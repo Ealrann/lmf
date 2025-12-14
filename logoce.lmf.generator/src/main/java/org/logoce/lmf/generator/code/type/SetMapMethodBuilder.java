@@ -4,8 +4,8 @@ import com.squareup.javapoet.MethodSpec;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.feature.FeatureSetter;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.feature.FeatureSetter;
+import org.logoce.lmf.core.lang.Group;
 
 import javax.lang.model.element.Modifier;
 

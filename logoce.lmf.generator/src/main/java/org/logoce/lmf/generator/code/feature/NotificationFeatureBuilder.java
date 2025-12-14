@@ -3,8 +3,8 @@ package org.logoce.lmf.generator.code.feature;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.util.GenUtils;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.lang.Feature;
+import org.logoce.lmf.core.lang.Group;
 
 public class NotificationFeatureBuilder
 {

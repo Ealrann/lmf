@@ -11,9 +11,9 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.group.builder.BuilderFeatureUtil;
-import org.logoce.lmf.model.feature.FeatureInserter;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.feature.FeatureInserter;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.Group;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

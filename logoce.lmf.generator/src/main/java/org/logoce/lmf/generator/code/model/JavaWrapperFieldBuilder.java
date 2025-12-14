@@ -6,9 +6,9 @@ import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.builder.JavaWrapperBuilder;
-import org.logoce.lmf.model.lang.builder.SerializerBuilder;
+import org.logoce.lmf.core.lang.JavaWrapper;
+import org.logoce.lmf.core.lang.builder.JavaWrapperBuilder;
+import org.logoce.lmf.core.lang.builder.SerializerBuilder;
 
 public final class JavaWrapperFieldBuilder implements DefinitionFieldBuilder<JavaWrapper<?>>
 {

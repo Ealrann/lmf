@@ -5,15 +5,16 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.logoce.lmf.core.lang.Enum;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Alias;
-import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.LMCoreModelDefinition;
-import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.util.MetaModelRegistry;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.Alias;
+import org.logoce.lmf.core.lang.JavaWrapper;
+import org.logoce.lmf.core.lang.LMCoreModelDefinition;
+import org.logoce.lmf.core.lang.LMCoreModelPackage;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.util.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +96,7 @@ final class AttributeValueCompletionProvider
 			return items;
 		}
 
-		if (datatype instanceof org.logoce.lmf.model.lang.Enum<?> _enum)
+		if (datatype instanceof Enum<?> _enum)
 		{
 			final var range = new Range(new Position(pos.getLine(), pos.getCharacter()),
 										new Position(pos.getLine(), pos.getCharacter()));

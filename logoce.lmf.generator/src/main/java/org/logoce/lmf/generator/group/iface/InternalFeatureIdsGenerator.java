@@ -3,7 +3,7 @@ package org.logoce.lmf.generator.group.iface;
 import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.code.model.FeatureIdFieldBuilder;
 import org.logoce.lmf.generator.util.FeatureStreams;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.lang.Group;
 
 import javax.lang.model.element.Modifier;
 

@@ -4,8 +4,8 @@ import org.eclipse.lsp4j.SemanticTokens;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
-import org.logoce.lmf.model.resource.parsing.PToken;
-import org.logoce.lmf.model.util.TextPositions;
+import org.logoce.lmf.core.resource.parsing.PToken;
+import org.logoce.lmf.core.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +23,13 @@ final class SemanticTokensProvider
 
 	static SemanticTokens computeSemanticTokens(final LmLanguageServer server, final URI uri)
 	{
+		final long startNanos = System.nanoTime();
 		final WorkspaceIndex index = server.workspaceIndex();
 		final LmDocumentState state = index.getDocument(uri);
 		if (state == null)
 		{
-			LOG.info("LMF LSP semanticTokensFull: uri={} no document state, tokens=0", uri);
+			LOG.info("LMF LSP semanticTokensFull: uri={} no document state, tokens=0, durationMs={}",
+					 uri, (System.nanoTime() - startNanos) / 1_000_000);
 			return new SemanticTokens(List.of());
 		}
 
@@ -49,7 +51,8 @@ final class SemanticTokensProvider
 
 			if (syntax == null)
 			{
-				LOG.info("LMF LSP semanticTokensFull: uri={} no syntax available, tokens=0", uri);
+				LOG.info("LMF LSP semanticTokensFull: uri={} no syntax available, tokens=0, durationMs={}",
+						 uri, (System.nanoTime() - startNanos) / 1_000_000);
 				return new SemanticTokens(List.of());
 			}
 		}
@@ -60,7 +63,8 @@ final class SemanticTokensProvider
 		final List<int[]> headerTokens = collectHeaderTokens(syntax, source);
 		if (headerTokens.isEmpty())
 		{
-			LOG.info("LMF LSP semanticTokensFull: uri={} no header tokens, tokens=0", uri);
+			LOG.info("LMF LSP semanticTokensFull: uri={} no header tokens, tokens=0, durationMs={}",
+					 uri, (System.nanoTime() - startNanos) / 1_000_000);
 			return new SemanticTokens(List.of());
 		}
 
@@ -95,8 +99,8 @@ final class SemanticTokensProvider
 		}
 
 		final var tokens = new SemanticTokens(data);
-		LOG.info("LMF LSP semanticTokensFull: uri={}, version={}, sourceLength={}, tokens={}",
-				 uri, state.version(), source.length(), data.size() / 5);
+		LOG.info("LMF LSP semanticTokensFull: uri={}, version={}, sourceLength={}, tokens={}, durationMs={}",
+				 uri, state.version(), source.length(), data.size() / 5, (System.nanoTime() - startNanos) / 1_000_000);
 		return tokens;
 	}
 
@@ -142,4 +146,3 @@ final class SemanticTokensProvider
 		return headerTokens;
 	}
 }
-

@@ -3,10 +3,10 @@ package org.logoce.lmf.generator.util;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
-import org.logoce.lmf.model.api.model.IFeaturedObject;
-import org.logoce.lmf.model.lang.Enum;
-import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.GenericParameter;
+import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.lang.*;
+import org.logoce.lmf.core.lang.Enum;
+import org.logoce.lmf.core.lang.GenericParameter;
 
 import java.util.List;
 

@@ -9,8 +9,8 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.feature.FeatureGetter;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.feature.FeatureGetter;
+import org.logoce.lmf.core.lang.Group;
 
 import javax.lang.model.element.Modifier;
 

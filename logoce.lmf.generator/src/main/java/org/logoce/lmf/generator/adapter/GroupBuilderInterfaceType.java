@@ -7,7 +7,7 @@ import org.logoce.lmf.extender.api.ModelExtender;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.lang.Group;
 
 import java.util.List;
 

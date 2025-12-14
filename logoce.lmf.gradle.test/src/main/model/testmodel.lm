@@ -24,76 +24,90 @@
 		(-contains javaWrappers [0..*] @JavaWrapper)
 		(-att lPackage /javaWrappers.1 [1..1]))
 
-	(Definition Group
-		(includes group=@Type parameters=../generics.0)
-		(includes group=@Concept parameters=../generics.0)
-		(Generic T
-			(GenericExtension boundType=extends type=@LMObject))
-		(-att concrete datatype=@boolean)
-		(-contains includes [0..*] @Include)
-		(-contains features [0..*] @Feature)
-		(-contains generics [0..*] @Generic))
+		(Definition Group
+			(includes group=@Type (parameters ^T))
+			(includes group=@Concept (parameters ^T))
+			(Generic T
+				(GenericExtension boundType=extends type=@LMObject))
+			(-att concrete datatype=@boolean)
+			(-contains includes [0..*] @Include)
+			(-contains features [0..*] @Feature)
+			(-contains generics [0..*] @Generic))
 
-	(Group Feature
-		(includes group=@Named)
-		(Generic UnaryType)
-		(Generic EffectiveType)
-		(-att name=immutable datatype=@boolean)
-		(-att name=many datatype=@boolean)
-		(-att name=mandatory datatype=@boolean)
-		(-att name=rawFeature datatype=/javaWrappers.0 parameters=../generics.0,../generics.1))
+		(Definition Include
+			(includes @LMObject)
+			(-refers group [1..1] @Group)
+			(-refers parameters [0..*] @Generic))
 
-	(Definition Attribute
-		(includes group=@Feature parameters=../generics.0,../generics.1)
-		(Generic UnaryType)
-		(Generic EffectiveType)
-		(-refers datatype [1..1] @Datatype parameters=../../generics.0)
-		(-att name=defaultValue /units.7)
-		(-refers parameters [0..*] (reference group=@Generic)))
+		(Group Feature
+			(includes group=@Named)
+			(Generic UnaryType)
+			(Generic EffectiveType)
+			(-att name=immutable datatype=@boolean)
+			(-att name=many datatype=@boolean)
+			(-att name=mandatory datatype=@boolean)
+			(-att name=rawFeature datatype=/javaWrappers.0
+				(parameters ^UnaryType)
+				(parameters ^EffectiveType)))
 
-	(Definition Relation
-		(includes group=@Feature parameters=../generics.0,../generics.1)
-		(Generic UnaryType
-			(GenericExtension boundType=Extends type=@LMObject))
-		(Generic EffectiveType)
-		(-refers concept [1..1] @Concept parameters=../../generics.0)
-		(-refers parameters [0..*] @Concept)
-		(-att lazy datatype=/units.2)
-		(-att contains datatype=/units.2))
+			(Definition Attribute
+				(includes group=@Feature
+					(parameters ^UnaryType)
+					(parameters ^EffectiveType))
+				(Generic UnaryType)
+				(Generic EffectiveType)
+				(-refers datatype [1..1] @Datatype
+					(parameters type=^UnaryType))
+				(-att name=defaultValue /units.7)
+				(-refers parameters [0..*] @Generic))
 
-	(Group Datatype
-		(includes group=@Type parameters=../generics.0)
-		(Generic T))
+		(Definition Relation
+			(includes group=@Feature
+				(parameters ^UnaryType)
+				(parameters ^EffectiveType))
+			(Generic UnaryType
+				(GenericExtension boundType=Extends type=@LMObject))
+			(Generic EffectiveType)
+			(-refers concept [1..1] @Concept
+				(parameters type=^UnaryType))
+			(-refers parameters [0..*] @Concept)
+			(-att lazy datatype=/units.2)
+			(-att contains datatype=/units.2))
+
+		(Group Datatype
+			(includes group=@Type (parameters ^T))
+			(Generic T))
 	(Definition Alias
 		(includes group=@Named)
 		(-att value datatype=@string [1..1]))
-	(Definition Enum
-		(includes group=@Datatype parameters=../generics.0)
-		(Generic T)
-		(-att literals datatype=@string [0..*]))
-	(Definition Unit
-		(includes group=@Datatype parameters=../generics.0)
-		(Generic T)
-		(-att matcher /units.0 [0..1])
-		(-att name=defaultValue datatype=@string [0..1])
+		(Definition Enum
+			(includes group=@Datatype (parameters ^T))
+			(Generic T)
+			(-att literals datatype=@string [0..*]))
+		(Definition Unit
+			(includes group=@Datatype (parameters ^T))
+			(Generic T)
+			(-att matcher /units.0 [0..1])
+			(-att name=defaultValue datatype=@string [0..1])
 		(-att primitive /enums.1 [0..1] defaultValue=String)
 		(-att extractor /units.1 [0..1]))
 
-	(Definition Generic
-		(includes group=@Concept parameters=../generics.0)
-		(Generic T
-			(GenericExtension boundType=extends type=@LMObject))
-		(-refers type [0..1] (reference group=@Type parameters=../../generics.0))
-		(-att boundType datatype=/enums.0))
+		(Definition Generic
+			(includes group=@Concept (parameters ^T))
+			(Generic T
+				(GenericExtension boundType=extends type=@LMObject))
+			(-refers type [0..1] @Type
+				(parameters type=^T))
+			(-att boundType datatype=/enums.0))
 
 	(Group Concept 
 		(includes @Named)
 		(Generic name=T))
 
-	(Definition JavaWrapper
-		(Generic name=T)
-		(includes group=@Datatype parameters=../generics.0)
-		(-att name=qualifiedClassName /units.7 mandatory))
+		(Definition JavaWrapper
+			(Generic name=T)
+			(includes group=@Datatype (parameters ^T))
+			(-att name=qualifiedClassName /units.7 mandatory))
 
 	(Unit name=matcher matcher="rgx_match:<(.+?)>")
 	(Unit name=extractor matcher="rgx_match:<(.+?)>")
@@ -119,6 +133,6 @@
 	(Alias [0..*] value="mandatory=false many")
 	(Alias [1..*] value="mandatory many")
 
-	(JavaWrapper name=RawFeature qualifiedClassName=org.logoce.lmf.model.api.feature.RawFeature)
-	(JavaWrapper name=IModelPackage qualifiedClassName=org.logoce.lmf.model.api.model.IModelPackage)
+	(JavaWrapper name=RawFeature qualifiedClassName=org.logoce.lmf.core.api.feature.RawFeature)
+	(JavaWrapper name=IModelPackage qualifiedClassName=org.logoce.lmf.core.api.model.IModelPackage)
 )

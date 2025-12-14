@@ -1,18 +1,14 @@
 package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.CompletionItem;
+import org.logoce.lmf.core.lang.*;
+import org.logoce.lmf.core.lang.Enum;
 import org.logoce.lmf.lsp.LmLanguageServer;
 import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.ModelKey;
 import org.logoce.lmf.lsp.state.SymbolEntry;
-import org.logoce.lmf.model.lang.Enum;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.JavaWrapper;
-import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.core.lang.Unit;
+import org.logoce.lmf.core.util.ModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +121,7 @@ final class TypeCompletionProvider
 			}
 		}
 
-		for (final org.logoce.lmf.model.lang.Alias alias : lmCore.aliases())
+		for (final Alias alias : lmCore.aliases())
 		{
 			final String name = alias.name();
 			if (name != null && !name.isBlank())
@@ -231,7 +227,7 @@ final class TypeCompletionProvider
 		int addedUnits = 0;
 		int addedWrappers = 0;
 
-		for (final org.logoce.lmf.model.lang.Group<?> group : mm.groups())
+		for (final Group<?> group : mm.groups())
 		{
 			if (isAllowedByUsage(usageKind, true, false))
 			{
@@ -244,7 +240,7 @@ final class TypeCompletionProvider
 				addedGroups++;
 			}
 		}
-		for (final org.logoce.lmf.model.lang.Enum<?> _enum : mm.enums())
+		for (final Enum<?> _enum : mm.enums())
 		{
 			if (isAllowedByUsage(usageKind, false, true))
 			{

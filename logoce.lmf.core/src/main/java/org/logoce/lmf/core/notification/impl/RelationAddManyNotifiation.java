@@ -1,0 +1,30 @@
+package org.logoce.lmf.core.notification.impl;
+
+import org.logoce.lmf.core.api.notification.Notification;
+import org.logoce.lmf.core.lang.LMObject;
+
+import java.util.List;
+
+public record RelationAddManyNotifiation(LMObject notifier,
+										 boolean isContainment,
+										 int featureId,
+										 List<? extends LMObject> newValues) implements Notification
+{
+	@Override
+	public int featureId()
+	{
+		return featureId;
+	}
+
+	@Override
+	public Object newValue()
+	{
+		return newValues;
+	}
+
+	@Override
+	public EventType type()
+	{
+		return EventType.ADD_MANY;
+	}
+}

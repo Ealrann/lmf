@@ -22,7 +22,7 @@ final class M1CompletionEngineTest
 	@Test
 	void m1ContainmentCompletionOffersCarFromMetaModel() throws Exception
 	{
-		final Path carCompanyPath = resolvePath("logoce.lmf.model/src/test/model/CarCompany.lm");
+		final Path carCompanyPath = resolvePath("logoce.lmf.core/src/test/model/CarCompany.lm");
 		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 
 		final String m1Text = """
@@ -53,7 +53,7 @@ final class M1CompletionEngineTest
 	@Test
 	void m1ContainmentCompletionAddsMandatoryFeaturesToInsertText() throws Exception
 	{
-		final Path carCompanyPath = resolvePath("logoce.lmf.model/src/test/model/CarCompany.lm");
+		final Path carCompanyPath = resolvePath("logoce.lmf.core/src/test/model/CarCompany.lm");
 		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 
 		final String m1Text = """
@@ -95,7 +95,7 @@ final class M1CompletionEngineTest
 	@Test
 	void m1RelationValueCompletionOffersCarFromMetaModel() throws Exception
 	{
-		final Path carCompanyPath = resolvePath("logoce.lmf.model/src/test/model/CarCompany.lm");
+		final Path carCompanyPath = resolvePath("logoce.lmf.core/src/test/model/CarCompany.lm");
 		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 
 		final String m1Text = """

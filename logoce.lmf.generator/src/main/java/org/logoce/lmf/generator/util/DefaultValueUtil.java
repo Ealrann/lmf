@@ -2,10 +2,10 @@ package org.logoce.lmf.generator.util;
 
 import com.squareup.javapoet.CodeBlock;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Enum;
-import org.logoce.lmf.model.lang.Primitive;
-import org.logoce.lmf.model.lang.Unit;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.Enum;
+import org.logoce.lmf.core.lang.Primitive;
+import org.logoce.lmf.core.lang.Unit;
 
 import java.util.Optional;
 

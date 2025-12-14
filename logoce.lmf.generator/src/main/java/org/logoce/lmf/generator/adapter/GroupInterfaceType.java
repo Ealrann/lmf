@@ -10,9 +10,9 @@ import org.logoce.lmf.generator.util.GenericParameter;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.Include;
-import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.Include;
+import org.logoce.lmf.core.lang.MetaModel;
 
 import java.util.List;
 import java.util.stream.Stream;

@@ -3,7 +3,7 @@ package org.logoce.lmf.generator.model;
 import org.logoce.lmf.generator.group.builder.BuilderGenerator;
 import org.logoce.lmf.generator.group.iface.InterfaceGenerator;
 import org.logoce.lmf.generator.group.impl.ImplementationGenerator;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.lang.Group;
 
 import java.io.File;
 import java.util.Optional;

@@ -4,12 +4,13 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
+import org.logoce.lmf.core.lang.*;
+import org.logoce.lmf.core.lang.GenericParameter;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.util.*;
-import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.builder.AttributeBuilder;
-import org.logoce.lmf.model.lang.builder.RelationBuilder;
-import org.logoce.lmf.model.util.ModelUtil;
+import org.logoce.lmf.core.lang.builder.AttributeBuilder;
+import org.logoce.lmf.core.lang.builder.RelationBuilder;
+import org.logoce.lmf.core.util.ModelUtil;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 
 import java.util.ArrayList;
@@ -214,28 +215,28 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			{
 				return switch (unit.primitive())
 				{
-					case Boolean -> ClassName.get("org.logoce.lmf.model.notification.listener", "BooleanListener");
-					case Int -> ClassName.get("org.logoce.lmf.model.notification.listener", "IntListener");
-					case Long -> ClassName.get("org.logoce.lmf.model.notification.listener", "LongListener");
-					case Float -> ClassName.get("org.logoce.lmf.model.notification.listener", "FloatListener");
-					case Double -> ClassName.get("org.logoce.lmf.model.notification.listener", "DoubleListener");
+					case Boolean -> ClassName.get("org.logoce.lmf.core.notification.listener", "BooleanListener");
+					case Int -> ClassName.get("org.logoce.lmf.core.notification.listener", "IntListener");
+					case Long -> ClassName.get("org.logoce.lmf.core.notification.listener", "LongListener");
+					case Float -> ClassName.get("org.logoce.lmf.core.notification.listener", "FloatListener");
+					case Double -> ClassName.get("org.logoce.lmf.core.notification.listener", "DoubleListener");
 					case String ->
-							GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+							GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
 												  List.of(ClassName.get(String.class)));
 				};
 			}
 
-			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
 										 List.of(rawEffectiveType.box()));
 		}
 
 		if (feature instanceof Relation<?, ?, ?, ?> relation && !relation.many())
 		{
-			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
 										 List.of(rawEffectiveType.box()));
 		}
 
-		return GenUtils.parameterize(ClassName.get("org.logoce.lmf.model.notification.listener", "Listener"),
+		return GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
 									 List.of(rawEffectiveType.box()));
 	}
 
@@ -307,7 +308,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		return generateGenericsCodeblock(concept);
 	}
 
-	private static CodeBlock generateParameterCodeblock(final org.logoce.lmf.model.lang.GenericParameter parameter)
+	private static CodeBlock generateParameterCodeblock(final GenericParameter parameter)
 	{
 		return GenericFieldBuilder.genericParameterBlock(parameter);
 	}

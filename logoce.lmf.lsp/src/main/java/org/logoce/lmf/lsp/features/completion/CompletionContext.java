@@ -5,12 +5,12 @@ import org.logoce.lmf.lsp.LmLanguageServer;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Concept;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.Concept;
+import org.logoce.lmf.core.lang.Feature;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Relation;
 
 import java.net.URI;
 

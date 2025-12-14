@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.adapter.GroupInterfaceType;
 import org.logoce.lmf.generator.code.feature.FeatureFieldBuilder;
@@ -15,13 +16,13 @@ import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
-import org.logoce.lmf.model.api.notification.Notification;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelUtil;
+import org.logoce.lmf.core.api.notification.Notification;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Unit;
+import org.logoce.lmf.core.lang.Relation;
+import org.logoce.lmf.core.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -174,7 +175,7 @@ public final class ImplementationFeatureUtil
 		return CodeBlock.of("setContainer($N, $L)", paramName, featureExpr);
 	}
 
-	private static CodeBlock notifyStatement(final org.logoce.lmf.model.lang.Feature<?, ?, ?, ?> feature,
+	private static CodeBlock notifyStatement(final Feature<?, ?, ?, ?> feature,
 											 final CodeBlock featureIdExpr,
 											 final String paramName,
 											 final boolean isRelation,

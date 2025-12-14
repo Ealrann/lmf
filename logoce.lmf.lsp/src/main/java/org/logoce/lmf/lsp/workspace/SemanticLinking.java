@@ -1,14 +1,14 @@
 package org.logoce.lmf.lsp.workspace;
 
-import org.logoce.lmf.model.api.model.IModelPackage;
-import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.linking.LmModelLinker;
-import org.logoce.lmf.model.loader.linking.LinkNode;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.tree.Tree;
+import org.logoce.lmf.core.api.model.IModelPackage;
+import org.logoce.lmf.core.lang.LMCoreModelPackage;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.linking.LinkNode;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.util.tree.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

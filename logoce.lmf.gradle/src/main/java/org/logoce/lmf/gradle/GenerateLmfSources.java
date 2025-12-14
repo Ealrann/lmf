@@ -11,8 +11,8 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.logoce.lmf.gradle.diagnostics.GenerationFailureReporter;
-import org.logoce.lmf.model.loader.LmWorkspace;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.core.loader.LmWorkspace;
+import org.logoce.lmf.core.util.ModelRegistry;
 
 import java.io.File;
 import java.io.IOException;

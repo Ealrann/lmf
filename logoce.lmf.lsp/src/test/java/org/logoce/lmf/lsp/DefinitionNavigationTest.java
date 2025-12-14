@@ -25,7 +25,7 @@ final class DefinitionNavigationTest
 	void goToDefinitionFromLocalAtReferenceInMetaModel() throws Exception
 	{
 		final var text = readLmCoreSource();
-		final var uri = Path.of("../logoce.lmf.model/src/main/model/asset/LMCore.lm").toAbsolutePath().toUri();
+		final var uri = Path.of("../logoce.lmf.core/src/main/model/asset/LMCore.lm").toAbsolutePath().toUri();
 
 		final var server = new LmLanguageServer();
 		server.connect(new NoopClient());
@@ -125,12 +125,12 @@ final class DefinitionNavigationTest
 	@Test
 	void goToDefinitionFromMetamodelsEntryInM1Model() throws Exception
 	{
-		Path carCompanyPath = Path.of("../logoce.lmf.model/src/test/model/CarCompany.lm");
+		Path carCompanyPath = Path.of("../logoce.lmf.core/src/test/model/CarCompany.lm");
 		if (!Files.exists(carCompanyPath))
 		{
-			carCompanyPath = Path.of("logoce.lmf.model/src/test/model/CarCompany.lm");
+			carCompanyPath = Path.of("logoce.lmf.core/src/test/model/CarCompany.lm");
 		}
-		final Path peugeotPath = Path.of("../logoce.lmf.model/src/test/model/Peugeot.lm");
+		final Path peugeotPath = Path.of("../logoce.lmf.core/src/test/model/Peugeot.lm");
 
 		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 		final String peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
@@ -161,10 +161,10 @@ final class DefinitionNavigationTest
 	@Test
 	void goToDefinitionNavigatesToNameToken() throws Exception
 	{
-		Path path = Path.of("logoce.lmf.model/src/test/model/CarCompany.lm");
+		Path path = Path.of("logoce.lmf.core/src/test/model/CarCompany.lm");
 		if (!Files.exists(path))
 		{
-			path = Path.of("../logoce.lmf.model/src/test/model/CarCompany.lm");
+			path = Path.of("../logoce.lmf.core/src/test/model/CarCompany.lm");
 		}
 		final String text = Files.readString(path, StandardCharsets.UTF_8);
 		final URI uri = path.toAbsolutePath().toUri();
@@ -212,10 +212,10 @@ final class DefinitionNavigationTest
 
 	private static String readLmCoreSource() throws Exception
 	{
-		Path path = Path.of("logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		Path path = Path.of("logoce.lmf.core/src/main/model/asset/LMCore.lm");
 		if (!Files.exists(path))
 		{
-			path = Path.of("../logoce.lmf.model/src/main/model/asset/LMCore.lm");
+			path = Path.of("../logoce.lmf.core/src/main/model/asset/LMCore.lm");
 		}
 		return Files.readString(path, StandardCharsets.UTF_8);
 	}

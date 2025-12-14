@@ -1,14 +1,14 @@
 package org.logoce.lmf.gradle.diagnostics;
 
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.loader.LmLoader;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
-import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.TextPositions;
-import org.logoce.lmf.model.util.tree.Tree;
+import org.logoce.lmf.core.lang.Model;
+import org.logoce.lmf.core.loader.LmLoader;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.loader.parsing.ModelHeaderUtil;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.util.tree.Tree;
 
 import java.io.File;
 import java.io.FileInputStream;

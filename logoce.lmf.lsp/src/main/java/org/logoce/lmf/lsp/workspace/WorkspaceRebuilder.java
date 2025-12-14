@@ -4,21 +4,24 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.logoce.lmf.core.loader.model.LmDocument;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.tree.Tree;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolTable;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.loader.LmLoader;
-import org.logoce.lmf.model.loader.LmWorkspace;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.linking.LinkException;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
-import org.logoce.lmf.model.loader.parsing.ModelHeaderUtil;
-import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.TextPositions;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.loader.LmLoader;
+import org.logoce.lmf.core.loader.LmWorkspace;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.linking.LinkException;
+import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.loader.parsing.ModelHeaderUtil;
+import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.lsp4j.Position;
@@ -59,6 +62,8 @@ public final class WorkspaceRebuilder
 	 */
 	public void rebuildWorkspace()
 	{
+		final long startNanos = System.nanoTime();
+		final int docCount = workspaceIndex.documents().size();
 		try
 		{
 			rebuildModelRegistry();
@@ -73,6 +78,14 @@ public final class WorkspaceRebuilder
 			// diagnostics are surfaced via analyzeDocument instead of global
 			// client notifications.
 			LOG.warn("Error while rebuilding workspace: {}", e.getMessage(), e);
+		}
+		finally
+		{
+			final long durationMs = (System.nanoTime() - startNanos) / 1_000_000;
+			if (durationMs > 500)
+			{
+				LOG.info("LMF LSP rebuildWorkspace: documents={}, durationMs={}", docCount, durationMs);
+			}
 		}
 	}
 
@@ -111,7 +124,7 @@ public final class WorkspaceRebuilder
 
 		try
 		{
-			final var documents = new ArrayList<org.logoce.lmf.model.loader.model.LmDocument>();
+			final var documents = new ArrayList<LmDocument>();
 			final var reader = new LmTreeReader();
 
 			for (final LmDocumentState docState : docs)
@@ -143,7 +156,7 @@ public final class WorkspaceRebuilder
 					continue;
 				}
 
-				final var doc = new org.logoce.lmf.model.loader.model.LmDocument(
+				final var doc = new LmDocument(
 					null,
 					List.copyOf(diagnostics),
 					roots,
@@ -314,7 +327,7 @@ public final class WorkspaceRebuilder
 			final var diagnostics = new ArrayList<LmDiagnostic>();
 			final var reader = new LmTreeReader();
 
-			List<org.logoce.lmf.model.util.tree.Tree<org.logoce.lmf.model.resource.parsing.PNode>> roots;
+			List<Tree<PNode>> roots;
 			CharSequence source;
 			try
 			{
@@ -380,7 +393,7 @@ public final class WorkspaceRebuilder
 			final var diagnostics = new ArrayList<LmDiagnostic>();
 			final var reader = new LmTreeReader();
 
-			List<org.logoce.lmf.model.util.tree.Tree<org.logoce.lmf.model.resource.parsing.PNode>> roots;
+			List<Tree<PNode>> roots;
 			CharSequence source;
 			try
 			{
@@ -479,7 +492,7 @@ public final class WorkspaceRebuilder
 		return diag;
 	}
 
-	private List<MetaModel> resolveActiveMetaModels(final List<org.logoce.lmf.model.util.tree.Tree<org.logoce.lmf.model.resource.parsing.PNode>> roots)
+	private List<MetaModel> resolveActiveMetaModels(final List<Tree<PNode>> roots)
 	{
 		final var registry = workspaceIndex.modelRegistry();
 		return MetaModelResolver.resolveActiveMetaModelsFromRoots(roots, registry);

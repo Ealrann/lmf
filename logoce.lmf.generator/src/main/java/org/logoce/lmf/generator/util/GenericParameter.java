@@ -3,9 +3,9 @@ package org.logoce.lmf.generator.util;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
-import org.logoce.lmf.model.lang.BoundType;
-import org.logoce.lmf.model.lang.Generic;
-import org.logoce.lmf.model.lang.GenericExtension;
+import org.logoce.lmf.core.lang.BoundType;
+import org.logoce.lmf.core.lang.Generic;
+import org.logoce.lmf.core.lang.GenericExtension;
 
 public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 {
@@ -63,7 +63,7 @@ public record GenericParameter(TypeVariableName raw, TypeVariableName defined)
 		throw new IllegalArgumentException("Type cannot be parameterized: " + baseType.getClass().getSimpleName());
 	}
 
-	public static TypeName resolveParameterType(final org.logoce.lmf.model.lang.GenericParameter parameter)
+	public static TypeName resolveParameterType(final org.logoce.lmf.core.lang.GenericParameter parameter)
 	{
 		final var type = parameter.type();
 		final var nestedParameters = parameter.parameters();

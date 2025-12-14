@@ -1,10 +1,10 @@
 package org.logoce.lmf.generator;
 
 import org.logoce.lmf.generator.model.ModelGenerator;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.loader.LmLoader;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.loader.LmLoader;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.util.ModelRegistry;
 
 import java.io.File;
 import java.io.FileInputStream;

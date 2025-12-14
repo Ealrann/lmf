@@ -3,6 +3,7 @@ package org.logoce.lmf.lsp;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.SemanticTokenTypes;
 import org.eclipse.lsp4j.SemanticTokensLegend;
@@ -24,9 +25,11 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class LmLanguageServer implements LanguageServer, LanguageClientAware
 {
@@ -41,6 +44,9 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 	private volatile LanguageClient client;
 	private volatile Settings settings = Settings.defaults();
+	private volatile Boolean semanticTokensRefreshSupport;
+	private final AtomicLong semanticTokensRefreshId = new AtomicLong();
+	private volatile long lastSemanticTokensRefreshNanos;
 
 	public LmLanguageServer()
 	{
@@ -157,11 +163,21 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	}
 
 	@Override
+	public void initialized(final InitializedParams params)
+	{
+		LOG.info("LMF LSP initialized");
+	}
+
+	@Override
 	public CompletableFuture<InitializeResult> initialize(final InitializeParams params)
 	{
+		final var refreshSupport = readSemanticTokensRefreshSupport(params);
+		semanticTokensRefreshSupport = refreshSupport;
+
 		LOG.info("LMF LSP initialize: clientId={}, projectRoot={}",
 				 params.getClientInfo() != null ? params.getClientInfo().getName() : "unknown",
 				 projectRoot);
+		LOG.info("LMF LSP client capabilities: semanticTokensRefreshSupport={}", refreshSupport);
 
 		final var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Incremental);
@@ -185,11 +201,73 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		final var semanticOptions = new SemanticTokensWithRegistrationOptions(legend, full, false);
 		capabilities.setSemanticTokensProvider(semanticOptions);
 
-		LOG.info("LMF LSP capabilities: textSync=Full, completion=true, definition=true, "
+		LOG.info("LMF LSP capabilities: textSync=Incremental, completion=true, definition=true, "
 				 + "references=true, hover=true, documentSymbol=true, rename=true, semanticTokens=true");
 
 		final var result = new InitializeResult(capabilities);
 		return CompletableFuture.completedFuture(result);
+	}
+
+	public void refreshSemanticTokensIfSupported(final String reason)
+	{
+		final LanguageClient currentClient = client;
+		if (currentClient == null)
+		{
+			return;
+		}
+
+		final Boolean refreshSupport = semanticTokensRefreshSupport;
+		if (Boolean.FALSE.equals(refreshSupport))
+		{
+			return;
+		}
+
+		final long now = System.nanoTime();
+		final long last = lastSemanticTokensRefreshNanos;
+		if (last != 0 && (now - last) < TimeUnit.MILLISECONDS.toNanos(250))
+		{
+			return;
+		}
+		lastSemanticTokensRefreshNanos = now;
+
+		final long id = semanticTokensRefreshId.incrementAndGet();
+		LOG.info("LMF LSP semanticTokensRefresh: id={}, reason={}", id, reason);
+
+		currentClient.refreshSemanticTokens().whenComplete((ignored, error) -> {
+			if (error != null)
+			{
+				if (refreshSupport == null)
+				{
+					semanticTokensRefreshSupport = Boolean.FALSE;
+				}
+				LOG.warn("LMF LSP semanticTokensRefresh failed: id={}, reason={}, error={}",
+						 id, reason, error.getClass().getName() + ": " + error.getMessage());
+				return;
+			}
+			if (refreshSupport == null)
+			{
+				semanticTokensRefreshSupport = Boolean.TRUE;
+			}
+		});
+	}
+
+	private static Boolean readSemanticTokensRefreshSupport(final InitializeParams params)
+	{
+		if (params == null || params.getCapabilities() == null)
+		{
+			return null;
+		}
+		final var workspace = params.getCapabilities().getWorkspace();
+		if (workspace == null)
+		{
+			return null;
+		}
+		final var semanticTokens = workspace.getSemanticTokens();
+		if (semanticTokens == null)
+		{
+			return null;
+		}
+		return semanticTokens.getRefreshSupport();
 	}
 
 	@Override

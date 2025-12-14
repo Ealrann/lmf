@@ -5,7 +5,7 @@ import org.logoce.lmf.adapter.api.Adapter;
 import org.logoce.lmf.extender.api.IAdapter;
 import org.logoce.lmf.extender.api.ModelExtender;
 import org.logoce.lmf.generator.util.TargetPathUtil;
-import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.core.lang.MetaModel;
 
 @ModelExtender(scope = MetaModel.class)
 @Adapter

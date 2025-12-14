@@ -6,8 +6,8 @@ import com.squareup.javapoet.FieldSpec;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Enum;
-import org.logoce.lmf.model.lang.builder.EnumBuilder;
+import org.logoce.lmf.core.lang.Enum;
+import org.logoce.lmf.core.lang.builder.EnumBuilder;
 
 public final class EnumFieldBuilder implements DefinitionFieldBuilder<Enum<?>>
 {

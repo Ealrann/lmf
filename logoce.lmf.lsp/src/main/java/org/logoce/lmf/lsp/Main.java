@@ -2,6 +2,11 @@ package org.logoce.lmf.lsp;
 
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.ModelRegistry;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,8 +73,8 @@ public final class Main
 			final Path path = Path.of(pathString);
 			final String text = Files.readString(path, StandardCharsets.UTF_8);
 
-			final var diagnostics = new ArrayList<org.logoce.lmf.model.loader.diagnostic.LmDiagnostic>();
-			final var treeReader = new org.logoce.lmf.model.loader.parsing.LmTreeReader();
+			final var diagnostics = new ArrayList<LmDiagnostic>();
+			final var treeReader = new LmTreeReader();
 			final var readResult = treeReader.read(text, diagnostics);
 
 			final var roots = readResult.roots();
@@ -77,8 +82,8 @@ public final class Main
 
 			if (!roots.isEmpty())
 			{
-				final var linker = new org.logoce.lmf.model.loader.linking.LmModelLinker<org.logoce.lmf.model.resource.parsing.PNode>(
-					org.logoce.lmf.model.util.ModelRegistry.empty());
+				final var linker = new LmModelLinker<PNode>(
+						ModelRegistry.empty());
 				linker.linkModel(roots, diagnostics, source);
 			}
 

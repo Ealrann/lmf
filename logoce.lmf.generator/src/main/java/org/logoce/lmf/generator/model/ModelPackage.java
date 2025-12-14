@@ -7,8 +7,8 @@ import org.logoce.lmf.generator.util.FormattedJavaWriter;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.api.model.IFeaturedObject;
-import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.lang.MetaModel;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;

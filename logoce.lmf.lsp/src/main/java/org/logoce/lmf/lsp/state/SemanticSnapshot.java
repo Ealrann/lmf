@@ -1,9 +1,9 @@
 package org.logoce.lmf.lsp.state;
 
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.linking.LinkNode;
-import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.core.lang.Model;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.linking.LinkNode;
+import org.logoce.lmf.core.resource.parsing.PNode;
 
 import java.util.List;
 

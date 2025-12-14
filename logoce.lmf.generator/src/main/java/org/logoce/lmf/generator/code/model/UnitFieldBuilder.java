@@ -7,8 +7,8 @@ import com.squareup.javapoet.TypeName;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Unit;
-import org.logoce.lmf.model.lang.builder.UnitBuilder;
+import org.logoce.lmf.core.lang.Unit;
+import org.logoce.lmf.core.lang.builder.UnitBuilder;
 
 public final class UnitFieldBuilder implements DefinitionFieldBuilder<Unit<?>>
 {

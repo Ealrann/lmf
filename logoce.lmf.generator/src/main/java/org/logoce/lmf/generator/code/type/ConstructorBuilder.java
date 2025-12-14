@@ -9,10 +9,10 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TargetPathUtil;
-import org.logoce.lmf.model.util.ModelUtil;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Relation;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;

@@ -3,8 +3,8 @@ package org.logoce.lmf.generator.util;
 import com.squareup.javapoet.CodeBlock;
 import java.util.List;
 import java.util.function.Predicate;
-import org.logoce.lmf.model.api.model.IFeaturedObject;
-import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.lang.Attribute;
 
 public final class BuilderInitializerUtil
 {

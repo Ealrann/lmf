@@ -9,9 +9,9 @@ import org.logoce.lmf.generator.code.util.FieldBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.api.model.IFeaturedObject;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMObject;
+import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.LMObject;
 
 public final class GroupFeaturesGenerator
 {

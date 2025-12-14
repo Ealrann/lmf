@@ -1,7 +1,9 @@
 package org.logoce.lmf.intellij;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.platform.lsp.api.LspServerSupportProvider;
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor;
@@ -11,6 +13,8 @@ import java.util.List;
 
 public final class LmLspServerSupportProvider implements LspServerSupportProvider
 {
+	private static final Logger LOG = Logger.getInstance(LmLspServerSupportProvider.class);
+
 	@Override
 	public void fileOpened(@NotNull final Project project,
 						   @NotNull final VirtualFile file,
@@ -21,6 +25,7 @@ public final class LmLspServerSupportProvider implements LspServerSupportProvide
 			return;
 		}
 
+		LOG.info("LMF LSP fileOpened: file=" + file.getPath() + ", basePath=" + project.getBasePath());
 		serverStarter.ensureServerStarted(new LmLspServerDescriptor(project));
 	}
 
@@ -40,13 +45,27 @@ public final class LmLspServerSupportProvider implements LspServerSupportProvide
 		@Override
 		public @NotNull GeneralCommandLine createCommandLine()
 		{
-			final String basePath = getProject().getBasePath();
-			if (basePath != null && !basePath.isBlank())
+			final String projectRoot = resolveProjectRoot(getProject());
+			if (projectRoot != null && !projectRoot.isBlank())
 			{
-				return new GeneralCommandLine(List.of("logoce.lmf.lsp", "--project-root", basePath));
+				LOG.info("LMF LSP starting: logoce.lmf.lsp --project-root " + projectRoot);
+				return new GeneralCommandLine(List.of("logoce.lmf.lsp", "--project-root", projectRoot));
 			}
 
+			LOG.warn("LMF LSP starting: logoce.lmf.lsp (no project root detected)");
 			return new GeneralCommandLine(List.of("logoce.lmf.lsp"));
+		}
+
+		private static String resolveProjectRoot(final Project project)
+		{
+			final String basePath = project.getBasePath();
+			if (basePath != null && !basePath.isBlank())
+			{
+				return basePath;
+			}
+
+			final var guess = ProjectUtil.guessProjectDir(project);
+			return guess != null ? guess.getPath() : null;
 		}
 	}
 }

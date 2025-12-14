@@ -4,10 +4,10 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.logoce.lmf.lsp.LspRanges;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.resource.parsing.PToken;
-import org.logoce.lmf.model.util.TextPositions;
-import org.logoce.lmf.model.util.tree.Tree;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.resource.parsing.PToken;
+import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.util.tree.Tree;
 
 final class SyntaxNavigation
 {

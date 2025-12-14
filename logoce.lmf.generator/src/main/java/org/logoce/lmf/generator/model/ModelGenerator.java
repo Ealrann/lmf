@@ -1,6 +1,6 @@
 package org.logoce.lmf.generator.model;
 
-import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 
 import java.io.File;

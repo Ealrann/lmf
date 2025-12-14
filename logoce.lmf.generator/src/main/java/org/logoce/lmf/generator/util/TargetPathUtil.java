@@ -1,6 +1,6 @@
 package org.logoce.lmf.generator.util;
 
-import org.logoce.lmf.model.lang.MetaModel;
+import org.logoce.lmf.core.lang.MetaModel;
 
 import java.io.File;
 import java.util.Locale;

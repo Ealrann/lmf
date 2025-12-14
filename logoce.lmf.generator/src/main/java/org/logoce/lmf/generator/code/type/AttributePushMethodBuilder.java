@@ -7,7 +7,7 @@ import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Attribute;
+import org.logoce.lmf.core.lang.Attribute;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

@@ -9,7 +9,7 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Relation;
+import org.logoce.lmf.core.lang.Relation;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

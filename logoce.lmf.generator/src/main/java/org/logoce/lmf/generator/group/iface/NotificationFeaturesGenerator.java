@@ -7,8 +7,8 @@ import com.squareup.javapoet.TypeSpec;
 import org.logoce.lmf.generator.code.feature.NotificationFeatureBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FeatureStreams;
-import org.logoce.lmf.model.api.feature.INotificationFeature;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.api.feature.INotificationFeature;
+import org.logoce.lmf.core.lang.Group;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

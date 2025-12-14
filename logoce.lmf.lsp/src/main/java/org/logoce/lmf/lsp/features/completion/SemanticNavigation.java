@@ -3,11 +3,11 @@ package org.logoce.lmf.lsp.features.completion;
 import org.eclipse.lsp4j.Position;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.loader.linking.LinkNode;
-import org.logoce.lmf.model.loader.linking.tree.LinkNodeFull;
-import org.logoce.lmf.model.resource.parsing.PNode;
+import org.logoce.lmf.core.lang.Feature;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.loader.linking.LinkNode;
+import org.logoce.lmf.core.loader.linking.tree.LinkNodeFull;
+import org.logoce.lmf.core.resource.parsing.PNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,10 @@
 package org.logoce.lmf.generator;
 
 import org.junit.jupiter.api.Test;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Operation;
 import org.logoce.lmf.generator.model.ModelGenerator;
-import org.logoce.lmf.model.lang.*;
 
 import java.io.File;
 import java.io.IOException;

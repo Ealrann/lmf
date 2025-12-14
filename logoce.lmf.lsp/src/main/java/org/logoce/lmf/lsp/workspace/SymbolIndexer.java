@@ -10,11 +10,11 @@ import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.lsp.state.SymbolId;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
 import org.logoce.lmf.lsp.features.completion.MetaModelResolver;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.loader.model.LmSemanticIndexBuilder;
-import org.logoce.lmf.model.loader.model.LmSymbolIndex;
-import org.logoce.lmf.model.util.TextPositions;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Model;
+import org.logoce.lmf.core.loader.model.LmSemanticIndexBuilder;
+import org.logoce.lmf.core.loader.model.LmSymbolIndex;
+import org.logoce.lmf.core.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

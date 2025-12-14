@@ -6,16 +6,16 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
+import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.generator.util.TypeResolutionUtil;
-import org.logoce.lmf.model.lang.*;
-import org.logoce.lmf.model.lang.builder.GenericBuilder;
-import org.logoce.lmf.model.lang.builder.GenericExtensionBuilder;
-import org.logoce.lmf.model.lang.builder.GenericParameterBuilder;
-import org.logoce.lmf.model.util.ModelUtil;
+import org.logoce.lmf.core.lang.builder.GenericBuilder;
+import org.logoce.lmf.core.lang.builder.GenericExtensionBuilder;
+import org.logoce.lmf.core.lang.builder.GenericParameterBuilder;
+import org.logoce.lmf.core.util.ModelUtil;
 
 public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic<?>>
 {

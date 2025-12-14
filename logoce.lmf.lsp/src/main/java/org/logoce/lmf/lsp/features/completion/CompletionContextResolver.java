@@ -1,22 +1,13 @@
 package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.Position;
+import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.lsp.LmLanguageServer;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.lang.Attribute;
-import org.logoce.lmf.model.lang.Concept;
-import org.logoce.lmf.model.lang.Datatype;
-import org.logoce.lmf.model.lang.Feature;
-import org.logoce.lmf.model.lang.Group;
-import org.logoce.lmf.model.lang.LMCoreModelDefinition;
-import org.logoce.lmf.model.lang.LMCoreModelPackage;
-import org.logoce.lmf.model.lang.MetaModel;
-import org.logoce.lmf.model.lang.Model;
-import org.logoce.lmf.model.lang.Relation;
-import org.logoce.lmf.model.util.ModelRegistry;
-import org.logoce.lmf.model.util.ModelUtil;
+import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.util.ModelUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -427,7 +418,7 @@ final class CompletionContextResolver
 			// Prefer aliases defined in the active meta-model when present.
 			if (activeMetaModel != null)
 			{
-				for (final org.logoce.lmf.model.lang.Alias alias : activeMetaModel.aliases())
+				for (final Alias alias : activeMetaModel.aliases())
 				{
 					if (keyword.equals(alias.name()))
 					{
@@ -436,7 +427,7 @@ final class CompletionContextResolver
 				}
 			}
 
-			for (final org.logoce.lmf.model.lang.Alias alias : lmCore.aliases())
+			for (final Alias alias : lmCore.aliases())
 			{
 				if (keyword.equals(alias.name()))
 				{

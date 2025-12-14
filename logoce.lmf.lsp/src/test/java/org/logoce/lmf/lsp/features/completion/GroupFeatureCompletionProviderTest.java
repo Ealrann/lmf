@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolTable;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.model.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.model.loader.linking.LmModelLinker;
-import org.logoce.lmf.model.loader.parsing.LmTreeReader;
-import org.logoce.lmf.model.resource.parsing.PNode;
-import org.logoce.lmf.model.util.ModelRegistry;
+import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.util.ModelRegistry;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

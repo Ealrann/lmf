@@ -9,7 +9,7 @@ pluginManagement {
 rootProject.name = "LMF"
 
 include ':logoce.lmf.adapter'
-include ':logoce.lmf.model'
+include ':logoce.lmf.core'
 include ':logoce.lmf.extender'
 include ':logoce.lmf.generator'
 include ':logoce.lmf.notification'

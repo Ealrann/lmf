@@ -108,8 +108,9 @@ final class LmCompletionEngineTest
 	void relationValueCompletionOffersNamedGroups()
 		throws Exception
 	{
-		final var text = readLmCoreSource();
-		final var uri = URI.create("file:///home/eal/git/LMF/logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		final var path = lmCorePath();
+		final var text = Files.readString(path, StandardCharsets.UTF_8);
+		final var uri = path.toUri();
 		final var position = positionAfter(text, "group=@");
 
 		final var items = complete(uri, text, position);
@@ -123,8 +124,9 @@ final class LmCompletionEngineTest
 	void attributeDatatypeCompletionOffersDatatypeTypes()
 		throws Exception
 	{
-		final var text = readLmCoreSource();
-		final var uri = URI.create("file:///home/eal/git/LMF/logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		final var path = lmCorePath();
+		final var text = Files.readString(path, StandardCharsets.UTF_8);
+		final var uri = path.toUri();
 		final var position = positionAfter(text, "name=imports datatype=@");
 
 		final var items = complete(uri, text, position);
@@ -145,8 +147,9 @@ final class LmCompletionEngineTest
 	void attributeDatatypeRelationCompletionOffersReferenceLikeGroups()
 		throws Exception
 	{
-		final var text = readLmCoreSource();
-		final var uri = URI.create("file:///home/eal/git/LMF/logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		final var path = lmCorePath();
+		final var text = Files.readString(path, StandardCharsets.UTF_8);
+		final var uri = path.toUri();
 		final var position = positionAfter(text, "name=defaultValue datatype=@");
 
 		final var items = complete(uri, text, position);
@@ -328,13 +331,13 @@ final class LmCompletionEngineTest
 		return new Position(line, col);
 	}
 
-	private static String readLmCoreSource() throws Exception
+	private static Path lmCorePath()
 	{
-		Path path = Path.of("logoce.lmf.model/src/main/model/asset/LMCore.lm");
+		Path path = Path.of("logoce.lmf.core/src/main/model/asset/LMCore.lm");
 		if (!Files.exists(path))
 		{
-			path = Path.of("../logoce.lmf.model/src/main/model/asset/LMCore.lm");
+			path = Path.of("../logoce.lmf.core/src/main/model/asset/LMCore.lm");
 		}
-		return Files.readString(path, StandardCharsets.UTF_8);
+		return path.toAbsolutePath();
 	}
 }

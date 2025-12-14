@@ -5,7 +5,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.generator.util.TypeParameter;
-import org.logoce.lmf.model.lang.Group;
+import org.logoce.lmf.core.lang.Group;
 
 import java.util.List;
 
