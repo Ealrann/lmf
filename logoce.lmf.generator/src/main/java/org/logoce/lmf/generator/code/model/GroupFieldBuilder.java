@@ -49,7 +49,14 @@ public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 		group.includes().forEach(include -> initializerBuilder.add(".addInclude(() -> $L)",
 																   generateReferencesCodeblock(include)));
 
-		initializerBuilder.add(".addFeatures($T.ALL)", groupFeaturesType);
+		if (constantName.equals(groupClass.simpleName()))
+		{
+			initializerBuilder.add(".addFeatures($L.ALL)", groupFeaturesType.canonicalName());
+		}
+		else
+		{
+			initializerBuilder.add(".addFeatures($T.ALL)", groupFeaturesType);
+		}
 
 		if (!group.generics().isEmpty())
 		{

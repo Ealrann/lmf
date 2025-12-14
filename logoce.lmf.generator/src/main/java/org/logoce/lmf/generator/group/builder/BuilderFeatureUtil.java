@@ -16,6 +16,7 @@ import org.logoce.lmf.generator.code.type.RelationManyListMethodBuilder;
 import org.logoce.lmf.generator.code.type.AttributeManyListMethodBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.DefaultValueUtil;
+import org.logoce.lmf.model.lang.Attribute;
 import org.logoce.lmf.model.lang.Group;
 import org.logoce.lmf.model.lang.Relation;
 
@@ -87,6 +88,10 @@ public final class BuilderFeatureUtil
 		else if (feature instanceof Relation<?, ?, ?, ?> && !mandatory)
 		{
 			return Optional.of(CodeBlock.of("() -> null"));
+		}
+		else if (feature instanceof Attribute<?, ?, ?, ?> && !mandatory)
+		{
+			return DefaultValueUtil.resolveDefaultValue(resolution);
 		}
 		else if (immutable && !mandatory)
 		{

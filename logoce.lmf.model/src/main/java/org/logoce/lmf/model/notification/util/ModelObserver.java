@@ -103,8 +103,11 @@ public final class ModelObserver
 									  ? new RelationAddManyNotifiation(target,
 																	   feature.contains(),
 																	   feature.id(),
-																	   List.of(value))
-									  : new RelationAddNotifiation(target, feature.contains(), feature.id(), value);
+																	   castList(value))
+									  : new RelationAddNotifiation(target,
+																	feature.contains(),
+																	feature.id(),
+																	(LMObject) value);
 					ModelObserver.this.listener.accept(notif);
 				}
 			}
@@ -129,8 +132,11 @@ public final class ModelObserver
 									  ? new RelationRemoveManyNotifiation(target,
 																		  feature.contains(),
 																		  feature.id(),
-																		  List.of(value))
-									  : new RelationRemoveNotifiation(target, feature.contains(), feature.id(), value);
+																		  castList(value))
+									  : new RelationRemoveNotifiation(target,
+																	   feature.contains(),
+																	   feature.id(),
+																	   (LMObject) value);
 					ModelObserver.this.listener.accept(notif);
 				}
 			}
@@ -159,9 +165,15 @@ public final class ModelObserver
 			}
 		}
 
-		private static LMObject getValue(final LMObject target, final Relation<?, ?, ?, ?> feature)
+		private static Object getValue(final LMObject target, final Relation<?, ?, ?, ?> feature)
 		{
-			return (LMObject) target.get(feature);
+			return target.get(feature);
+		}
+
+		@SuppressWarnings("unchecked")
+		private static List<LMObject> castList(final Object value)
+		{
+			return (List<LMObject>) value;
 		}
 
 		@Override
