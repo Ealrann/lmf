@@ -1,6 +1,6 @@
 package org.logoce.lmf.lsp.state;
 
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.net.URI;
 import java.util.ArrayList;

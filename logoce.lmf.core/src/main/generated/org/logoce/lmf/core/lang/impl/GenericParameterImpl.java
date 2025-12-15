@@ -2,9 +2,9 @@ package org.logoce.lmf.core.lang.impl;
 
 import java.util.List;
 import java.util.function.Supplier;
-import org.logoce.lmf.core.api.model.ModelNotifier;
 import org.logoce.lmf.core.api.model.FeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.model.ModelNotifier;
 import org.logoce.lmf.core.feature.FeatureGetter;
 import org.logoce.lmf.core.feature.FeatureSetter;
 import org.logoce.lmf.core.lang.BoundType;

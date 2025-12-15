@@ -3,7 +3,7 @@ package org.logoce.lmf.core.api.model;
 import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.extender.api.IAdaptable;
 import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import org.logoce.lmf.notification.api.IFeatures;
 
 import java.util.function.Supplier;

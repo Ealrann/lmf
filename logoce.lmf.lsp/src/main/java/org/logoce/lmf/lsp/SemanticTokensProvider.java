@@ -4,8 +4,8 @@ import org.eclipse.lsp4j.SemanticTokens;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
-import org.logoce.lmf.core.resource.parsing.PToken;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.text.syntax.PToken;
+import org.logoce.lmf.core.api.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

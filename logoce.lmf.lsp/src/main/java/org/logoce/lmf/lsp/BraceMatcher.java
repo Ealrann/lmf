@@ -3,7 +3,7 @@ package org.logoce.lmf.lsp;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentHighlightKind;
 import org.eclipse.lsp4j.Position;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.util.TextPositions;
 
 import java.util.List;
 

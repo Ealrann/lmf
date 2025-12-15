@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.GenericExtensionBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface GenericExtension extends LMObject {
   static Builder builder() {
@@ -21,9 +21,9 @@ public interface GenericExtension extends LMObject {
   List<GenericParameter> parameters();
 
   interface FeatureIDs {
-    int TYPE = 1591035491;
-    int BOUND_TYPE = 1549707343;
-    int PARAMETERS = -1733249453;
+    int TYPE = -2079629779;
+    int BOUND_TYPE = -1592664379;
+    int PARAMETERS = -362525027;
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {

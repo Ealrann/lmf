@@ -3,7 +3,7 @@ package org.logoce.lmf.core.functional;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.loader.LmLoader;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;

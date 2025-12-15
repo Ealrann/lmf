@@ -3,6 +3,8 @@
 
 package org.logoce.lmf.core.lexer;
 
+import org.logoce.lmf.core.api.lexer.ELMTokenType;
+
 @SuppressWarnings("ALL")
 
 public class LMLexer {

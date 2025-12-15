@@ -1,5 +1,6 @@
 package org.logoce.lmf.core.util;
 
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.Model;
 

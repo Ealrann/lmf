@@ -2,8 +2,8 @@ package org.logoce.lmf.lsp;
 
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
-import org.logoce.lmf.core.resource.parsing.PToken;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.text.syntax.PToken;
+import org.logoce.lmf.core.api.util.TextPositions;
 
 public final class LspRanges
 {

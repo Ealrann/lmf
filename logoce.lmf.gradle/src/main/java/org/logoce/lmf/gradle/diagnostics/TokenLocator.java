@@ -1,9 +1,9 @@
 package org.logoce.lmf.gradle.diagnostics;
 
 import org.logoce.lmf.core.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.resource.parsing.PToken;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.text.syntax.PToken;
+import org.logoce.lmf.core.api.util.TextPositions;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.io.File;

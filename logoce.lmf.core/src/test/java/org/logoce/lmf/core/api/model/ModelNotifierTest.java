@@ -7,9 +7,9 @@ import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMCoreModelDefinition;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
-import org.logoce.lmf.core.notification.impl.IntSetNotification;
-import org.logoce.lmf.core.notification.listener.IntListener;
-import org.logoce.lmf.core.notification.listener.Listener;
+import org.logoce.lmf.core.notification.IntSetNotification;
+import org.logoce.lmf.core.api.notification.listener.IntListener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,9 +4,9 @@ import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.linking.LinkNode;
-import org.logoce.lmf.core.loader.linking.linker.NodeLinker;
-import org.logoce.lmf.core.resource.interpretation.PFeature;
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.loader.internal.linking.NodeLinker;
+import org.logoce.lmf.core.loader.internal.interpretation.PFeature;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 import org.logoce.lmf.core.util.tree.StructuredTree;
 
 import java.util.List;

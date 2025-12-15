@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.GenericBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Generic<T> extends Concept<T>, Datatype<T> {
   static <T> Builder<T> builder() {
@@ -19,7 +19,7 @@ public interface Generic<T> extends Concept<T>, Datatype<T> {
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int EXTENSION = 1695230195;
+    int EXTENSION = -255281731;
   }
 
   interface Features<T extends Features<T>> extends Concept.Features<T>, Datatype.Features<T> {

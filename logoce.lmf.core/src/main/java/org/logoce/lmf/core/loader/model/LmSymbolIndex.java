@@ -1,6 +1,6 @@
 package org.logoce.lmf.core.loader.model;
 
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.util.TextPositions;
 
 import java.util.List;
 

@@ -2,13 +2,13 @@ package org.logoce.lmf.core.loader.model;
 
 import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.core.lang.Enum;
-import org.logoce.lmf.core.loader.linking.feature.reference.PathParser;
-import org.logoce.lmf.core.loader.linking.feature.reference.PathUtil;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.resource.parsing.PToken;
+import org.logoce.lmf.core.loader.internal.feature.reference.PathParser;
+import org.logoce.lmf.core.loader.internal.feature.reference.PathUtil;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.text.syntax.PToken;
 import org.logoce.lmf.core.util.ModelImports;
-import org.logoce.lmf.core.util.ModelRegistry;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.model.ModelRegistry;
+import org.logoce.lmf.core.api.util.TextPositions;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.util.ArrayList;

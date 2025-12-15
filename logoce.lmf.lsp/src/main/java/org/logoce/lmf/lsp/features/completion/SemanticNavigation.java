@@ -7,7 +7,7 @@ import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.loader.linking.LinkNode;
 import org.logoce.lmf.core.loader.linking.tree.LinkNodeFull;
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

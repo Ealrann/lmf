@@ -2,7 +2,7 @@ package org.logoce.lmf.core.loader.parsing;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.core.lexer.ELMTokenType;
+import org.logoce.lmf.core.api.lexer.ELMTokenType;
 
 public class LmTreeReaderTest
 {

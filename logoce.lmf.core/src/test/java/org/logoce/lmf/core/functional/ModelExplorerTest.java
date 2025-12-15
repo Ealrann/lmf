@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.functional;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.core.util.ModelExplorer;
+import org.logoce.lmf.core.api.util.ModelExplorer;
 import test.model.carcompany.*;
 import test.model.carcompany.impl.PersonImpl;
 

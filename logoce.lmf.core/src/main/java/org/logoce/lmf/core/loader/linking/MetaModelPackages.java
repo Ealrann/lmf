@@ -5,8 +5,8 @@ import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.loader.parsing.ModelHeaderUtil;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.util.ArrayList;

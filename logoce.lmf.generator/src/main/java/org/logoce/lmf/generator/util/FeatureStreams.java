@@ -2,7 +2,7 @@ package org.logoce.lmf.generator.util;
 
 import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.core.lang.Group;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;

@@ -8,7 +8,7 @@ import org.logoce.lmf.lsp.state.LmSymbolKind;
 import org.logoce.lmf.lsp.state.ModelKey;
 import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.core.lang.Unit;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

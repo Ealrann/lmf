@@ -9,7 +9,7 @@ import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.code.util.ImplementationCodeUtil;
 import org.logoce.lmf.generator.util.FeatureStreams;
 import org.logoce.lmf.generator.util.TargetPathUtil;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Relation;

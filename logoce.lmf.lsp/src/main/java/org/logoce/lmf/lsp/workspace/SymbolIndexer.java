@@ -14,7 +14,7 @@ import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.loader.model.LmSemanticIndexBuilder;
 import org.logoce.lmf.core.loader.model.LmSymbolIndex;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.util.TextPositions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

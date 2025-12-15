@@ -3,7 +3,7 @@ package org.logoce.lmf.lsp.state;
 import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.linking.LinkNode;
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package org.logoce.lmf.core.tool;
 import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.loader.LmLoader;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.File;
 import java.io.IOException;

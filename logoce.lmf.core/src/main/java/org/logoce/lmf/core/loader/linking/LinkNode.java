@@ -4,7 +4,7 @@ import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 
 import java.util.List;
 

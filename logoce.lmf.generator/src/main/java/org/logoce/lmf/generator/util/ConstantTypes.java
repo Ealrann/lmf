@@ -10,7 +10,7 @@ import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelPackage;
 import org.logoce.lmf.core.feature.FeatureInserter;
 import org.logoce.lmf.core.lang.builder.MetaModelBuilder;
-import org.logoce.lmf.core.notification.list.ObservableList;
+import org.logoce.lmf.core.api.notification.list.ObservableList;
 import org.logoce.lmf.core.util.BuildUtils;
 
 import java.util.ArrayList;

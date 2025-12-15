@@ -4,8 +4,8 @@ import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.model.LmDocument;
 import org.logoce.lmf.core.loader.parsing.LmTreeReader;
 import org.logoce.lmf.core.loader.parsing.ModelHeaderUtil;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.io.File;

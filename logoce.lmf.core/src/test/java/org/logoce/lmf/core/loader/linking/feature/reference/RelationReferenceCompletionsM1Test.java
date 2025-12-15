@@ -6,9 +6,10 @@ import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.LmLoader;
+import org.logoce.lmf.core.loader.RelationReferenceCompletions;
 import org.logoce.lmf.core.loader.model.LmDocument;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.loader.linking.LinkNode;
 import test.model.carcompany.CarCompanyModelPackage;
 

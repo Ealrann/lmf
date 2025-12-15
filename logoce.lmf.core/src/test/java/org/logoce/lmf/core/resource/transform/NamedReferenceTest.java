@@ -7,7 +7,7 @@ import org.logoce.lmf.core.lang.Primitive;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.lang.Unit;
 import org.logoce.lmf.core.loader.LmLoader;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

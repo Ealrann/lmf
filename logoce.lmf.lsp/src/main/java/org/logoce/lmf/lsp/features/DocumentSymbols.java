@@ -12,8 +12,8 @@ import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.lsp.state.SymbolEntry;
 import org.logoce.lmf.lsp.state.SymbolId;
 import org.logoce.lmf.lsp.state.WorkspaceIndex;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.resource.parsing.PToken;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.text.syntax.PToken;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.util.ArrayList;

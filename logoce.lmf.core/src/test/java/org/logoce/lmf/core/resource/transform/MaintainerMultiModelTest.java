@@ -5,7 +5,7 @@ import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.LmLoader;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;

@@ -1,12 +1,12 @@
 package org.logoce.lmf.core.loader.parsing;
 
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.resource.parsing.LMIterableLexer;
-import org.logoce.lmf.core.resource.parsing.LexerException;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.resource.parsing.PNodeBuilder;
-import org.logoce.lmf.core.resource.parsing.PToken;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.text.parsing.LMIterableLexer;
+import org.logoce.lmf.core.api.text.parsing.LexerException;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.text.parsing.PNodeBuilder;
+import org.logoce.lmf.core.api.text.syntax.PToken;
+import org.logoce.lmf.core.api.util.TextPositions;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.util.ArrayList;

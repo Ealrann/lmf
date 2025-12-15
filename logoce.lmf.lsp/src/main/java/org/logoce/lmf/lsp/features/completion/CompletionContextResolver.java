@@ -6,8 +6,8 @@ import org.logoce.lmf.lsp.LmLanguageServer;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.core.util.ModelRegistry;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.model.ModelRegistry;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

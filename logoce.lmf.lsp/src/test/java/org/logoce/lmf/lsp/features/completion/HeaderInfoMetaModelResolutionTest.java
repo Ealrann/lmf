@@ -8,8 +8,8 @@ import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.linking.LmModelLinker;
 import org.logoce.lmf.core.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

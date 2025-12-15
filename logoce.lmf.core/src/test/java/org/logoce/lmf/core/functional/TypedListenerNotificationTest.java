@@ -13,7 +13,7 @@ import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 
 import java.util.ArrayList;
 import java.util.List;

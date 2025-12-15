@@ -8,7 +8,7 @@ import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 public final class FeatureIdFieldBuilder implements DefinitionFieldBuilder<Feature<?, ?, ?, ?>>
 {

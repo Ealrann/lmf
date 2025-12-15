@@ -1,6 +1,6 @@
 package org.logoce.lmf.core.loader.linking;
 
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 
 public final class LinkException extends IllegalStateException
 {

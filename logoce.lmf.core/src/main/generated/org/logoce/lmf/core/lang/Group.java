@@ -5,12 +5,12 @@ import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.BuilderSupplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.BooleanListener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.core.lang.builder.GroupBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.BooleanListener;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
   static <T extends LMObject> Builder<T> builder() {
@@ -28,12 +28,12 @@ public interface Group<T extends LMObject> extends Type<T>, Concept<T> {
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int CONCRETE = -431948311;
-    int INCLUDES = 240954415;
-    int FEATURES = -139964511;
-    int GENERICS = 1961073888;
-    int OPERATIONS = -1207043504;
-    int LM_BUILDER = 1328379894;
+    int CONCRETE = 1290384735;
+    int INCLUDES = 1963287461;
+    int FEATURES = 1582368535;
+    int GENERICS = -611560362;
+    int OPERATIONS = 392604742;
+    int LM_BUILDER = -1113870528;
   }
 
   interface Features<T extends Features<T>> extends Type.Features<T>, Concept.Features<T> {

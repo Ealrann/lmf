@@ -10,10 +10,10 @@ import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.linking.FeatureResolution;
 import org.logoce.lmf.core.loader.linking.LinkException;
 import org.logoce.lmf.core.loader.linking.ResolutionAttempt;
-import org.logoce.lmf.core.loader.linking.linker.NodeLinker;
-import org.logoce.lmf.core.resource.interpretation.PFeature;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.DynamicModelPackage;
+import org.logoce.lmf.core.loader.internal.linking.NodeLinker;
+import org.logoce.lmf.core.loader.internal.interpretation.PFeature;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.DynamicModelPackage;
 import org.logoce.lmf.core.util.tree.AbstractTree;
 
 import java.util.HashSet;

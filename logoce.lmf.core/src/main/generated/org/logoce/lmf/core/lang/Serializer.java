@@ -3,9 +3,9 @@ package org.logoce.lmf.core.lang;
 import java.util.List;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.SerializerBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Serializer extends LMObject {
   static Builder builder() {
@@ -19,9 +19,9 @@ public interface Serializer extends LMObject {
   String convert();
 
   interface FeatureIDs {
-    int DEFAULT_VALUE = -947412497;
-    int CREATE = 2102923899;
-    int CONVERT = 689167380;
+    int DEFAULT_VALUE = 2006380345;
+    int CREATE = 152411973;
+    int CONVERT = 352839818;
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {

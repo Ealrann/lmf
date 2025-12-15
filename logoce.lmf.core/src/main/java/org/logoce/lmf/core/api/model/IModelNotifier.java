@@ -2,7 +2,7 @@ package org.logoce.lmf.core.api.model;
 
 import org.logoce.lmf.core.api.notification.Notification;
 import org.logoce.lmf.core.lang.Feature;
-import org.logoce.lmf.core.notification.listener.IModelListener;
+import org.logoce.lmf.core.api.notification.listener.IModelListener;
 import org.logoce.lmf.notification.api.IFeatures;
 
 import java.util.Collection;

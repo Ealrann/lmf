@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.functional;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.core.util.ModelCopier;
+import org.logoce.lmf.core.api.util.ModelCopier;
 import test.model.carcompany.Brand;
 import test.model.carcompany.Car;
 import test.model.carcompany.CarCompany;

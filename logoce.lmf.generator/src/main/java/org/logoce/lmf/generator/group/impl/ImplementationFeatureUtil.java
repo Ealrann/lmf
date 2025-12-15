@@ -22,7 +22,7 @@ import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Unit;
 import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

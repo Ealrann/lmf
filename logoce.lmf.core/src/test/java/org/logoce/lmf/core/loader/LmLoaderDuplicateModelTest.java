@@ -3,7 +3,7 @@ package org.logoce.lmf.core.loader;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import test.model.carcompany.CarCompanyModelPackage;
 
 import java.nio.charset.StandardCharsets;

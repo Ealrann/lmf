@@ -1,6 +1,7 @@
 package org.logoce.lmf.core.util;
 
 import org.junit.jupiter.api.Test;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

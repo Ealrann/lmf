@@ -30,7 +30,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
-import org.logoce.lmf.core.util.TextPositions;
+import org.logoce.lmf.core.api.util.TextPositions;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
 import org.logoce.lmf.lsp.state.LmDocumentState;

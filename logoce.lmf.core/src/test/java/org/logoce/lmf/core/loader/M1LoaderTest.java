@@ -11,11 +11,11 @@ import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.lang.Named;
 import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.loader.linking.feature.EnumResolver;
+import org.logoce.lmf.core.loader.internal.feature.EnumResolver;
 import org.logoce.lmf.core.loader.model.LmDocument;
-import org.logoce.lmf.core.util.DynamicModelPackage;
-import org.logoce.lmf.core.util.ModelRegistry;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.model.DynamicModelPackage;
+import org.logoce.lmf.core.api.model.ModelRegistry;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import test.model.carcompany.CarCompany;
 import test.model.carcompany.CarCompanyModelPackage;
 

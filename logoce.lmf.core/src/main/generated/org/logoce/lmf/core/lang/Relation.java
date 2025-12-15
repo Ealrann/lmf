@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.BooleanListener;
+import org.logoce.lmf.core.api.notification.listener.IntListener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.BooleanListener;
-import org.logoce.lmf.core.notification.listener.IntListener;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Relation<UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> extends Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> {
   static <UnaryType extends LMObject, EffectiveType, ListenerType, ParentGroup> Builder<UnaryType, EffectiveType, ListenerType, ParentGroup> builder(
@@ -30,9 +30,9 @@ public interface Relation<UnaryType extends LMObject, EffectiveType, ListenerTyp
     int MANY = Feature.FeatureIDs.MANY;
     int MANDATORY = Feature.FeatureIDs.MANDATORY;
     int PARAMETERS = Feature.FeatureIDs.PARAMETERS;
-    int CONCEPT = 1758409075;
-    int LAZY = -813813687;
-    int CONTAINS = -1308319628;
+    int CONCEPT = -936909975;
+    int LAZY = -1312443885;
+    int CONTAINS = 1036135742;
   }
 
   interface Features<T extends Features<T>> extends Feature.Features<T> {

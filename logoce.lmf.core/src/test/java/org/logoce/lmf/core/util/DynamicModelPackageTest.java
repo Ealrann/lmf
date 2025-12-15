@@ -1,6 +1,9 @@
 package org.logoce.lmf.core.util;
 
 import org.junit.jupiter.api.Test;
+import org.logoce.lmf.core.api.model.DynamicModelPackage;
+import org.logoce.lmf.core.api.model.ModelRegistry;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
@@ -10,9 +13,9 @@ import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.loader.LmLoader;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.linking.LmModelLinker;
-import org.logoce.lmf.core.loader.linking.TreeToFeatureLinker;
+import org.logoce.lmf.core.loader.internal.linking.TreeToFeatureLinker;
 import org.logoce.lmf.core.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

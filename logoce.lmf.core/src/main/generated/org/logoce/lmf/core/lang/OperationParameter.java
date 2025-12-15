@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.OperationParameterBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface OperationParameter extends Named {
   static Builder builder() {
@@ -20,8 +20,8 @@ public interface OperationParameter extends Named {
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int TYPE = 302950153;
-    int PARAMETERS = -525565319;
+    int TYPE = -1038224301;
+    int PARAMETERS = -1814351805;
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {

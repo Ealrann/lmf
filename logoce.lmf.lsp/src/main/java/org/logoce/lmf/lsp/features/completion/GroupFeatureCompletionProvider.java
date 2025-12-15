@@ -16,10 +16,10 @@ import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelRegistry;
-import org.logoce.lmf.core.util.ModelUtil;
-import org.logoce.lmf.core.util.MetaModelRegistry;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.ModelRegistry;
+import org.logoce.lmf.core.api.util.ModelUtil;
+import org.logoce.lmf.core.api.model.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

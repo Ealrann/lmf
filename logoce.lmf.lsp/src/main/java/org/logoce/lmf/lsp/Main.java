@@ -5,8 +5,8 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.linking.LmModelLinker;
 import org.logoce.lmf.core.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.loader.linking;
 
 import org.logoce.lmf.core.lang.Feature;
-import org.logoce.lmf.core.resource.interpretation.PFeature;
+import org.logoce.lmf.core.loader.internal.interpretation.PFeature;
 
 import java.util.NoSuchElementException;
 

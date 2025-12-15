@@ -10,7 +10,7 @@ import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.generator.util.*;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 
 import java.util.ArrayList;
@@ -208,6 +208,7 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 	private static TypeName resolveListenerType(final Feature<?, ?, ?, ?> feature,
 												final TypeName rawEffectiveType)
 	{
+		final var listenerPackage = "org.logoce.lmf.core.api.notification.listener";
 		if (feature instanceof Attribute<?, ?, ?, ?> attribute)
 		{
 			final var datatype = attribute.datatype();
@@ -215,28 +216,28 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 			{
 				return switch (unit.primitive())
 				{
-					case Boolean -> ClassName.get("org.logoce.lmf.core.notification.listener", "BooleanListener");
-					case Int -> ClassName.get("org.logoce.lmf.core.notification.listener", "IntListener");
-					case Long -> ClassName.get("org.logoce.lmf.core.notification.listener", "LongListener");
-					case Float -> ClassName.get("org.logoce.lmf.core.notification.listener", "FloatListener");
-					case Double -> ClassName.get("org.logoce.lmf.core.notification.listener", "DoubleListener");
+					case Boolean -> ClassName.get(listenerPackage, "BooleanListener");
+					case Int -> ClassName.get(listenerPackage, "IntListener");
+					case Long -> ClassName.get(listenerPackage, "LongListener");
+					case Float -> ClassName.get(listenerPackage, "FloatListener");
+					case Double -> ClassName.get(listenerPackage, "DoubleListener");
 					case String ->
-							GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
+							GenUtils.parameterize(ClassName.get(listenerPackage, "Listener"),
 												  List.of(ClassName.get(String.class)));
 				};
 			}
 
-			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
+			return GenUtils.parameterize(ClassName.get(listenerPackage, "Listener"),
 										 List.of(rawEffectiveType.box()));
 		}
 
 		if (feature instanceof Relation<?, ?, ?, ?> relation && !relation.many())
 		{
-			return GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
+			return GenUtils.parameterize(ClassName.get(listenerPackage, "Listener"),
 										 List.of(rawEffectiveType.box()));
 		}
 
-		return GenUtils.parameterize(ClassName.get("org.logoce.lmf.core.notification.listener", "Listener"),
+		return GenUtils.parameterize(ClassName.get(listenerPackage, "Listener"),
 									 List.of(rawEffectiveType.box()));
 	}
 

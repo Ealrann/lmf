@@ -9,8 +9,8 @@ import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Named;
 import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.notification.list.ObservableList;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.notification.list.ObservableList;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 import java.util.List;
 import java.util.stream.Stream;

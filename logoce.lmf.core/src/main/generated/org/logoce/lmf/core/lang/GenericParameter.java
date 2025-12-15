@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.BooleanListener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.GenericParameterBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.BooleanListener;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface GenericParameter extends LMObject {
   static Builder builder() {
@@ -23,10 +23,10 @@ public interface GenericParameter extends LMObject {
   List<GenericParameter> parameters();
 
   interface FeatureIDs {
-    int WILDCARD = 520310873;
-    int WILDCARD_BOUND_TYPE = 673018239;
-    int TYPE = -1625571015;
-    int PARAMETERS = -47630167;
+    int WILDCARD = 141849379;
+    int WILDCARD_BOUND_TYPE = -792342027;
+    int TYPE = -1001268989;
+    int PARAMETERS = 1323094259;
   }
 
   interface Features<T extends Features<T>> extends LMObject.Features<T> {

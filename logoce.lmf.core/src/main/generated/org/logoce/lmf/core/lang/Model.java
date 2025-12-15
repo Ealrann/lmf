@@ -2,8 +2,8 @@ package org.logoce.lmf.core.lang;
 
 import java.util.List;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Model extends Named {
   @Override
@@ -14,9 +14,9 @@ public interface Model extends Named {
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int DOMAIN = -463269570;
-    int IMPORTS = -1387965388;
-    int METAMODELS = -1744988119;
+    int DOMAIN = -1449185740;
+    int IMPORTS = -1886595586;
+    int METAMODELS = -145339873;
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {

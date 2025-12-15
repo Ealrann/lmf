@@ -15,7 +15,7 @@ import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.core.lang.builder.GenericBuilder;
 import org.logoce.lmf.core.lang.builder.GenericExtensionBuilder;
 import org.logoce.lmf.core.lang.builder.GenericParameterBuilder;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic<?>>
 {

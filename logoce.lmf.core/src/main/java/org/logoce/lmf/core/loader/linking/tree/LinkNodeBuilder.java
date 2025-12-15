@@ -5,11 +5,11 @@ import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.linking.LinkException;
 import org.logoce.lmf.core.loader.linking.ModelGroup;
-import org.logoce.lmf.core.loader.linking.TreeToFeatureLinker;
-import org.logoce.lmf.core.resource.interpretation.PGroup;
-import org.logoce.lmf.core.resource.interpretation.PType;
-import org.logoce.lmf.core.resource.parsing.PNode;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.loader.internal.linking.TreeToFeatureLinker;
+import org.logoce.lmf.core.loader.internal.interpretation.PGroup;
+import org.logoce.lmf.core.loader.internal.interpretation.PType;
+import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.api.util.ModelUtil;
 import org.logoce.lmf.core.util.tree.BasicTree;
 import org.logoce.lmf.core.util.tree.Tree;
 

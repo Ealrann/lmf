@@ -5,11 +5,11 @@ import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
 import org.logoce.lmf.core.api.model.IModelPackage;
+import org.logoce.lmf.core.api.notification.listener.BooleanListener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.MetaModelBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.BooleanListener;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface MetaModel extends Model {
   static Builder builder() {
@@ -32,14 +32,14 @@ public interface MetaModel extends Model {
     int DOMAIN = Model.FeatureIDs.DOMAIN;
     int IMPORTS = Model.FeatureIDs.IMPORTS;
     int METAMODELS = Model.FeatureIDs.METAMODELS;
-    int GROUPS = 1867707507;
-    int ENUMS = -1604280045;
-    int UNITS = -1589515024;
-    int ALIASES = 856393791;
-    int JAVA_WRAPPERS = -62373407;
-    int LM_PACKAGE = 968992902;
-    int GEN_NAME_PACKAGE = 1673060714;
-    int EXTRA_PACKAGE = 768798069;
+    int GROUPS = -827611543;
+    int ENUMS = 248436829;
+    int UNITS = 263201850;
+    int ALIASES = -1094118135;
+    int JAVA_WRAPPERS = 2111120215;
+    int LM_PACKAGE = -867226928;
+    int GEN_NAME_PACKAGE = -1248641696;
+    int EXTRA_PACKAGE = -1352675605;
   }
 
   interface Features<T extends Features<T>> extends Model.Features<T> {

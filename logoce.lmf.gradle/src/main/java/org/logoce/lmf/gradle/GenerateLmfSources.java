@@ -12,7 +12,7 @@ import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.logoce.lmf.gradle.diagnostics.GenerationFailureReporter;
 import org.logoce.lmf.core.loader.LmWorkspace;
-import org.logoce.lmf.core.util.ModelRegistry;
+import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.File;
 import java.io.IOException;

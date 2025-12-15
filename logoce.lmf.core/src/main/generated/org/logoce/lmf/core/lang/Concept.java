@@ -2,7 +2,7 @@ package org.logoce.lmf.core.lang;
 
 import java.util.List;
 import org.logoce.lmf.core.api.model.IModelNotifier;
-import org.logoce.lmf.core.notification.listener.Listener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 
 public interface Concept<T> extends Type<T> {
   @Override

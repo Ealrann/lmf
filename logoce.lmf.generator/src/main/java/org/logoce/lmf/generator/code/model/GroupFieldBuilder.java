@@ -20,7 +20,7 @@ import org.logoce.lmf.generator.util.TypeResolutionUtil;
 import org.logoce.lmf.core.api.model.BuilderSupplier;
 import org.logoce.lmf.core.lang.builder.GroupBuilder;
 import org.logoce.lmf.core.lang.builder.IncludeBuilder;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 public final class GroupFieldBuilder implements DefinitionFieldBuilder<Group<?>>
 {

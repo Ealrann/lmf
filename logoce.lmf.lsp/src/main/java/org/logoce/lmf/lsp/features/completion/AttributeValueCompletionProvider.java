@@ -14,7 +14,7 @@ import org.logoce.lmf.core.lang.LMCoreModelDefinition;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
-import org.logoce.lmf.core.util.MetaModelRegistry;
+import org.logoce.lmf.core.api.model.MetaModelRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

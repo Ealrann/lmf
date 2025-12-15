@@ -2,7 +2,7 @@ package org.logoce.lmf.core.util.oldlogoce;
 
 import org.logoce.lmf.core.api.notification.Notification;
 import org.logoce.lmf.core.lang.LMObject;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 import java.util.*;
 import java.util.function.Consumer;

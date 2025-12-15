@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.loader.parsing;
 
-import org.logoce.lmf.core.lexer.ELMTokenType;
-import org.logoce.lmf.core.resource.parsing.PNode;
+import org.logoce.lmf.core.api.lexer.ELMTokenType;
+import org.logoce.lmf.core.api.text.syntax.PNode;
 import org.logoce.lmf.core.util.tree.Tree;
 
 import java.util.ArrayList;

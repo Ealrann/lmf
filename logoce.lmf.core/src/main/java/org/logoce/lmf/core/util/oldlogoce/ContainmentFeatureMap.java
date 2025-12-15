@@ -2,7 +2,7 @@ package org.logoce.lmf.core.util.oldlogoce;
 
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.util.ModelUtil;
+import org.logoce.lmf.core.api.util.ModelUtil;
 
 import java.util.ArrayList;
 import java.util.List;

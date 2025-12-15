@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.JavaWrapperBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface JavaWrapper<T> extends Datatype<T> {
   static <T> Builder<T> builder() {
@@ -21,8 +21,8 @@ public interface JavaWrapper<T> extends Datatype<T> {
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int QUALIFIED_CLASS_NAME = 1292771257;
-    int SERIALIZER = -1882174364;
+    int QUALIFIED_CLASS_NAME = -4904145;
+    int SERIALIZER = 291319258;
   }
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {

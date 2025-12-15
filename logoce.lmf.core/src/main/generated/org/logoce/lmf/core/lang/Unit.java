@@ -3,9 +3,9 @@ package org.logoce.lmf.core.lang;
 import java.util.List;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.UnitBuilder;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Unit<T> extends Datatype<T> {
   static <T> Builder<T> builder() {
@@ -21,10 +21,10 @@ public interface Unit<T> extends Datatype<T> {
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int MATCHER = 1032045637;
-    int DEFAULT_VALUE = -221625219;
-    int PRIMITIVE = 1504038714;
-    int EXTRACTOR = -1208971145;
+    int MATCHER = 46129467;
+    int DEFAULT_VALUE = 2122830151;
+    int PRIMITIVE = -1068595536;
+    int EXTRACTOR = 513361901;
   }
 
   interface Features<T extends Features<T>> extends Datatype.Features<T> {

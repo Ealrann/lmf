@@ -1,8 +1,8 @@
 package org.logoce.lmf.core.lang.impl;
 
-import org.logoce.lmf.core.api.model.ModelNotifier;
 import org.logoce.lmf.core.api.model.FeaturedObject;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.model.ModelNotifier;
 import org.logoce.lmf.core.feature.FeatureGetter;
 import org.logoce.lmf.core.feature.FeatureSetter;
 import org.logoce.lmf.core.lang.Alias;

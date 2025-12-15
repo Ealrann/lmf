@@ -2,11 +2,11 @@ package org.logoce.lmf.core.lang;
 
 import java.util.List;
 import org.logoce.lmf.core.api.model.IModelNotifier;
+import org.logoce.lmf.core.api.notification.listener.BooleanListener;
+import org.logoce.lmf.core.api.notification.listener.IntListener;
+import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
 import org.logoce.lmf.core.lang.builder.RelationBuilder;
-import org.logoce.lmf.core.notification.listener.BooleanListener;
-import org.logoce.lmf.core.notification.listener.IntListener;
-import org.logoce.lmf.core.notification.listener.Listener;
 
 public interface Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> extends Named {
   @Override
@@ -19,11 +19,11 @@ public interface Feature<UnaryType, EffectiveType, ListenerType, ParentGroup> ex
 
   interface FeatureIDs {
     int NAME = Named.FeatureIDs.NAME;
-    int IMMUTABLE = 2122316949;
-    int ID = 1492330856;
-    int MANY = -389004436;
-    int MANDATORY = 132418796;
-    int PARAMETERS = -435928777;
+    int IMMUTABLE = 171805023;
+    int ID = -1923216418;
+    int MANY = -1374920606;
+    int MANDATORY = -1818093130;
+    int PARAMETERS = -772256339;
   }
 
   interface Features<T extends Features<T>> extends Named.Features<T> {
