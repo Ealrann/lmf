@@ -28,4 +28,4 @@ if [[ -n "$IMPORTS" ]]; then
 fi
 
 GRADLE_USER_HOME="${GRADLE_USER_HOME:-$ROOT_DIR/.gradle}" \
-"$ROOT_DIR/gradlew" :logoce.lmf.core:run --args="$MODEL $IMPORTS"
+"$ROOT_DIR/gradlew" :logoce.lmf.core.api:run --args="$MODEL $IMPORTS"

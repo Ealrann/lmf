@@ -1,6 +1,6 @@
 package org.logoce.lmf.gradle.diagnostics;
 
-import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
 
 import java.io.File;
 import java.util.List;

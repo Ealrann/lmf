@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
-import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.loader.linking.LmModelLinker;
-import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.api.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.api.loader.parsing.LmTreeReader;
 import org.logoce.lmf.core.api.text.syntax.PNode;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 
@@ -26,7 +26,7 @@ final class HeaderInfoMetaModelResolutionTest
 	void headerInfoUsesActiveMetaModelForM1Root() throws Exception
 	{
 		// 1) Build the CarCompany meta-model from its M2 definition.
-		final var carCompanyPath = Path.of("..", "logoce.lmf.core", "src", "test", "model", "CarCompany.lm");
+		final var carCompanyPath = Path.of("..", "logoce.lmf.core.api", "src", "test", "model", "CarCompany.lm");
 		final var carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 
 		final var carDiagnostics = new ArrayList<LmDiagnostic>();
@@ -40,7 +40,7 @@ final class HeaderInfoMetaModelResolutionTest
 		final MetaModel carCompanyMetaModel = (MetaModel) carLinkResult.model();
 
 		// 2) Parse the Peugeot M1 model and build a SyntaxSnapshot for header inspection.
-		final var peugeotPath = Path.of("..", "logoce.lmf.core", "src", "test", "model", "Peugeot.lm");
+		final var peugeotPath = Path.of("..", "logoce.lmf.core.api", "src", "test", "model", "Peugeot.lm");
 		final var peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
 
 		final var peugeotDiagnostics = new ArrayList<LmDiagnostic>();

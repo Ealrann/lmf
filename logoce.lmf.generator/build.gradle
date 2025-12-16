@@ -14,7 +14,7 @@ application {
 
 dependencies {
 
-	api project(':logoce.lmf.core')
+	api project(':logoce.lmf.core.api')
 
 	implementation "com.squareup:javapoet:$javaPoetVersion"
 

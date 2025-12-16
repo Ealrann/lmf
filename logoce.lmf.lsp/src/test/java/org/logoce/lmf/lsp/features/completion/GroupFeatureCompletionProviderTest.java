@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolTable;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.core.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.loader.linking.LmModelLinker;
-import org.logoce.lmf.core.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.api.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.api.loader.parsing.LmTreeReader;
 import org.logoce.lmf.core.api.text.syntax.PNode;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 

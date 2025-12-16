@@ -1,0 +1,56 @@
+package org.logoce.lmf.core.resource.transform;
+
+import org.junit.jupiter.api.Test;
+import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.MetaModel;
+import org.logoce.lmf.core.lang.Primitive;
+import org.logoce.lmf.core.lang.Unit;
+import org.logoce.lmf.core.api.loader.LmLoader;
+import org.logoce.lmf.core.api.model.ModelRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class AttributeTest
+{
+	@Test
+	public void attributes()
+	{
+		final var textModel = "(MetaModel Test " +
+							  "  (Definition name=Atts" +
+							  "    (Attribute mandatory immutable many name=count datatype=#LMCore/units.3)" +
+							  "    (Attribute mandatory=false immutable=false many=false name=exists " +
+							  "        datatype=#LMCore/units.2)" +
+							  "    )" +
+							  ") ";
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var roots = loader.loadObjects(textModel);
+
+		final var root = roots.get(0);
+		assertTrue(root instanceof MetaModel);
+		final var model = (MetaModel) root;
+
+
+		final var group0 = model.groups()
+								.get(0);
+		assertEquals("Atts", group0.name());
+		assertTrue(group0.concrete());
+		assertEquals(2,
+					 group0.features()
+						   .size());
+
+		final var att0 = (Attribute<?, ?, ?, ?>) group0.features()
+													 .get(0);
+		assertEquals("count", att0.name());
+		assertEquals(Primitive.Int, ((Unit<?>) att0.datatype()).primitive());
+		assertTrue(att0.many());
+		assertTrue(att0.immutable());
+		assertTrue(att0.mandatory());
+
+		final var att1 = (Attribute<?, ?, ?, ?>) group0.features()
+													 .get(1);
+		assertEquals("exists", att1.name());
+		assertEquals(Primitive.Boolean, ((Unit<?>) att1.datatype()).primitive());
+		assertFalse(att1.immutable());
+		assertFalse(att1.mandatory());
+	}
+}

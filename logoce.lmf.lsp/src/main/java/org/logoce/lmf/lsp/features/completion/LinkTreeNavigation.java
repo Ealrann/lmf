@@ -3,7 +3,7 @@ package org.logoce.lmf.lsp.features.completion;
 import org.eclipse.lsp4j.Position;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.core.loader.linking.LinkNode;
+import org.logoce.lmf.core.api.loader.linking.LinkNode;
 import org.logoce.lmf.core.api.text.syntax.PNode;
 
 final class LinkTreeNavigation
@@ -30,4 +30,3 @@ final class LinkTreeNavigation
 		return SemanticNavigation.findLinkNodeForNode(semantic, headerNode);
 	}
 }
-

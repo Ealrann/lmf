@@ -11,11 +11,8 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.logoce.lmf.gradle.diagnostics.GenerationFailureReporter;
-import org.logoce.lmf.core.loader.LmWorkspace;
-import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +22,10 @@ public abstract class GenerateLmfSources extends DefaultTask
 	@SkipWhenEmpty
 	@PathSensitive(PathSensitivity.RELATIVE)
 	public abstract ConfigurableFileCollection getModelFiles();
+
+	@InputFiles
+	@PathSensitive(PathSensitivity.RELATIVE)
+	public abstract ConfigurableFileCollection getImportModelFiles();
 
 	@OutputDirectory
 	public abstract DirectoryProperty getOutputDir();
@@ -36,6 +37,7 @@ public abstract class GenerateLmfSources extends DefaultTask
 		final var outputDir = getOutputDir().get().getAsFile();
 
 		final List<File> modelFiles = new ArrayList<>(getModelFiles().getFiles());
+		final List<File> importModelFiles = new ArrayList<>(getImportModelFiles().getFiles());
 
 		if (outputDir.exists() == false && outputDir.mkdirs() == false)
 		{
@@ -51,7 +53,7 @@ public abstract class GenerateLmfSources extends DefaultTask
 		logger.lifecycle("Generating LMF sources from {}", modelFiles);
 		try
 		{
-			runGenerator(modelFiles, outputDir, logger);
+			runGenerator(outputDir, modelFiles, importModelFiles, logger);
 		}
 		catch (Exception e)
 		{
@@ -59,19 +61,16 @@ public abstract class GenerateLmfSources extends DefaultTask
 		}
 	}
 
-	private static void runGenerator(final List<File> modelFiles,
-									 final File outputDir,
-									 final Logger logger) throws IOException
+	private static void runGenerator(final File outputDir,
+									 final List<File> modelsToGenerate,
+									 final List<File> importModels,
+									 final Logger logger)
 	{
-		final var workspace = LmWorkspace.loadMetaModels(modelFiles, ModelRegistry.empty());
-		final List<File> metaModelFiles = new ArrayList<>(workspace.files());
-
-		if (metaModelFiles.isEmpty())
+		if (importModels.isEmpty() == false)
 		{
-			logger.lifecycle("No MetaModel roots found in LMF model files; skipping LMF code generation.");
-			return;
+			logger.lifecycle("LMF import models = {}", importModels);
 		}
 
-		org.logoce.lmf.generator.Main.generate(outputDir, metaModelFiles, metaModelFiles);
+		org.logoce.lmf.generator.Main.generate(outputDir, modelsToGenerate, importModels);
 	}
 }

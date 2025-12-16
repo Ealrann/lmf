@@ -5,6 +5,8 @@ buildscript {
 	}
 }
 
+apply plugin: 'base'
+
 def lmfGroup = 'org.logoce.lmf'
 def lmfVersion = findProperty('logoceVersion') ?: '0.0.1'
 
@@ -55,5 +57,35 @@ subprojects {
 		}
 	}
 
+	
+}
 
+tasks.register("buildAll") {
+	group = "build"
+	description = "Builds all LMF subprojects"
+	dependsOn(subprojects.collect { it.tasks.named("build") })
+}
+
+tasks.named("build") {
+	dependsOn("buildAll")
+}
+
+tasks.register("checkAll") {
+	group = "verification"
+	description = "Runs checks for all LMF subprojects"
+	dependsOn(subprojects.collect { it.tasks.named("check") })
+}
+
+tasks.named("check") {
+	dependsOn("checkAll")
+}
+
+tasks.register("cleanAll") {
+	group = "build"
+	description = "Cleans all LMF subprojects"
+	dependsOn(subprojects.collect { it.tasks.named("clean") })
+}
+
+tasks.named("clean") {
+	dependsOn("cleanAll")
 }

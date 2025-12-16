@@ -333,10 +333,10 @@ final class LmCompletionEngineTest
 
 	private static Path lmCorePath()
 	{
-		Path path = Path.of("logoce.lmf.core/src/main/model/asset/LMCore.lm");
+		Path path = Path.of("logoce.lmf.core.api/src/main/model/asset/LMCore.lm");
 		if (!Files.exists(path))
 		{
-			path = Path.of("../logoce.lmf.core/src/main/model/asset/LMCore.lm");
+			path = Path.of("../logoce.lmf.core.api/src/main/model/asset/LMCore.lm");
 		}
 		return path.toAbsolutePath();
 	}

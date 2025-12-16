@@ -1,14 +1,14 @@
 # LMCore `.lm` How‑To (M2 Meta‑Models)
 
-This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.core` and `logoce.lmf.generator`.
+This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.core.api` and `logoce.lmf.generator`.
 
 If you are new to this repo, read this file together with:
 
-- `logoce.lmf.core/src/main/model/asset/LMCore.lm` – the LMCore meta‑model (M3), which defines the language itself.
+- `logoce.lmf.core.api/src/main/model/asset/LMCore.lm` – the LMCore meta‑model (M3), which defines the language itself.
 - `logoce.lmf.generator/src/test/model/CarCompany.lm` – a minimal but complete M2 example.
 - The `lsp-design/` folder (optional, for tooling work) – contains copied `.lm` examples and LSP design notes.
 
-The LMCore definition itself lives in `logoce.lmf.core/src/main/model/asset/LMCore.lm`. The CarCompany example model is in `logoce.lmf.generator/src/test/model/CarCompany.lm`.
+The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/LMCore.lm`. The CarCompany example model is in `logoce.lmf.generator/src/test/model/CarCompany.lm`.
 
 ## 0. Orientation: what you are writing
 
@@ -23,7 +23,7 @@ The LMCore definition itself lives in `logoce.lmf.core/src/main/model/asset/LMCo
 - **Loading `.lm` programmatically**
   - For simple experiments:
     ```java
-    var loader = new org.logoce.lmf.core.loader.LmLoader(ModelRegistry.empty());
+    var loader = new org.logoce.lmf.core.api.loader.LmLoader(ModelRegistry.empty());
     var doc    = loader.loadModel(Files.newInputStream(path));
     MetaModel mm = (MetaModel) doc.model();
     ```
@@ -191,7 +191,7 @@ Generics in LMCore let you describe type‑parameterised concepts and have the g
         ...)
     ```
   - `Definition Attribute` and `Definition Relation`, which `includes group=@Feature parameters=../generics.0,../generics.1`.
-- In the generated Java (`logoce.lmf.core/src/main/generated/org/logoce/lmf/core/lang`):
+- In the generated Java (`logoce.lmf.core.api/src/main/generated/org/logoce/lmf/core/lang`):
   - `Feature`, `Attribute`, and `Relation` are generic types (`Feature<T, E>`, etc.).
   - The generic parameters in the `.lm` model map directly to these Java type parameters.
 
@@ -266,10 +266,10 @@ If you need to express something that doesn’t fit these patterns, open `LMCore
 For small tools, tests, or REPL‑style experiments, the easiest entry point is the new loader:
 
 ```java
-import org.logoce.lmf.core.lang.MetaModel;
-import org.logoce.lmf.core.loader.LmLoader;
-import org.logoce.lmf.core.loader.model.LmDocument;
-import org.logoce.lmf.core.api.model.ModelRegistry;
+	import org.logoce.lmf.core.lang.MetaModel;
+	import org.logoce.lmf.core.api.loader.LmLoader;
+	import org.logoce.lmf.core.api.loader.model.LmDocument;
+	import org.logoce.lmf.core.api.model.ModelRegistry;
 
 var loader = new LmLoader(ModelRegistry.empty());
 try (var in = Files.newInputStream(Path.of("src/main/model/MyModel.lm"))) {
@@ -328,13 +328,14 @@ Generates `Thing`, `Kind`, builders, and feature constants; containment of `chil
 To relate the `.lm` syntax and this how‑to to the Java implementation:
 
 - **LMCore meta‑model (M3)**  
-  `logoce.lmf.core/src/main/model/asset/LMCore.lm` and the generated API under `logoce.lmf.core/src/main/generated/org/logoce/lmf/core/lang`.
+  `logoce.lmf.core.api/src/main/model/asset/LMCore.lm` and the generated API under `logoce.lmf.core.api/src/main/generated/org/logoce/lmf/core/lang`.
 
 - **Loading and linking `.lm`**  
-  - High‑level loader: `org.logoce.lmf.core.loader.LmLoader` (recommended entry point for tools, tests, and the LSP).
+ - High‑level loader: `org.logoce.lmf.core.api.loader.LmLoader` (recommended entry point for tools, tests, and the LSP).
   - Interpretation and linking internals:
-    - `org.logoce.lmf.core.resource.parsing.*` – lexing and parse trees (`PNode`, `PToken`).
-    - `org.logoce.lmf.core.resource.interpretation.*` – `PGroup`, `PFeature`, alias expansion.
-    - `org.logoce.lmf.core.loader.linking.*` – feature resolution, reference handling, and link tree construction.
+    - `org.logoce.lmf.core.api.loader.parsing.*` – parsing entry points (`LmTreeReader`, headers, etc.).
+    - `org.logoce.lmf.core.api.text.syntax.*` – parse trees (`PNode`, `PToken`).
+    - `org.logoce.lmf.core.loader.internal.interpretation.*` – `PGroup`, `PFeature`, alias expansion.
+    - `org.logoce.lmf.core.api.loader.linking.*` – feature resolution, reference handling, and link tree construction.
 
 If you intend to build advanced tooling (e.g. an LSP server), also check the `lsp-design/` folder at the repo root for additional notes and example models.

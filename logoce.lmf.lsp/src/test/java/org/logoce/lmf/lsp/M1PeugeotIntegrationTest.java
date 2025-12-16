@@ -17,7 +17,7 @@ final class M1PeugeotIntegrationTest
 	@Test
 	void peugeotM1ModelIsAnalyzedWithoutCrashing() throws Exception
 	{
-		final Path path = Path.of("..", "logoce.lmf.core", "src", "test", "model", "Peugeot.lm");
+		final Path path = Path.of("..", "logoce.lmf.core.api", "src", "test", "model", "Peugeot.lm");
 		final String text = Files.readString(path, StandardCharsets.UTF_8);
 
 		final var server = new LmLanguageServer();
