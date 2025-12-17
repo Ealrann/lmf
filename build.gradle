@@ -41,8 +41,8 @@ subprojects {
 
 	tasks.withType(Pmd).configureEach {
 		exclude('**/module-info.java')
-		// Exclude only the hand-written lexer from PMD; keep other generated code checked
-		exclude('**/org/logoce/lmf/core/lexer/**')
+		// Exclude only the hand-written lexer from PMD; keep other code checked
+		exclude('**/org/logoce/lmf/core/loader/lexer/LMLexer.java')
 	}
 
 	repositories {

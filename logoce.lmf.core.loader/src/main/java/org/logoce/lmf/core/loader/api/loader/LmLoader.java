@@ -308,9 +308,12 @@ public final class LmLoader
 		{
 		}
 
-			static List<Model> buildAll(final List<ParsedModel> parsedModels, final ModelRegistry baseRegistry)
+		static List<Model> buildAll(final List<ParsedModel> parsedModels, final ModelRegistry baseRegistry)
+		{
+			if (parsedModels.isEmpty())
 			{
-				if (parsedModels.isEmpty()) return List.of();
+				return List.of();
+			}
 
 			final var remaining = new ArrayList<>(parsedModels);
 			final var builtByName = new java.util.HashMap<String, Model>();
@@ -326,35 +329,28 @@ public final class LmLoader
 				while (it.hasNext())
 				{
 					final var pm = it.next();
-					if (allImportsAvailable(pm.imports(), availableNames))
+					if (!allImportsAvailable(pm.imports(), availableNames))
 					{
-						final var linker = new LmModelLinker<PNode>(registryBuilder.build());
-						final var diagnostics = new ArrayList<LmDiagnostic>();
-						final var linkResult = linker.linkModel(List.of(pm.tree()), diagnostics, pm.source());
-
-						final var model = linkResult.model();
-						if (model == null)
-						{
-							// Surface diagnostics to help understand why the model is invalid.
-							for (final var diagnostic : diagnostics)
-							{
-								System.err.printf("%s:%d:%d [%s] %s%n",
-												  pm.source(),
-												  diagnostic.line(),
-												  diagnostic.column(),
-												  diagnostic.severity(),
-												  diagnostic.message());
-							}
-							throw new IllegalArgumentException("Input doesn't define a valid model: " +
-															   pm.qualifiedName());
-						}
-
-						registryBuilder.register(model);
-						availableNames.add(domainName(model));
-						builtByName.put(pm.qualifiedName(), model);
-						it.remove();
-						progressed = true;
+						continue;
 					}
+
+					final var linker = new LmModelLinker<PNode>(registryBuilder.build());
+					final var diagnostics = new ArrayList<LmDiagnostic>();
+					final var linkResult = linker.linkModel(List.of(pm.tree()), diagnostics, pm.source());
+
+					final var model = linkResult.model();
+					if (model == null)
+					{
+						throw new IllegalArgumentException("Input doesn't define a valid model: " +
+														   pm.qualifiedName() +
+														   formatDiagnostics(diagnostics));
+					}
+
+					registryBuilder.register(model);
+					availableNames.add(domainName(model));
+					builtByName.put(pm.qualifiedName(), model);
+					it.remove();
+					progressed = true;
 				}
 
 				if (!progressed)
@@ -362,7 +358,7 @@ public final class LmLoader
 					final var unresolved = new StringBuilder();
 					for (final var pm : remaining)
 					{
-						if (!unresolved.isEmpty())
+						if (unresolved.length() != 0)
 						{
 							unresolved.append(", ");
 						}
@@ -373,25 +369,64 @@ public final class LmLoader
 				}
 			}
 
-			// Preserve the original parsedModels order in the returned list, as the legacy
-			// MultiModelLoader did via its BuildingModel list.
 			final var ordered = new ArrayList<Model>(parsedModels.size());
-				for (final var pm : parsedModels)
+			for (final var pm : parsedModels)
+			{
+				final var model = builtByName.get(pm.qualifiedName());
+				if (model == null)
 				{
-					final var model = builtByName.get(pm.qualifiedName());
-					if (model == null)
-					{
-						throw new IllegalStateException("No built model for " + pm.qualifiedName());
-					}
-					ordered.add(model);
+					throw new IllegalStateException("No built model for " + pm.qualifiedName());
 				}
-				return List.copyOf(ordered);
+				ordered.add(model);
+			}
+			return List.copyOf(ordered);
+		}
+
+		private static String formatDiagnostics(final List<LmDiagnostic> diagnostics)
+		{
+			if (diagnostics == null || diagnostics.isEmpty())
+			{
+				return "";
 			}
 
-			private static boolean allImportsAvailable(final List<String> imports, final Set<String> available)
+			final int maxErrors = 5;
+			final var sb = new StringBuilder();
+			int count = 0;
+
+			for (final var diagnostic : diagnostics)
 			{
-				for (final var imp : imports)
+				if (diagnostic.severity() != LmDiagnostic.Severity.ERROR)
 				{
+					continue;
+				}
+				if (count == maxErrors)
+				{
+					sb.append("; ...");
+					break;
+				}
+				if (count > 0)
+				{
+					sb.append("; ");
+				}
+				sb.append(diagnostic.line())
+				  .append(':')
+				  .append(diagnostic.column())
+				  .append(' ')
+				  .append(diagnostic.message());
+				count++;
+			}
+
+			if (sb.length() == 0)
+			{
+				return "";
+			}
+			return " (errors: " + sb + ")";
+		}
+
+		private static boolean allImportsAvailable(final List<String> imports, final Set<String> available)
+		{
+			for (final var imp : imports)
+			{
 				if (!available.contains(imp))
 				{
 					return false;

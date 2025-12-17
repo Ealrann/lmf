@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static org.logoce.lmf.core.loader.api.loader.model.LmSymbolIndex.ReferenceSpan;
 import static org.logoce.lmf.core.loader.api.loader.model.LmSymbolIndex.SymbolId;
@@ -65,96 +66,124 @@ public final class LmSemanticIndexBuilder
 			return new LmSymbolIndex(List.of(), List.of());
 		}
 
-		// 1) Map each LMObject built from the link trees to its LinkNodeFull.
-		final Map<LMObject, LinkNodeFull<?, PNode>> nodeByObject = new IdentityHashMap<>();
+		final var context = new IndexBuildContext(rootModel, linkTrees, registry, source);
+		return context.build();
+	}
 
-		for (final LinkNode<?, PNode> root : linkTrees)
+	private static final class IndexBuildContext
+	{
+		private final Model rootModel;
+		private final List<? extends LinkNode<?, PNode>> linkTrees;
+		private final ModelRegistry registry;
+		private final CharSequence source;
+
+		private final Map<LMObject, LinkNodeFull<?, PNode>> nodeByObject = new IdentityHashMap<>();
+		private final Map<LMObject, Model> owningModel = new IdentityHashMap<>();
+		private final Map<LMObject, SymbolId> symbolIds = new IdentityHashMap<>();
+		private final Map<LMObject, SymbolSpan> spansByObject = new IdentityHashMap<>();
+
+		private final List<SymbolSpan> declarations = new ArrayList<>();
+		private final List<ReferenceSpan> references = new ArrayList<>();
+
+		private IndexBuildContext(final Model rootModel,
+								  final List<? extends LinkNode<?, PNode>> linkTrees,
+								  final ModelRegistry registry,
+								  final CharSequence source)
 		{
-			if (root instanceof LinkNodeFull<?, PNode> fullRoot)
-			{
-				fullRoot.streamTree().forEach(node -> {
-					final LMObject object;
-					try
-					{
-						object = node.build();
-					}
-					catch (Exception e)
-					{
-						return;
-					}
+			this.rootModel = rootModel;
+			this.linkTrees = linkTrees;
+			this.registry = registry;
+			this.source = source;
+		}
 
-					if (object != null)
-					{
-						nodeByObject.putIfAbsent(object, node);
-					}
-				});
+		LmSymbolIndex build()
+		{
+			indexNodesByObject();
+			if (nodeByObject.isEmpty())
+			{
+				return new LmSymbolIndex(List.of(), List.of());
+			}
+
+			indexOwningModels();
+			collectDeclarations();
+			collectDeclarationHierarchy();
+			collectRelationReferences();
+			collectHeaderReferences();
+			collectModelAttributeReferences();
+			collectEnumValueReferences();
+
+			return new LmSymbolIndex(List.copyOf(declarations), List.copyOf(references));
+		}
+
+		private void indexNodesByObject()
+		{
+			forEachFullNode(node -> {
+				final LMObject object;
+				try
+				{
+					object = node.build();
+				}
+				catch (Exception e)
+				{
+					return;
+				}
+
+				if (object != null)
+				{
+					nodeByObject.putIfAbsent(object, node);
+				}
+			});
+		}
+
+		private void indexOwningModels()
+		{
+			registry.models().forEach(model -> {
+				for (final LMObject object : (Iterable<LMObject>) () -> ModelUtil.streamTree(model).iterator())
+				{
+					owningModel.putIfAbsent(object, model);
+				}
+			});
+
+			if (!owningModel.containsKey(rootModel))
+			{
+				for (final LMObject object : (Iterable<LMObject>) () -> ModelUtil.streamTree(rootModel).iterator())
+				{
+					owningModel.putIfAbsent(object, rootModel);
+				}
 			}
 		}
 
-		if (nodeByObject.isEmpty())
+		private void collectDeclarations()
 		{
-			return new LmSymbolIndex(List.of(), List.of());
-		}
-
-		// 2) Map LMObjects to their owning Models using the registry (and the root model).
-		final Map<LMObject, Model> owningModel = new IdentityHashMap<>();
-		registry.models().forEach(model -> {
-			for (final LMObject object : (Iterable<LMObject>) () -> ModelUtil.streamTree(model).iterator())
+			for (final Map.Entry<LMObject, LinkNodeFull<?, PNode>> entry : nodeByObject.entrySet())
 			{
-				owningModel.putIfAbsent(object, model);
-			}
-		});
+				final LMObject object = entry.getKey();
+				final SymbolId id = getOrCreateSymbolId(object, symbolIds, owningModel, rootModel);
+				if (id == null)
+				{
+					continue;
+				}
 
-		if (!owningModel.containsKey(rootModel))
-		{
-			for (final LMObject object : (Iterable<LMObject>) () -> ModelUtil.streamTree(rootModel).iterator())
-			{
-				owningModel.putIfAbsent(object, rootModel);
+				final var span = resolveDeclarationSpan(object, entry.getValue(), source);
+				spansByObject.put(object, new SymbolSpan(id, span, null));
 			}
 		}
 
-		// 3) Build declarations from LMObjects.
-		final List<SymbolSpan> declarations = new ArrayList<>();
-		final Map<LMObject, SymbolId> symbolIds = new IdentityHashMap<>();
-		final Map<LMObject, SymbolSpan> spansByObject = new IdentityHashMap<>();
-
-		for (final Map.Entry<LMObject, LinkNodeFull<?, PNode>> entry : nodeByObject.entrySet())
+		private void collectDeclarationHierarchy()
 		{
-			final LMObject object = entry.getKey();
-			final SymbolId id = getOrCreateSymbolId(object, symbolIds, owningModel, rootModel);
-			if (id == null)
+			for (final Map.Entry<LMObject, SymbolSpan> entry : spansByObject.entrySet())
 			{
-				continue;
+				final LMObject object = entry.getKey();
+				final SymbolSpan baseSpan = entry.getValue();
+				final SymbolId containerId = resolveContainerId(object, nodeByObject, symbolIds);
+				declarations.add(new SymbolSpan(baseSpan.id(), baseSpan.span(), containerId));
 			}
-
-			final var span = resolveDeclarationSpan(object, entry.getValue(), source);
-			final SymbolSpan symbolSpan = new SymbolSpan(id, span, null);
-
-			spansByObject.put(object, symbolSpan);
 		}
 
-		// 3b) Enrich declarations with container symbols to establish a basic
-		// hierarchy (for example Group -> Feature, Type -> Operation).
-		for (final Map.Entry<LMObject, SymbolSpan> entry : spansByObject.entrySet())
+		private void collectRelationReferences()
 		{
-			final LMObject object = entry.getKey();
-			final SymbolSpan baseSpan = entry.getValue();
-			final SymbolId containerId = resolveContainerId(object, nodeByObject, symbolIds);
-			declarations.add(new SymbolSpan(baseSpan.id(), baseSpan.span(), containerId));
-		}
-
-		// 4) Build references from resolved relations that target declared objects.
-		final List<ReferenceSpan> references = new ArrayList<>();
-
-		for (final LinkNode<?, PNode> root : linkTrees)
-		{
-			if (!(root instanceof LinkNodeFull<?, PNode> fullRoot))
-			{
-				continue;
-			}
-
-			fullRoot.streamTree().forEach(node -> {
-				for (final ResolutionAttempt<Relation<?, ?, ?, ?>> attempt : node.relationResolutions())
+			forEachFullNode(node -> {
+				for (final var attempt : node.relationResolutions())
 				{
 					final var resolution = attempt.resolution();
 					final LMObject target;
@@ -175,8 +204,6 @@ public final class LmSemanticIndexBuilder
 					}
 					else
 					{
-						// Other resolution types (for example constant literals) are not
-						// represented as symbol references in this index.
 						return;
 					}
 
@@ -192,26 +219,9 @@ public final class LmSemanticIndexBuilder
 			});
 		}
 
-		// 5) Build header-based references for M1-style instance models: when a
-		// document uses a meta-model as its "rootModel", each instance header
-		// (for example 'CarParc' or 'ceo' in Peugeot.lm) implicitly refers to
-		// either the owning meta-type (Group/Definition) or the containment
-		// relation from the meta-model.
-		//
-		// We detect these by:
-		// - Looking at each LinkNode's interpreted group() and containingRelation().
-		// - Restricting to groups whose owning model is exactly rootModel (so we
-		//   skip LMCore meta-groups when indexing meta-model definitions).
-		// - Matching the header token against either the containment relation
-		//   name (for example 'ceo') or the group name (for example 'CarParc').
-		for (final LinkNode<?, PNode> root : linkTrees)
+		private void collectHeaderReferences()
 		{
-			if (!(root instanceof LinkNodeFull<?, PNode> fullRoot))
-			{
-				continue;
-			}
-
-			fullRoot.streamTree().forEach(node -> {
+			forEachFullNode(node -> {
 				final var pNode = node.pNode();
 				if (pNode == null)
 				{
@@ -236,30 +246,10 @@ public final class LmSemanticIndexBuilder
 					return;
 				}
 
-				// Decide whether this header denotes a relation (for example
-				// 'ceo' in Peugeot.lm) or a type/alias (for example 'CarParc' or '-att').
 				final Relation<?, ?, ?, ?> containment = node.containingRelation();
-				LMObject target = null;
-
-				if (containment != null && headerToken.equals(containment.name()))
-				{
-					// Header token matches the containment relation name:
-					// treat it as a reference to the relation declaration in
-					// the meta-model.
-					target = containment;
-				}
-				else
-				{
-					// Fallback: treat the header as denoting the meta-type
-					// itself, regardless of whether the raw token is a direct
-					// group name ('Enum') or an alias ('-att', '+contains').
-					target = metaGroup;
-				}
-
-				if (target == null)
-				{
-					return;
-				}
+				final LMObject target = containment != null && headerToken.equals(containment.name())
+										? containment
+										: metaGroup;
 
 				final SymbolId targetId = getOrCreateSymbolId(target, symbolIds, owningModel, owner);
 				if (targetId == null)
@@ -267,7 +257,7 @@ public final class LmSemanticIndexBuilder
 					return;
 				}
 
-				final var span = findValueSpan(headerToken, (LinkNodeFull<?, PNode>) node, source, false);
+				final var span = findValueSpan(headerToken, node, source, false);
 				if (span == null)
 				{
 					return;
@@ -277,38 +267,10 @@ public final class LmSemanticIndexBuilder
 			});
 		}
 
-		// 6) Build references from model-level imports/metamodels attributes:
-		// these are string-valued features on LMCore's Model/MetaModel types
-		// that denote other models in the registry (for example
-		// "test.multi.GraphCore" or "test.model.CarCompany").
-		collectModelAttributeReferences(linkTrees,
-										registry,
-										owningModel,
-										symbolIds,
-										rootModel,
-										references,
-										source);
-
-		return new LmSymbolIndex(List.copyOf(declarations), List.copyOf(references));
-	}
-
-	private static void collectModelAttributeReferences(final List<? extends LinkNode<?, PNode>> linkTrees,
-													   final ModelRegistry registry,
-													   final Map<LMObject, Model> owningModel,
-													   final Map<LMObject, SymbolId> symbolIds,
-													   final Model rootModel,
-													   final List<ReferenceSpan> references,
-													   final CharSequence source)
-	{
-		for (final LinkNode<?, PNode> root : linkTrees)
+		private void collectModelAttributeReferences()
 		{
-			if (!(root instanceof LinkNodeFull<?, PNode> fullRoot))
-			{
-				continue;
-			}
-
-			fullRoot.streamTree().forEach(node -> {
-				for (final ResolutionAttempt<Attribute<?, ?, ?, ?>> attempt : node.attributeResolutions())
+			forEachFullNode(node -> {
+				for (final var attempt : node.attributeResolutions())
 				{
 					final var feature = attempt.feature();
 					if (feature == null || feature.values().isEmpty())
@@ -343,11 +305,6 @@ public final class LmSemanticIndexBuilder
 						}
 
 						final Model targetModel = registry.getModel(name);
-						if (targetModel == null)
-						{
-							continue;
-						}
-
 						if (!(targetModel instanceof LMObject targetObject))
 						{
 							continue;
@@ -370,6 +327,106 @@ public final class LmSemanticIndexBuilder
 				}
 			});
 		}
+
+		private void collectEnumValueReferences()
+		{
+			forEachFullNode(node -> {
+				for (final var attempt : node.attributeResolutions())
+				{
+					final var resolution = attempt.resolution();
+					if (!(resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution))
+					{
+						continue;
+					}
+
+					final var attribute = attrResolution.feature();
+					if (!(attribute != null && attribute.datatype() instanceof Enum<?> enumeration))
+					{
+						continue;
+					}
+
+					final var feature = attempt.feature();
+					if (feature == null || feature.values().isEmpty())
+					{
+						continue;
+					}
+
+					for (final String raw : feature.values())
+					{
+						if (raw == null)
+						{
+							continue;
+						}
+						final String rawTrimmed = raw.trim();
+						if (rawTrimmed.isEmpty())
+						{
+							continue;
+						}
+
+						if (resolveEnumLiteral(enumeration, rawTrimmed) == null)
+						{
+							continue;
+						}
+
+						final SymbolId targetId = getOrCreateSymbolId((LMObject) enumeration, symbolIds, owningModel, rootModel);
+						if (targetId == null)
+						{
+							continue;
+						}
+
+						final var span = findValueSpan(rawTrimmed, node, source, false);
+						if (span == null)
+						{
+							continue;
+						}
+
+						references.add(new ReferenceSpan(targetId, span));
+					}
+				}
+			});
+		}
+
+		private void forEachFullNode(final Consumer<LinkNodeFull<?, PNode>> consumer)
+		{
+			for (final LinkNode<?, PNode> root : linkTrees)
+			{
+				if (root instanceof LinkNodeFull<?, PNode> fullRoot)
+				{
+					fullRoot.streamTree().forEach(consumer);
+				}
+			}
+		}
+	}
+
+	private static String resolveEnumLiteral(final Enum<?> enumeration, final String raw)
+	{
+		if (enumeration == null || raw == null || raw.isBlank())
+		{
+			return null;
+		}
+
+		final String candidate = capitalizeFirstLetter(raw);
+		for (final String literal : enumeration.literals())
+		{
+			if (literal == null)
+			{
+				continue;
+			}
+			if (literal.equals(candidate))
+			{
+				return literal;
+			}
+		}
+		return null;
+	}
+
+	private static String capitalizeFirstLetter(final String str)
+	{
+		if (str == null || str.isEmpty())
+		{
+			return str;
+		}
+		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
 	}
 
 	private static TextPositions.Span resolveReferenceSpan(final PFeature feature,
@@ -418,14 +475,14 @@ public final class LmSemanticIndexBuilder
 
 		// Locate the 'name' attribute for this node so we can anchor
 		// the declaration span on the actual name token (for example 'Person')
-		// instead of the header keyword ('Definition').
-		String rawName = null;
+			// instead of the header keyword ('Definition').
+			String rawName = null;
 
-				for (final ResolutionAttempt<Attribute<?, ?, ?, ?>> attempt : node.attributeResolutions())
-		{
-			final var resolution = attempt.resolution();
-			if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
-				Named.Features.NAME == attrResolution.feature())
+			for (final ResolutionAttempt<Attribute<?, ?, ?, ?>> attempt : node.attributeResolutions())
+			{
+				final var resolution = attempt.resolution();
+				if (resolution instanceof AttributeResolver.AttributeResolution<?> attrResolution &&
+					Named.Features.NAME == attrResolution.feature())
 			{
 				final var feature = attempt.feature();
 				if (feature != null && !feature.values().isEmpty())

@@ -262,7 +262,52 @@ public final class FeatureResolution implements IAdapter
 				return bound;
 			}
 		}
+		else if (feature instanceof Relation<?, ?, ?, ?> relation && relation.concept() instanceof Group<?> group)
+		{
+			final var parameters = relation.parameters();
+			if (!parameters.isEmpty())
+			{
+				final var parameterTypes = parameters.stream()
+													 .map(p -> resolveParameterTypeForOwner(p, owner))
+													 .toList();
+
+				final var model = (MetaModel) group.lmContainer();
+				final var className = ClassName.get(org.logoce.lmf.generator.util.TargetPathUtil.packageName(model),
+													group.name());
+				return TypeParameter.of(className, parameterTypes);
+			}
+		}
 		return singleType;
+	}
+
+	private static TypeName resolveParameterTypeForOwner(final org.logoce.lmf.core.lang.GenericParameter parameter,
+														final Group<?> owner)
+	{
+		final var type = parameter.type();
+		if (type instanceof Generic<?> genericType)
+		{
+			final var bound = TypeResolutionUtil.resolveGenericBinding(genericType, owner);
+			if (bound != null)
+			{
+				final var resolved = bound.parametrized().box();
+				return parameter.wildcard()
+					   ? wildcard(resolved, parameter.wildcardBoundType())
+					   : resolved;
+			}
+		}
+
+		final var resolved = org.logoce.lmf.generator.util.GenericParameter.resolveParameterType(parameter);
+		return resolved;
+	}
+
+	private static TypeName wildcard(final TypeName type, final BoundType boundType)
+	{
+		return switch (boundType)
+		{
+			case Super -> com.squareup.javapoet.WildcardTypeName.supertypeOf(type);
+			case Extends -> com.squareup.javapoet.WildcardTypeName.subtypeOf(type);
+			case null -> com.squareup.javapoet.WildcardTypeName.subtypeOf(type);
+		};
 	}
 
 	private static PartialFeatureResolution resolveType(final Feature<?, ?, ?, ?> feature)

@@ -27,8 +27,8 @@ module logoce.lmf.core.api
 	exports org.logoce.lmf.core.api.extender.ext;
 	exports org.logoce.lmf.core.api.service;
 
-	exports org.logoce.lmf.core.util to logoce.lmf.core.loader, logoce.lmf.core.generator;
-	exports org.logoce.lmf.core.feature to logoce.lmf.core.loader, logoce.lmf.core.generator;
+	exports org.logoce.lmf.core.util;
+	exports org.logoce.lmf.core.feature;
 
 	uses ILmLoader;
 	uses IAdapterDescriptorRegistry;

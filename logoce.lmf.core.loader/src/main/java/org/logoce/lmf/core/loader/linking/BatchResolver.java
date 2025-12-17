@@ -82,13 +82,16 @@ public final class BatchResolver<T extends Feature<?, ?, ?, ?>>
 		final var tokenName = token.name().get();
 		return runner.findMandatory(r -> r.match(tokenName),
 									token.values(),
+									tokenName,
 									() -> new NoSuchElementException("Cannot resolve named Token " + tokenName));
 	}
 
 	private FeatureResolution<T> valueResolution(final PFeature token)
 	{
+		final var tokenName = token.firstToken();
 		return runner.findMandatory(r -> true,
 									token.values(),
+									tokenName,
 									() -> new NoSuchElementException("Cannot resolve value Token " +
 																	 token.firstToken()));
 	}

@@ -29,6 +29,7 @@ public final class TokenResolver<T extends Feature<?, ?, ?, ?>, R extends Abstra
 
 	public FeatureResolution<T> findMandatory(final Predicate<ITokenResolver> filter,
 											  final List<String> values,
+											  final String tokenName,
 											  final Supplier<NoSuchElementException> message)
 	{
 		final var optional = findOptional(filter, values);
@@ -38,20 +39,17 @@ public final class TokenResolver<T extends Feature<?, ?, ?, ?>, R extends Abstra
 		}
 
 		final var e = message.get();
-		final var baseMessage = e.getMessage();
 
 		// If a resolver matching the filter used to exist but is no longer
 		// available, interpret this as a duplicate usage of the same feature
 		// (for example, an alias that already consumed the resolver plus an
 		// explicit assignment such as 'immutable=true').
 		final boolean existed = allResolvers.stream().anyMatch(filter::test);
-		if (existed && baseMessage != null && !baseMessage.isBlank())
+		final boolean stillAvailable = availableResolvers.stream().anyMatch(filter::test);
+		if (existed && !stillAvailable)
 		{
-			final int lastSpace = baseMessage.lastIndexOf(' ');
-			final String tokenName = lastSpace >= 0 && lastSpace + 1 < baseMessage.length()
-									 ? baseMessage.substring(lastSpace + 1)
-									 : baseMessage;
-			throw new NoSuchElementException("Feature \"" + tokenName + "\" is already defined");
+			final var effectiveName = tokenName == null || tokenName.isBlank() ? "unknown" : tokenName;
+			throw new NoSuchElementException("Feature \"" + effectiveName + "\" is already defined");
 		}
 
 		throw e;

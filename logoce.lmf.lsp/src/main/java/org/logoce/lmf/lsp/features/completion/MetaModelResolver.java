@@ -1,5 +1,6 @@
 package org.logoce.lmf.lsp.features.completion;
 
+import org.logoce.lmf.lsp.HeaderTextScanner;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.MetaModel;
@@ -154,7 +155,7 @@ public final class MetaModelResolver
 				// the header line. This keeps M1 editing usable even for temporarily
 				// invalid documents.
 				final var source = syntax.source();
-				final var namesFromText = parseMetamodelNamesFromSource(source);
+				final var namesFromText = HeaderTextScanner.parseMetamodelNames(source);
 				if (!namesFromText.isEmpty())
 				{
 					for (final String name : namesFromText)
@@ -185,57 +186,5 @@ public final class MetaModelResolver
 
 		LOG.debug("LMF LSP MetaModelResolver: falling back to LMCore meta-model");
 		return LMCoreModelPackage.MODEL;
-	}
-
-	private static java.util.List<String> parseMetamodelNamesFromSource(final CharSequence source)
-	{
-		if (source == null || source.length() == 0)
-		{
-			return java.util.List.of();
-		}
-
-		final String text = source.toString();
-		final String key = "metamodels=";
-		final int idx = text.indexOf(key);
-		if (idx < 0)
-		{
-			return java.util.List.of();
-		}
-
-		int start = idx + key.length();
-		int endLine = text.indexOf('\n', start);
-		if (endLine < 0)
-		{
-			endLine = text.length();
-		}
-
-		final String tail = text.substring(start, endLine);
-		int end = tail.length();
-		for (int i = 0; i < tail.length(); i++)
-		{
-			final char c = tail.charAt(i);
-			if (Character.isWhitespace(c) || c == ')')
-			{
-				end = i;
-				break;
-			}
-		}
-
-		final String raw = tail.substring(0, end).trim();
-		if (raw.isEmpty())
-		{
-			return java.util.List.of();
-		}
-
-		final var result = new java.util.ArrayList<String>();
-		for (final String part : raw.split(","))
-		{
-			final String trimmed = part.trim();
-			if (!trimmed.isEmpty())
-			{
-				result.add(trimmed);
-			}
-		}
-		return java.util.List.copyOf(result);
 	}
 }

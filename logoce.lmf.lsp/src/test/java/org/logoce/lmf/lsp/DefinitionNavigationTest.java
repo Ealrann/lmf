@@ -6,6 +6,7 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.LmSymbolKind;
 
@@ -135,8 +136,8 @@ final class DefinitionNavigationTest
 		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 		final String peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
 
-		final URI carCompanyUri = carCompanyPath.toAbsolutePath().toUri();
-		final URI peugeotUri = peugeotPath.toAbsolutePath().toUri();
+		final URI carCompanyUri = carCompanyPath.toAbsolutePath().normalize().toUri();
+		final URI peugeotUri = peugeotPath.toAbsolutePath().normalize().toUri();
 
 		final var server = new LmLanguageServer();
 		server.connect(new NoopClient());
@@ -206,6 +207,217 @@ final class DefinitionNavigationTest
 
 		assertEquals(expected.getLine(), start.getLine(), "Definition line should match 'Person' token");
 		assertEquals(expected.getCharacter(), start.getCharacter(), "Definition column should match 'Person' token");
+
+		server.shutdown().join();
+	}
+
+	@Test
+	void goToDefinitionFromM1GroupWithoutOpeningMetaModelFile() throws Exception
+	{
+		Path modelDir = Path.of("logoce.lmf.core.api/src/test/model");
+		if (!Files.exists(modelDir))
+		{
+			modelDir = Path.of("../logoce.lmf.core.api/src/test/model");
+		}
+		final Path carCompanyPath = modelDir.resolve("CarCompany.lm");
+		final Path peugeotPath = modelDir.resolve("Peugeot.lm");
+
+		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
+		final String peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
+
+		final URI carCompanyUri = carCompanyPath.toAbsolutePath().normalize().toUri();
+		final URI peugeotUri = peugeotPath.toAbsolutePath().normalize().toUri();
+
+		final var server = new LmLanguageServer(modelDir.toAbsolutePath().normalize());
+		server.connect(new NoopClient());
+
+		// Only open the M1 model; the M2 meta-model stays unopened but is on disk.
+		final var peugeotState = new LmDocumentState(peugeotUri, 1, peugeotText);
+		server.workspaceIndex().putDocument(peugeotState);
+		server.worker().submit(server::rebuildWorkspace).get();
+
+		final Position groupRef = positionAt(peugeotText, "CarParc");
+
+		final var textDocumentService = (LmTextDocumentService) server.getTextDocumentService();
+		final var params = new DefinitionParams();
+		params.setTextDocument(new TextDocumentIdentifier(peugeotUri.toString()));
+		params.setPosition(groupRef);
+
+		final var result = textDocumentService.definition(params).get();
+		assertTrue(result.isLeft(), "Expected simple Location result for definition");
+		final var locations = result.getLeft();
+		assertNotNull(locations, "Locations should not be null");
+		assertFalse(locations.isEmpty(), "Expected at least one definition location");
+
+		final Location loc = locations.getFirst();
+		assertEquals(carCompanyUri.toString(), loc.getUri(), "Definition should navigate to CarCompany.lm");
+
+		final Position start = loc.getRange().getStart();
+		final String header = "(Definition CarParc";
+		final int headerOffset = carCompanyText.indexOf(header);
+		assertTrue(headerOffset >= 0, "Header '(Definition CarParc' should exist in CarCompany.lm");
+		final int nameOffset = headerOffset + "(Definition ".length();
+		final Position expected = positionForOffset(carCompanyText, nameOffset);
+
+		assertEquals(expected.getLine(), start.getLine(), "Definition line should match 'CarParc' token");
+		assertEquals(expected.getCharacter(), start.getCharacter(), "Definition column should match 'CarParc' token");
+
+		server.shutdown().join();
+	}
+
+	@Test
+	void goToDefinitionFromM1GroupIgnoresUnrelatedInvalidMetaModelOnDisk(@TempDir final Path tempDir) throws Exception
+	{
+		final Path modelDir = Files.createDirectories(tempDir.resolve("models"));
+		final Path carCompanyPath = modelDir.resolve("CarCompany.lm");
+		final Path badPath = modelDir.resolve("Bad.lm");
+		final Path peugeotPath = modelDir.resolve("Peugeot.lm");
+
+		Path carCompanySource = Path.of("logoce.lmf.core.api/src/test/model/CarCompany.lm");
+		if (!Files.exists(carCompanySource))
+		{
+			carCompanySource = Path.of("../logoce.lmf.core.api/src/test/model/CarCompany.lm");
+		}
+		final String carCompanyText = Files.readString(carCompanySource, StandardCharsets.UTF_8);
+		final String badText = """
+			(MetaModel domain=bad name=Bad
+				(Enum E A,A)
+			)
+			""";
+		final String peugeotText = """
+			(CarCompany domain=test.model name=PeugeotCompany metamodels=test.model.CarCompany
+				(CarParc)
+			)
+			""";
+
+		Files.writeString(carCompanyPath, carCompanyText, StandardCharsets.UTF_8);
+		Files.writeString(badPath, badText, StandardCharsets.UTF_8);
+		Files.writeString(peugeotPath, peugeotText, StandardCharsets.UTF_8);
+
+		final URI carCompanyUri = carCompanyPath.toAbsolutePath().normalize().toUri();
+		final URI peugeotUri = peugeotPath.toAbsolutePath().normalize().toUri();
+
+		final var server = new LmLanguageServer(tempDir.toAbsolutePath().normalize());
+		server.connect(new NoopClient());
+
+		server.workspaceIndex().putDocument(new LmDocumentState(peugeotUri, 1, peugeotText));
+		server.worker().submit(server::rebuildWorkspace).get();
+
+		final Position groupRef = positionAt(peugeotText, "CarParc");
+
+		final var textDocumentService = (LmTextDocumentService) server.getTextDocumentService();
+		final var params = new DefinitionParams();
+		params.setTextDocument(new TextDocumentIdentifier(peugeotUri.toString()));
+		params.setPosition(groupRef);
+
+		final var result = textDocumentService.definition(params).get();
+		assertTrue(result.isLeft(), "Expected simple Location result for definition");
+		final var locations = result.getLeft();
+		assertNotNull(locations, "Locations should not be null");
+		assertFalse(locations.isEmpty(), "Expected at least one definition location");
+
+		final Location loc = locations.getFirst();
+		assertEquals(carCompanyUri.toString(), loc.getUri(), "Definition should navigate to CarCompany.lm");
+
+		server.shutdown().join();
+	}
+
+	@Test
+	void goToDefinitionFromM1GroupAfterClosingMetaModelFile() throws Exception
+	{
+		Path modelDir = Path.of("logoce.lmf.core.api/src/test/model");
+		if (!Files.exists(modelDir))
+		{
+			modelDir = Path.of("../logoce.lmf.core.api/src/test/model");
+		}
+		final Path carCompanyPath = modelDir.resolve("CarCompany.lm");
+		final Path peugeotPath = modelDir.resolve("Peugeot.lm");
+
+		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
+		final String peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
+
+		final URI carCompanyUri = carCompanyPath.toAbsolutePath().normalize().toUri();
+		final URI peugeotUri = peugeotPath.toAbsolutePath().normalize().toUri();
+
+		final var server = new LmLanguageServer(modelDir.toAbsolutePath().normalize());
+		server.connect(new NoopClient());
+
+		// Simulate that the user navigated to the meta-model once (open) and then the editor closed it.
+		server.workspaceIndex().putDocument(new LmDocumentState(carCompanyUri, 1, carCompanyText));
+		server.workspaceIndex().putDocument(new LmDocumentState(peugeotUri, 1, peugeotText));
+		server.worker().submit(server::rebuildWorkspace).get();
+
+		final var textDocumentService = (LmTextDocumentService) server.getTextDocumentService();
+		final var close = new org.eclipse.lsp4j.DidCloseTextDocumentParams();
+		close.setTextDocument(new TextDocumentIdentifier(carCompanyUri.toString()));
+		textDocumentService.didClose(close);
+		server.worker().submit(() -> {}).get();
+
+		final var params = new DefinitionParams();
+		params.setTextDocument(new TextDocumentIdentifier(peugeotUri.toString()));
+		params.setPosition(positionAt(peugeotText, "CarParc"));
+		final var result = textDocumentService.definition(params).get();
+
+		assertTrue(result.isLeft(), "Expected simple Location result for definition");
+		final var locations = result.getLeft();
+		assertNotNull(locations, "Locations should not be null");
+		assertFalse(locations.isEmpty(), "Expected at least one definition location");
+		assertEquals(carCompanyUri.toString(), locations.getFirst().getUri(), "Definition should navigate to CarCompany.lm");
+
+		server.shutdown().join();
+	}
+
+	@Test
+	void goToDefinitionFromEnumLiteralInM1Model() throws Exception
+	{
+		Path modelDir = Path.of("logoce.lmf.core.api/src/test/model");
+		if (!Files.exists(modelDir))
+		{
+			modelDir = Path.of("../logoce.lmf.core.api/src/test/model");
+		}
+		final Path carCompanyPath = modelDir.resolve("CarCompany.lm");
+		final Path peugeotPath = modelDir.resolve("Peugeot.lm");
+
+		final String carCompanyText = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
+		final String peugeotText = Files.readString(peugeotPath, StandardCharsets.UTF_8);
+
+		final URI carCompanyUri = carCompanyPath.toAbsolutePath().normalize().toUri();
+		final URI peugeotUri = peugeotPath.toAbsolutePath().normalize().toUri();
+
+		final var server = new LmLanguageServer(modelDir.toAbsolutePath().normalize());
+		server.connect(new NoopClient());
+
+		// Only open the M1 model; the M2 meta-model stays unopened but is on disk.
+		server.workspaceIndex().putDocument(new LmDocumentState(peugeotUri, 1, peugeotText));
+		server.worker().submit(server::rebuildWorkspace).get();
+
+		final int brandOffset = peugeotText.indexOf("brand=Peugeot");
+		assertTrue(brandOffset >= 0, "Expected 'brand=Peugeot' assignment in Peugeot.lm");
+		final Position literalRef = positionForOffset(peugeotText, brandOffset + "brand=".length());
+
+		final var textDocumentService = (LmTextDocumentService) server.getTextDocumentService();
+		final var params = new DefinitionParams();
+		params.setTextDocument(new TextDocumentIdentifier(peugeotUri.toString()));
+		params.setPosition(literalRef);
+
+		final var result = textDocumentService.definition(params).get();
+		assertTrue(result.isLeft(), "Expected simple Location result for definition");
+		final var locations = result.getLeft();
+		assertNotNull(locations, "Locations should not be null");
+		assertFalse(locations.isEmpty(), "Expected at least one definition location");
+
+		final Location loc = locations.getFirst();
+		assertEquals(carCompanyUri.toString(), loc.getUri(), "Definition should navigate to CarCompany.lm");
+
+		final Position start = loc.getRange().getStart();
+		final String enumLine = "(Enum Brand Renault,Peugeot)";
+		final int enumOffset = carCompanyText.indexOf(enumLine);
+		assertTrue(enumOffset >= 0, "Expected enum declaration '" + enumLine + "' in CarCompany.lm");
+		final int nameOffset = enumOffset + "(Enum ".length();
+		final Position expected = positionForOffset(carCompanyText, nameOffset);
+
+		assertEquals(expected.getLine(), start.getLine(), "Definition line should match enum name 'Brand'");
+		assertEquals(expected.getCharacter(), start.getCharacter(), "Definition column should match enum name 'Brand'");
 
 		server.shutdown().join();
 	}

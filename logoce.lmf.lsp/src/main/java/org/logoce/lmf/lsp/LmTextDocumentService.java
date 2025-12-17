@@ -174,7 +174,16 @@ public final class LmTextDocumentService implements TextDocumentService
 	{
 		final URI uri = URI.create(params.getTextDocument().getUri());
 		LOG.info("LMF LSP didClose: uri={}", uri);
-		server.worker().execute(() -> server.workspaceIndex().removeDocument(uri));
+		server.worker().execute(() -> {
+			server.workspaceIndex().removeDocument(uri);
+
+			// IntelliJ may close editors (even without explicit user intent), and we must not
+			// lose go-to-definition targets for meta-models that are still present on disk.
+			// Rebuilding re-indexes disk meta-models (when a projectRoot is configured) and
+			// re-analyzes remaining open documents.
+			server.rebuildWorkspace();
+			server.refreshSemanticTokensIfSupported("didClose");
+		});
 	}
 
 	@Override

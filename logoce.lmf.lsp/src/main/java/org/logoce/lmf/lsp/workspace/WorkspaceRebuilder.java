@@ -4,6 +4,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.logoce.lmf.lsp.HeaderTextScanner;
 import org.logoce.lmf.core.loader.api.loader.model.LmDocument;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.util.tree.Tree;
@@ -32,7 +33,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -44,6 +48,8 @@ public final class WorkspaceRebuilder
 	private final SymbolIndexer symbolIndexer;
 	private final Path projectRoot;
 	private final Supplier<LanguageClient> clientSupplier;
+	private final Map<Path, Long> indexedMetaModelFilesByMtime = new HashMap<>();
+	private final DiskMetaModelHeaderIndex diskMetaModelHeaderIndex = new DiskMetaModelHeaderIndex();
 
 	public WorkspaceRebuilder(final WorkspaceIndex workspaceIndex,
 							  final SymbolIndexer symbolIndexer,
@@ -95,18 +101,17 @@ public final class WorkspaceRebuilder
 		{
 			try
 			{
-				final var modelFiles = collectModelFilesFromProjectRoot(projectRoot);
-				if (modelFiles.isEmpty())
+				final var requiredMetaModelFiles = collectRequiredMetaModelFilesFromProjectRoot(projectRoot);
+				if (requiredMetaModelFiles.isEmpty())
 				{
-					workspaceIndex.setModelRegistry(ModelRegistry.empty());
+					return;
 				}
-				else
-				{
-					final var workspace = LmWorkspace.loadMetaModels(modelFiles, workspaceIndex.modelRegistry());
-					workspaceIndex.setModelRegistry(workspace.registry());
-					LOG.debug("LMF LSP rebuildModelRegistry: projectRoot={}, metaModels={}", projectRoot,
-							  workspace.files().size());
-				}
+
+				final var metaModelWorkspace = LmWorkspace.loadMetaModels(requiredMetaModelFiles, workspaceIndex.modelRegistry());
+				workspaceIndex.setModelRegistry(metaModelWorkspace.registry());
+				indexWorkspaceMetaModels(metaModelWorkspace);
+				LOG.debug("LMF LSP rebuildModelRegistry: projectRoot={}, metaModels={}", projectRoot,
+						  metaModelWorkspace.files().size());
 			}
 			catch (Exception e)
 			{
@@ -186,16 +191,178 @@ public final class WorkspaceRebuilder
 		}
 	}
 
-	private static List<File> collectModelFilesFromProjectRoot(final Path root) throws IOException
+	private List<File> collectRequiredMetaModelFilesFromProjectRoot(final Path root) throws IOException
 	{
-		final List<File> files = new ArrayList<>();
-		try (final var paths = Files.walk(root))
+		final var requiredNames = collectDeclaredMetaModelNamesFromOpenDocuments();
+		if (requiredNames.isEmpty())
 		{
-			paths.filter(Files::isRegularFile)
-				 .filter(p -> p.getFileName().toString().endsWith(".lm"))
-				 .forEach(p -> files.add(p.toFile()));
+			return List.of();
 		}
-		return List.copyOf(files);
+
+		diskMetaModelHeaderIndex.refresh(root);
+		return diskMetaModelHeaderIndex.resolveMetaModelFilesClosure(requiredNames);
+	}
+
+	private HashSet<String> collectDeclaredMetaModelNamesFromOpenDocuments()
+	{
+		final var result = new HashSet<String>();
+		final var reader = new LmTreeReader();
+
+		for (final var state : workspaceIndex.documents().values())
+		{
+			final var text = state.text();
+			final var diagnostics = new ArrayList<LmDiagnostic>();
+			final var readResult = reader.read(text, diagnostics);
+			final var roots = readResult.roots();
+
+			if (roots.isEmpty())
+			{
+				result.addAll(HeaderTextScanner.parseMetamodelNames(text));
+				continue;
+			}
+
+			final var rootNode = roots.getFirst().data();
+
+			if (ModelHeaderUtil.isMetaModelRoot(roots))
+			{
+				final var qualifiedName = qualifiedNameFromHeader(rootNode);
+				if (qualifiedName != null)
+				{
+					result.add(qualifiedName);
+				}
+				continue;
+			}
+
+			result.addAll(ModelHeaderUtil.resolveMetamodelNames(rootNode));
+		}
+
+		return result;
+	}
+
+	private static String qualifiedNameFromHeader(final PNode rootNode)
+	{
+		final String domain = ModelHeaderUtil.resolveDomain(rootNode);
+		final String name = ModelHeaderUtil.resolveName(rootNode);
+		if (name == null || name.isBlank())
+		{
+			return null;
+		}
+		if (domain == null || domain.isBlank())
+		{
+			return name;
+		}
+		return domain + "." + name;
+	}
+
+	/**
+	 * Index meta-model files from disk (not only opened documents) so that features like
+	 * go-to-definition can navigate to declarations in unopened files.
+	 * <p>
+	 * Open documents always take precedence: if a meta-model file is open, its in-memory
+	 * version is indexed via {@link #analyzeDocument(LmDocumentState)} instead.
+	 */
+	private void indexWorkspaceMetaModels(final LmWorkspace.MetaModelWorkspace metaModelWorkspace)
+	{
+		if (metaModelWorkspace == null || metaModelWorkspace.files().isEmpty())
+		{
+			return;
+		}
+
+		final var present = new HashSet<Path>();
+		for (final var file : metaModelWorkspace.files())
+		{
+			if (file == null)
+			{
+				continue;
+			}
+			present.add(file.toPath().toAbsolutePath().normalize());
+		}
+
+		// Evict removed files and their indices.
+		final var removed = new ArrayList<Path>();
+		for (final var path : indexedMetaModelFilesByMtime.keySet())
+		{
+			if (!present.contains(path))
+			{
+				removed.add(path);
+			}
+		}
+		for (final var path : removed)
+		{
+			indexedMetaModelFilesByMtime.remove(path);
+			workspaceIndex.clearIndicesForDocument(path.toUri());
+		}
+
+		final int count = Math.min(metaModelWorkspace.files().size(), metaModelWorkspace.documents().size());
+		for (int i = 0; i < count; i++)
+		{
+			final var file = metaModelWorkspace.files().get(i);
+			final var parsedDoc = metaModelWorkspace.documents().get(i);
+			if (file == null || parsedDoc == null)
+			{
+				continue;
+			}
+
+			final var path = file.toPath().toAbsolutePath().normalize();
+			final var uri = path.toUri();
+
+			// If the file is open, the editor content (not the on-disk file) is indexed elsewhere.
+			if (workspaceIndex.getDocument(uri) != null)
+			{
+				continue;
+			}
+
+			final long mtime;
+			try
+			{
+				mtime = Files.getLastModifiedTime(path).toMillis();
+			}
+			catch (Exception e)
+			{
+				continue;
+			}
+
+			final var previousMtime = indexedMetaModelFilesByMtime.get(path);
+			final boolean hasIndex = !workspaceIndex.symbolsForUri(uri).isEmpty();
+			if (previousMtime != null && previousMtime.longValue() == mtime && hasIndex)
+			{
+				continue;
+			}
+
+			try
+			{
+				final var diagnostics = new ArrayList<LmDiagnostic>(parsedDoc.diagnostics());
+				final var readResult = new LmTreeReader.ReadResult(parsedDoc.roots(), parsedDoc.source());
+
+				final var loader = new LmLoader(workspaceIndex.modelRegistry());
+				final var doc = loader.loadModel(readResult, diagnostics);
+
+				final var state = new LmDocumentState(uri, 0, doc.source().toString());
+				final var syntaxSnapshot = new SyntaxSnapshot(
+					List.of(),
+					doc.roots(),
+					doc.diagnostics(),
+					doc.source());
+				state.setSyntaxSnapshot(syntaxSnapshot);
+				state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
+
+				final var semanticSnapshot = new SemanticSnapshot(
+					doc.model(),
+					doc.linkTrees(),
+					List.of(),
+					SymbolTable.EMPTY,
+					List.of());
+				state.setSemanticSnapshot(semanticSnapshot);
+
+				symbolIndexer.rebuildIndicesForDocument(state);
+				indexedMetaModelFilesByMtime.put(path, mtime);
+			}
+			catch (Exception e)
+			{
+				LOG.debug("LMF LSP: failed to index meta-model file {}", uri, e);
+				workspaceIndex.clearIndicesForDocument(uri);
+			}
+		}
 	}
 
 	/**
@@ -263,7 +430,7 @@ public final class WorkspaceRebuilder
 			LOG.debug("LMF LSP analyzeDocument done: uri={}, model={}, syntaxDiag={}, semanticDiag={}",
 					  state.uri(), modelKind, syntaxCount, semanticCount);
 
-				// Let the client decide when to refresh semantic tokens.
+			// Let the client decide when to refresh semantic tokens.
 		}
 		catch (LinkException e)
 		{
@@ -275,12 +442,11 @@ public final class WorkspaceRebuilder
 
 			final String text = state.text();
 			final var diagnostics = new ArrayList<LmDiagnostic>();
-			final var reader = new LmTreeReader();
-			final var readResult = reader.read(text, diagnostics);
+			final var parsed = parseForDiagnostics(text, diagnostics);
 
 			if (e.pNode() != null)
 			{
-				final var span = TextPositions.spanOf(e.pNode(), readResult.source());
+				final var span = TextPositions.spanOf(e.pNode(), parsed.source());
 				diagnostics.add(new LmDiagnostic(
 					span.line(),
 					span.column(),
@@ -290,16 +456,8 @@ public final class WorkspaceRebuilder
 					e.getMessage() == null ? "Link error" : e.getMessage()));
 			}
 
-			final var syntaxSnapshot = new SyntaxSnapshot(
-				List.of(),
-				readResult.roots(),
-				List.copyOf(diagnostics),
-				readResult.source());
-			state.setSyntaxSnapshot(syntaxSnapshot);
-
-			// Linking failed but parsing succeeded; keep this as last good
-			// syntax so that semantic tokens can still rely on a stable tree.
-			state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
+			final var syntaxSnapshot = buildSyntaxSnapshot(parsed.roots(), diagnostics, parsed.source());
+			setSyntaxSnapshot(state, syntaxSnapshot, true);
 
 			final var semanticSnapshot = new SemanticSnapshot(
 				null,
@@ -325,28 +483,7 @@ public final class WorkspaceRebuilder
 
 			final String text = state.text();
 			final var diagnostics = new ArrayList<LmDiagnostic>();
-			final var reader = new LmTreeReader();
-
-			List<Tree<PNode>> roots;
-			CharSequence source;
-			try
-			{
-				final var readResult = reader.read(text, diagnostics);
-				roots = readResult.roots();
-				source = readResult.source();
-			}
-			catch (Exception parseEx)
-			{
-				roots = List.of();
-				source = text;
-				diagnostics.add(new LmDiagnostic(
-					1,
-					1,
-					Math.max(1, text.length()),
-					0,
-					LmDiagnostic.Severity.ERROR,
-					parseEx.getMessage() == null ? "Error while parsing document" : parseEx.getMessage()));
-			}
+			final var parsed = parseForDiagnostics(text, diagnostics);
 
 			diagnostics.add(new LmDiagnostic(
 				1,
@@ -356,19 +493,14 @@ public final class WorkspaceRebuilder
 				LmDiagnostic.Severity.ERROR,
 				e.getMessage() == null ? "Error while analyzing document" : e.getMessage()));
 
-			final var activeMetaModels = resolveActiveMetaModels(roots);
-			final var linkTrees = SemanticLinking.link(roots, activeMetaModels, workspaceIndex.modelRegistry(), source);
+			final var activeMetaModels = resolveActiveMetaModels(parsed.roots());
+			final var linkTrees = SemanticLinking.link(parsed.roots(),
+													  activeMetaModels,
+													  workspaceIndex.modelRegistry(),
+													  parsed.source());
 
-			final var syntaxSnapshot = new SyntaxSnapshot(
-				List.of(),
-				roots,
-				List.copyOf(diagnostics),
-				source);
-			state.setSyntaxSnapshot(syntaxSnapshot);
-
-			// Linking failed but parsing succeeded; keep this as last good syntax so
-			// that semantic tokens can still rely on a stable tree.
-			state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
+			final var syntaxSnapshot = buildSyntaxSnapshot(parsed.roots(), diagnostics, parsed.source());
+			setSyntaxSnapshot(state, syntaxSnapshot, true);
 
 			final var semanticSnapshot = new SemanticSnapshot(
 				null,
@@ -391,28 +523,7 @@ public final class WorkspaceRebuilder
 
 			final String text = state.text();
 			final var diagnostics = new ArrayList<LmDiagnostic>();
-			final var reader = new LmTreeReader();
-
-			List<Tree<PNode>> roots;
-			CharSequence source;
-			try
-			{
-				final var readResult = reader.read(text, diagnostics);
-				roots = readResult.roots();
-				source = readResult.source();
-			}
-			catch (Exception parseEx)
-			{
-				roots = List.of();
-				source = text;
-				diagnostics.add(new LmDiagnostic(
-					1,
-					1,
-					Math.max(1, text.length()),
-					0,
-					LmDiagnostic.Severity.ERROR,
-					parseEx.getMessage() == null ? "Error while parsing document" : parseEx.getMessage()));
-			}
+			final var parsed = parseForDiagnostics(text, diagnostics);
 
 			diagnostics.add(new LmDiagnostic(
 				1,
@@ -422,12 +533,8 @@ public final class WorkspaceRebuilder
 				LmDiagnostic.Severity.ERROR,
 				e.getMessage() == null ? "Error while analyzing document" : e.getMessage()));
 
-			final var syntaxSnapshot = new SyntaxSnapshot(
-				List.of(),
-				roots,
-				List.copyOf(diagnostics),
-				source);
-			state.setSyntaxSnapshot(syntaxSnapshot);
+			final var syntaxSnapshot = buildSyntaxSnapshot(parsed.roots(), diagnostics, parsed.source());
+			setSyntaxSnapshot(state, syntaxSnapshot, false);
 
 			final var semanticSnapshot = new SemanticSnapshot(
 				null,
@@ -438,6 +545,53 @@ public final class WorkspaceRebuilder
 			state.setSemanticSnapshot(semanticSnapshot);
 
 			publishDiagnostics(state);
+		}
+	}
+
+	private record ParsedText(List<Tree<PNode>> roots, CharSequence source)
+	{
+	}
+
+	private static ParsedText parseForDiagnostics(final String text, final List<LmDiagnostic> diagnostics)
+	{
+		final var reader = new LmTreeReader();
+		try
+		{
+			final var readResult = reader.read(text, diagnostics);
+			return new ParsedText(readResult.roots(), readResult.source());
+		}
+		catch (Exception parseEx)
+		{
+			diagnostics.add(new LmDiagnostic(
+				1,
+				1,
+				Math.max(1, text.length()),
+				0,
+				LmDiagnostic.Severity.ERROR,
+				parseEx.getMessage() == null ? "Error while parsing document" : parseEx.getMessage()));
+			return new ParsedText(List.of(), text);
+		}
+	}
+
+	private static SyntaxSnapshot buildSyntaxSnapshot(final List<Tree<PNode>> roots,
+													 final List<LmDiagnostic> diagnostics,
+													 final CharSequence source)
+	{
+		return new SyntaxSnapshot(
+			List.of(),
+			roots,
+			List.copyOf(diagnostics),
+			source);
+	}
+
+	private static void setSyntaxSnapshot(final LmDocumentState state,
+										  final SyntaxSnapshot syntaxSnapshot,
+										  final boolean updateLastGood)
+	{
+		state.setSyntaxSnapshot(syntaxSnapshot);
+		if (updateLastGood)
+		{
+			state.setLastGoodSyntaxSnapshot(syntaxSnapshot);
 		}
 	}
 
