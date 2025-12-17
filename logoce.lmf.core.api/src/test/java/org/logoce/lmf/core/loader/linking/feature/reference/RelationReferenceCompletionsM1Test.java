@@ -5,12 +5,12 @@ import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.api.loader.LmLoader;
-import org.logoce.lmf.core.api.loader.RelationReferenceCompletions;
-import org.logoce.lmf.core.api.loader.model.LmDocument;
-import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.loader.api.loader.LmLoader;
+import org.logoce.lmf.core.loader.api.loader.RelationReferenceCompletions;
+import org.logoce.lmf.core.loader.api.loader.model.LmDocument;
+import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.api.model.ModelRegistry;
-import org.logoce.lmf.core.api.loader.linking.LinkNode;
+import org.logoce.lmf.core.loader.api.loader.linking.LinkNode;
 import test.model.carcompany.CarCompanyModelPackage;
 
 import java.nio.charset.StandardCharsets;

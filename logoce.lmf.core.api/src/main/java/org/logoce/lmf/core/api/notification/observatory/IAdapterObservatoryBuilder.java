@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.api.notification.observatory;
 
-import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.extender.api.IAdapterHandle;
+import org.logoce.lmf.core.api.extender.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapterHandle;
 
 import java.util.function.Consumer;
 

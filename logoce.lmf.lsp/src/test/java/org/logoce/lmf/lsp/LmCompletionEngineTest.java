@@ -171,10 +171,10 @@ final class LmCompletionEngineTest
 	void groupHeaderCompletionMatchesOperationsGenericCase()
 		throws Exception
 	{
-		Path path = Path.of("logoce.lmf.generator/src/test/model/OperationsGeneric.lm");
+		Path path = Path.of("logoce.lmf.core.generator/src/test/model/OperationsGeneric.lm");
 		if (!Files.exists(path))
 		{
-			path = Path.of("../logoce.lmf.generator/src/test/model/OperationsGeneric.lm");
+			path = Path.of("../logoce.lmf.core.generator/src/test/model/OperationsGeneric.lm");
 		}
 
 		final var text = Files.readString(path, StandardCharsets.UTF_8);

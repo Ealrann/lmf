@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SymbolTable;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.api.loader.linking.LmModelLinker;
-import org.logoce.lmf.core.api.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.api.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.nio.charset.StandardCharsets;
@@ -25,7 +25,7 @@ final class GroupFeatureCompletionProviderTest
 	@Test
 	void completesOperationAndParameterFeaturesInNativeGenerics() throws Exception
 	{
-		final var path = Path.of("..", "logoce.lmf.generator", "src", "test", "model", "NativeGenerics.lm");
+		final var path = Path.of("..", "logoce.lmf.core.generator", "src", "test", "model", "NativeGenerics.lm");
 		final var text = Files.readString(path, StandardCharsets.UTF_8);
 
 		final var syntaxDiagnostics = new ArrayList<LmDiagnostic>();

@@ -1,0 +1,91 @@
+import org.gradle.api.GradleException
+import org.gradle.api.tasks.JavaExec
+
+plugins {
+	id 'application'
+	id 'distribution'
+	id 'maven-publish'
+}
+
+application {
+	mainModule = 'logoce.lmf.core.generator'
+	mainClass = 'org.logoce.lmf.generator.Main'
+}
+
+dependencies {
+
+	api project(':logoce.lmf.core.api')
+	implementation project(':logoce.lmf.core.loader')
+
+	implementation "com.squareup:javapoet:$javaPoetVersion"
+
+	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
+
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
+}
+
+run {
+	enableAssertions = true
+}
+
+test {
+	useJUnitPlatform()
+}
+
+tasks.register('generateTestModels', JavaExec) {
+	group = 'verification'
+	description = 'Generates Java sources for all test .lm models into src/test/generated'
+
+	final def modelFiles = fileTree('src/test/model') {
+		include '**/*.lm'
+	}
+
+	inputs.files(modelFiles)
+	outputs.dir('src/test/generated')
+
+	classpath = sourceSets.main.runtimeClasspath
+	mainClass = 'org.logoce.lmf.generator.Main'
+
+	doFirst {
+		delete('src/test/generated')
+		final def files = modelFiles.files.toList().sort()
+		if (files.isEmpty()) {
+			throw new GradleException("No test .lm models found under src/test/model")
+		}
+		args = ['--targetDir', 'src/test/generated',
+				'--genModels', files.collect { it.path }.join(',')]
+	}
+}
+
+tasks.named('compileTestJava') {
+	dependsOn tasks.named('generateTestModels')
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'org.logoce.lmf'
+			artifactId = 'logoce.lmf.core.generator'
+			version = "$logoceVersion"
+
+			from components.java
+		}
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	// Silence javac lint about requiring the automatic module com.squareup.javapoet
+	options.compilerArgs += ['-Xlint:-requires-automatic']
+}
+
+sourceSets {
+	main {
+		java.srcDirs += ['src/main/model'
+						 ,'src/main/generated']
+	}
+	test {
+		java.srcDirs += ['src/test/generated']
+	}
+}

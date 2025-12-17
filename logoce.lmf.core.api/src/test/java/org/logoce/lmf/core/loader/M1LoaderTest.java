@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.loader;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.core.api.loader.LmLoader;
+import org.logoce.lmf.core.loader.api.loader.LmLoader;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.LMObject;
@@ -11,9 +11,9 @@ import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.lang.Named;
 import org.logoce.lmf.core.lang.Attribute;
-import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.loader.internal.feature.EnumResolver;
-import org.logoce.lmf.core.api.loader.model.LmDocument;
+import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.feature.EnumResolver;
+import org.logoce.lmf.core.loader.api.loader.model.LmDocument;
 import org.logoce.lmf.core.api.model.DynamicModelPackage;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.api.util.ModelUtil;

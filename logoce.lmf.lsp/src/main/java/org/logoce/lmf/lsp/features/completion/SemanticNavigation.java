@@ -5,9 +5,9 @@ import org.logoce.lmf.lsp.state.SemanticSnapshot;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.core.lang.Group;
-import org.logoce.lmf.core.api.loader.linking.LinkNode;
-import org.logoce.lmf.core.api.loader.linking.tree.LinkNodeFull;
-import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.loader.api.loader.linking.LinkNode;
+import org.logoce.lmf.core.loader.api.loader.linking.tree.LinkNodeFull;
+import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

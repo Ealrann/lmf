@@ -1,6 +1,6 @@
 package org.logoce.lmf.core.util.oldlogoce;
 
-import org.logoce.lmf.extender.api.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapter;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.api.util.ModelExplorer;

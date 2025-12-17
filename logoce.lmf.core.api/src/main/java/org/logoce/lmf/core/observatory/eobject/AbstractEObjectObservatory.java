@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.observatory.eobject;
 
 import org.logoce.lmf.core.observatory.eobject.poi.*;
-import org.logoce.lmf.extender.api.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapter;
 import org.logoce.lmf.core.api.notification.Notification;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.api.notification.observatory.IAdapterObservatoryBuilder;
@@ -13,8 +13,8 @@ import org.logoce.lmf.core.observatory.allocation.AdapterObservatory;
 import org.logoce.lmf.core.observatory.eobject.listener.GatherBulkListener;
 import org.logoce.lmf.core.observatory.eobject.listener.GatherListener;
 import org.logoce.lmf.core.observatory.notifier.NotifierAdapterObservatory;
-import org.logoce.lmf.notification.api.IFeatures;
-import org.logoce.lmf.notification.api.INotifier;
+import org.logoce.lmf.core.api.notification.IFeatures;
+import org.logoce.lmf.core.api.notification.INotifier;
 
 import java.util.ArrayList;
 import java.util.List;

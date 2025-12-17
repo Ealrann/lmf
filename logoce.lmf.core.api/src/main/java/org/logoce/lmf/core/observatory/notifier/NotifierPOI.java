@@ -1,8 +1,8 @@
 package org.logoce.lmf.core.observatory.notifier;
 
-import org.logoce.lmf.notification.api.IFeature;
-import org.logoce.lmf.notification.api.IFeatures;
-import org.logoce.lmf.notification.api.INotifier;
+import org.logoce.lmf.core.api.notification.IFeature;
+import org.logoce.lmf.core.api.notification.IFeatures;
+import org.logoce.lmf.core.api.notification.INotifier;
 
 public final class NotifierPOI<Callback, Type extends IFeatures<?>> implements INotifierPOI<Type>
 {

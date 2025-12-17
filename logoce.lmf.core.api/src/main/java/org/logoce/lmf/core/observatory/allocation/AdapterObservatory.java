@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.observatory.allocation;
 
-import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.extender.api.IAdapterHandle;
+import org.logoce.lmf.core.api.extender.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapterHandle;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.api.notification.observatory.IAdapterObservatoryBuilder;
 import org.logoce.lmf.core.api.notification.observatory.IObservatory;

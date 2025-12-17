@@ -1,8 +1,8 @@
 package org.logoce.lmf.core.functional;
 
-import org.logoce.lmf.adapter.api.Adapter;
-import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.extender.api.ModelExtender;
+import org.logoce.lmf.core.api.adapter.Adapter;
+import org.logoce.lmf.core.api.extender.IAdapter;
+import org.logoce.lmf.core.api.extender.ModelExtender;
 import test.model.carcompany.Car;
 import test.model.carcompany.Person;
 

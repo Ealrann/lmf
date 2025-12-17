@@ -10,12 +10,12 @@ import org.logoce.lmf.core.lang.LMCoreModelPackage;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.lang.Attribute;
-import org.logoce.lmf.core.api.loader.LmLoader;
-import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.api.loader.linking.LmModelLinker;
-import org.logoce.lmf.core.loader.internal.linking.TreeToFeatureLinker;
-import org.logoce.lmf.core.api.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.loader.api.loader.LmLoader;
+import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.api.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.linking.TreeToFeatureLinker;
+import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +31,7 @@ public final class DynamicModelPackageTest
 	void dynamicBuilder_buildsObjectsWithAttributesAndRelations() throws IOException
 	{
 		final var carCompanyPath = Path.of("..",
-										   "logoce.lmf.generator",
+										   "logoce.lmf.core.generator",
 										   "src",
 										   "test",
 										   "model",

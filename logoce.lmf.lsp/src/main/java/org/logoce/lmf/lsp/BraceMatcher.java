@@ -3,7 +3,7 @@ package org.logoce.lmf.lsp;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentHighlightKind;
 import org.eclipse.lsp4j.Position;
-import org.logoce.lmf.core.api.util.TextPositions;
+import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
 
 import java.util.List;
 
@@ -108,4 +108,3 @@ final class BraceMatcher
 		return -1;
 	}
 }
-

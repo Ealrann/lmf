@@ -8,12 +8,12 @@ pluginManagement {
 
 rootProject.name = "LMF"
 
-include ':logoce.lmf.adapter'
 include ':logoce.lmf.core.api'
 project(':logoce.lmf.core.api').projectDir = file('logoce.lmf.core.api')
-include ':logoce.lmf.extender'
-include ':logoce.lmf.generator'
-include ':logoce.lmf.notification'
+include ':logoce.lmf.core.loader'
+project(':logoce.lmf.core.loader').projectDir = file('logoce.lmf.core.loader')
+include ':logoce.lmf.core.generator'
+project(':logoce.lmf.core.generator').projectDir = file('logoce.lmf.core.generator')
 
 include ':logoce.lmf.gradle'
 

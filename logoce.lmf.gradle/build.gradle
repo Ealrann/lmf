@@ -11,7 +11,8 @@ repositories {
 }
 
 dependencies {
-	implementation project(':logoce.lmf.generator')
+	implementation project(':logoce.lmf.core.generator')
+	implementation project(':logoce.lmf.core.loader')
 
 	implementation gradleApi()
 	//implementation "dev.gradleplugins:gradle-api:8.3"

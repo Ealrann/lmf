@@ -2,17 +2,14 @@ import org.gradle.api.tasks.JavaExec
 
 plugins {
 	id 'maven-publish'
-	id 'application'
 }
 
 dependencies {
-
-	api project(":logoce.lmf.adapter")
-	api project(":logoce.lmf.extender")
-	api project(":logoce.lmf.notification")
+	// adapter/extender/notification are now part of this module
 
 	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
 	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
+	testImplementation project(":logoce.lmf.core.loader")
 
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformVersion"
@@ -43,7 +40,7 @@ tasks.register('generateTestCarCompanyModel', JavaExec) {
 	inputs.file('src/test/model/CarCompany.lm')
 	outputs.dir('src/test/generated')
 
-	classpath = project(':logoce.lmf.generator').sourceSets.main.runtimeClasspath
+	classpath = project(':logoce.lmf.core.generator').sourceSets.main.runtimeClasspath
 	mainClass = 'org.logoce.lmf.generator.Main'
 	args 'src/test/model/CarCompany.lm', 'src/test/generated'
 
@@ -69,9 +66,4 @@ publishing {
 			from components.java
 		}
 	}
-}
-
-application {
-	mainModule = 'logoce.lmf.core.api'
-	mainClass = 'org.logoce.lmf.core.tool.ModelValidator'
 }

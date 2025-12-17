@@ -2,10 +2,10 @@ package org.logoce.lmf.lsp;
 
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.logoce.lmf.core.api.loader.diagnostic.LmDiagnostic;
-import org.logoce.lmf.core.api.loader.linking.LmModelLinker;
-import org.logoce.lmf.core.api.loader.parsing.LmTreeReader;
-import org.logoce.lmf.core.api.text.syntax.PNode;
+import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.api.loader.linking.LmModelLinker;
+import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
+import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import java.io.InputStream;

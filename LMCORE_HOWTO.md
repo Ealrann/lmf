@@ -1,14 +1,14 @@
 # LMCore `.lm` How‑To (M2 Meta‑Models)
 
-This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.core.api` and `logoce.lmf.generator`.
+This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.core.api`, `logoce.lmf.core.loader`, and `logoce.lmf.core.generator`.
 
 If you are new to this repo, read this file together with:
 
 - `logoce.lmf.core.api/src/main/model/asset/LMCore.lm` – the LMCore meta‑model (M3), which defines the language itself.
-- `logoce.lmf.generator/src/test/model/CarCompany.lm` – a minimal but complete M2 example.
+- `logoce.lmf.core.generator/src/test/model/CarCompany.lm` – a minimal but complete M2 example.
 - The `lsp-design/` folder (optional, for tooling work) – contains copied `.lm` examples and LSP design notes.
 
-The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/LMCore.lm`. The CarCompany example model is in `logoce.lmf.generator/src/test/model/CarCompany.lm`.
+The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/LMCore.lm`. The CarCompany example model is in `logoce.lmf.core.generator/src/test/model/CarCompany.lm`.
 
 ## 0. Orientation: what you are writing
 
@@ -17,7 +17,7 @@ The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/
 
 - **M2 (your `.lm` files)**  
   When you write a new `.lm` file (e.g. `CarCompany.lm`), you are defining an M2 meta‑model *in terms of* LMCore. From that M2 meta‑model:
-  - `logoce.lmf.generator` generates Java types in your `domain` package.
+  - `logoce.lmf.core.generator` generates Java types in your `domain` package.
   - The runtime (`LmLoader` / `ResourceUtil`) can load and link your `.lm` into `MetaModel` and related LMCore objects.
 
 - **Loading `.lm` programmatically**
@@ -43,7 +43,7 @@ The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/
 - `name` is the model name; the generator will produce e.g. `MyModelDefinition`, `MyModelPackage`, etc.
 
 ### Quick start for new `.lm` authors
-- Start from a small working model (e.g. `logoce.lmf.generator/src/test/model/CarCompany.lm`) and tweak `domain` and `name` first.
+- Start from a small working model (e.g. `logoce.lmf.core.generator/src/test/model/CarCompany.lm`) and tweak `domain` and `name` first.
 - Use `Group` for abstract concepts, `Definition` for concrete ones. `includes group=@Base` sets inheritance.
 - Keep one logical domain per file: one `MetaModel` per `.lm`.
 - Generics live under the group/definition that owns them; pass them down via `includes ... (parameters ../../generics.N)`.
@@ -137,7 +137,7 @@ For most domain models you can stick to LMCore’s built‑in primitives (`#LMCo
 
 ## 5. Example: CarCompany
 
-`logoce.lmf.generator/src/test/model/CarCompany.lm` shows a minimal but complete model:
+`logoce.lmf.core.generator/src/test/model/CarCompany.lm` shows a minimal but complete model:
 
 ```lm
 (MetaModel domain=test.model name=CarCompany
@@ -175,7 +175,7 @@ Key points:
   - contains a mandatory `ceo` (`[1..1]`).
   - contains a list of `parcs` (cars) via `[0..*]`.
 
-This model is used by tests in `logoce.lmf.generator` and is a good template for new M2 models.
+This model is used by tests in `logoce.lmf.core.generator` and is a good template for new M2 models.
 
 ## 6. Generics
 
@@ -252,7 +252,7 @@ The generator can process multiple `.lm` files at once; make sure upstream model
 ### 7.2 Modelling guidelines
 
 - Start from CarCompany:
-  - Copy `logoce.lmf.generator/src/test/model/CarCompany.lm`.
+  - Copy `logoce.lmf.core.generator/src/test/model/CarCompany.lm`.
   - Adjust `domain` and `name`.
   - Rename groups/definitions and tweak attributes/relations.
 - Use `+contains` for ownership/containment relationships (where moving/removing elements should propagate container changes); use `+refers` for pure references.

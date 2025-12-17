@@ -2,8 +2,8 @@ package org.logoce.lmf.core.api.model;
 
 import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.core.api.util.ModelUtil;
-import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.extender.api.IAdapterManager;
+import org.logoce.lmf.core.api.extender.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapterManager;
 import org.logoce.lmf.core.api.notification.Notification;
 import org.logoce.lmf.core.api.notification.listener.IModelListener;
 

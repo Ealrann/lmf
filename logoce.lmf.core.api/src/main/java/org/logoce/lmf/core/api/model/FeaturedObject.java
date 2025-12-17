@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.api.model;
 
-import org.logoce.lmf.adapter.api.BasicAdapterManager;
-import org.logoce.lmf.extender.api.IAdapter;
+import org.logoce.lmf.core.api.adapter.BasicAdapterManager;
+import org.logoce.lmf.core.api.extender.IAdapter;
 import org.logoce.lmf.core.api.notification.Notification;
 import org.logoce.lmf.core.feature.FeatureGetter;
 import org.logoce.lmf.core.feature.FeatureSetter;

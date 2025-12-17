@@ -1,14 +1,14 @@
 package org.logoce.lmf.core.observatory.notifier;
 
-import org.logoce.lmf.extender.api.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapter;
 import org.logoce.lmf.core.api.notification.observatory.INotifierAdapterObservatoryBuilder;
 import org.logoce.lmf.core.api.notification.observatory.IObservatory;
 import org.logoce.lmf.core.observatory.InternalObservatoryBuilder;
 import org.logoce.lmf.core.observatory.allocation.AdapterObservatory;
 import org.logoce.lmf.core.observatory.allocation.IAdapterPOI;
-import org.logoce.lmf.notification.api.IFeature;
-import org.logoce.lmf.notification.api.IFeatures;
-import org.logoce.lmf.notification.api.INotifier;
+import org.logoce.lmf.core.api.notification.IFeature;
+import org.logoce.lmf.core.api.notification.IFeatures;
+import org.logoce.lmf.core.api.notification.INotifier;
 
 import java.util.ArrayList;
 import java.util.List;

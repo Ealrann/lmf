@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.logoce.lmf.core.lang.Enum;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
-import org.logoce.lmf.core.api.loader.LmLoader;
+import org.logoce.lmf.core.loader.api.loader.LmLoader;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

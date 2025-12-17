@@ -10,7 +10,4 @@ repositories {
 
 dependencies {
 	implementation project(':logoce.lmf.core.api')
-	implementation project(':logoce.lmf.adapter')
-	implementation project(':logoce.lmf.extender')
-	implementation project(':logoce.lmf.notification')
 }

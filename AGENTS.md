@@ -8,9 +8,13 @@ If you plan to touch `.lm` meta‑models or generator behaviour, read `LMCORE_HO
 
 - `logoce.lmf.core.api`  
   - Core **M3 meta‑model** definition (Meta‑Object‑Facility style).  
-  - Can parse and interpret `.lm` files into in‑memory models via the new loader API (`org.logoce.lmf.core.api.loader.LmLoader`) or the legacy façade `ResourceUtil` (which now delegates to the loader).  
+  - Defines the runtime model APIs and the LMCore generated Java API under `org.logoce.lmf.core.lang` (in `src/main/generated`).  
   - Provides generated Java API for the LMCore meta‑model under `org.logoce.lmf.core.lang` (in `src/main/generated`).  
   - Intended as the foundation to **load any `.lm` meta‑model (M2)** and, together with the generator, **produce Java code** for it.
+
+- `logoce.lmf.core.loader`
+  - Loader / parser / linker implementation and tooling APIs (`org.logoce.lmf.core.api.loader.*`).
+  - Provides the external loading service implementation (`org.logoce.lmf.core.api.service.ILmLoader` provider).
 
 - `logoce.lmf.extender`  
   - Generic adapter/extension framework (reflection helpers, adapter descriptors, registries, etc.).
@@ -21,7 +25,7 @@ If you plan to touch `.lm` meta‑models or generator behaviour, read `LMCORE_HO
 - `logoce.lmf.notification`  
   - Lightweight notification/observer primitives (`INotifier`, `IFeature`, listener maps, etc.).
 
-- `logoce.lmf.generator`  
+- `logoce.lmf.core.generator`  
   - JavaPoet‑based code generator.  
   - CLI entry point `org.logoce.lmf.generator.Main`:  
     - `arg[0]` = model `.lm` file, `arg[1]` = target directory.  
@@ -60,12 +64,12 @@ When modifying or adding code:
 - **Model / generator specifics**
 - `logoce.lmf.core.api` is the reference for the language semantics; align new behavior with existing tests under `src/test/java`.  
 - Use `ModelRegistry.empty()` when you need a baseline registry that includes LMCore.  
-- For programmatic loading in tools, tests, or an LSP, use `org.logoce.lmf.core.api.loader.LmLoader` (`loadModel(...)`, `loadModels(...)`, `loadObjects(...)`).  
+- For programmatic loading in tools, tests, or an LSP, use `org.logoce.lmf.core.api.loader.LmLoader` from `logoce.lmf.core.loader` (`loadModel(...)`, `loadModels(...)`, `loadObjects(...)`).  
 - Avoid calling legacy parsing/linking helpers directly; always go through `LmLoader` so that lex/interpret/link and diagnostics all stay consistent.
 
 - **Modules and visibility**
   - Respect JPMS module boundaries; if you need access across modules, prefer adding targeted `exports`/`requires` rather than using raw/classpath tricks.  
-- Avoid introducing new package cycles; keep generator‑specific logic in `logoce.lmf.generator` and runtime concerns in `logoce.lmf.core.api`.
+- Avoid introducing new package cycles; keep generator‑specific logic in `logoce.lmf.core.generator` and runtime concerns in `logoce.lmf.core.api`.
 
 ## Tests and Validation
 
@@ -76,8 +80,10 @@ When modifying or adding code:
 ## Quick Orientation for Newcomers
 
 - **Where the language is defined**: LMCore’s own meta‑model lives in `logoce.lmf.core.api/src/main/model/asset/LMCore.lm`. This file shows the authoritative shapes for Groups, Features, Generics, Operations, etc. If something in `.lm` feels unclear, look here first.
-- **Where generation logic lives**: `logoce.lmf.generator` consumes `.lm` models to emit Java. Generated sources for LMCore itself are under `logoce.lmf.core.api/src/main/generated`. Never hand‑edit generated files.
- - **How to load models in Java**: use `new org.logoce.lmf.core.api.loader.LmLoader(ModelRegistry.empty())` and call `loadModel(...)`, `loadModels(...)`, or `loadObjects(...)` depending on your needs. For diagnostics‑oriented flows, use `LmLoader.loadModel(...)` which returns an `LmDocument` carrying both the `Model` (if any) and a list of `LmDiagnostic`s.
+- **Where generation logic lives**: `logoce.lmf.core.generator` consumes `.lm` models to emit Java. Generated sources for LMCore itself are under `logoce.lmf.core.api/src/main/generated`. Never hand‑edit generated files.
+ - **How to load models in Java**:
+   - External (Lily, etc.): `org.logoce.lmf.core.api.service.ILmLoader` (ServiceLoader-backed).
+   - Internal tools/tests/LSP: `new org.logoce.lmf.core.api.loader.LmLoader(ModelRegistry.empty())` (from `logoce.lmf.core.loader`).
  - **Where LSP design notes live**: the `lsp-design/` folder at the root contains copied `.lm` examples, the LMCore how‑to, and several design docs explaining the language, editor challenges, and desired LSP features.
 - **.lm syntax cheat sheet**:
   - `+att/-att` = Attribute (mutable/immutable). `+contains/-contains` = Relation with `contains=true`. `+refers/-refers` = Relation with `contains=false`.
@@ -96,7 +102,7 @@ When modifying or adding code:
   - JavaWrappers do not contain `generics` in LMCore; placing generics under them will fail to link.
   - Relative generic paths must be exact; `../../generics.0` counts from the current node up through parents.
   - Operations must carry their return type arguments in `returnTypeParameters`; parameter type arguments go in each `OperationParameter`’s `parameters`.
-- **Debugging linker errors**: Messages like “Cannot find containment relation…” or “Cannot resolve named token …” indicate a missing feature on the parent group or a bad reference path. Compare against `LMCore.lm` to ensure your structure matches LMCore’s containment layout. Use existing tests (`logoce.lmf.core.api/src/test/java/...` and generator tests in `logoce.lmf.generator/src/test/java`) as working patterns.
+- **Debugging linker errors**: Messages like “Cannot find containment relation…” or “Cannot resolve named token …” indicate a missing feature on the parent group or a bad reference path. Compare against `LMCore.lm` to ensure your structure matches LMCore’s containment layout. Use existing tests (`logoce.lmf.core.api/src/test/java/...` and generator tests in `logoce.lmf.core.generator/src/test/java`) as working patterns.
 
 ## Operator responsibilities
 

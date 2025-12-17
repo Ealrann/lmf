@@ -16,9 +16,9 @@ final class MultiModelWorkspaceIntegrationTest
 	@Test
 	void graphMultiModelShouldLinkWithoutImportErrors() throws Exception
 	{
-		final Path corePath = Path.of("..", "logoce.lmf.generator", "src", "test", "model", "GraphCore.lm");
-		final Path extensionsPath = Path.of("..", "logoce.lmf.generator", "src", "test", "model", "GraphExtensions.lm");
-		final Path analysisPath = Path.of("..", "logoce.lmf.generator", "src", "test", "model", "GraphAnalysis.lm");
+		final Path corePath = Path.of("..", "logoce.lmf.core.generator", "src", "test", "model", "GraphCore.lm");
+		final Path extensionsPath = Path.of("..", "logoce.lmf.core.generator", "src", "test", "model", "GraphExtensions.lm");
+		final Path analysisPath = Path.of("..", "logoce.lmf.core.generator", "src", "test", "model", "GraphAnalysis.lm");
 
 		final String coreText = Files.readString(corePath, StandardCharsets.UTF_8);
 		final String extensionsText = Files.readString(extensionsPath, StandardCharsets.UTF_8);
@@ -54,4 +54,3 @@ final class MultiModelWorkspaceIntegrationTest
 				   "GraphAnalysis.lm should not report unresolved 'GraphExtensions' model when all graph models are open");
 	}
 }
-

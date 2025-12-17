@@ -4,9 +4,9 @@ import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.api.notification.observatory.INotifierObservatoryBuilder;
 import org.logoce.lmf.core.api.notification.observatory.IObservatory;
 import org.logoce.lmf.core.observatory.InternalObservatoryBuilder;
-import org.logoce.lmf.notification.api.IFeature;
-import org.logoce.lmf.notification.api.IFeatures;
-import org.logoce.lmf.notification.api.INotifier;
+import org.logoce.lmf.core.api.notification.IFeature;
+import org.logoce.lmf.core.api.notification.IFeatures;
+import org.logoce.lmf.core.api.notification.INotifier;
 
 import java.util.ArrayList;
 import java.util.List;

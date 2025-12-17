@@ -1,7 +1,7 @@
 package org.logoce.lmf.core.api.notification.observatory;
 
-import org.logoce.lmf.notification.api.IFeature;
-import org.logoce.lmf.notification.api.IFeatures;
+import org.logoce.lmf.core.api.notification.IFeature;
+import org.logoce.lmf.core.api.notification.IFeatures;
 
 public interface INotifierObservatoryBuilder<Type extends IFeatures<?>>
 {

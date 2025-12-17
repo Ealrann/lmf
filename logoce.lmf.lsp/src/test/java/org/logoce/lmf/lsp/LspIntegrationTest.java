@@ -17,7 +17,7 @@ final class LspIntegrationTest
 	{
 		// Resolve path relative to project root; tests are run from subproject dir,
 		// so go up one level and reuse the generator test model.
-		final Path path = Path.of("..", "logoce.lmf.generator", "src", "test", "model", "CarCompany.lm");
+		final Path path = Path.of("..", "logoce.lmf.core.generator", "src", "test", "model", "CarCompany.lm");
 		final String text = Files.readString(path, StandardCharsets.UTF_8);
 
 		final var server = new LmLanguageServer();

@@ -15,7 +15,7 @@ import org.logoce.lmf.core.api.notification.listener.IModelListener;
 import org.logoce.lmf.core.api.notification.listener.IntListener;
 import org.logoce.lmf.core.api.notification.listener.Listener;
 import org.logoce.lmf.core.api.notification.listener.LongListener;
-import org.logoce.lmf.notification.api.IFeatures;
+import org.logoce.lmf.core.api.notification.IFeatures;
 
 import java.util.Collection;
 import java.util.Deque;

@@ -1,0 +1,68 @@
+package org.logoce.lmf.generator.adapter;
+
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
+import org.logoce.lmf.core.api.adapter.Adapter;
+import org.logoce.lmf.core.api.extender.IAdapter;
+import org.logoce.lmf.core.api.extender.ModelExtender;
+import org.logoce.lmf.generator.util.GenericParameter;
+import org.logoce.lmf.generator.util.TargetPathUtil;
+import org.logoce.lmf.generator.util.TypeParameter;
+import org.logoce.lmf.generator.util.TypeResolutionUtil;
+import org.logoce.lmf.core.lang.Group;
+import org.logoce.lmf.core.lang.Include;
+import org.logoce.lmf.core.lang.MetaModel;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+@ModelExtender(scope = Group.class)
+@Adapter
+public final class GroupInterfaceType extends AbstractGroupType implements IAdapter
+{
+	public static final TypeVariableName VAR_NAME_SELF = TypeVariableName.get("Self");
+	private static final boolean INCLUDE_SELF_TYPE = false;
+
+	private GroupInterfaceType(final Group<?> group)
+	{
+		super(bakeValues(group));
+	}
+
+	private static Values bakeValues(final Group<?> group)
+	{
+		final var model = (MetaModel) group.lmContainer();
+		final var basePackage = TargetPathUtil.packageName(model);
+		final var interfaceName = ClassName.get(basePackage, group.name());
+		final var genericParameters = group.generics().stream().map(GenericParameter::fromGeneric).toList();
+		final var rawStream = genericParameters.stream().map(GenericParameter::raw);
+		final var includes = group.includes();
+		final var superInterfaces = resolveIncludes(includes, group);
+		final var typedStream = genericParameters.stream().map(GenericParameter::defined);
+		final var rawParameters = INCLUDE_SELF_TYPE
+								  ? Stream.concat(rawStream, Stream.of(VAR_NAME_SELF)).toList()
+								  : rawStream.toList();
+		final var typedParameters = INCLUDE_SELF_TYPE
+									? Stream.concat(typedStream, Stream.of(VAR_NAME_SELF)).toList()
+									: typedStream.toList();
+
+		final var groupType = TypeParameter.of(interfaceName, rawParameters);
+
+		return new Values(groupType, basePackage, group, superInterfaces, typedParameters);
+	}
+
+	private static List<TypeName> resolveIncludes(final List<Include<?>> includes, final Group<?> group)
+	{
+		if (includes.isEmpty())
+		{
+			return List.of(TypeResolutionUtil.resolveNoInclude(group).parametrized());
+		}
+		else
+		{
+			return includes.stream()
+						   .map(i -> TypeResolutionUtil.resolveInclude(i, group))
+						   .map(TypeParameter::parametrized)
+						   .toList();
+		}
+	}
+}

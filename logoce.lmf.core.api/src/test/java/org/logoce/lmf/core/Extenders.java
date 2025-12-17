@@ -1,7 +1,7 @@
 package org.logoce.lmf.core;
 
-import org.logoce.lmf.extender.api.IAdapter;
-import org.logoce.lmf.extender.api.IAdapterProvider;
+import org.logoce.lmf.core.api.extender.IAdapter;
+import org.logoce.lmf.core.api.extender.IAdapterProvider;
 import org.logoce.lmf.core.functional.ModelExplorerAdapters;
 
 import java.lang.invoke.MethodHandles;

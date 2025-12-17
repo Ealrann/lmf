@@ -58,7 +58,7 @@ final class DefinitionNavigationTest
 	@Test
 	void goToDefinitionFromLocalAtReferenceInM1Model() throws Exception
 	{
-		Path path = Path.of("../logoce.lmf.generator/src/test/model/CarCompany.lm");
+		Path path = Path.of("../logoce.lmf.core.generator/src/test/model/CarCompany.lm");
 		final String text = Files.readString(path, StandardCharsets.UTF_8);
 		final URI uri = path.toAbsolutePath().toUri();
 
@@ -93,8 +93,8 @@ final class DefinitionNavigationTest
 	@Test
 	void goToDefinitionFromMetaModelImportsEntry() throws Exception
 	{
-		final Path corePath = Path.of("../logoce.lmf.generator/src/test/model/GraphCore.lm");
-		final Path extensionsPath = Path.of("../logoce.lmf.generator/src/test/model/GraphExtensions.lm");
+		final Path corePath = Path.of("../logoce.lmf.core.generator/src/test/model/GraphCore.lm");
+		final Path extensionsPath = Path.of("../logoce.lmf.core.generator/src/test/model/GraphExtensions.lm");
 
 		final String coreText = Files.readString(corePath, StandardCharsets.UTF_8);
 		final String extensionsText = Files.readString(extensionsPath, StandardCharsets.UTF_8);
