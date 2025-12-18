@@ -61,10 +61,10 @@ public interface MetaModel extends Model {
   interface Builder extends IFeaturedObject.Builder<MetaModel> {
     Builder name(String name);
     Builder domain(String domain);
-    Builder addImport(String _import);
+    Builder addImport(String import_);
     Builder addMetamodel(String metamodel);
     Builder addGroup(Supplier<Group<?>> group);
-    Builder addEnum(Supplier<Enum<?>> _enum);
+    Builder addEnum(Supplier<Enum<?>> enum_);
     Builder addUnit(Supplier<Unit<?>> unit);
     Builder addAlias(Supplier<Alias> alias);
     Builder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper);

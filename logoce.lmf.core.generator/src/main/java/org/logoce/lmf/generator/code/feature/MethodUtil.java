@@ -26,9 +26,53 @@ public final class MethodUtil
 
 	public static String validateParameterName(final String name)
 	{
-		final var isValidResolution = SourceVersion.isName(name);
+		if (name == null || name.isBlank())
+		{
+			return "value";
+		}
 
-		return isValidResolution ? name : '_' + name;
+		if (SourceVersion.isIdentifier(name) && !SourceVersion.isKeyword(name))
+		{
+			return name;
+		}
+
+		final var sanitized = sanitizeIdentifier(name);
+		if (SourceVersion.isIdentifier(sanitized) && !SourceVersion.isKeyword(sanitized))
+		{
+			return sanitized;
+		}
+
+		if (SourceVersion.isIdentifier(sanitized + '_') && !SourceVersion.isKeyword(sanitized + '_'))
+		{
+			return sanitized + '_';
+		}
+
+		if (SourceVersion.isIdentifier('_' + sanitized) && !SourceVersion.isKeyword('_' + sanitized))
+		{
+			return '_' + sanitized;
+		}
+
+		return "value";
+	}
+
+	private static String sanitizeIdentifier(final String name)
+	{
+		final var sanitized = new StringBuilder(name.length());
+
+		for (int i = 0; i < name.length(); i++)
+		{
+			final var ch = name.charAt(i);
+			if (i == 0)
+			{
+				sanitized.append(Character.isJavaIdentifierStart(ch) ? ch : '_');
+			}
+			else
+			{
+				sanitized.append(Character.isJavaIdentifierPart(ch) ? ch : '_');
+			}
+		}
+
+		return sanitized.toString();
 	}
 
 	private static String singularize(final String name)

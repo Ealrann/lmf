@@ -1,6 +1,7 @@
 package org.logoce.lmf.generator.model;
 
 import com.squareup.javapoet.*;
+import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.util.BuilderInitializerUtil;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.FormattedJavaWriter;
@@ -112,20 +113,23 @@ public class ModelPackage
 
 	private MethodSpec buildEnumResolver(final String definitionName)
 	{
+		final var enumParameterName = MethodUtil.validateParameterName("enum");
 		final var enumResolve = MethodSpec.methodBuilder("resolveEnumLiteral")
-										  .addModifiers(Modifier.PUBLIC)
-										  .addAnnotation(Override.class)
-										  .addAnnotation(ConstantTypes.SUPPRESS_UNCHECKED)
-										  .returns(TypeParameter.of(ConstantTypes.OPTIONAL, T).parametrized())
-										  .addTypeVariable(T)
-										  .addParameter(ConstantTypes.ENUM.nest(T).parametrized(), "_enum")
-										  .addParameter(ConstantTypes.STRING, "value");
+											  .addModifiers(Modifier.PUBLIC)
+											  .addAnnotation(Override.class)
+											  .addAnnotation(ConstantTypes.SUPPRESS_UNCHECKED)
+											  .returns(TypeParameter.of(ConstantTypes.OPTIONAL, T).parametrized())
+											  .addTypeVariable(T)
+											  .addParameter(ConstantTypes.ENUM.nest(T).parametrized(), enumParameterName)
+											  .addParameter(ConstantTypes.STRING, "value");
 
-		installEnumResolutionStatements(definitionName, enumResolve);
+		installEnumResolutionStatements(definitionName, enumResolve, enumParameterName);
 		return enumResolve.build();
 	}
 
-	private void installEnumResolutionStatements(final String definitionName, final MethodSpec.Builder enumResolve)
+	private void installEnumResolutionStatements(final String definitionName,
+												 final MethodSpec.Builder enumResolve,
+												 final String enumParameterName)
 	{
 		boolean first = true;
 		for (final var _enum : model.enums())
@@ -136,7 +140,8 @@ public class ModelPackage
 
 			final var enumName = _enum.name();
 			final var enumConstantName = GenUtils.toConstantCase(enumName);
-			statement.add("if (_enum == $N.Enums.$N) return (Optional<T>) Optional.of($N" + ".valueOf(value))",
+			statement.add("if ($N == $N.Enums.$N) return (Optional<T>) Optional.of($N" + ".valueOf(value))",
+						  enumParameterName,
 						  definitionName,
 						  enumConstantName,
 						  enumName);

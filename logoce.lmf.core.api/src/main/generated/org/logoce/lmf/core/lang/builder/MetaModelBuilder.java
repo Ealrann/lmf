@@ -49,8 +49,8 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
-  public MetaModelBuilder addImport(String _import) {
-    this.imports.add(_import);
+  public MetaModelBuilder addImport(String import_) {
+    this.imports.add(import_);
     return this;
   }
 
@@ -85,8 +85,8 @@ public final class MetaModelBuilder implements Builder {
   }
 
   @Override
-  public MetaModelBuilder addEnum(Supplier<Enum<?>> _enum) {
-    this.enums.add(_enum);
+  public MetaModelBuilder addEnum(Supplier<Enum<?>> enum_) {
+    this.enums.add(enum_);
     return this;
   }
 

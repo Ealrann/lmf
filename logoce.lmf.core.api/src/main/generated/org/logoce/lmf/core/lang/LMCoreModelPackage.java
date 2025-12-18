@@ -41,9 +41,9 @@ public final class LMCoreModelPackage implements IModelPackage {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> Optional<T> resolveEnumLiteral(Enum<T> _enum, String value) {
-    if (_enum == LMCoreModelDefinition.Enums.BOUND_TYPE) return (Optional<T>) Optional.of(BoundType.valueOf(value));
-    else if (_enum == LMCoreModelDefinition.Enums.PRIMITIVE) return (Optional<T>) Optional.of(Primitive.valueOf(value));
+  public <T> Optional<T> resolveEnumLiteral(Enum<T> enum_, String value) {
+    if (enum_ == LMCoreModelDefinition.Enums.BOUND_TYPE) return (Optional<T>) Optional.of(BoundType.valueOf(value));
+    else if (enum_ == LMCoreModelDefinition.Enums.PRIMITIVE) return (Optional<T>) Optional.of(Primitive.valueOf(value));
     return Optional.empty();
   }
 }
