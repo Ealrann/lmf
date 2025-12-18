@@ -1,9 +1,13 @@
 package org.logoce.lmf.generator.code.model;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
+import com.squareup.javapoet.WildcardTypeName;
 import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.core.lang.GenericParameter;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
@@ -39,8 +43,8 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		final var specializeInherited = resolvedFeature.requiresOwnerSpecialization(group);
 		final Group<?> targetGroup = specializeInherited ? group : declaringGroup;
 		final var constantName = GenUtils.toConstantCase(name);
-		final var rawSingleType = resolvedFeature.rawSingleTypeFor(targetGroup).parametrizedWildcard();
-		final var rawEffectiveType = resolvedFeature.rawEffectiveTypeFor(targetGroup).parametrizedWildcard();
+		final var rawSingleType = sanitizeStaticFeatureType(resolvedFeature.rawSingleTypeFor(targetGroup).parametrized());
+		final var rawEffectiveType = sanitizeStaticFeatureType(resolvedFeature.rawEffectiveTypeFor(targetGroup).parametrized());
 		final var listenerType = resolveListenerType(input, rawEffectiveType);
 		final List<TypeName> baseBuilderTypes = List.of(rawSingleType, rawEffectiveType);
 
@@ -123,9 +127,20 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 							datatypeBlock = CodeBlock.of("$N.$N", typeHolder, typeName);
 						}
 
-						initBuilder.add(".datatype(() -> $L)", datatypeBlock);
+						if (datatype instanceof JavaWrapper<?> && !attribute.parameters().isEmpty())
+						{
+							initBuilder.add(".datatype(() -> ($T<$T>) ($T) $L)",
+											ClassName.get(Datatype.class),
+											rawSingleType.box(),
+											ClassName.get(Datatype.class),
+											datatypeBlock);
+						}
+						else
+						{
+							initBuilder.add(".datatype(() -> $L)", datatypeBlock);
+						}
 					}
-			}
+				}
 			else
 			{
 				final var relation = (Relation<?, ?, ?, ?>) input;
@@ -144,6 +159,73 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		return FieldSpec.builder(mainType.parametrized(), constantName, modifiers)
 						.initializer(initBuilder.build())
 						.build();
+	}
+
+	private static TypeName sanitizeStaticFeatureType(final TypeName typeName)
+	{
+		return sanitizeStaticFeatureType(typeName, TypeVariableSanitizationMode.TYPE_ARGUMENT);
+	}
+
+	private enum TypeVariableSanitizationMode
+	{
+		TYPE_ARGUMENT,
+		REFERENCE_TYPE
+	}
+
+	private static TypeName sanitizeStaticFeatureType(final TypeName typeName,
+													  final TypeVariableSanitizationMode mode)
+	{
+		if (typeName instanceof TypeVariableName variable)
+		{
+			final var upperBound = sanitizeTypeVariableUpperBound(variable);
+			return mode == TypeVariableSanitizationMode.REFERENCE_TYPE
+				   ? upperBound
+				   : WildcardTypeName.subtypeOf(upperBound);
+		}
+		if (typeName instanceof ParameterizedTypeName parameterized)
+		{
+			final var arguments = parameterized.typeArguments
+											   .stream()
+											   .map(argument -> sanitizeStaticFeatureType(argument,
+																				 TypeVariableSanitizationMode.TYPE_ARGUMENT))
+											   .toArray(TypeName[]::new);
+			return ParameterizedTypeName.get(parameterized.rawType, arguments);
+		}
+		if (typeName instanceof WildcardTypeName wildcard)
+		{
+			if (!wildcard.lowerBounds.isEmpty())
+			{
+				final var lowerBound = sanitizeStaticFeatureType(wildcard.lowerBounds.getFirst(),
+																TypeVariableSanitizationMode.REFERENCE_TYPE);
+				return WildcardTypeName.supertypeOf(lowerBound);
+			}
+			if (wildcard.upperBounds.isEmpty())
+			{
+				return WildcardTypeName.subtypeOf(TypeName.OBJECT);
+			}
+			final var upperBound = sanitizeStaticFeatureType(wildcard.upperBounds.getFirst(),
+															TypeVariableSanitizationMode.REFERENCE_TYPE);
+			return WildcardTypeName.subtypeOf(upperBound);
+		}
+		if (typeName instanceof ArrayTypeName array)
+		{
+			final var componentType = sanitizeStaticFeatureType(array.componentType,
+															   TypeVariableSanitizationMode.REFERENCE_TYPE);
+			return ArrayTypeName.of(componentType);
+		}
+		return typeName;
+	}
+
+	private static TypeName sanitizeTypeVariableUpperBound(final TypeVariableName variable)
+	{
+		for (final var bound : variable.bounds)
+		{
+			if (!TypeName.OBJECT.equals(bound))
+			{
+				return sanitizeStaticFeatureType(bound, TypeVariableSanitizationMode.REFERENCE_TYPE);
+			}
+		}
+		return TypeName.OBJECT;
 	}
 
 	private static List<TypeName> builderTypeArguments(final Feature<?, ?, ?, ?> feature,
@@ -321,9 +403,9 @@ public final class FeaturesFieldBuilder implements DefinitionFieldBuilder<Featur
 		final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 												  model.name() + "ModelDefinition");
 		final var constantName = GenUtils.toConstantCase(group.name());
-		final var index = group.generics().indexOf(generic);
+		final var genericConstantName = GenUtils.toConstantCase(generic.name());
 		return CodeBlock.builder()
-						.add("$T.Generics.$N.ALL.get($L)", modelDefinition, constantName, index)
+						.add("$T.Generics.$N.$N", modelDefinition, constantName, genericConstantName)
 						.build();
 	}
 
