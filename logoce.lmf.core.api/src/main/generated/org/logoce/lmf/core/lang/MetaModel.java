@@ -66,7 +66,7 @@ public interface MetaModel extends Model {
     Builder addGroup(Supplier<Group<?>> group);
     Builder addEnum(Supplier<Enum<?>> _enum);
     Builder addUnit(Supplier<Unit<?>> unit);
-    Builder addAliase(Supplier<Alias> aliase);
+    Builder addAlias(Supplier<Alias> alias);
     Builder addJavaWrapper(Supplier<JavaWrapper<?>> javaWrapper);
     Builder lmPackage(IModelPackage lmPackage);
     Builder genNamePackage(boolean genNamePackage);

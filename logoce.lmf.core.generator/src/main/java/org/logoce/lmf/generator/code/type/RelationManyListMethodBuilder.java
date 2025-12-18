@@ -32,7 +32,6 @@ public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureR
 		final var paramName = MethodUtil.validateParameterName(resolution.name());
 		final var elementType = resolution.singleTypeFor(ownerGroup).parametrizedWildcard();
 		final var listType = ParameterizedTypeName.get(ConstantTypes.LIST, elementType.box());
-		final var supplierType = ParameterizedTypeName.get(ConstantTypes.SUPPLIER, elementType.box());
 
 		final var parameter = ParameterSpec.builder(listType, paramName, Modifier.FINAL).build();
 
@@ -41,10 +40,7 @@ public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureR
 						 .addAnnotation(ConstantTypes.OVERRIDE)
 						 .returns(returnType)
 						 .addParameter(parameter)
-						 .addStatement("$N.stream().map(value -> ($T) () -> value).forEach(this.$N::add)",
-									   paramName,
-									   supplierType,
-									   resolution.name())
+						 .addStatement("$N.forEach(value -> this.$N.add(() -> value))", paramName, resolution.name())
 						 .addStatement("return this")
 						 .build();
 	}

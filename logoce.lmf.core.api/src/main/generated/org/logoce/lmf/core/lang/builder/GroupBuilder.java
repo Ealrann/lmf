@@ -50,7 +50,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public GroupBuilder<T> addIncludes(final List<Include<?>> includes) {
-    includes.stream().map(value -> (Supplier<Include<?>>) () -> value).forEach(this.includes::add);
+    includes.forEach(value -> this.includes.add(() -> value));
     return this;
   }
 
@@ -62,7 +62,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public GroupBuilder<T> addFeatures(final List<Feature<?, ?, ?, ?>> features) {
-    features.stream().map(value -> (Supplier<Feature<?, ?, ?, ?>>) () -> value).forEach(this.features::add);
+    features.forEach(value -> this.features.add(() -> value));
     return this;
   }
 
@@ -74,7 +74,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public GroupBuilder<T> addGenerics(final List<Generic<?>> generics) {
-    generics.stream().map(value -> (Supplier<Generic<?>>) () -> value).forEach(this.generics::add);
+    generics.forEach(value -> this.generics.add(() -> value));
     return this;
   }
 
@@ -86,7 +86,7 @@ public final class GroupBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public GroupBuilder<T> addOperations(final List<Operation> operations) {
-    operations.stream().map(value -> (Supplier<Operation>) () -> value).forEach(this.operations::add);
+    operations.forEach(value -> this.operations.add(() -> value));
     return this;
   }
 

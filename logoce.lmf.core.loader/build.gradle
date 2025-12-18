@@ -35,6 +35,5 @@ publishing {
 
 application {
 	mainModule = 'logoce.lmf.core.loader'
-	mainClass = 'org.logoce.lmf.core.tool.ModelValidator'
+	mainClass = 'org.logoce.lmf.core.loader.tool.ModelValidator'
 }
-

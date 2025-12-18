@@ -69,7 +69,7 @@ public final class AttributeBuilder<UnaryType, EffectiveType, ListenerType, Pare
   @Override
   public AttributeBuilder<UnaryType, EffectiveType, ListenerType, ParentGroup> addParameters(
       final List<GenericParameter> parameters) {
-    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
+    parameters.forEach(value -> this.parameters.add(() -> value));
     return this;
   }
 

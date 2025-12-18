@@ -80,7 +80,7 @@ public final class MetaModelBuilder implements Builder {
 
   @Override
   public MetaModelBuilder addGroups(final List<Group<?>> groups) {
-    groups.stream().map(value -> (Supplier<Group<?>>) () -> value).forEach(this.groups::add);
+    groups.forEach(value -> this.groups.add(() -> value));
     return this;
   }
 
@@ -92,7 +92,7 @@ public final class MetaModelBuilder implements Builder {
 
   @Override
   public MetaModelBuilder addEnums(final List<Enum<?>> enums) {
-    enums.stream().map(value -> (Supplier<Enum<?>>) () -> value).forEach(this.enums::add);
+    enums.forEach(value -> this.enums.add(() -> value));
     return this;
   }
 
@@ -104,19 +104,19 @@ public final class MetaModelBuilder implements Builder {
 
   @Override
   public MetaModelBuilder addUnits(final List<Unit<?>> units) {
-    units.stream().map(value -> (Supplier<Unit<?>>) () -> value).forEach(this.units::add);
+    units.forEach(value -> this.units.add(() -> value));
     return this;
   }
 
   @Override
-  public MetaModelBuilder addAliase(Supplier<Alias> aliase) {
-    this.aliases.add(aliase);
+  public MetaModelBuilder addAlias(Supplier<Alias> alias) {
+    this.aliases.add(alias);
     return this;
   }
 
   @Override
   public MetaModelBuilder addAliases(final List<Alias> aliases) {
-    aliases.stream().map(value -> (Supplier<Alias>) () -> value).forEach(this.aliases::add);
+    aliases.forEach(value -> this.aliases.add(() -> value));
     return this;
   }
 
@@ -128,7 +128,7 @@ public final class MetaModelBuilder implements Builder {
 
   @Override
   public MetaModelBuilder addJavaWrappers(final List<JavaWrapper<?>> javaWrappers) {
-    javaWrappers.stream().map(value -> (Supplier<JavaWrapper<?>>) () -> value).forEach(this.javaWrappers::add);
+    javaWrappers.forEach(value -> this.javaWrappers.add(() -> value));
     return this;
   }
 
@@ -175,7 +175,7 @@ public final class MetaModelBuilder implements Builder {
 
   private static final class Inserters {
     private static final FeatureInserter<MetaModelBuilder> ATTRIBUTE_INSERTER = new FeatureInserter.Builder<MetaModelBuilder>(7, Inserters::attributeIndex).add(MetaModel.FeatureIDs.NAME, (builder, value) -> builder.name((String) value)).add(MetaModel.FeatureIDs.DOMAIN, (builder, value) -> builder.domain((String) value)).add(MetaModel.FeatureIDs.IMPORTS, (builder, value) -> builder.addImport((String) value)).add(MetaModel.FeatureIDs.METAMODELS, (builder, value) -> builder.addMetamodel((String) value)).add(MetaModel.FeatureIDs.LM_PACKAGE, (builder, value) -> builder.lmPackage((IModelPackage) value)).add(MetaModel.FeatureIDs.GEN_NAME_PACKAGE, (builder, value) -> builder.genNamePackage((boolean) value)).add(MetaModel.FeatureIDs.EXTRA_PACKAGE, (builder, value) -> builder.extraPackage((String) value)).build();
-    private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>(5, Inserters::relationIndex).add(MetaModel.FeatureIDs.GROUPS, (builder, value) -> builder.addGroup((Supplier<Group<?>>) value)).add(MetaModel.FeatureIDs.ENUMS, (builder, value) -> builder.addEnum((Supplier<Enum<?>>) value)).add(MetaModel.FeatureIDs.UNITS, (builder, value) -> builder.addUnit((Supplier<Unit<?>>) value)).add(MetaModel.FeatureIDs.ALIASES, (builder, value) -> builder.addAliase((Supplier<Alias>) value)).add(MetaModel.FeatureIDs.JAVA_WRAPPERS, (builder, value) -> builder.addJavaWrapper((Supplier<JavaWrapper<?>>) value)).build();
+    private static final RelationLazyInserter<MetaModelBuilder> RELATION_INSERTER = new RelationLazyInserter.Builder<MetaModelBuilder>(5, Inserters::relationIndex).add(MetaModel.FeatureIDs.GROUPS, (builder, value) -> builder.addGroup((Supplier<Group<?>>) value)).add(MetaModel.FeatureIDs.ENUMS, (builder, value) -> builder.addEnum((Supplier<Enum<?>>) value)).add(MetaModel.FeatureIDs.UNITS, (builder, value) -> builder.addUnit((Supplier<Unit<?>>) value)).add(MetaModel.FeatureIDs.ALIASES, (builder, value) -> builder.addAlias((Supplier<Alias>) value)).add(MetaModel.FeatureIDs.JAVA_WRAPPERS, (builder, value) -> builder.addJavaWrapper((Supplier<JavaWrapper<?>>) value)).build();
 
     private static int attributeIndex(final int featureId) {
       return switch (featureId) {

@@ -53,7 +53,7 @@ public final class OperationBuilder implements Builder {
   @Override
   public OperationBuilder addReturnTypeParameters(
       final List<GenericParameter> returnTypeParameters) {
-    returnTypeParameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.returnTypeParameters::add);
+    returnTypeParameters.forEach(value -> this.returnTypeParameters.add(() -> value));
     return this;
   }
 
@@ -65,7 +65,7 @@ public final class OperationBuilder implements Builder {
 
   @Override
   public OperationBuilder addParameters(final List<OperationParameter> parameters) {
-    parameters.stream().map(value -> (Supplier<OperationParameter>) () -> value).forEach(this.parameters::add);
+    parameters.forEach(value -> this.parameters.add(() -> value));
     return this;
   }
 

@@ -127,8 +127,7 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 				final var container = generic.lmContainer();
 				if (container instanceof Group<?> group)
 				{
-					final var index = group.generics().indexOf(generic);
-					if (index < 0)
+					if (!group.generics().contains(generic))
 					{
 						throw new IllegalStateException("Generic " + generic.name() + " not found in container");
 					}
@@ -136,7 +135,8 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 					final var modelDefinition = ClassName.get(TargetPathUtil.packageName(model),
 															  model.name() + "ModelDefinition");
 					final var groupConstantName = GenUtils.toConstantCase(group.name());
-					return CodeBlock.of("$T.Generics.$N.ALL.get($L)", modelDefinition, groupConstantName, index);
+					final var genericConstantName = GenUtils.toConstantCase(generic.name());
+					return CodeBlock.of("$T.Generics.$N.$N", modelDefinition, groupConstantName, genericConstantName);
 				}
 			}
 

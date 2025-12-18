@@ -60,26 +60,38 @@ public final class FeatureIdFieldBuilder implements DefinitionFieldBuilder<Featu
 
 		for (final var candidate : model.groups())
 		{
-			if (candidate.features().contains(feature))
+			if (!candidate.features().contains(feature))
 			{
-				boolean hasParent = false;
-				for (final var other : model.groups())
-				{
-					if (other != candidate && ModelUtil.isSubGroup(other, candidate))
-					{
-						hasParent = true;
-						break;
-					}
-				}
-
-				if (!hasParent)
-				{
-					declaringGroup = candidate;
-					break;
-				}
+				continue;
 			}
+			if (hasSuperGroupWithFeature(candidate, feature))
+			{
+				continue;
+			}
+			declaringGroup = candidate;
+			break;
 		}
 
 		return declaringGroup;
+	}
+
+	private static boolean hasSuperGroupWithFeature(final Group<?> group, final Feature<?, ?, ?, ?> feature)
+	{
+		for (final var include : group.includes())
+		{
+			if (!(include.group() instanceof Group<?> superGroup))
+			{
+				continue;
+			}
+			if (superGroup.features().contains(feature))
+			{
+				return true;
+			}
+			if (hasSuperGroupWithFeature(superGroup, feature))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

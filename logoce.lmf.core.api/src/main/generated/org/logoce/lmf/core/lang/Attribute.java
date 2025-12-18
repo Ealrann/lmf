@@ -40,7 +40,7 @@ public interface Attribute<UnaryType, EffectiveType, ListenerType, ParentGroup> 
     Attribute<Boolean, Boolean, BooleanListener, Feature.Features<?>> MANY = Feature.Features.MANY;
     Attribute<Boolean, Boolean, BooleanListener, Feature.Features<?>> MANDATORY = Feature.Features.MANDATORY;
     Relation<GenericParameter, List<GenericParameter>, Listener<List<GenericParameter>>, Feature.Features<?>> PARAMETERS = Feature.Features.PARAMETERS;
-    Relation<Datatype<?>, Datatype<?>, Listener<Datatype<?>>, Features<?>> DATATYPE = new RelationBuilder<Datatype<?>, Datatype<?>, Listener<Datatype<?>>, Features<?>>().name("datatype").immutable(true).mandatory(true).lazy(true).id(Attribute.FeatureIDs.DATATYPE).concept(() -> LMCoreModelDefinition.Groups.DATATYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.ALL.get(0)).build()).build();
+    Relation<Datatype<?>, Datatype<?>, Listener<Datatype<?>>, Features<?>> DATATYPE = new RelationBuilder<Datatype<?>, Datatype<?>, Listener<Datatype<?>>, Features<?>>().name("datatype").immutable(true).mandatory(true).lazy(true).id(Attribute.FeatureIDs.DATATYPE).concept(() -> LMCoreModelDefinition.Groups.DATATYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ATTRIBUTE.UNARY_TYPE).build()).build();
     Attribute<String, String, Listener<String>, Features<?>> DEFAULT_VALUE = new AttributeBuilder<String, String, Listener<String>, Features<?>>().name("defaultValue").immutable(true).id(Attribute.FeatureIDs.DEFAULT_VALUE).datatype(() -> LMCoreModelDefinition.Units.STRING).build();
     List<Feature<?, ?, ?, ?>> ALL = List.of(NAME, IMMUTABLE, ID, MANY, MANDATORY, PARAMETERS, DATATYPE, DEFAULT_VALUE);
   }

@@ -45,7 +45,7 @@ public final class IncludeBuilder<T extends LMObject> implements Builder<T> {
 
   @Override
   public IncludeBuilder<T> addParameters(final List<GenericParameter> parameters) {
-    parameters.stream().map(value -> (Supplier<GenericParameter>) () -> value).forEach(this.parameters::add);
+    parameters.forEach(value -> this.parameters.add(() -> value));
     return this;
   }
 
