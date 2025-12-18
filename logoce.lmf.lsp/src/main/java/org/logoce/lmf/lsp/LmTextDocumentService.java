@@ -33,7 +33,6 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
-import org.logoce.lmf.lsp.state.LmDocumentState;
 import org.logoce.lmf.lsp.state.SyntaxSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +68,7 @@ public final class LmTextDocumentService implements TextDocumentService
 				 effectiveText.length());
 
 		server.worker().execute(() -> {
-			final var state = new LmDocumentState(uri, version, effectiveText);
-			server.workspaceIndex().putDocument(state);
-			server.rebuildWorkspace();
+			server.openDocument(uri, version, effectiveText);
 			server.refreshSemanticTokensIfSupported("didOpen");
 		});
 	}
@@ -97,28 +94,14 @@ public final class LmTextDocumentService implements TextDocumentService
 		}
 
 		server.worker().execute(() -> {
-			final var index = server.workspaceIndex();
-			final var existing = index.getDocument(uri);
-			final var state = existing != null ? existing : new LmDocumentState(uri, version, "");
-			state.setVersion(version);
-
-			String updatedText = state.text();
-			if (updatedText == null)
-			{
-				updatedText = "";
-			}
+			final var existing = server.workspaceIndex().getDocument(uri);
+			String updatedText = existing != null && existing.text() != null ? existing.text() : "";
 			for (final var change : changes)
 			{
 				updatedText = applyChange(uri, updatedText, change);
 			}
 
-			state.setText(updatedText);
-			if (existing == null)
-			{
-				index.putDocument(state);
-			}
-
-			server.rebuildWorkspace();
+			server.updateDocument(uri, version, updatedText);
 		});
 	}
 
@@ -175,13 +158,7 @@ public final class LmTextDocumentService implements TextDocumentService
 		final URI uri = URI.create(params.getTextDocument().getUri());
 		LOG.info("LMF LSP didClose: uri={}", uri);
 		server.worker().execute(() -> {
-			server.workspaceIndex().removeDocument(uri);
-
-			// IntelliJ may close editors (even without explicit user intent), and we must not
-			// lose go-to-definition targets for meta-models that are still present on disk.
-			// Rebuilding re-indexes disk meta-models (when a projectRoot is configured) and
-			// re-analyzes remaining open documents.
-			server.rebuildWorkspace();
+			server.closeDocument(uri);
 			server.refreshSemanticTokensIfSupported("didClose");
 		});
 	}

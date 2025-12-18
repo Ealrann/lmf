@@ -94,6 +94,21 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		workspaceRebuilder.analyzeDocument(state);
 	}
 
+	public void openDocument(final java.net.URI uri, final int version, final String text)
+	{
+		workspaceRebuilder.openDocument(uri, version, text);
+	}
+
+	public void updateDocument(final java.net.URI uri, final int version, final String text)
+	{
+		workspaceRebuilder.updateDocument(uri, version, text);
+	}
+
+	public void closeDocument(final java.net.URI uri)
+	{
+		workspaceRebuilder.closeDocument(uri);
+	}
+
 	public Settings settings()
 	{
 		return settings;
