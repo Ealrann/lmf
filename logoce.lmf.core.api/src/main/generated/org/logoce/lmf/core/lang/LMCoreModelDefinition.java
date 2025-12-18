@@ -5,6 +5,7 @@ import org.logoce.lmf.core.api.model.BuilderSupplier;
 import org.logoce.lmf.core.api.model.IModelPackage;
 import org.logoce.lmf.core.lang.builder.AliasBuilder;
 import org.logoce.lmf.core.lang.builder.AttributeBuilder;
+import org.logoce.lmf.core.lang.builder.EnumAttributeBuilder;
 import org.logoce.lmf.core.lang.builder.EnumBuilder;
 import org.logoce.lmf.core.lang.builder.GenericBuilder;
 import org.logoce.lmf.core.lang.builder.GenericExtensionBuilder;
@@ -108,13 +109,14 @@ public interface LMCoreModelDefinition {
     Group<Datatype<?>> DATATYPE = new GroupBuilder<Datatype<?>>().name("Datatype").addInclude(() -> new IncludeBuilder<Type<?>>().group(() -> TYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.DATATYPE.T).build()).build()).addFeatures(Datatype.Features.ALL).addGenerics(Generics.DATATYPE.ALL).build();
     Group<Alias> ALIAS = new GroupBuilder<Alias>().name("Alias").concrete(true).addInclude(() -> new IncludeBuilder<Named>().group(() -> NAMED).build()).addFeatures(Alias.Features.ALL).lmBuilder(new BuilderSupplier<>(AliasBuilder::new)).build();
     Group<Enum<?>> ENUM = new GroupBuilder<Enum<?>>().name("Enum").concrete(true).addInclude(() -> new IncludeBuilder<Datatype<?>>().group(() -> DATATYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.ENUM.T).build()).build()).addFeatures(Enum.Features.ALL).addGenerics(Generics.ENUM.ALL).lmBuilder(new BuilderSupplier<>(EnumBuilder::new)).build();
+    Group<EnumAttribute> ENUM_ATTRIBUTE = new GroupBuilder<EnumAttribute>().name("EnumAttribute").concrete(true).addInclude(() -> new IncludeBuilder<Named>().group(() -> NAMED).build()).addFeatures(EnumAttribute.Features.ALL).lmBuilder(new BuilderSupplier<>(EnumAttributeBuilder::new)).build();
     Group<Unit<?>> UNIT = new GroupBuilder<Unit<?>>().name("Unit").concrete(true).addInclude(() -> new IncludeBuilder<Datatype<?>>().group(() -> DATATYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.UNIT.T).build()).build()).addFeatures(Unit.Features.ALL).addGenerics(Generics.UNIT.ALL).lmBuilder(new BuilderSupplier<>(UnitBuilder::new)).build();
     Group<Generic<?>> GENERIC = new GroupBuilder<Generic<?>>().name("Generic").concrete(true).addInclude(() -> new IncludeBuilder<Concept<?>>().group(() -> CONCEPT).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.GENERIC.T).build()).build()).addInclude(() -> new IncludeBuilder<Datatype<?>>().group(() -> DATATYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.GENERIC.T).build()).build()).addFeatures(Generic.Features.ALL).addGenerics(Generics.GENERIC.ALL).lmBuilder(new BuilderSupplier<>(GenericBuilder::new)).build();
     Group<GenericExtension> GENERIC_EXTENSION = new GroupBuilder<GenericExtension>().name("GenericExtension").concrete(true).addInclude(() -> new IncludeBuilder<LMObject>().group(() -> LM_OBJECT).build()).addFeatures(GenericExtension.Features.ALL).lmBuilder(new BuilderSupplier<>(GenericExtensionBuilder::new)).build();
     Group<GenericParameter> GENERIC_PARAMETER = new GroupBuilder<GenericParameter>().name("GenericParameter").concrete(true).addInclude(() -> new IncludeBuilder<LMObject>().group(() -> LM_OBJECT).build()).addFeatures(GenericParameter.Features.ALL).lmBuilder(new BuilderSupplier<>(GenericParameterBuilder::new)).build();
     Group<JavaWrapper<?>> JAVA_WRAPPER = new GroupBuilder<JavaWrapper<?>>().name("JavaWrapper").concrete(true).addInclude(() -> new IncludeBuilder<Datatype<?>>().group(() -> DATATYPE).addParameter(() -> new GenericParameterBuilder().type(() -> LMCoreModelDefinition.Generics.JAVA_WRAPPER.T).build()).build()).addFeatures(JavaWrapper.Features.ALL).addGenerics(Generics.JAVA_WRAPPER.ALL).lmBuilder(new BuilderSupplier<>(JavaWrapperBuilder::new)).build();
     Group<Serializer> SERIALIZER = new GroupBuilder<Serializer>().name("Serializer").concrete(true).addInclude(() -> new IncludeBuilder<LMObject>().group(() -> LM_OBJECT).build()).addFeatures(Serializer.Features.ALL).lmBuilder(new BuilderSupplier<>(SerializerBuilder::new)).build();
-    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, CONCEPT, GROUP, INCLUDE, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, UNIT, GENERIC, GENERIC_EXTENSION, GENERIC_PARAMETER, JAVA_WRAPPER, SERIALIZER);
+    List<Group<?>> ALL = List.of(LM_OBJECT, NAMED, TYPE, MODEL, META_MODEL, CONCEPT, GROUP, INCLUDE, FEATURE, ATTRIBUTE, RELATION, OPERATION, OPERATION_PARAMETER, DATATYPE, ALIAS, ENUM, ENUM_ATTRIBUTE, UNIT, GENERIC, GENERIC_EXTENSION, GENERIC_PARAMETER, JAVA_WRAPPER, SERIALIZER);
   }
 
   interface Units {

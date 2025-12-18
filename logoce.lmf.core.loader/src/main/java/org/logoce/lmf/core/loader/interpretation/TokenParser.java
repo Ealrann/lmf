@@ -11,6 +11,7 @@ import java.util.stream.StreamSupport;
 final class TokenParser
 {
 	private final Iterator<PToken> iterator;
+	private final Deque<PToken> pushedBack = new ArrayDeque<>();
 
 	public TokenParser(final Iterator<PToken> iterator)
 	{
@@ -19,14 +20,14 @@ final class TokenParser
 
 	public PType createTypeToken()
 	{
-		final var firstToken = iterator.next();
+		final var firstToken = nextToken();
 		final var firstValue = firstToken.value();
 		assert firstToken.type() == ELMTokenType.TYPE_NAME || firstToken.type() == ELMTokenType.TYPE;
 		if (firstToken.type() == ELMTokenType.TYPE_NAME)
 		{
-			final var assign = iterator.next();
+			final var assign = nextToken();
 			assert assign.type() == ELMTokenType.ASSIGN;
-			final var type = iterator.next();
+			final var type = nextToken();
 			assert type.type() == ELMTokenType.TYPE;
 			return new PType(Optional.of(firstValue), Optional.of(type.value()));
 		}
@@ -54,15 +55,15 @@ final class TokenParser
 		final var firstValue = firstToken.value();
 		if (firstToken.type() == ELMTokenType.VALUE_NAME)
 		{
-			final var assign = iterator.next();
+			final var assign = nextToken();
 			assert assign.type() == ELMTokenType.ASSIGN;
-			final var nextValues = nextContiguousValues(iterator);
+			final var nextValues = nextContiguousValues();
 			return Optional.of(PFeature.of(Optional.of(firstValue), nextValues));
 		}
 		else
 		{
 			assert firstToken.type() == ELMTokenType.VALUE || firstToken.type() == ELMTokenType.QUOTE;
-			final var nextValues = nextContiguousValues(iterator);
+			final var nextValues = nextContiguousValues();
 			final var values = Stream.concat(Stream.of(firstValue), nextValues.stream()).toList();
 			return Optional.of(PFeature.of(Optional.empty(), values));
 		}
@@ -70,9 +71,9 @@ final class TokenParser
 
 	private Optional<PToken> nextNotEmpty()
 	{
-		while (iterator.hasNext())
+		while (hasNextToken())
 		{
-			final var next = iterator.next();
+			final var next = nextToken();
 			final var type = next.type();
 			if (type != ELMTokenType.WHITE_SPACE && type != ELMTokenType.QUOTE)
 			{
@@ -82,27 +83,40 @@ final class TokenParser
 		return Optional.empty();
 	}
 
-	private static List<String> nextContiguousValues(final Iterator<PToken> iterator)
+	private List<String> nextContiguousValues()
 	{
 		final List<String> res = new ArrayList<>();
 		int quoteCount = 0;
+		boolean afterListSeparator = false;
 
 		_while:
-		while (iterator.hasNext())
+		while (hasNextToken())
 		{
-			final var token = iterator.next();
+			final var token = nextToken();
 			final var type = token.type();
 			switch (type)
 			{
 				case WHITE_SPACE:
+					if (afterListSeparator)
+					{
+						continue;
+					}
+					final var nextNonWhitespace = peekNextNonWhitespace();
+					if (nextNonWhitespace.isPresent() &&
+						nextNonWhitespace.get().type() == ELMTokenType.LIST_SEPARATOR)
+					{
+						continue;
+					}
 					break _while;
 				case QUOTE:
 					quoteCount++;
 					continue;
 				case LIST_SEPARATOR:
+					afterListSeparator = true;
 					continue;
 				case VALUE:
 					res.add(token.value());
+					afterListSeparator = false;
 					break;
 				default:
 					throw new IllegalStateException("Unmanaged case: " + type);
@@ -116,5 +130,35 @@ final class TokenParser
 			res.add("");
 		}
 		return res;
+	}
+
+	private boolean hasNextToken()
+	{
+		return !pushedBack.isEmpty() || iterator.hasNext();
+	}
+
+	private PToken nextToken()
+	{
+		return pushedBack.isEmpty() ? iterator.next() : pushedBack.removeFirst();
+	}
+
+	private void pushBack(final PToken token)
+	{
+		pushedBack.addFirst(token);
+	}
+
+	private Optional<PToken> peekNextNonWhitespace()
+	{
+		while (hasNextToken())
+		{
+			final var token = nextToken();
+			if (token.type() == ELMTokenType.WHITE_SPACE)
+			{
+				continue;
+			}
+			pushBack(token);
+			return Optional.of(token);
+		}
+		return Optional.empty();
 	}
 }

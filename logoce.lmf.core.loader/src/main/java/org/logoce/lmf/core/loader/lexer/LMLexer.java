@@ -513,7 +513,8 @@ public class LMLexer {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { return ELMTokenType.BAD_CHARACTER;
+            { if (yylength() == 1 && yycharat(0) == ':') return ELMTokenType.LIST_SEPARATOR;
+              return ELMTokenType.BAD_CHARACTER;
             }
           // fall through
           case 14: break;

@@ -1,0 +1,20 @@
+(MetaModel domain=test.model2.enumattrs name=EnumAttributes
+	(Enum NameAndId
+		A : 1 ,
+		B : 2 ,
+		C : 3
+		(EnumAttribute id #LMCore@int))
+
+	(Enum Labelled
+		A : "Hello world" ,
+		B : "foo:bar" ,
+		C : "hi,there"
+		(EnumAttribute label #LMCore@string))
+
+	(Enum CodeAndLabel
+		A : 1 : "Hello world" ,
+		B : 2 : "foo:bar" ,
+		C : 3 : "hi,there"
+		(EnumAttribute id #LMCore@int)
+		(EnumAttribute label #LMCore@string))
+)

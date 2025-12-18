@@ -115,7 +115,12 @@
 		(includes group=@Datatype
 			(parameters ^T))
 		(Generic T)
-		(-att literals datatype=@string [0..*]))
+		(-att literals datatype=@string [0..*])
+		(-contains attributes [0..*] @EnumAttribute))
+	(Definition EnumAttribute
+		(includes group=@Named)
+		(-refers unit concept=@Unit [1..1])
+		(-att name=defaultValue @string [0..1]))
 	(Definition Unit
 		(includes group=@Datatype
 			(parameters ^T))

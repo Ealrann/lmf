@@ -7,18 +7,23 @@ import org.logoce.lmf.core.api.model.ModelNotifier;
 import org.logoce.lmf.core.feature.FeatureGetter;
 import org.logoce.lmf.core.feature.FeatureSetter;
 import org.logoce.lmf.core.lang.Enum;
+import org.logoce.lmf.core.lang.EnumAttribute;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMCoreModelDefinition;
 
 public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implements Enum<T> {
-  private static final int FEATURE_COUNT = 2;
+  private static final int FEATURE_COUNT = 3;
   private final ModelNotifier<Enum.Features<?>> notifier = new ModelNotifier<>(this, FEATURE_COUNT, this::featureIndex);
   private final String name;
   private final List<String> literals;
+  private final List<EnumAttribute> attributes;
 
-  public EnumImpl(final String name, final List<String> literals) {
+  public EnumImpl(final String name, final List<String> literals,
+      final List<EnumAttribute> attributes) {
     this.name = name;
     this.literals = List.copyOf(literals);
+    this.attributes = List.copyOf(attributes);
+    setContainer(attributes, Enum.FeatureIDs.ATTRIBUTES);
     notifier.eDeliver(true);
   }
 
@@ -35,6 +40,11 @@ public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implemen
   @Override
   public List<String> literals() {
     return literals;
+  }
+
+  @Override
+  public List<EnumAttribute> attributes() {
+    return attributes;
   }
 
   @Override
@@ -56,6 +66,7 @@ public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implemen
     return switch (featureId) {
       case Enum.FeatureIDs.NAME -> 0;
       case Enum.FeatureIDs.LITERALS -> 1;
+      case Enum.FeatureIDs.ATTRIBUTES -> 2;
       default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
     };
   }
@@ -66,7 +77,7 @@ public final class EnumImpl<T> extends FeaturedObject<Enum.Features<?>> implemen
   }
 
   private static final class Inserters {
-    private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>(FEATURE_COUNT, EnumImpl::featureIndexStatic).add(Enum.FeatureIDs.NAME, Enum::name).add(Enum.FeatureIDs.LITERALS, Enum::literals).build();
+    private static final FeatureGetter<Enum<?>> GET_MAP = new FeatureGetter.Builder<Enum<?>>(FEATURE_COUNT, EnumImpl::featureIndexStatic).add(Enum.FeatureIDs.NAME, Enum::name).add(Enum.FeatureIDs.LITERALS, Enum::literals).add(Enum.FeatureIDs.ATTRIBUTES, Enum::attributes).build();
     private static final FeatureSetter<Enum<?>> SET_MAP = new FeatureSetter.Builder<Enum<?>>(FEATURE_COUNT, EnumImpl::featureIndexStatic).build();
   }
 }

@@ -30,6 +30,7 @@ public final class LMCoreModelPackage implements IModelPackage {
     else if (group == LMCoreModelDefinition.Groups.OPERATION_PARAMETER) return Optional.of((IFeaturedObject.Builder<T>) OperationParameter.builder());
     else if (group == LMCoreModelDefinition.Groups.ALIAS) return Optional.of((IFeaturedObject.Builder<T>) Alias.builder());
     else if (group == LMCoreModelDefinition.Groups.ENUM) return Optional.of((IFeaturedObject.Builder<T>) Enum.builder());
+    else if (group == LMCoreModelDefinition.Groups.ENUM_ATTRIBUTE) return Optional.of((IFeaturedObject.Builder<T>) EnumAttribute.builder());
     else if (group == LMCoreModelDefinition.Groups.UNIT) return Optional.of((IFeaturedObject.Builder<T>) Unit.builder());
     else if (group == LMCoreModelDefinition.Groups.GENERIC) return Optional.of((IFeaturedObject.Builder<T>) Generic.builder());
     else if (group == LMCoreModelDefinition.Groups.GENERIC_EXTENSION) return Optional.of((IFeaturedObject.Builder<T>) GenericExtension.builder());
