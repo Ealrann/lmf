@@ -35,15 +35,14 @@ public final class LinkNodeBuilder<I extends PNode>
 
 	public void resolve(final LinkNodeInternal<?, I, ?> node)
 	{
-		final var resolver = metaResolvers.get(node.group());
-		resolver.resolve(node);
+		requireResolver(node.group(), node.pNode()).resolve(node);
 	}
 
 	private LinkNodeFull<?, I> buildNode(final BasicTree.BuildInfo<LinkInfo<?, I>, LinkNodeFull<?, I>> buildInfo)
 	{
 		@SuppressWarnings("unchecked")
 		final var data = (LinkInfo<?, I>) buildInfo.data();
-		final var resolver = metaResolvers.get(data.modelGroup().group());
+		final var resolver = requireResolver(data.modelGroup().group(), data.pNode());
 		final var attributeResolutions = resolver.nodeLinker().resolveAttributes(data.features());
 
 		return new LinkNodeFull<>(data, buildInfo.parent(), attributeResolutions, buildInfo.childrenBuilder());
@@ -93,46 +92,68 @@ public final class LinkNodeBuilder<I extends PNode>
 																		final Group<?> parentGroup)
 	{
 		final var containmentName = node.type().firstToken();
-		final var groupFromParent = parentGroup.features()
-											   .stream()
-											   .filter(feature -> feature instanceof Relation<?, ?, ?, ?> relation &&
-																  relation.name().equals(containmentName))
-											   .map(feature -> ((Relation<?, ?, ?, ?>) feature).concept())
-											   .findAny()
-											   .orElseThrow(() -> buildException(node, containmentName, parentGroup));
+		final var groupFromParent = findContainmentRelationByName(parentGroup, containmentName, node.pnode())
+			.map(Relation::concept)
+			.orElseThrow(() -> buildException(node, containmentName, parentGroup));
 
-		return (ModelGroup<T>) metaGroups.get(groupFromParent.name());
+		final var resolved = (ModelGroup<T>) metaGroups.get(groupFromParent.name());
+		if (resolved == null)
+		{
+			throw new LinkException("Cannot find Group: " + groupFromParent.name(), node.pnode());
+		}
+		return resolved;
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T extends LMObject> Relation<T, ?, ?, ?> resolveContainmentRelation(final PGroup<I> node,
-																				final Group<?> parentGroup,
-																				final Group<T> childGroup)
+																					final Group<?> parentGroup,
+																					final Group<T> childGroup)
 	{
 		final var containmentName = node.type().firstToken();
-		final var fromName = resolveFromName(parentGroup, containmentName);
-		return (Relation<T, ?, ?, ?>) fromName.or(() -> resolveFromGroup(parentGroup, childGroup))
-											   .orElseThrow(() -> buildException(node,
-																				 parentGroup,
-																				 childGroup.name(),
-																				 containmentName));
+		final var fromName = resolveFromName(node, parentGroup, containmentName);
+		return (Relation<T, ?, ?, ?>) fromName.or(() -> resolveFromGroup(node, parentGroup, childGroup))
+												   .orElseThrow(() -> buildException(node,
+																					 parentGroup,
+																					 childGroup.name(),
+																					 containmentName));
 	}
 
-	private <T extends LMObject> Optional<? extends Relation<?, ?, ?, ?>> resolveFromGroup(final Group<?> parentGroup,
+	private <T extends LMObject> Optional<? extends Relation<?, ?, ?, ?>> resolveFromGroup(final PGroup<I> node,
+																						   final Group<?> parentGroup,
 																						   final Group<T> childGroup)
 	{
-		return metaResolvers.get(parentGroup)
-							.streamContainmentRelations()
-							.filter(r -> ModelUtil.isSubGroup(r.concept(), childGroup))
-							.findAny();
+		return requireResolver(parentGroup, node.pnode())
+			.streamContainmentRelations()
+			.filter(r -> ModelUtil.isSubGroup(r.concept(), childGroup))
+			.findFirst();
 	}
 
-	private Optional<Relation<?, ?, ?, ?>> resolveFromName(final Group<?> parentGroup, final String containmentName)
+	private Optional<Relation<?, ?, ?, ?>> resolveFromName(final PGroup<I> node,
+														   final Group<?> parentGroup,
+														   final String containmentName)
 	{
-		return metaResolvers.get(parentGroup)
-							.streamContainmentRelations()
-							.filter(f -> f.name().equals(containmentName))
-							.findAny();
+		return findContainmentRelationByName(parentGroup, containmentName, node.pnode());
+	}
+
+	private Optional<Relation<?, ?, ?, ?>> findContainmentRelationByName(final Group<?> parentGroup,
+																		 final String containmentName,
+																		 final PNode pNode)
+	{
+		return requireResolver(parentGroup, pNode)
+			.streamContainmentRelations()
+			.filter(r -> r.name().equals(containmentName))
+			.findFirst();
+	}
+
+	private TreeToFeatureLinker requireResolver(final Group<?> group, final PNode pNode)
+	{
+		final var resolver = metaResolvers.get(group);
+		if (resolver == null)
+		{
+			final var groupName = group != null ? group.name() : "<null>";
+			throw new LinkException("No meta resolver registered for group " + groupName, pNode);
+		}
+		return resolver;
 	}
 
 	private static <I extends PNode> LinkException buildException(final PGroup<I> node,
@@ -160,6 +181,7 @@ public final class LinkNodeBuilder<I extends PNode>
 
 	private static LinkException buildException(final PGroup<?> node, final PType nodeType)
 	{
-		return new LinkException("Cannot find Group: " + nodeType.value(), node.pnode());
+		final var value = nodeType.name().orElse(nodeType.value().orElse("<unknown>"));
+		return new LinkException("Cannot find Group: " + value, node.pnode());
 	}
 }

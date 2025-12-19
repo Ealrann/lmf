@@ -7,5 +7,5 @@ public interface IFeature<Callback, Type extends IFeatures<?>>
 		return new SimpleFeature<>();
 	}
 
-	record SimpleFeature<Callback, Type extends IFeatures<?>>() implements IFeature<Callback, Type> {}
+	final class SimpleFeature<Callback, Type extends IFeatures<?>> implements IFeature<Callback, Type> {}
 }

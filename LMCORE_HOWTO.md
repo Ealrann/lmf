@@ -1,6 +1,6 @@
-# LMCore `.lm` How‑To (M2 Meta‑Models)
+# LMCore `.lm` How‑To (M2 Meta‑Models + M1 Instance Models)
 
-This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.core.api`, `logoce.lmf.core.loader`, and `logoce.lmf.core.generator`.
+This is a pragmatic guide for writing LMCore `.lm` meta‑models (M2) that work well with `logoce.lmf.core.api`, `logoce.lmf.core.loader`, and `logoce.lmf.core.generator`, with a short section on M1 instance models (data) written in the same syntax.
 
 If you are new to this repo, read this file together with:
 
@@ -20,6 +20,11 @@ The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/
   - `logoce.lmf.core.generator` generates Java types in your `domain` package.
   - The runtime (`LmLoader` / `ResourceUtil`) can load and link your `.lm` into `MetaModel` and related LMCore objects.
 
+- **M1 (instance models / “data”)**  
+  LM syntax is also used to describe **instances of your M2 meta‑models** (object graphs). The loader reads from an input stream (so the extension is technically irrelevant), but for IDE/editor support we keep files ending in `.lm` (for example `Scene.lm` or `Compositor.subpass.lm`).
+  - If the root is `(MetaModel ...)` → you are loading an **M2** meta‑model.
+  - If the root is a domain type (e.g. `(CarCompany ...)`) → you are loading an **M1** instance model.
+
 - **Loading `.lm` programmatically**
   - For simple experiments:
     ```java
@@ -28,6 +33,103 @@ The LMCore definition itself lives in `logoce.lmf.core.api/src/main/model/asset/
     MetaModel mm = (MetaModel) doc.model();
     ```
   - The older `ResourceUtil.loadModel/loadModels` APIs now delegate to this loader; you can keep using them if you prefer.
+
+## 0.1 M1 models (instance models) in practice
+
+An M1 model is “just objects”, but the loader still needs to know **which meta‑model (M2) to use** to interpret types, features, enums, containment, etc.
+
+### 0.1.1 The “header” is just the `#LMCore@Model` concept
+
+LMCore defines a `Model` group (M3) that provides:
+
+- `name` (via `#LMCore@Named`)
+- `domain` (required)
+- `imports` (optional, list)
+- `metamodels` (optional, list)
+
+In practice:
+
+- In **M2** meta‑models, `imports=` is what enables cross‑model type references like `#OtherModel@Type`.
+- In **M1** instance models, `metamodels=` is what tells the loader which meta‑model packages to use to interpret the instance.
+
+In most projects, the root M1 type includes `#LMCore@Model` (directly or through inheritance). That’s why M1 roots often start with:
+
+```lm
+(SomeRootType domain=my.domain name=MyInstance metamodels=my.domain.MyMetaModel
+    ;; object graph...
+)
+```
+
+`metamodels=` is a list of **meta‑model identifiers** in the form `domain.name` (for example, `test.model.CarCompany` matches `(MetaModel domain=test.model name=CarCompany ...)`). If your instance uses types coming from multiple meta‑models, list them all:
+
+```lm
+metamodels=my.domain.Process,my.domain.Resource
+```
+
+**Common confusion:** `domain=` means different things depending on whether you write M2 or M1:
+
+- On an M2 `(MetaModel ...)`, `domain` is the Java package for generated code.
+- On an M1 root that implements `#LMCore@Model`, `domain` is just an identifier for the instance model itself (it does not have to match the meta‑model domain).
+
+### 0.1.2 Minimal M1 example (based on the repo tests)
+
+Meta‑model (M2): `logoce.lmf.core.api/src/test/model/CarCompany.lm`  
+Instance model (M1): `logoce.lmf.core.api/src/test/model/Peugeot.lm`
+
+```lm
+(CarCompany domain=test.model name=PeugeotCompany metamodels=test.model.CarCompany
+    (ceo name=Macron)
+    (CarParc
+        (Car name=peugeot1 brand=Peugeot)))
+```
+
+Points that are easy to miss at first:
+
+- `(ceo ...)` uses the **feature name** `ceo` (a `+contains` relation on `CarCompany`) to create the contained `Person` instance.
+- `(CarParc ...)` and `(Car ...)` use **type names**. The loader attaches them through the unique compatible containment feature:
+  - `CarCompany` contains `CarParc` through `parcs`
+  - `CarParc` contains `Car` through `cars`
+- Enum values are written as **literal names** (`brand=Peugeot`).
+
+### 0.1.3 References inside an M1 model (`@name`)
+
+If a relation is a non‑containment reference (`+refers`), you usually point to an existing object using `@...`:
+
+```lm
+(CarCompany domain=test.model name=PeugeotCompanyWithReference metamodels=test.model.CarCompany
+    (ceo name=Macron car=@peugeot1)
+    (CarParc
+        (Car name=peugeot1 brand=Peugeot)))
+```
+
+This works because the target (`Car`) is `#LMCore@Named`, so it has a stable `name` used for resolution.
+
+### 0.1.4 Containment: pick one style (feature *or* type), don’t double‑wrap
+
+For a containment relation, you can usually describe children in two equivalent styles:
+
+- **By feature name** (explicit):
+  ```lm
+  (CarParc
+      (cars name=peugeot1 brand=Peugeot))
+  ```
+- **By concrete type name** (implicit containment resolution):
+  ```lm
+  (CarParc
+      (Car name=peugeot1 brand=Peugeot))
+  ```
+
+Avoid mixing both for the same step, for example don’t write a “feature wrapper” that contains a second “typed child” for the same object. This often leads to linker errors like:
+
+> “Cannot find containment relation from parent … to child …”
+
+When you hit this, flatten the structure: use either the feature node *or* the typed node, but not both.
+
+If you rely on implicit containment resolution (typed nodes), and a parent has multiple containment features that could accept the same child type, resolution becomes ambiguous. In that case, prefer the explicit feature form.
+
+### 0.1.5 Mandatory features still need values at load time
+
+During linking, objects are built using the generated builders. If a feature is mandatory in the meta‑model (`[1..1]`), the builder may require a value immediately. If you plan to overwrite something programmatically later, you may still need a placeholder value in the M1 file so the model can load.
 
 ## 1. File Skeleton
 
@@ -125,6 +227,41 @@ Enums:
 ```
 
 - Generates a Java enum `Brand` in `domain` with the given literals.
+- List separators are whitespace-tolerant: `A,B,C` is equivalent to `A , B , C` and can be split across lines.
+
+### Enum literal attributes
+
+Enums can also declare **literal attributes** (similar to Java enums with extra fields) via `EnumAttribute` blocks.
+
+```lm
+    (Enum NameAndId
+        A : 1,
+        B : 2,
+        C : 3
+        (EnumAttribute id #LMCore@int))
+```
+
+- Each `EnumAttribute` declares a literal field:
+  - attribute name = Java accessor name (LMF style, e.g. `int id()`).
+  - type = the referenced `Unit` (currently intended for primitive units like `#LMCore@int`, `#LMCore@float`, `#LMCore@string`, ...).
+- Literal values are **positional**: they map to attributes by the **order** of the `EnumAttribute` declarations.
+- Within a literal, parts are separated by `:`; literals are separated by `,` (whitespace around separators is ignored).
+- If an enum declares no `EnumAttribute`, literals are declared by name only (as before).
+- If an enum has attributes, every literal must provide a value for each attribute.
+
+Multiple attributes:
+
+```lm
+    (Enum CodeAndLabel
+        A : 1 : "Hello world",
+        B : 2 : "foo:bar",
+        C : 3 : "hi,there"
+        (EnumAttribute id #LMCore@int)
+        (EnumAttribute label #LMCore@string))
+```
+
+- Use quotes for string values when you need spaces, `:` or `,`.
+- References to enum literals (for example attribute `defaultValue`) always use the **base literal name** only: `defaultValue="A"` (never `A:1`).
 
 Units (custom scalar types) are more advanced and mostly used in LMCore itself:
 

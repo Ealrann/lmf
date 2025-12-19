@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class EnumAttributesGenerationTest
 {
@@ -23,6 +25,8 @@ public class EnumAttributesGenerationTest
 		assertTrue(nameAndIdContent.contains("public int id()"), "NameAndId should expose an id accessor");
 		assertTrue(nameAndIdContent.contains("A(1)"), "NameAndId.A should carry an id");
 		assertTrue(nameAndIdContent.contains("B(2)"), "NameAndId.B should carry an id");
+		assertFalse(Pattern.compile("A\\(1\\),\\R\\R\\s*B\\(2\\)").matcher(nameAndIdContent).find(),
+					"NameAndId enum constants should not be separated by blank lines");
 
 		final var labelled = new File(basePackageDir, "Labelled.java");
 		assertTrue(labelled.isFile(), "Labelled.java should be generated");
@@ -32,6 +36,8 @@ public class EnumAttributesGenerationTest
 		assertTrue(labelledContent.contains("A(\"Hello world\")"), "Labelled.A should carry a string label");
 		assertTrue(labelledContent.contains("B(\"foo:bar\")"), "Labelled.B should preserve ':' in label");
 		assertTrue(labelledContent.contains("C(\"hi,there\")"), "Labelled.C should preserve ',' in label");
+		assertFalse(Pattern.compile("A\\(\"Hello world\"\\),\\R\\R\\s*B\\(\"foo:bar\"\\)").matcher(labelledContent).find(),
+					"Labelled enum constants should not be separated by blank lines");
 
 		final var codeAndLabel = new File(basePackageDir, "CodeAndLabel.java");
 		assertTrue(codeAndLabel.isFile(), "CodeAndLabel.java should be generated");

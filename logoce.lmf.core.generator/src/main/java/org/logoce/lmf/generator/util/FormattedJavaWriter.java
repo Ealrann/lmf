@@ -43,6 +43,11 @@ public final class FormattedJavaWriter
 
 		String result = rawSource;
 
+		if (typeSpec.kind == TypeSpec.Kind.ENUM)
+		{
+			result = removeBlankLinesBetweenEnumConstants(result);
+		}
+
 		if (typeSpec.kind == TypeSpec.Kind.CLASS && isImplOrBuilder(typeSpec.name))
 		{
 			result = removeBlankLinesBetweenFields(result);
@@ -138,6 +143,80 @@ public final class FormattedJavaWriter
 		if (trimmed.startsWith("public interface ") || trimmed.startsWith("interface ")) return false;
 		if (trimmed.endsWith("{") || trimmed.equals("}")) return false;
 		return true;
+	}
+
+	private static String removeBlankLinesBetweenEnumConstants(final String source)
+	{
+		final var lines = source.split("\\R", -1);
+		final var builder = new StringBuilder(source.length());
+
+		boolean inConstants = false;
+
+		for (int i = 0; i < lines.length; i++)
+		{
+			final var line = lines[i];
+			final var trimmed = line.trim();
+
+			final var isEnumDeclarationLine = trimmed.contains(" enum ") && trimmed.endsWith("{");
+			if (!inConstants && isEnumDeclarationLine)
+			{
+				inConstants = true;
+			}
+
+			if (inConstants && !isEnumDeclarationLine && (trimmed.startsWith("private ")
+														  || trimmed.startsWith("public ")
+														  || trimmed.startsWith("protected ")))
+			{
+				inConstants = false;
+			}
+
+			if (inConstants && trimmed.isEmpty() && i > 0 && i < lines.length - 1)
+			{
+				final var previous = lines[i - 1];
+				final var next = lines[i + 1];
+				if (isEnumConstantEndLine(previous) && isEnumConstantStartLine(next)) continue;
+			}
+
+			builder.append(line);
+			if (i < lines.length - 1) builder.append(System.lineSeparator());
+		}
+
+		return builder.toString();
+	}
+
+	private static boolean isEnumConstantStartLine(final String line)
+	{
+		final var trimmed = stripTrailingLineComment(line).trim();
+		if (trimmed.isEmpty()) return false;
+		if (trimmed.startsWith("package ") || trimmed.startsWith("import ")) return false;
+		if (trimmed.startsWith("public enum ") || trimmed.startsWith("enum ")) return false;
+		if (trimmed.startsWith("private ") || trimmed.startsWith("public ") || trimmed.startsWith("protected ")) return false;
+		if (trimmed.startsWith("@")) return false;
+		if (trimmed.equals("}") || trimmed.equals("{")) return false;
+
+		final var first = trimmed.charAt(0);
+		if (!Character.isJavaIdentifierStart(first)) return false;
+		for (int i = 1; i < trimmed.length(); i++)
+		{
+			final char c = trimmed.charAt(i);
+			if (Character.isJavaIdentifierPart(c)) continue;
+			return Character.isWhitespace(c) || c == '(' || c == '{' || c == ',' || c == ';';
+		}
+		return true;
+	}
+
+	private static boolean isEnumConstantEndLine(final String line)
+	{
+		final var trimmed = stripTrailingLineComment(line).trim();
+		if (trimmed.isEmpty()) return false;
+		return trimmed.endsWith(",") || trimmed.endsWith(";") || trimmed.equals("},") || trimmed.equals("};");
+	}
+
+	private static String stripTrailingLineComment(final String line)
+	{
+		final int commentIndex = line.indexOf("//");
+		if (commentIndex < 0) return line;
+		return line.substring(0, commentIndex);
 	}
 
 	private static Path resolvePath(final JavaFile javaFile, final Path targetDirectory)
