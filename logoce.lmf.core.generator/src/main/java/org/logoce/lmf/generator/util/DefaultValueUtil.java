@@ -4,10 +4,12 @@ import com.squareup.javapoet.CodeBlock;
 import org.logoce.lmf.generator.adapter.FeatureResolution;
 import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.lang.Enum;
+import org.logoce.lmf.core.lang.JavaWrapper;
 import org.logoce.lmf.core.lang.Primitive;
 import org.logoce.lmf.core.lang.Unit;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class DefaultValueUtil
 {
@@ -27,6 +29,20 @@ public class DefaultValueUtil
 			{
 				if (unit.primitive() == Primitive.String) return Optional.of(CodeBlock.of("$S", defaultValue));
 				else return Optional.of(CodeBlock.of("$L", defaultValue));
+			}
+			else if (dataType instanceof JavaWrapper<?> wrapper)
+			{
+				final var serializer = wrapper.serializer();
+				if (serializer != null && serializer.create() != null)
+				{
+					final var javaType = resolution.singleType().parametrized();
+					return Optional.of(CodeBlock.of("(($T<$T, $T>) it -> { $L }).apply($S)",
+												 Function.class,
+												 String.class,
+												 javaType,
+												 serializer.create(),
+												 defaultValue));
+				}
 			}
 		}
 		return Optional.empty();

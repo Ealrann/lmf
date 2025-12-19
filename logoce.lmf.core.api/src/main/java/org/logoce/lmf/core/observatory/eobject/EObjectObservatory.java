@@ -48,13 +48,13 @@ public final class EObjectObservatory<T extends LMObject> extends AbstractEObjec
 		final var group = parent.lmGroup();
 		for (final var feature : group.features())
 		{
-			if (feature.id() == referenceId)
-			{
-				if (feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
+				if (feature.id() == referenceId)
 				{
-					return true;
-				}
-				throw new IllegalArgumentException("Observation failed, the explored feature " +
+					if (feature instanceof Relation<?, ?, ?, ?>)
+					{
+						return true;
+					}
+					throw new IllegalArgumentException("Observation failed, the explored feature " +
 												   feature.name() +
 												   " on " +
 												   group.name() +

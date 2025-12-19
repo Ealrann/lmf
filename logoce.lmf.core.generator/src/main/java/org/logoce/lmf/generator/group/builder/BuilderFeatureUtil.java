@@ -78,31 +78,18 @@ public final class BuilderFeatureUtil
 	{
 		final var feature = resolution.feature();
 		final var many = feature.many();
-		final var immutable = feature.immutable();
-		final var mandatory = feature.mandatory();
 
 		if (many)
 		{
 			return Optional.of(CodeBlock.of("new $T<>()", ConstantTypes.ARRAYLIST));
 		}
-		else if (feature instanceof Relation<?, ?, ?, ?> && !mandatory)
+		else if (feature instanceof Relation<?, ?, ?, ?>)
 		{
 			return Optional.of(CodeBlock.of("() -> null"));
 		}
-		else if (feature instanceof Attribute<?, ?, ?, ?> && !mandatory)
+		else if (feature instanceof Attribute<?, ?, ?, ?>)
 		{
 			return DefaultValueUtil.resolveDefaultValue(resolution);
-		}
-		else if (immutable && !mandatory)
-		{
-			if (feature instanceof Relation<?, ?, ?, ?>)
-			{
-				return Optional.of(CodeBlock.of("() -> null"));
-			}
-			else
-			{
-				return DefaultValueUtil.resolveDefaultValue(resolution);
-			}
 		}
 		else
 		{

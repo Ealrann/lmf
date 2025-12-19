@@ -1,0 +1,15 @@
+(MetaModel domain=test.model2 name=DefaultValues
+	(Enum Mode A,B)
+
+	(JavaWrapper name=WrappedString qualifiedClassName=java.lang.String
+		(serializer create="return it;" convert="return it;"))
+
+	(Definition Bar
+		(+att name=id datatype=#LMCore@int [1..1] defaultValue=3))
+
+	(Definition Foo
+		(+att name=enabled datatype=#LMCore@boolean [1..1] defaultValue=true)
+		(+att name=mode datatype=@Mode [1..1] defaultValue=A)
+		(+att name=text datatype=@WrappedString [0..1] defaultValue="hello")
+		(+refers name=bar @Bar [1..1]))
+)
