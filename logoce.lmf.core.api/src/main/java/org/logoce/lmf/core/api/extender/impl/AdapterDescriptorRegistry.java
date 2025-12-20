@@ -61,7 +61,7 @@ public final class AdapterDescriptorRegistry implements IAdapterDescriptorRegist
 	private static final class ExtenderMapBuilder
 	{
 		private final Map<Module, MethodHandles.Lookup> lookupMap = new HashMap<>();
-		private final Set<Class<? extends IAdapter>> extenderClasses = new HashSet<>();
+		private final Set<Class<? extends IAdapter>> extenderClasses = new LinkedHashSet<>();
 
 		public void append(IAdapterProvider provider)
 		{

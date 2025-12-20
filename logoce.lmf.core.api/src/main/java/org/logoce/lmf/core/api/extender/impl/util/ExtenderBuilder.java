@@ -55,7 +55,14 @@ public final class ExtenderBuilder<Extender extends IAdapter>
 			}
 		}
 
-		return constructorHandle.newInstance(parameters);
+		try
+		{
+			return constructorHandle.newInstance(parameters);
+		}
+		catch (RuntimeException e)
+		{
+			throw new ReflectiveOperationException("Cannot instantiate " + extenderClass.getSimpleName(), e);
+		}
 	}
 
 	private static IParameterResolver findResolver(final List<? extends IParameterResolver> resolvers,

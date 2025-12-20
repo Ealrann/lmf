@@ -27,8 +27,7 @@ public final class ConstructorHandleParamN<T> implements ConstructorHandle<T>
 		}
 		catch (Throwable throwable)
 		{
-			throwable.printStackTrace();
-			return null;
+			throw new RuntimeException("Failed to instantiate " + constructor.getDeclaringClass().getName(), throwable);
 		}
 	}
 
