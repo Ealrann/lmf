@@ -45,6 +45,31 @@ public class DefaultValueUtil
 				}
 			}
 		}
+		else if (dataType instanceof Enum<?> enumeration)
+		{
+			final var literalName = firstEnumLiteralName(enumeration);
+			if (literalName != null && !literalName.isBlank())
+			{
+				return Optional.of(CodeBlock.of("$T.$N", resolution.singleType().raw(), literalName));
+			}
+		}
 		return Optional.empty();
+	}
+
+	private static String firstEnumLiteralName(final Enum<?> enumeration)
+	{
+		if (enumeration == null) return null;
+		final var literals = enumeration.literals();
+		if (literals == null || literals.isEmpty()) return null;
+
+		final var raw = literals.get(0);
+		if (raw == null) return null;
+
+		final var colonIndex = raw.indexOf(':');
+		if (colonIndex >= 0)
+		{
+			return raw.substring(0, colonIndex).trim();
+		}
+		return raw.trim();
 	}
 }
