@@ -23,7 +23,8 @@ public class DefaultValueUtil
 		{
 			if (dataType instanceof Enum<?>)
 			{
-				return Optional.of(CodeBlock.of("$T.$N", resolution.singleType().raw(), defaultValue));
+				final var constantName = enumConstantName(defaultValue);
+				return Optional.of(CodeBlock.of("$T.$N", resolution.singleType().raw(), constantName));
 			}
 			else if (dataType instanceof Unit<?> unit)
 			{
@@ -50,10 +51,23 @@ public class DefaultValueUtil
 			final var literalName = firstEnumLiteralName(enumeration);
 			if (literalName != null && !literalName.isBlank())
 			{
-				return Optional.of(CodeBlock.of("$T.$N", resolution.singleType().raw(), literalName));
+				final var constantName = enumConstantName(literalName);
+				return Optional.of(CodeBlock.of("$T.$N", resolution.singleType().raw(), constantName));
 			}
 		}
 		return Optional.empty();
+	}
+
+	private static String enumConstantName(final String rawLiteral)
+	{
+		if (rawLiteral == null) return null;
+		final var trimmed = rawLiteral.trim();
+		if (trimmed.isEmpty()) return trimmed;
+
+		final var colonIndex = trimmed.indexOf(':');
+		final var literalName = colonIndex >= 0 ? trimmed.substring(0, colonIndex).trim() : trimmed;
+
+		return GenUtils.capitalizeFirstLetter(literalName);
 	}
 
 	private static String firstEnumLiteralName(final Enum<?> enumeration)
