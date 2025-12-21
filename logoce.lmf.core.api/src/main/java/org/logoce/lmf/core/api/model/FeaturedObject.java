@@ -230,6 +230,29 @@ public abstract class FeaturedObject<F extends IFeaturedObject.Features<?>> impl
 		}
 	}
 
+	/**
+	 * Explicitly detach this object from its current container.
+	 * <p>
+	 * This is intentionally not called automatically on containment removes, because
+	 * move operations are expected to keep {@link #lmContainer()} non-null until
+	 * the object is re-attached to a new container.
+	 */
+	public final void lmUnsetContainer()
+	{
+		if (container == null || containingFeatureId == -1)
+		{
+			return;
+		}
+
+		final var oldContainer = container;
+		final int oldFeatureId = containingFeatureId;
+
+		container = null;
+		containingFeatureId = -1;
+
+		notifier().notify(oldFeatureId, true, false, Notification.EventType.CONTAINER, oldContainer, null);
+	}
+
 	@Override
 	public final <T extends IAdapter> T adaptGeneric(final Class<? extends IAdapter> type)
 	{

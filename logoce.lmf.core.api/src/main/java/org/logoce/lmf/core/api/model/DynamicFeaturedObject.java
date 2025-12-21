@@ -62,6 +62,17 @@ public final class DynamicFeaturedObject implements Model
 		return containingRelation;
 	}
 
+	/**
+	 * Explicitly detach this object from its current container.
+	 * <p>
+	 * Dynamic objects do not support notifications, so this is a pure state update.
+	 */
+	public void lmUnsetContainer()
+	{
+		container = null;
+		containingRelation = null;
+	}
+
 	@Override
 	public <V> V get(final Feature<?, ?, ?, ?> feature)
 	{

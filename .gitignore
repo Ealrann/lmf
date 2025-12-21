@@ -1,5 +1,6 @@
 .gradle/
 .gradle-user/
+.gradle-home/
 .gradle-user-home/
 .gradle-local/
 .metadata
