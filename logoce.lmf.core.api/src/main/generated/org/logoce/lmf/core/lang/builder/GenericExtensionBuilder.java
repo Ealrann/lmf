@@ -18,7 +18,7 @@ import org.logoce.lmf.core.util.BuildUtils;
 
 public final class GenericExtensionBuilder implements Builder {
   private Supplier<Type<?>> type = () -> null;
-  private BoundType boundType;
+  private BoundType boundType = BoundType.Extends;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
   public GenericExtensionBuilder() {

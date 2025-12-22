@@ -92,15 +92,16 @@ public final class GenericFieldBuilder implements DefinitionFieldBuilder<Generic
 		final var builder = CodeBlock.builder()
 									 .add("new $T()", GENERIC_PARAMETER_BUILDER_TYPE);
 
-		if (parameter.wildcard())
+		final var wildcard = parameter.wildcard();
+		if (wildcard)
 		{
 			builder.add(".wildcard(true)");
-		}
 
-		final var wildcardBoundType = parameter.wildcardBoundType();
-		if (wildcardBoundType != null)
-		{
-			builder.add(".wildcardBoundType($T.$L)", BT_TYPE, wildcardBoundType);
+			final var wildcardBoundType = parameter.wildcardBoundType();
+			if (wildcardBoundType != null && wildcardBoundType != BoundType.Extends)
+			{
+				builder.add(".wildcardBoundType($T.$L)", BT_TYPE, wildcardBoundType);
+			}
 		}
 
 		final var type = parameter.type();

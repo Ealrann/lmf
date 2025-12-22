@@ -30,7 +30,7 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		final var codeList = FeatureStreams.distinctFeatures(group)
 										   .map(g -> g.adapt(FeatureResolution.class))
 										   .filter(ConstructorBuilder::mandatoryOrImmutable)
-										   .map(ConstructorBuilder::bakeCode)
+										   .map(resolution -> bakeCode(resolution, group))
 										   .toList();
 
 		codeList.forEach(c -> c.installStep1(constructor));
@@ -52,9 +52,9 @@ public final class ConstructorBuilder implements CodeBuilder<Group<?>, MethodSpe
 		return feature.immutable() || feature.mandatory();
 	}
 
-	private static ParameterCode bakeCode(final FeatureResolution resolution)
+	private static ParameterCode bakeCode(final FeatureResolution resolution, final Group<?> owner)
 	{
-		final var paramSpec = resolution.parameterSpec();
+		final var paramSpec = resolution.parameterSpec(owner);
 		final var feature = resolution.feature();
 		final var assignCode = ImplementationCodeUtil.assignationStatement(feature, paramSpec.name);
 

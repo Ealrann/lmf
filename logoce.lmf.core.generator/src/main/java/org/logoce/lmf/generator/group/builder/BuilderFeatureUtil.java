@@ -85,6 +85,10 @@ public final class BuilderFeatureUtil
 		}
 		else if (feature instanceof Relation<?, ?, ?, ?>)
 		{
+			if (feature.mandatory())
+			{
+				return Optional.empty();
+			}
 			return Optional.of(CodeBlock.of("() -> null"));
 		}
 		else if (feature instanceof Attribute<?, ?, ?, ?>)
@@ -167,7 +171,7 @@ public final class BuilderFeatureUtil
 		final var feature = resolution.feature();
 		final var many = feature.many();
 
-		if (many) return assignPatternMany(parameter);
+		if (many) return raw ? assignPatternManyCast(parameter) : assignPatternMany(parameter);
 		else if (raw) return assignPatternCast(parameter, ownerGroup);
 		else return assignPatternSingle(parameter);
 	}
@@ -178,6 +182,26 @@ public final class BuilderFeatureUtil
 		final var feature = resolution.feature();
 		final var paramName = parameter.parameterName();
 		return CodeBlock.of("this.$N.add($N)", feature.name(), paramName);
+	}
+
+	private static CodeBlock assignPatternManyCast(final FeatureParameter parameter)
+	{
+		final var resolution = parameter.feature();
+		final var feature = resolution.feature();
+		final var paramName = parameter.parameterName();
+		final var paramType = parameter.parameterSpec().type;
+
+		final TypeName cast;
+		if (paramType instanceof ParameterizedTypeName parameterized)
+		{
+			cast = parameterized.rawType;
+		}
+		else
+		{
+			cast = paramType;
+		}
+
+		return CodeBlock.of("this.$N.add(($T) $N)", feature.name(), cast, paramName);
 	}
 
 	private static CodeBlock assignPatternCast(final FeatureParameter parameter, final Group<?> ownerGroup)

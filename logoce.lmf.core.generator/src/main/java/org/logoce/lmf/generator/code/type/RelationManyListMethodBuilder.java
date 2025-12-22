@@ -1,5 +1,6 @@
 package org.logoce.lmf.generator.code.type;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -9,6 +10,7 @@ import org.logoce.lmf.generator.code.feature.MethodUtil;
 import org.logoce.lmf.generator.code.util.CodeBuilder;
 import org.logoce.lmf.generator.util.ConstantTypes;
 import org.logoce.lmf.generator.util.GenUtils;
+import org.logoce.lmf.generator.group.builder.BuilderFeatureUtil;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.Relation;
 
@@ -34,13 +36,18 @@ public final class RelationManyListMethodBuilder implements CodeBuilder<FeatureR
 		final var listType = ParameterizedTypeName.get(ConstantTypes.LIST, elementType.box());
 
 		final var parameter = ParameterSpec.builder(listType, paramName, Modifier.FINAL).build();
+		final var needsRawSetter = BuilderFeatureUtil.needsRawSetter(resolution, ownerGroup);
+		final var rawSetterName = "_" + resolution.name();
+		final var addStatement = needsRawSetter
+								 ? CodeBlock.of("$N.forEach(value -> this.$N(() -> value))", paramName, rawSetterName)
+								 : CodeBlock.of("$N.forEach(value -> this.$N.add(() -> value))", paramName, resolution.name());
 
 		return MethodSpec.methodBuilder(methodName)
 						 .addModifiers(Modifier.PUBLIC)
 						 .addAnnotation(ConstantTypes.OVERRIDE)
 						 .returns(returnType)
 						 .addParameter(parameter)
-						 .addStatement("$N.forEach(value -> this.$N.add(() -> value))", paramName, resolution.name())
+						 .addStatement(addStatement)
 						 .addStatement("return this")
 						 .build();
 	}

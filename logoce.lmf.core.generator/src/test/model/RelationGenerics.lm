@@ -1,0 +1,36 @@
+(MetaModel domain=test.gen name=RelationGenerics
+	(Group Base
+		(+att name=name datatype=#LMCore@string [1..1] defaultValue=""))
+
+	(Definition ConcreteChild
+		(includes group=@Base))
+
+	(Group GenericParent
+		(Generic T
+			(extension boundType=extends type=@Base))
+		(+contains name=children ^T [0..*]))
+
+	(Definition ConcreteParent
+		(includes group=@GenericParent
+			(parameters type=@ConcreteChild)))
+
+	(Definition GenericHolder
+		(Generic T
+			(extension boundType=extends type=@Base))
+		(+refers name=value ^T [0..1]))
+
+	(Definition GenericItem
+		(Generic T
+			(extension boundType=extends type=@Base))
+		(+refers name=payload ^T [0..1]))
+
+	(Definition ItemContainer
+		(Generic T
+			(extension boundType=extends type=@Base))
+		(+contains name=items @GenericItem [0..*]
+			(parameters type=^T)))
+
+	(Definition ConcreteItemContainer
+		(includes group=@ItemContainer
+			(parameters type=@ConcreteChild)))
+)

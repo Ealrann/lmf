@@ -3,6 +3,7 @@ package org.logoce.lmf.generator.adapter;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
 import org.logoce.lmf.core.api.adapter.Adapter;
 import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.core.lang.Enum;
@@ -100,6 +101,7 @@ public final class FeatureResolution implements IAdapter
 			{
 				return TypeResolutionUtil.resolveSimpleType(extension.type());
 			}
+			return TypeParameter.of(Object.class);
 		}
 
 		return rawSingleType;
@@ -262,6 +264,14 @@ public final class FeatureResolution implements IAdapter
 				return bound;
 			}
 		}
+		else if (feature instanceof Relation<?, ?, ?, ?> relation && relation.concept() instanceof Generic<?> generic)
+		{
+			final var bound = TypeResolutionUtil.resolveGenericBinding(generic, owner);
+			if (bound != null)
+			{
+				return bound;
+			}
+		}
 		else if (feature instanceof Relation<?, ?, ?, ?> relation && relation.concept() instanceof Group<?> group)
 		{
 			final var parameters = relation.parameters();
@@ -396,8 +406,8 @@ public final class FeatureResolution implements IAdapter
 				else
 				{
 					final var generic = (Generic<?>) concept;
-					final var className = ClassName.get("", generic.name());
-					final var typeParameter = TypeParameter.of(className);
+					final var typeVar = TypeVariableName.get(generic.name());
+					final var typeParameter = new TypeParameter.SimpleType(typeVar);
 					return new PartialFeatureResolution(typeParameter, typeParameter, true);
 				}
 			}

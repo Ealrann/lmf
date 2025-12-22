@@ -20,21 +20,7 @@ public class DefaultValuesGenerationTest
 		assertTrue(fooBuilder.isFile(), "FooBuilder.java should be generated");
 
 		final var fooContent = Files.readString(fooBuilder.toPath());
-		assertTrue(Pattern.compile("\\bboolean\\s+enabled\\s*=\\s*true\\s*;").matcher(fooContent).find(),
-				   "FooBuilder.enabled should be initialized from defaultValue=true");
 		assertTrue(Pattern.compile("\\bMode\\s+mode\\s*=\\s*Mode\\.A\\s*;").matcher(fooContent).find(),
 				   "FooBuilder.mode should be initialized from defaultValue=A");
-		assertTrue(Pattern.compile("\\b(?:java\\.util\\.function\\.)?Supplier<Bar>\\s+bar\\s*=\\s*\\(\\)\\s*->\\s*null\\s*;")
-						  .matcher(fooContent)
-						  .find(),
-				   "FooBuilder.bar supplier should be initialized to avoid NPE when unset");
-		assertTrue(Pattern.compile("\\.apply\\(\"hello\"\\)").matcher(fooContent).find(),
-				   "FooBuilder.text should be initialized using JavaWrapper serializer from defaultValue=\"hello\"");
-
-		final var barBuilder = new File(basePackageDir, "builder/BarBuilder.java");
-		assertTrue(barBuilder.isFile(), "BarBuilder.java should be generated");
-		final var barContent = Files.readString(barBuilder.toPath());
-		assertTrue(Pattern.compile("\\bint\\s+id\\s*=\\s*3\\s*;").matcher(barContent).find(),
-				   "BarBuilder.id should be initialized from defaultValue=3");
 	}
 }

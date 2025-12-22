@@ -69,7 +69,8 @@ public class AttributeMapFieldBuilder implements CodeBuilder<List<FeatureResolut
 
 		final var methodName = MethodUtil.builderMethodName(resolution);
 		final var usesRawSetter = BuilderFeatureUtil.needsRawSetter(resolution, ownerGroup);
-		final var usedMethod = usesRawSetter ? '_' + methodName : methodName;
+		final var rawMethodName = '_' + resolution.name();
+		final var usedMethod = usesRawSetter ? rawMethodName : methodName;
 		final var paramType = usesRawSetter
 							  ? BuilderFeatureUtil.rawSetterParameterType(resolution, ownerGroup)
 							  : resolution.builderParameterSpec(ownerGroup).type;

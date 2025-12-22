@@ -65,6 +65,7 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		final var featureName = resolution.name();
 		final var ownerGroup = interfaceType.group;
 		final TypeName valueType = resolution.effectiveTypeFor(ownerGroup).parametrized();
+		final TypeName rawValueType = resolution.rawEffectiveTypeFor(ownerGroup).parametrized();
 
 		final TypeName castType;
 		if (valueType instanceof ParameterizedTypeName parameterized)
@@ -75,7 +76,7 @@ public class SetMapFieldBuilder implements CodeBuilder<Group<?>, FieldSpec>
 		}
 		else if (valueType instanceof TypeVariableName)
 		{
-			castType = TypeName.OBJECT;
+			castType = rawValueType;
 		}
 		else
 		{

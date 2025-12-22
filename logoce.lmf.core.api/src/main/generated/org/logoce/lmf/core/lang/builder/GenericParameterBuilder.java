@@ -17,7 +17,7 @@ import org.logoce.lmf.core.util.BuildUtils;
 
 public final class GenericParameterBuilder implements Builder {
   private boolean wildcard;
-  private BoundType wildcardBoundType;
+  private BoundType wildcardBoundType = BoundType.Extends;
   private Supplier<Type<?>> type;
   private final List<Supplier<GenericParameter>> parameters = new ArrayList<>();
 
