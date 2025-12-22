@@ -9,10 +9,13 @@ import org.logoce.lmf.generator.util.GenUtils;
 import org.logoce.lmf.generator.util.TargetPathUtil;
 import org.logoce.lmf.generator.util.TypeParameter;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.lang.JavaWrapper;
 import org.logoce.lmf.core.lang.MetaModel;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ModelPackage
 {
@@ -67,11 +70,104 @@ public class ModelPackage
 
 		packageClass.addMethod(buildBuilderResolver(definitionName));
 		packageClass.addMethod(buildEnumResolver(definitionName));
+		addJavaWrapperConverters(packageClass, definitionName);
 
 		final var javaFile = JavaFile.builder(TargetPathUtil.packageName(model), packageClass.build())
 									 .skipJavaLangImports(true)
 									 .build();
 		FormattedJavaWriter.write(javaFile, target);
+	}
+
+	private void addJavaWrapperConverters(final TypeSpec.Builder packageClass, final String definitionName)
+	{
+		final List<JavaWrapper<?>> wrappers = new ArrayList<>();
+		for (final var wrapper : model.javaWrappers())
+		{
+			final var serializer = wrapper.serializer();
+			if (serializer != null && serializer.create() != null && serializer.convert() != null)
+			{
+				wrappers.add(wrapper);
+				packageClass.addField(buildJavaWrapperConverterField(wrapper));
+			}
+		}
+
+		packageClass.addMethod(buildJavaWrapperConverterResolver(definitionName, wrappers));
+	}
+
+	private FieldSpec buildJavaWrapperConverterField(final JavaWrapper<?> wrapper)
+	{
+		final var qualifiedName = wrapper.qualifiedClassName();
+		final var type = ClassName.bestGuess(qualifiedName);
+		final var genericCount = GenUtils.genericCount(qualifiedName);
+		final var wrapperType = TypeParameter.of(type, genericCount).parametrized();
+		final var serializer = wrapper.serializer();
+
+		final var converterType = TypeParameter.of(ConstantTypes.JAVA_WRAPPER_CONVERTER, wrapperType).parametrized();
+		final var converterName = GenUtils.toConstantCase(wrapper.name()) + "_CONVERTER";
+		final var createContent = escapeJavaPoetSnippet(serializer.create());
+		final var convertContent = escapeJavaPoetSnippet(serializer.convert());
+
+		final var converterImpl = TypeSpec.anonymousClassBuilder("")
+										  .addSuperinterface(converterType)
+										  .addMethod(MethodSpec.methodBuilder("create")
+															 .addAnnotation(Override.class)
+															 .addModifiers(Modifier.PUBLIC)
+															 .returns(wrapperType)
+															 .addParameter(ConstantTypes.STRING, "it")
+															 .addCode("$L\n", createContent)
+															 .build())
+										  .addMethod(MethodSpec.methodBuilder("convert")
+															 .addAnnotation(Override.class)
+															 .addModifiers(Modifier.PUBLIC)
+															 .returns(ConstantTypes.STRING)
+															 .addParameter(wrapperType, "it")
+															 .addCode("$L\n", convertContent)
+															 .build())
+										  .build();
+
+		return FieldSpec.builder(converterType, converterName, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+						.initializer("$L", converterImpl)
+						.build();
+	}
+
+	private MethodSpec buildJavaWrapperConverterResolver(final String definitionName, final List<JavaWrapper<?>> wrappers)
+	{
+		final var method = MethodSpec.methodBuilder("resolveJavaWrapperConverter")
+									 .addModifiers(Modifier.PUBLIC)
+									 .addAnnotation(Override.class)
+									 .addAnnotation(ConstantTypes.SUPPRESS_UNCHECKED)
+									 .returns(TypeParameter.of(ConstantTypes.OPTIONAL,
+															  TypeParameter.of(ConstantTypes.JAVA_WRAPPER_CONVERTER, T)
+																		   .parametrized())
+														  .parametrized())
+									 .addTypeVariable(T)
+									 .addParameter(ConstantTypes.JAVA_WRAPPER.nest(T).parametrized(), "wrapper");
+
+		boolean first = true;
+		for (final var wrapper : wrappers)
+		{
+			final var statement = CodeBlock.builder();
+			if (first) first = false;
+			else statement.add("else ");
+
+			final var wrapperConstantName = GenUtils.toConstantCase(wrapper.name());
+			final var converterName = wrapperConstantName + "_CONVERTER";
+			statement.add("if (wrapper == $N.JavaWrappers.$N) return Optional.of(($T<$T>) $N)",
+						  definitionName,
+						  wrapperConstantName,
+						  ConstantTypes.JAVA_WRAPPER_CONVERTER,
+						  T,
+						  converterName);
+			method.addStatement(statement.build());
+		}
+
+		method.addStatement("return $T.empty()", ConstantTypes.OPTIONAL);
+		return method.build();
+	}
+
+	private static String escapeJavaPoetSnippet(final String snippet)
+	{
+		return snippet == null ? null : snippet.replace("$", "$$");
 	}
 
 	private MethodSpec buildBuilderResolver(final String definitionName)

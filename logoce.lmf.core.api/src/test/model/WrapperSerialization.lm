@@ -1,0 +1,10 @@
+(MetaModel domain=test.model name=WrapperSerialization
+	(JavaWrapper name=Duration qualifiedClassName=java.time.Duration
+		(serializer create="if(it!=null){return java.time.Duration.parse(it);}return java.time.Duration.ZERO;"
+			convert="if(it!=null){return it.toString();}return \"PT0S\";"))
+
+	(Definition WrapperApp
+		(includes #LMCore@Model)
+		(+att name=duration datatype=@Duration [1..1]))
+)
+

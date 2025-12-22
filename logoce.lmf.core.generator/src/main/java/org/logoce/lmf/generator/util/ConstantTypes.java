@@ -7,6 +7,7 @@ import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.core.lang.Enum;
 import org.logoce.lmf.generator.code.util.FieldBuilder;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.api.model.IJavaWrapperConverter;
 import org.logoce.lmf.core.api.model.IModelPackage;
 import org.logoce.lmf.core.feature.FeatureInserter;
 import org.logoce.lmf.core.lang.builder.MetaModelBuilder;
@@ -46,6 +47,7 @@ public class ConstantTypes
 	public static final ClassName SUPPLIER = ClassName.get(Supplier.class);
 	public static final ClassName OPTIONAL = ClassName.get(Optional.class);
 	public static final ClassName IMODEL_PACKAGE = ClassName.get(IModelPackage.class);
+	public static final ClassName JAVA_WRAPPER_CONVERTER = ClassName.get(IJavaWrapperConverter.class);
 	public static final ClassName MODEL = ClassName.get(MetaModel.class);
 	public static final ClassName META_MODEL_BUILDER = ClassName.get(MetaModelBuilder.class);
 	public static final ClassName STRING = ClassName.get(String.class);

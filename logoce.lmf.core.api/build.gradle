@@ -33,27 +33,30 @@ sourceSets {
 	}
 }
 
-tasks.register('generateTestCarCompanyModel', JavaExec) {
+tasks.register('generateTestModels', JavaExec) {
 	group = 'verification'
-	description = 'Generates test CarCompany model sources from CarCompany.lm'
+	description = 'Generates test model sources from .lm files'
 
-	inputs.file('src/test/model/CarCompany.lm')
+	def modelFiles = [
+			'src/test/model/CarCompany.lm',
+			'src/test/model/WrapperSerialization.lm'
+	]
+
+	inputs.files(modelFiles)
 	outputs.dir('src/test/generated')
 
 	classpath = project(':logoce.lmf.core.generator').sourceSets.main.runtimeClasspath
 	mainClass = 'org.logoce.lmf.generator.Main'
-	args 'src/test/model/CarCompany.lm', 'src/test/generated'
 
 	doFirst {
-		def targetDir = file('src/test/generated')
-		if (targetDir.exists()) {
-			delete(targetDir)
-		}
+		delete('src/test/generated')
+		args = ['--targetDir', 'src/test/generated',
+				'--genModels', modelFiles.join(',')]
 	}
 }
 
 tasks.named('compileTestJava') {
-	dependsOn tasks.named('generateTestCarCompanyModel')
+	dependsOn tasks.named('generateTestModels')
 }
 
 publishing {

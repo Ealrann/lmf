@@ -1,0 +1,2 @@
+(WrapperApp domain=test.model name=WrapperSerializationApp metamodels=test.model.WrapperSerialization duration="PT20S")
+

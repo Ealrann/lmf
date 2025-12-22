@@ -2,6 +2,7 @@ package org.logoce.lmf.core.lang;
 
 import java.util.Optional;
 import org.logoce.lmf.core.api.model.IFeaturedObject;
+import org.logoce.lmf.core.api.model.IJavaWrapperConverter;
 import org.logoce.lmf.core.api.model.IModelPackage;
 import org.logoce.lmf.core.lang.builder.MetaModelBuilder;
 
@@ -45,6 +46,13 @@ public final class LMCoreModelPackage implements IModelPackage {
   public <T> Optional<T> resolveEnumLiteral(Enum<T> enum_, String value) {
     if (enum_ == LMCoreModelDefinition.Enums.BOUND_TYPE) return (Optional<T>) Optional.of(BoundType.valueOf(value));
     else if (enum_ == LMCoreModelDefinition.Enums.PRIMITIVE) return (Optional<T>) Optional.of(Primitive.valueOf(value));
+    return Optional.empty();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> Optional<IJavaWrapperConverter<T>> resolveJavaWrapperConverter(
+      JavaWrapper<T> wrapper) {
     return Optional.empty();
   }
 }

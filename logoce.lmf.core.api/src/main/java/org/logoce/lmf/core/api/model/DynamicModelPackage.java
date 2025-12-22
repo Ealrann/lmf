@@ -1,12 +1,7 @@
 package org.logoce.lmf.core.api.model;
 
-import org.logoce.lmf.core.lang.Attribute;
+import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.core.lang.Enum;
-import org.logoce.lmf.core.lang.Group;
-import org.logoce.lmf.core.lang.LMObject;
-import org.logoce.lmf.core.lang.MetaModel;
-import org.logoce.lmf.core.lang.Relation;
-import org.logoce.lmf.core.lang.Feature;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -111,6 +106,12 @@ public final class DynamicModelPackage implements IModelPackage
 			}
 		}
 
+		return Optional.empty();
+	}
+
+	@Override
+	public <T> Optional<IJavaWrapperConverter<T>> resolveJavaWrapperConverter(final JavaWrapper<T> wrapper)
+	{
 		return Optional.empty();
 	}
 
