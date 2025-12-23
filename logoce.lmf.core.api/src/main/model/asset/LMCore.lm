@@ -176,8 +176,8 @@
 	(Enum name=Primitive boolean,int,long,float,double,string)
 	(Unit name=boolean matcher="rgx_match:<(true|false)>" defaultValue=false primitive=boolean)
 	(Unit name=int matcher="rgx_match:<[0-9]+>" defaultValue=0 primitive=int)
-	(Unit name=long matcher="rgx_match:<[0-9]+[Ll]>" defaultValue=0L primitive=long)
-	(Unit name=float matcher="rgx_match:<[0-9.]+[Ff]>" defaultValue=0f primitive=float)
+	(Unit name=long matcher="rgx_match:<[0-9]+[Ll]>" extractor="rgx_match:<([0-9]+)[Ll]>" defaultValue=0L primitive=long)
+	(Unit name=float matcher="rgx_match:<[0-9.]+[Ff]>" extractor="rgx_match:<([0-9.]+)[Ff]>" defaultValue=0f primitive=float)
 	(Unit name=double matcher="rgx_match:<[0-9.]+>" defaultValue=0. primitive=double)
 	(Unit name=string defaultValue="")
 

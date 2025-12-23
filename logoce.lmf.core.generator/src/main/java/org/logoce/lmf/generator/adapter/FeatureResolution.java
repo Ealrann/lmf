@@ -23,7 +23,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
-@ModelExtender(scope = Feature.class)
+@ModelExtender(scope = Feature.class, inherited = true)
 @Adapter
 public final class FeatureResolution implements IAdapter
 {

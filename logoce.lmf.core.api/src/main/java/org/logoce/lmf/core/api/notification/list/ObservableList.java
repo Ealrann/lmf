@@ -38,8 +38,24 @@ public final class ObservableList<T> extends AbstractList<T>
 		final var previous = delegate.set(index, element);
 		if (!Objects.equals(previous, element))
 		{
-			notifyListener(EventType.REMOVE, List.of(previous));
-			notifyListener(EventType.ADD, List.of(element));
+			try
+			{
+				notifyListener(EventType.REMOVE, List.of(previous));
+				try
+				{
+					notifyListener(EventType.ADD, List.of(element));
+				}
+				catch (final RuntimeException exception)
+				{
+					delegate.set(index, previous);
+					throw exception;
+				}
+			}
+			catch (final RuntimeException exception)
+			{
+				delegate.set(index, previous);
+				throw exception;
+			}
 		}
 		return previous;
 	}
@@ -48,14 +64,30 @@ public final class ObservableList<T> extends AbstractList<T>
 	public void add(final int index, final T element)
 	{
 		delegate.add(index, element);
-		notifyListener(EventType.ADD, List.of(element));
+		try
+		{
+			notifyListener(EventType.ADD, List.of(element));
+		}
+		catch (final RuntimeException exception)
+		{
+			delegate.remove(index);
+			throw exception;
+		}
 	}
 
 	@Override
 	public T remove(final int index)
 	{
 		final var removed = delegate.remove(index);
-		notifyListener(EventType.REMOVE, List.of(removed));
+		try
+		{
+			notifyListener(EventType.REMOVE, List.of(removed));
+		}
+		catch (final RuntimeException exception)
+		{
+			delegate.add(index, removed);
+			throw exception;
+		}
 		return removed;
 	}
 
@@ -87,7 +119,15 @@ public final class ObservableList<T> extends AbstractList<T>
 		if (changed)
 		{
 			final var eventType = added.size() == 1 ? EventType.ADD : EventType.ADD_MANY;
-			notifyListener(eventType, added);
+			try
+			{
+				notifyListener(eventType, added);
+			}
+			catch (final RuntimeException exception)
+			{
+				delegate.subList(index, index + added.size()).clear();
+				throw exception;
+			}
 		}
 		return changed;
 	}
@@ -191,4 +231,3 @@ public final class ObservableList<T> extends AbstractList<T>
 		listener.accept(type, List.copyOf(elements));
 	}
 }
-

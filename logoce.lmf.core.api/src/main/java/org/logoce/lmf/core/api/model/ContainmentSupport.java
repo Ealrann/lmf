@@ -1,6 +1,8 @@
 package org.logoce.lmf.core.api.model;
 
 import org.logoce.lmf.core.api.notification.Notification;
+import org.logoce.lmf.core.lang.Feature;
+import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.lang.LMObject;
 
 import java.util.List;
@@ -38,16 +40,23 @@ final class ContainmentSupport
 		final var oldContainer = featuredChild.container;
 		final int oldFeatureId = featuredChild.containingFeatureId;
 
+		if (oldContainer == newContainer && oldFeatureId == newFeatureId)
+		{
+			return;
+		}
+
+		if (oldContainer != null && oldFeatureId != -1)
+		{
+			final var oldContainment = resolveContainmentRelation(oldContainer, oldFeatureId);
+			if (oldContainment != null && oldContainment.immutable() && !(child instanceof Feature<?, ?, ?, ?>))
+			{
+				throw cannotMoveFromImmutableContainment(oldContainer, oldContainment, child);
+			}
+			detachFromOldContainer(oldContainer, oldFeatureId, child);
+		}
+
 		featuredChild.container = newContainer;
 		featuredChild.containingFeatureId = newFeatureId;
-
-		if (oldContainer != null && oldFeatureId != -1 && oldContainer.lmGroup() != null)
-		{
-			final var oldParent = (FeaturedObject<?>) oldContainer;
-			oldParent.beforeContainmentNotify(Notification.EventType.REMOVE, child, null);
-			oldParent.notifier().notify(oldFeatureId, true, true, Notification.EventType.REMOVE, child, null);
-			oldParent.afterContainmentNotify(Notification.EventType.REMOVE, child, null);
-		}
 
 		featuredChild.notifier().notify(newFeatureId,
 										true,
@@ -55,5 +64,109 @@ final class ContainmentSupport
 										Notification.EventType.CONTAINER,
 										oldContainer,
 										newContainer);
+	}
+
+	private static Relation<?, ?, ?, ?> resolveContainmentRelation(final LMObject container, final int featureId)
+	{
+		final var group = container.lmGroup();
+		if (group == null)
+		{
+			return null;
+		}
+
+		final int featureIndex;
+		try
+		{
+			featureIndex = container.featureIndex(featureId);
+		}
+		catch (final RuntimeException exception)
+		{
+			return null;
+		}
+
+		if (featureIndex < 0 || featureIndex >= group.features().size())
+		{
+			return null;
+		}
+
+		final var feature = group.features().get(featureIndex);
+		if (feature instanceof Relation<?, ?, ?, ?> relation && relation.contains())
+		{
+			return relation;
+		}
+
+		return null;
+	}
+
+	private static IllegalStateException cannotMoveFromImmutableContainment(final LMObject container,
+																		   final Relation<?, ?, ?, ?> relation,
+																		   final LMObject target)
+	{
+		return new IllegalStateException("Cannot move object [" +
+										 target.lmGroup().name() +
+										 "] because it is contained by immutable relation [" +
+										 container.lmGroup().name() +
+										 "." +
+										 relation.name() +
+										 "]");
+	}
+
+	private static void detachFromOldContainer(final LMObject oldContainer, final int oldFeatureId, final LMObject child)
+	{
+		final var group = oldContainer.lmGroup();
+		if (group == null)
+		{
+			return;
+		}
+
+		final var featureIndex = oldContainer.featureIndex(oldFeatureId);
+		if (featureIndex < 0 || featureIndex >= group.features().size())
+		{
+			return;
+		}
+
+		final var feature = group.features().get(featureIndex);
+		if (!(feature instanceof Relation<?, ?, ?, ?> relation) || !relation.contains())
+		{
+			return;
+		}
+		if (relation.immutable())
+		{
+			return;
+		}
+
+		final var currentValue = oldContainer.get(oldFeatureId);
+		if (relation.many())
+		{
+			if (!(currentValue instanceof List<?> list) || list.isEmpty())
+			{
+				return;
+			}
+
+			boolean found = false;
+			for (final var element : list)
+			{
+				if (element == child)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				return;
+			}
+
+			list.removeIf(o -> o == child);
+		}
+		else
+		{
+			if (currentValue != child)
+			{
+				return;
+			}
+			oldContainer.set(oldFeatureId, null);
+		}
 	}
 }

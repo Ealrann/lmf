@@ -18,6 +18,8 @@ import test.model.carcompany.CarCompany;
 import test.model.carcompany.CarParc;
 import test.model.carcompany.impl.PersonImpl;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 final class ModelUtilDeleteTest
@@ -96,6 +98,32 @@ final class ModelUtilDeleteTest
 	}
 
 	@Test
+	void move_addToNewContainer_detachesFromOldContainer()
+	{
+		final var car = Car.builder()
+						   .name("Car 1")
+						   .brand(Brand.Peugeot)
+						   .build();
+		final var parcA = CarParc.builder().addCar(() -> car).build();
+		final var parcB = CarParc.builder().build();
+		CarCompany.builder()
+				  .name("Company")
+				  .ceo(() -> new PersonImpl("CEO"))
+				  .addParc(() -> parcA)
+				  .addParc(() -> parcB)
+				  .build();
+
+		assertTrue(parcA.cars().contains(car), "Sanity: car should be in parc A before the move");
+		assertFalse(parcB.cars().contains(car), "Sanity: car should not be in parc B before the move");
+
+		parcB.cars().add(car);
+
+		assertSame(parcB, car.lmContainer(), "Car container should be updated to parc B");
+		assertFalse(parcA.cars().contains(car), "Move should detach the car from parc A");
+		assertTrue(parcB.cars().contains(car), "Move should attach the car to parc B");
+	}
+
+	@Test
 	void delete_throwsWhenContainedInImmutableContainment()
 	{
 		final var child = new ImmutableChild();
@@ -105,6 +133,18 @@ final class ModelUtilDeleteTest
 		assertTrue(child.lmContainingFeature().immutable(), "Sanity: containment relation should be immutable");
 
 		assertThrows(IllegalStateException.class, () -> ModelUtil.delete(child));
+	}
+
+	@Test
+	void move_throwsWhenContainedInImmutableContainment()
+	{
+		final var child = new ImmutableChild();
+		final var root = new ImmutableContainer(child);
+		final var newContainer = new MutableContainer();
+
+		assertThrows(IllegalStateException.class, () -> newContainer.children().add(child));
+		assertSame(root, child.lmContainer(), "Child should remain contained by the immutable container");
+		assertFalse(newContainer.children().contains(child), "Move should not attach to the new container");
 	}
 
 	private static final int IMMUTABLE_CHILD_ID = -2000;
@@ -128,6 +168,24 @@ final class ModelUtilDeleteTest
 																		  .lmBuilder(new BuilderSupplier<>(() -> null))
 																		  .addFeature(() -> IMMUTABLE_CHILD_RELATION)
 																		  .build();
+
+	private static final int MUTABLE_CHILD_ID = -2001;
+
+	private static final Relation<LMObject, List<LMObject>, Listener<List<LMObject>>, LMObject.Features<?>> MUTABLE_CHILD_RELATION =
+			new RelationBuilder<LMObject, List<LMObject>, Listener<List<LMObject>>, LMObject.Features<?>>()
+					.name("children")
+					.id(MUTABLE_CHILD_ID)
+					.many(true)
+					.contains(true)
+					.immutable(false)
+					.concept(() -> IMMUTABLE_CHILD_GROUP)
+					.build();
+
+	private static final Group<LMObject> MUTABLE_CONTAINER_GROUP = Group.<LMObject>builder()
+																	   .name("MutableContainer")
+																	   .lmBuilder(new BuilderSupplier<>(() -> null))
+																	   .addFeature(() -> MUTABLE_CHILD_RELATION)
+																	   .build();
 
 	private static final class ImmutableContainer extends FeaturedObject<LMObject.Features<?>> implements LMObject
 	{
@@ -174,6 +232,65 @@ final class ModelUtilDeleteTest
 			return switch (feature.id())
 			{
 				case IMMUTABLE_CHILD_ID -> (T) child;
+				default -> null;
+			};
+		}
+	}
+
+	private static final class MutableContainer extends FeaturedObject<LMObject.Features<?>> implements LMObject
+	{
+		private static final int FEATURE_COUNT = 1;
+
+		private final ModelNotifier<LMObject.Features<?>> notifier = new ModelNotifier<>(this,
+																						 FEATURE_COUNT,
+																						 this::featureIndex);
+		private final List<LMObject> children = newObservableList(MUTABLE_CHILD_ID, true, true);
+
+		private MutableContainer()
+		{
+			notifier.eDeliver(true);
+		}
+
+		private List<LMObject> children()
+		{
+			return children;
+		}
+
+		@Override
+		public IModelNotifier.Impl<LMObject.Features<?>> notifier()
+		{
+			return notifier;
+		}
+
+		@Override
+		public Group<LMObject> lmGroup()
+		{
+			return MUTABLE_CONTAINER_GROUP;
+		}
+
+		@Override
+		public int featureIndex(final int featureId)
+		{
+			return switch (featureId)
+			{
+				case MUTABLE_CHILD_ID -> 0;
+				default -> throw new IllegalArgumentException("Unknown featureId: " + featureId);
+			};
+		}
+
+		@Override
+		public Object get(final int featureID)
+		{
+			return featureID == MUTABLE_CHILD_ID ? children : null;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T get(final Feature<?, ?, ?, ?> feature)
+		{
+			return switch (feature.id())
+			{
+				case MUTABLE_CHILD_ID -> (T) children;
 				default -> null;
 			};
 		}
