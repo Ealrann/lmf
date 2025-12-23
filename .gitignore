@@ -17,4 +17,4 @@ javacore.*
 *.dmp
 *.trc
 out/
-
+.intellijPlatform/
