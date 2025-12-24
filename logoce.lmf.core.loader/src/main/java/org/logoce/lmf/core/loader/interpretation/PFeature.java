@@ -7,6 +7,11 @@ public record PFeature(Optional<String> name, List<String> values, boolean isRel
 {
 	public static PFeature of(Optional<String> name, List<String> values)
 	{
+		return of(name, values, false);
+	}
+
+	public static PFeature of(Optional<String> name, List<String> values, boolean forceAttribute)
+	{
 		if (values.isEmpty())
 		{
 			throw new IllegalArgumentException("Empty value list for feature '" + name.orElse("<anonymous>") + "'");
@@ -14,7 +19,11 @@ public record PFeature(Optional<String> name, List<String> values, boolean isRel
 
 		final var firstVal = values.getFirst();
 		final boolean isRelation;
-		if (firstVal.isEmpty())
+		if (forceAttribute)
+		{
+			isRelation = false;
+		}
+		else if (firstVal.isEmpty())
 		{
 			isRelation = false;
 		}

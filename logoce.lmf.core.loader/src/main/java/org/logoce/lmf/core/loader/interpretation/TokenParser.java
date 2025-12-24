@@ -51,42 +51,55 @@ final class TokenParser
 	{
 		final var nextNotEmpty = nextNotEmpty();
 		if (nextNotEmpty.isEmpty()) return Optional.empty();
-		final var firstToken = nextNotEmpty.get();
+		final var tokenInfo = nextNotEmpty.get();
+		final var firstToken = tokenInfo.token();
 		final var firstValue = firstToken.value();
 		if (firstToken.type() == ELMTokenType.VALUE_NAME)
 		{
 			final var assign = nextToken();
 			assert assign.type() == ELMTokenType.ASSIGN;
-			final var nextValues = nextContiguousValues();
-			return Optional.of(PFeature.of(Optional.of(firstValue), nextValues));
+			final var nextValues = nextContiguousValues(false);
+			final var forceAttribute = shouldForceAttribute(nextValues.values(), nextValues.firstQuoted());
+			return Optional.of(PFeature.of(Optional.of(firstValue), nextValues.values(), forceAttribute));
 		}
 		else
 		{
 			assert firstToken.type() == ELMTokenType.VALUE || firstToken.type() == ELMTokenType.QUOTE;
-			final var nextValues = nextContiguousValues();
-			final var values = Stream.concat(Stream.of(firstValue), nextValues.stream()).toList();
-			return Optional.of(PFeature.of(Optional.empty(), values));
+			final var nextValues = nextContiguousValues(tokenInfo.inQuote());
+			final var values = Stream.concat(Stream.of(firstValue), nextValues.values().stream()).toList();
+			final var forceAttribute = shouldForceAttribute(values, tokenInfo.inQuote());
+			return Optional.of(PFeature.of(Optional.empty(), values, forceAttribute));
 		}
 	}
 
-	private Optional<PToken> nextNotEmpty()
+	private Optional<TokenInfo> nextNotEmpty()
 	{
+		boolean inQuote = false;
 		while (hasNextToken())
 		{
 			final var next = nextToken();
 			final var type = next.type();
-			if (type != ELMTokenType.WHITE_SPACE && type != ELMTokenType.QUOTE)
+			if (type == ELMTokenType.WHITE_SPACE)
 			{
-				return Optional.of(next);
+				continue;
 			}
+			if (type == ELMTokenType.QUOTE)
+			{
+				inQuote = !inQuote;
+				continue;
+			}
+			return Optional.of(new TokenInfo(next, inQuote));
 		}
 		return Optional.empty();
 	}
 
-	private List<String> nextContiguousValues()
+	private ValueTokens nextContiguousValues(final boolean startInQuote)
 	{
 		final List<String> res = new ArrayList<>();
 		int quoteCount = 0;
+		boolean inQuote = startInQuote;
+		boolean firstValueSeen = false;
+		boolean firstValueQuoted = false;
 		boolean afterListSeparator = false;
 
 		_while:
@@ -110,12 +123,18 @@ final class TokenParser
 					break _while;
 				case QUOTE:
 					quoteCount++;
+					inQuote = !inQuote;
 					continue;
 				case LIST_SEPARATOR:
 					afterListSeparator = true;
 					continue;
 				case VALUE:
 					res.add(token.value());
+					if (!firstValueSeen)
+					{
+						firstValueQuoted = inQuote;
+						firstValueSeen = true;
+					}
 					afterListSeparator = false;
 					break;
 				default:
@@ -123,13 +142,13 @@ final class TokenParser
 			}
 		}
 
-		if (res.isEmpty() && quoteCount >= 2)
+		if (res.isEmpty() && quoteCount >= 2 && !startInQuote)
 		{
 			// Interpret a pair of quotes with no VALUE tokens (e.g. defaultValue="")
 			// as an explicit empty string, which is a valid attribute value.
 			res.add("");
 		}
-		return res;
+		return new ValueTokens(res, firstValueQuoted);
 	}
 
 	private boolean hasNextToken()
@@ -160,5 +179,27 @@ final class TokenParser
 			return Optional.of(token);
 		}
 		return Optional.empty();
+	}
+
+	private record TokenInfo(PToken token, boolean inQuote)
+	{
+	}
+
+	private record ValueTokens(List<String> values, boolean firstQuoted)
+	{
+	}
+
+	private static boolean shouldForceAttribute(final List<String> values, final boolean firstQuoted)
+	{
+		if (!firstQuoted || values.isEmpty()) return false;
+		final var firstValue = values.getFirst();
+		for (int i = 0; i < firstValue.length(); i++)
+		{
+			if (firstValue.charAt(i) != '.')
+			{
+				return false;
+			}
+		}
+		return !firstValue.isEmpty();
 	}
 }
