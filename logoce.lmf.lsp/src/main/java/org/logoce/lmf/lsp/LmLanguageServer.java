@@ -203,12 +203,12 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		capabilities.setHoverProvider(true);
 		capabilities.setDocumentSymbolProvider(true);
 		capabilities.setRenameProvider(true);
+		capabilities.setFoldingRangeProvider(true);
 
-		// Semantic tokens: use a minimal legend for now where type-like names (groups, definitions)
-		// are reported as 'keyword'. This is very visible in most themes and helps
-		// confirm that semantic tokens are correctly wired end-to-end.
+		// Semantic tokens: keep a minimal legend where type-like names are reported
+		// as 'keyword', and Named values are reported as 'string'.
 		final var legend = new SemanticTokensLegend(
-			java.util.List.of(SemanticTokenTypes.Keyword),
+			java.util.List.of(SemanticTokenTypes.Keyword, SemanticTokenTypes.String),
 			java.util.List.of()
 		);
 		final var full = new SemanticTokensServerFull();

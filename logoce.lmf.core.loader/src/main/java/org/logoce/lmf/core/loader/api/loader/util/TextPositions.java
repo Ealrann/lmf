@@ -3,6 +3,7 @@ package org.logoce.lmf.core.loader.api.loader.util;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.loader.api.text.syntax.PToken;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -15,6 +16,68 @@ public final class TextPositions
 {
 	private TextPositions()
 	{
+	}
+
+	public static final class LineIndex
+	{
+		private final int[] lineOffsets;
+		private final int length;
+
+		private LineIndex(final int[] lineOffsets, final int length)
+		{
+			this.lineOffsets = lineOffsets;
+			this.length = length;
+		}
+
+		public int lineFor(final int offset)
+		{
+			final int clamped = Math.max(0, Math.min(offset, length));
+			final int idx = Arrays.binarySearch(lineOffsets, clamped);
+			if (idx >= 0)
+			{
+				return idx + 1;
+			}
+			final int insertionPoint = -idx - 1;
+			return Math.max(1, insertionPoint);
+		}
+
+		public int columnFor(final int offset)
+		{
+			final int clamped = Math.max(0, Math.min(offset, length));
+			final int line = lineFor(clamped);
+			final int lineStart = lineOffsets[Math.max(0, line - 1)];
+			return Math.max(1, clamped - lineStart + 1);
+		}
+	}
+
+	public static LineIndex index(final CharSequence text)
+	{
+		if (text == null || text.length() == 0)
+		{
+			return new LineIndex(new int[]{0}, 0);
+		}
+
+		final int length = text.length();
+		int[] offsets = new int[Math.max(16, length / 32)];
+		int count = 0;
+		offsets[count++] = 0;
+
+		for (int i = 0; i < length; i++)
+		{
+			if (text.charAt(i) == '\n')
+			{
+				if (count == offsets.length)
+				{
+					offsets = Arrays.copyOf(offsets, offsets.length * 2);
+				}
+				if (i + 1 <= length)
+				{
+					offsets[count++] = i + 1;
+				}
+			}
+		}
+
+		return new LineIndex(Arrays.copyOf(offsets, count), length);
 	}
 
 	public record Span(int line, int column, int length, int offset)

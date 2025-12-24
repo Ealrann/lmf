@@ -13,6 +13,8 @@ import org.eclipse.lsp4j.DocumentHighlightKind;
 import org.eclipse.lsp4j.DocumentHighlightParams;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
+import org.eclipse.lsp4j.FoldingRange;
+import org.eclipse.lsp4j.FoldingRangeRequestParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.Location;
@@ -186,6 +188,37 @@ public final class LmTextDocumentService implements TextDocumentService
 				return List.<Either<SymbolInformation, DocumentSymbol>>of();
 			}
 			return DocumentSymbols.buildDocumentSymbols(syntax, state.semanticSnapshot(), server.workspaceIndex(), uri);
+		}, server.worker());
+	}
+
+	@Override
+	public CompletableFuture<List<FoldingRange>> foldingRange(final FoldingRangeRequestParams params)
+	{
+		final URI uri = URI.create(params.getTextDocument().getUri());
+		return CompletableFuture.supplyAsync(() -> {
+			final var state = server.workspaceIndex().getDocument(uri);
+			if (state == null)
+			{
+				return List.<FoldingRange>of();
+			}
+
+			var syntax = state.syntaxSnapshot();
+			if (syntax == null)
+			{
+				server.analyzeDocument(state);
+				syntax = state.syntaxSnapshot();
+				if (syntax == null)
+				{
+					syntax = state.lastGoodSyntaxSnapshot();
+				}
+			}
+
+			if (syntax == null)
+			{
+				return List.<FoldingRange>of();
+			}
+
+			return buildFoldingRanges(syntax);
 		}, server.worker());
 	}
 
@@ -403,4 +436,43 @@ public final class LmTextDocumentService implements TextDocumentService
 											 server.worker());
 	}
 
+	private static List<FoldingRange> buildFoldingRanges(final SyntaxSnapshot syntax)
+	{
+		final var source = syntax.source();
+		final var lineIndex = syntax.lineIndex();
+		final var ranges = new ArrayList<FoldingRange>();
+
+		for (final var root : syntax.roots())
+		{
+			root.streamTree().forEach(node -> {
+				final var tokens = node.data().tokens();
+				if (tokens.isEmpty())
+				{
+					return;
+				}
+
+				final int startOffset = tokens.getFirst().offset();
+				final var lastToken = tokens.getLast();
+				final int endOffset = lastToken.offset() + Math.max(1, lastToken.length());
+				if (startOffset < 0 || endOffset <= startOffset || endOffset > source.length())
+				{
+					return;
+				}
+
+				final int endOffsetInclusive = Math.max(startOffset, endOffset - 1);
+				final int startLine = lineIndex.lineFor(startOffset);
+				final int endLine = lineIndex.lineFor(endOffsetInclusive);
+				if (endLine - startLine < 3)
+				{
+					return;
+				}
+
+				final int startLineZero = Math.max(0, startLine - 1);
+				final int endLineZero = Math.max(0, endLine - 1);
+				ranges.add(new FoldingRange(startLineZero, endLineZero));
+			});
+		}
+
+		return List.copyOf(ranges);
+	}
 }

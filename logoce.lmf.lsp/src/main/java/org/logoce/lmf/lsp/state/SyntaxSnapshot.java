@@ -1,6 +1,7 @@
 package org.logoce.lmf.lsp.state;
 
 import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
+import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.loader.api.text.syntax.PToken;
 import org.logoce.lmf.core.util.tree.Tree;
@@ -13,6 +14,7 @@ public final class SyntaxSnapshot
 	private final List<Tree<PNode>> roots;
 	private final List<LmDiagnostic> diagnostics;
 	private final CharSequence source;
+	private final TextPositions.LineIndex lineIndex;
 
 	public SyntaxSnapshot(final List<PToken> tokens,
 						  final List<Tree<PNode>> roots,
@@ -23,6 +25,7 @@ public final class SyntaxSnapshot
 		this.roots = List.copyOf(roots);
 		this.diagnostics = List.copyOf(diagnostics);
 		this.source = source;
+		this.lineIndex = TextPositions.index(source);
 	}
 
 	public List<PToken> tokens()
@@ -43,5 +46,10 @@ public final class SyntaxSnapshot
 	public CharSequence source()
 	{
 		return source;
+	}
+
+	public TextPositions.LineIndex lineIndex()
+	{
+		return lineIndex;
 	}
 }
