@@ -171,37 +171,46 @@ public final class DynamicModelPackage implements IModelPackage
 		{
 			if (relation == null || supplier == null) return;
 
-			if (relation.many())
+			if (relation.contains())
 			{
-				@SuppressWarnings("unchecked")
-				final List<RelationType> list = (List<RelationType>) values.computeIfAbsent(relation,
-																							 k -> new ArrayList<>());
 				final RelationType child = supplier.get();
 				if (child != null)
 				{
-					list.add(child);
-					if (relation.contains())
+					if (relation.many())
 					{
+						@SuppressWarnings("unchecked")
+						final List<RelationType> list = (List<RelationType>) values.computeIfAbsent(relation,
+																									 k -> new ArrayList<>());
+						list.add(child);
 						pendingChildren.add(ChildRelation.many(relation, child));
 					}
+					else
+					{
+						values.put(relation, child);
+						pendingChildren.add(ChildRelation.single(relation, child));
+					}
 				}
+				return;
+			}
+
+			if (relation.many())
+			{
+				@SuppressWarnings("unchecked")
+				final List<Supplier<RelationType>> list = (List<Supplier<RelationType>>) values.computeIfAbsent(relation,
+																											   k -> new ArrayList<>());
+				list.add(supplier);
 			}
 			else
 			{
-				final RelationType child = supplier.get();
-				values.put(relation, child);
-				if (relation.contains() && child != null)
-				{
-					pendingChildren.add(ChildRelation.single(relation, child));
-				}
+				values.put(relation, supplier);
 			}
 		}
 	}
 
-		private static final class ChildRelation
-		{
-			private final Relation<?, ?, ?, ?> relation;
-			private final LMObject child;
+	private static final class ChildRelation
+	{
+		private final Relation<?, ?, ?, ?> relation;
+		private final LMObject child;
 		private final boolean many;
 
 		private ChildRelation(final Relation<?, ?, ?, ?> relation, final LMObject child, final boolean many)

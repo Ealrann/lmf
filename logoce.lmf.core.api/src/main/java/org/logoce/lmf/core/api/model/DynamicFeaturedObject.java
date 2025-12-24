@@ -9,6 +9,7 @@ import org.logoce.lmf.core.api.notification.listener.IModelListener;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -78,6 +79,12 @@ public final class DynamicFeaturedObject implements Model
 	{
 		if (feature == null) return null;
 
+		if (feature instanceof Relation<?, ?, ?, ?> relation)
+		{
+			@SuppressWarnings("unchecked") final V resolved = (V) resolveRelationValue(relation);
+			return resolved;
+		}
+
 		if (feature.many())
 		{
 			@SuppressWarnings("unchecked") final V list = (V) values.computeIfAbsent(feature,
@@ -86,6 +93,66 @@ public final class DynamicFeaturedObject implements Model
 		}
 
 		@SuppressWarnings("unchecked") final V value = (V) values.get(feature);
+		return value;
+	}
+
+	private Object resolveRelationValue(final Relation<?, ?, ?, ?> relation)
+	{
+		if (relation.many())
+		{
+			final var value = values.get(relation);
+			if (value == null)
+			{
+				final var list = new ArrayList<LMObject>();
+				values.put(relation, list);
+				return list;
+			}
+
+			if (value instanceof List<?> list)
+			{
+				var hasSuppliers = false;
+				for (final var entry : list)
+				{
+					if (entry instanceof Supplier<?>)
+					{
+						hasSuppliers = true;
+						break;
+					}
+				}
+
+				if (!hasSuppliers) return list;
+
+				final var resolved = new ArrayList<LMObject>(list.size());
+				for (final var entry : list)
+				{
+					if (entry instanceof Supplier<?> supplier)
+					{
+						final var resolvedValue = supplier.get();
+						if (resolvedValue instanceof LMObject lmObject)
+						{
+							resolved.add(lmObject);
+						}
+					}
+					else if (entry instanceof LMObject lmObject)
+					{
+						resolved.add(lmObject);
+					}
+				}
+
+				values.put(relation, resolved);
+				return resolved;
+			}
+
+			return value;
+		}
+
+		final var value = values.get(relation);
+		if (value instanceof Supplier<?> supplier)
+		{
+			final var resolved = supplier.get();
+			values.put(relation, resolved);
+			return resolved;
+		}
 		return value;
 	}
 

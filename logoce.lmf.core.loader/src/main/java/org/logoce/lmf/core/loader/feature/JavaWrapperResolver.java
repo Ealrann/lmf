@@ -1,5 +1,6 @@
 package org.logoce.lmf.core.loader.feature;
 
+import org.logoce.lmf.core.api.model.DynamicModelPackage;
 import org.logoce.lmf.core.api.model.IJavaWrapperConverter;
 import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.lang.JavaWrapper;
@@ -24,7 +25,14 @@ public final class JavaWrapperResolver extends AttributeResolver
 	protected Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(final String value)
 	{
 		final var converter = resolveConverter(wrapper);
-		if (converter.isEmpty()) return Optional.empty();
+		if (converter.isEmpty())
+		{
+			if (isDynamicWrapper(wrapper))
+			{
+				return Optional.of(new AttributeResolution<>((Attribute<String, ?, ?, ?>) feature, value));
+			}
+			return Optional.empty();
+		}
 
 		try
 		{
@@ -35,6 +43,12 @@ public final class JavaWrapperResolver extends AttributeResolver
 		{
 			return Optional.empty();
 		}
+	}
+
+	private static boolean isDynamicWrapper(final JavaWrapper<?> wrapper)
+	{
+		if (!(wrapper.lmContainer() instanceof MetaModel metaModel)) return false;
+		return metaModel.lmPackage() instanceof DynamicModelPackage;
 	}
 
 	private static Optional<IJavaWrapperConverter<?>> resolveConverter(final JavaWrapper<?> wrapper)
