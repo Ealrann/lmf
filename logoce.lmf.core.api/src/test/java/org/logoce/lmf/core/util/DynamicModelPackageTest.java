@@ -241,9 +241,9 @@ public final class DynamicModelPackageTest
 		linker.linkModel(readResult.roots(), linkDiagnostics, readResult.source());
 
 		// LMCore is large and intentionally uses advanced patterns (aliases, weak typing, contextual paths).
-		// For the dynamic package we only require that linking does not crash and produces some diagnostics;
+		// For the dynamic package we only require that linking does not crash nor report errors;
 		// exact parity with the generated LMCorePackage is not needed here.
-		assertFalse(linkDiagnostics.isEmpty(),
-					"Dynamic linking of LMCore.lm is expected to produce diagnostics");
+		assertTrue(linkDiagnostics.stream().noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+				   "Dynamic linking of LMCore.lm should not report errors");
 	}
 }
