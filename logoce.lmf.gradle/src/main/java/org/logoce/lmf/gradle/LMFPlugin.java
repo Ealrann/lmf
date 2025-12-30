@@ -62,6 +62,12 @@ public final class LMFPlugin implements Plugin<Project>
 															}));
 												});
 
+				// Convention: LMF models live in `src/<sourceSet>/model`. Make them part of the source set so IDEs and
+				// packaging see them without extra per-project configuration.
+				sourceSet.getResources().srcDir(project.getLayout()
+													  .getProjectDirectory()
+													  .dir("src/" + sourceSetName + "/model"));
+
 				sourceSet.getJava().srcDir(outputDir);
 
 				project.getTasks()
