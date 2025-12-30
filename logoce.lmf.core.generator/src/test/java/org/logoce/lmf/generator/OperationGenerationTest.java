@@ -1,6 +1,7 @@
 package org.logoce.lmf.generator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.lang.Operation;
@@ -8,42 +9,26 @@ import org.logoce.lmf.generator.model.ModelGenerator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class OperationGenerationTest
 {
 	@Test
-	public void generateOperationMethodWithContent() throws IOException
+	public void generateOperationMethodWithContent(@TempDir final Path tempDir) throws IOException
 	{
-		final var targetDir = new File("build/test-generated/operations");
-		if (targetDir.exists())
-		{
-			for (final var file : targetDir.listFiles())
-			{
-				if (file.isDirectory())
-				{
-					for (final var child : file.listFiles())
-					{
-						child.delete();
-					}
-				}
-				file.delete();
-			}
-		}
-		else
-		{
-			//noinspection ResultOfMethodCallIgnored
-			targetDir.mkdirs();
-		}
-
 		final var metaModel = buildMetaModelWithOperation();
+		final var targetDir = tempDir.resolve("operations").toFile();
+
 		final var generator = new ModelGenerator(metaModel);
 		generator.generateJava(targetDir);
 
-		final var basePackageDir = new File(targetDir, "test/operations");
+		final var modelPackage = metaModel.name().toLowerCase(Locale.ROOT);
+		final var basePackageDir = new File(targetDir, "test/operations/" + modelPackage);
 		final var interfaceFile = new File(basePackageDir, "Foo.java");
 		final var implFile = new File(new File(basePackageDir, "impl"), "FooImpl.java");
 

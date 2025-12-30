@@ -1,8 +1,11 @@
 package org.logoce.lmf.generator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,9 +33,18 @@ public class MultiModelGenerationTest
 	}
 
 	@Test
-	public void generateGraphAnalysisWithCliImports()
+	public void generateGraphAnalysisWithCliImports(@TempDir final Path tempDir)
 	{
-		final var basePackageDir = new File("build/test-generated/graph-cli/test/multi");
+		final var targetDir = tempDir.resolve("graph-cli").toFile();
+		final var graphCore = new File("src/test/model/GraphCore.lm");
+		final var graphExtensions = new File("src/test/model/GraphExtensions.lm");
+		final var graphAnalysis = new File("src/test/model/GraphAnalysis.lm");
+
+		Main.generate(targetDir,
+					  List.of(graphAnalysis),
+					  List.of(graphCore, graphExtensions));
+
+		final var basePackageDir = new File(targetDir, "test/multi/graphanalysis");
 		assertTrue(new File(basePackageDir, "GraphView.java").isFile(), "GraphView.java should be generated");
 	}
 }
