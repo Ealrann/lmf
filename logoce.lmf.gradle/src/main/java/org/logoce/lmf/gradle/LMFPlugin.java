@@ -21,7 +21,14 @@ public final class LMFPlugin implements Plugin<Project>
 		final var extension = project.getExtensions().create("lmf", LMFExtension.class);
 
 		extension.getIncludes().convention(List.of("**/*.lm"));
+		extension.getOutputDir().convention(project.getLayout().getBuildDirectory().dir("generated/sources/lmf"));
 		configureDefaultImportModels(project, extension);
+
+		final var generationLock = project.getGradle()
+										  .getSharedServices()
+										  .registerIfAbsent("lmfGenerationLock",
+															LmfGenerationLockService.class,
+															spec -> spec.getMaxParallelUsages().set(1));
 
 		project.getPlugins().withType(JavaPlugin.class, javaPlugin -> {
 			final var javaExtension = project.getExtensions().getByType(JavaPluginExtension.class);
@@ -35,9 +42,7 @@ public final class LMFPlugin implements Plugin<Project>
 										   .dir("src/" + sourceSetName)
 										   .getAsFile();
 
-				final var outputDir = project.getLayout()
-											 .getProjectDirectory()
-											 .dir("src/" + sourceSetName + "/generated");
+				final var outputDir = extension.getOutputDir().dir(sourceSetName);
 
 				final var generateTask = project.getTasks()
 												.register(taskName, GenerateLmfSources.class, task -> {
@@ -48,12 +53,13 @@ public final class LMFPlugin implements Plugin<Project>
 
 														task.getOutputDir().set(outputDir);
 														task.getImportModelFiles().from(extension.getImportModels());
+														task.usesService(generationLock);
 
 													task.getModelFiles()
 														.from(project.fileTree(baseDir, spec -> {
 															final var includes = extension.getIncludes().get();
 															spec.include(includes);
-														}));
+															}));
 												});
 
 				sourceSet.getJava().srcDir(outputDir);
