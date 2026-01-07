@@ -1,8 +1,10 @@
 package org.logoce.lmf.lsp.workspace;
 
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.WorkspaceIndex;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.workspace.DocumentAnalyzer;
+import org.logoce.lmf.core.loader.api.tooling.workspace.SymbolIndexer;
+import org.logoce.lmf.core.loader.api.tooling.workspace.WorkspaceIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,7 @@ public final class WorkspaceRebuilder
 	private final WorkspaceDocumentStore documentStore;
 	private final WorkspaceRegistryManager registryManager;
 	private final DocumentAnalyzer documentAnalyzer;
+	private final DiagnosticsPublisher diagnosticsPublisher;
 
 	public WorkspaceRebuilder(final WorkspaceIndex workspaceIndex,
 							  final SymbolIndexer symbolIndexer,
@@ -30,7 +33,8 @@ public final class WorkspaceRebuilder
 		this.projectRoot = projectRoot;
 		this.documentStore = new WorkspaceDocumentStore(workspaceIndex);
 		this.registryManager = new WorkspaceRegistryManager(workspaceIndex, symbolIndexer, projectRoot);
-		this.documentAnalyzer = new DocumentAnalyzer(workspaceIndex, symbolIndexer, Objects.requireNonNull(clientSupplier, "clientSupplier"));
+		this.documentAnalyzer = new DocumentAnalyzer(workspaceIndex, symbolIndexer);
+		this.diagnosticsPublisher = new DiagnosticsPublisher(Objects.requireNonNull(clientSupplier, "clientSupplier"));
 	}
 
 	/**
@@ -133,5 +137,6 @@ public final class WorkspaceRebuilder
 	public void analyzeDocument(final LmDocumentState state)
 	{
 		documentAnalyzer.analyzeDocument(state);
+		diagnosticsPublisher.publish(state);
 	}
 }

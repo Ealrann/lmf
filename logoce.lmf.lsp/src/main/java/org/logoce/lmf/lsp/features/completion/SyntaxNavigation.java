@@ -3,7 +3,7 @@ package org.logoce.lmf.lsp.features.completion;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.logoce.lmf.lsp.LspRanges;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.loader.api.text.syntax.PToken;
 import org.logoce.lmf.core.loader.api.loader.util.TextPositions;

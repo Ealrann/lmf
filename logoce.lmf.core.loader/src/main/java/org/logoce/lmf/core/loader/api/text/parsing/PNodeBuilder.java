@@ -23,6 +23,11 @@ public final class PNodeBuilder
 		return roots.stream().map(PTreeBuilder::build).toList();
 	}
 
+	public int openDepth()
+	{
+		return stack.size();
+	}
+
 	public void readToken(final PToken token) throws LexerException
 	{
 		switch (token.type())
@@ -48,7 +53,12 @@ public final class PNodeBuilder
 	}
 
 	private void pop()
+		throws LexerException
 	{
+		if (stack.isEmpty())
+		{
+			throw new LexerException("Unmatched ')'");
+		}
 		stack.removeLast();
 	}
 

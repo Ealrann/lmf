@@ -253,24 +253,21 @@ public final class DynamicFeaturedObject implements Model
 	@Override
 	public String name()
 	{
-		final var nameAttribute = findAttribute("name");
-		return nameAttribute == null ? null : (String) get(nameAttribute);
+		final var value = rawAttributeValue("name");
+		return value instanceof String str ? str : null;
 	}
 
 	@Override
 	public String domain()
 	{
-		final var domainAttribute = findAttribute("domain");
-		return domainAttribute == null ? null : (String) get(domainAttribute);
+		final var value = rawAttributeValue("domain");
+		return value instanceof String str ? str : null;
 	}
 
 	@Override
 	public List<String> imports()
 	{
-		final var importsAttribute = findAttribute("imports");
-		if (importsAttribute == null) return List.of();
-
-		final var value = get(importsAttribute);
+		final var value = rawAttributeValue("imports");
 		if (value == null) return List.of();
 		if (value instanceof List<?> list)
 		{
@@ -286,10 +283,7 @@ public final class DynamicFeaturedObject implements Model
 	@Override
 	public List<String> metamodels()
 	{
-		final var metamodelsAttribute = findAttribute("metamodels");
-		if (metamodelsAttribute == null) return List.of();
-
-		final var value = get(metamodelsAttribute);
+		final var value = rawAttributeValue("metamodels");
 		if (value == null) return List.of();
 		if (value instanceof List<?> list)
 		{
@@ -342,15 +336,22 @@ public final class DynamicFeaturedObject implements Model
 		return Optional.empty();
 	}
 
-	private Attribute<?, ?, ?, ?> findAttribute(final String attributeName)
+	private Object rawAttributeValue(final String attributeName)
 	{
-		if (attributeName == null) return null;
+		if (attributeName == null)
+		{
+			return null;
+		}
 
 		for (final var feature : allFeatures)
 		{
 			if (feature instanceof Attribute<?, ?, ?, ?> attribute && attributeName.equals(attribute.name()))
 			{
-				return attribute;
+				final var value = values.get(attribute);
+				if (value != null)
+				{
+					return value;
+				}
 			}
 		}
 		return null;

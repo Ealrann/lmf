@@ -6,7 +6,7 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.logoce.lmf.core.lang.Enum;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.lang.Alias;
 import org.logoce.lmf.core.lang.JavaWrapper;

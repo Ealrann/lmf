@@ -1,8 +1,8 @@
 package org.logoce.lmf.lsp.workspace;
 
-import org.logoce.lmf.lsp.HeaderTextScanner;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.WorkspaceIndex;
+import org.logoce.lmf.core.loader.api.tooling.HeaderTextScanner;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.workspace.WorkspaceIndex;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -202,4 +202,3 @@ final class WorkspaceDocumentStore
 	{
 	}
 }
-

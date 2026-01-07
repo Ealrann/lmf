@@ -7,8 +7,8 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.LmSymbolKind;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.LmSymbolKind;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +44,7 @@ final class DefinitionNavigationTest
 		{
 			System.err.println("LMCore ref: target=" + ref.target().name() +
 							   " uri=" + ref.uri() +
-							   " range=" + ref.range());
+							   " span=" + ref.span());
 		}
 		org.junit.jupiter.api.Assertions.assertFalse(refs.isEmpty(), "Expected non-empty references for LMCore.lm");
 
@@ -79,7 +79,7 @@ final class DefinitionNavigationTest
 		{
 			System.err.println("CarCompany ref: target=" + ref.target().name() +
 							   " uri=" + ref.uri() +
-							   " range=" + ref.range());
+							   " span=" + ref.span());
 		}
 		org.junit.jupiter.api.Assertions.assertFalse(refs.isEmpty(), "Expected non-empty references for CarCompany.lm");
 

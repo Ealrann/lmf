@@ -1,0 +1,43 @@
+Goal: centralize edit/write flow for the CLI, simplify batch execution, and make formatting/validation behavior consistent and safe before v1.
+
+Step 1: Introduce a shared edit pipeline
+- Create a new service (for example `org.logoce.lmf.cli.edit.WorkspaceEditPipeline`) that owns the flow:
+  - apply edits to sources
+  - format (always on)
+  - validate (per supplied mode)
+  - write or return staged sources (batch uses staged)
+- Define a small data model (`EditOptions`, `EditOutcome`) so all commands can call one API and get consistent exit codes and diagnostics.
+
+Step 2: Migrate all edit runners to the pipeline
+- Replace duplicated apply/format/validate/write code in:
+  - `replace`, `remove`, `insert`, `move`, `set`, `unset`, `rename`
+- Keep each runner focused on “plan edits + call pipeline”.
+- Ensure `replace` uses the same pipeline (single-file edit map).
+
+Step 3: Refactor BatchRunner into smaller units
+- Split `BatchRunner` into:
+  - a small coordinator (read script, loop ops, manage `--continue-on-error`)
+  - per-command handlers (or reuse existing runners through the pipeline)
+  - shared validation/commit logic (ideally via the pipeline with `commit=false`)
+- Keep the JSONL parser unchanged; only refactor execution and staging.
+
+Step 4: Fix `LmSourceFormatter.formatOrOriginal` null handling
+- Change it to fail-fast (throw) or return `null` and make callers handle it explicitly.
+- Ensure no path can silently write an empty string on null input.
+- Add/adjust tests to cover the null behavior contract.
+
+Step 5: Make formatting happen before validation in batch (and each mode)
+- In batch `validate=each`, format staged sources before validating each step.
+- In batch `validate=final`, format once before the final validation.
+- Ensure the pipeline enforces the same order for non-batch commands.
+
+Step 6: Update tests and add new ones
+- Add tests for the pipeline ordering (format -> validate -> write).
+- Add/adjust batch tests to cover:
+  - `validate=each` with formatting
+  - `validate=final` with formatting
+  - staging vs commit consistency
+
+Step 7: Cleanup + verify
+- Remove now-unused helpers or duplicated utilities.
+- Run the full test suite.

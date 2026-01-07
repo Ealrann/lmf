@@ -9,7 +9,9 @@ import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.api.loader.linking.FeatureResolution;
 import org.logoce.lmf.core.api.util.ModelUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public final class ModelReferenceResolver implements ReferenceResolver
@@ -38,31 +40,47 @@ public final class ModelReferenceResolver implements ReferenceResolver
 	public Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolve(final PathParser pathParser)
 	{
 		final var firstStep = pathParser.next();
-
-		if (firstStep.type() == PathParser.Type.CHILD)
+		if (!pathParser.hasNext())
 		{
-			final var explorer = new ModelExplorer(model);
-			pathParser.rewind();
-			while (pathParser.hasNext())
+			if (firstStep.type() == PathParser.Type.NAME)
 			{
-				final var next = pathParser.next();
-				if (next.type() != PathParser.Type.CHILD)
-				{
-					throw new IllegalArgumentException("Unexpected step in model path: " + next.type());
-				}
-				explorer.exploreNode(next.text());
+				return resolveName(firstStep.text(), relation);
 			}
-			return explorer.build(relation);
+			if (firstStep.type() == PathParser.Type.CHILD)
+			{
+				final var explorer = new ModelExplorer(model);
+				explorer.apply(firstStep);
+				return explorer.build(relation);
+			}
+			throw new NoSuchElementException("Unsupported first step in model reference: " + firstStep.type());
 		}
-		else if (firstStep.type() == PathParser.Type.NAME)
+
+		final var remaining = collectRemaining(pathParser);
+
+		if (firstStep.type() == PathParser.Type.NAME)
 		{
-			final var name = firstStep.text();
-			return resolveName(name, relation);
+			return resolveNamedPath(firstStep.text(), remaining, relation);
 		}
 		else
 		{
-			throw new IllegalArgumentException("Unsupported first step in model reference: " + firstStep.type());
+			final var explorer = new ModelExplorer(model);
+			explorer.apply(firstStep);
+			for (final var step : remaining)
+			{
+				explorer.apply(step);
+			}
+			return explorer.build(relation);
 		}
+	}
+
+	private static List<PathParser.Step> collectRemaining(final PathParser parser)
+	{
+		final var steps = new ArrayList<PathParser.Step>();
+		while (parser.hasNext())
+		{
+			steps.add(parser.next());
+		}
+		return List.copyOf(steps);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,6 +103,55 @@ public final class ModelReferenceResolver implements ReferenceResolver
 						.map(o -> new ModelExplorer.StaticReferenceResolution<>(relation, o));
 	}
 
+	@SuppressWarnings("unchecked")
+	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolveNamedPath(final String name,
+																									final List<PathParser.Step> remaining,
+																									final Relation<T, ?, ?, ?> relation)
+	{
+		final var candidates = ModelUtil.streamTree(model)
+										.filter(o -> o instanceof Named named && name.equals(named.name()))
+										.toList();
+
+		final var results = candidates.stream()
+									  .map(anchor -> tryResolveFrom(anchor, remaining))
+									  .filter(Optional::isPresent)
+									  .map(Optional::get)
+									  .filter(o -> {
+										  final var concept = relation.concept();
+										  return concept instanceof Group<?> group && ModelUtil.isSubGroup(group, o.lmGroup());
+									  })
+									  .toList();
+
+		if (results.isEmpty())
+		{
+			throw new NoSuchElementException("Cannot resolve named path @" + name);
+		}
+		if (results.size() > 1)
+		{
+			throw new NoSuchElementException("Ambiguous named path @" + name + " (" + results.size() + " matches)");
+		}
+
+		final var object = (T) results.getFirst();
+		return Optional.of(new ModelExplorer.StaticReferenceResolution<>(relation, object));
+	}
+
+	private static Optional<LMObject> tryResolveFrom(final LMObject anchor, final List<PathParser.Step> remaining)
+	{
+		try
+		{
+			final var explorer = new ModelExplorer(anchor);
+			for (final var step : remaining)
+			{
+				explorer.apply(step);
+			}
+			return Optional.of(explorer.current());
+		}
+		catch (final NoSuchElementException exception)
+		{
+			return Optional.empty();
+		}
+	}
+
 	private static final class ModelExplorer
 	{
 		private LMObject current;
@@ -94,33 +161,101 @@ public final class ModelReferenceResolver implements ReferenceResolver
 			this.current = start;
 		}
 
-		@SuppressWarnings("unchecked")
-		void exploreNode(final String step)
+		LMObject current()
 		{
+			return current;
+		}
+
+		void apply(final PathParser.Step step)
+		{
+			current = switch (step.type())
+			{
+				case CHILD -> exploreChild(current, step.text());
+				case PARENT -> requireParent(current);
+				case CURRENT -> current;
+				case NAME -> exploreName(step.text());
+				case CONTEXT_NAME -> exploreContextName(step.text());
+				case ROOT -> ModelUtil.root(current);
+				default -> throw new NoSuchElementException("Unsupported step in model path: " + step.type());
+			};
+		}
+
+		private static LMObject requireParent(final LMObject object)
+		{
+			final var parent = object.lmContainer();
+			if (parent == null)
+			{
+				throw new NoSuchElementException("Cannot resolve parent of root object");
+			}
+			return parent;
+		}
+
+		private LMObject exploreName(final String name)
+		{
+			return ModelUtil.streamTree(ModelUtil.root(current))
+							.filter(o -> o instanceof Named named && name.equals(named.name()))
+							.findAny()
+							.orElseThrow(() -> new NoSuchElementException("Cannot find named Object : " + name));
+		}
+
+		private LMObject exploreContextName(final String name)
+		{
+			LMObject cursor = current;
+			while (cursor != null)
+			{
+				if (cursor instanceof Named named && name.equals(named.name()))
+				{
+					return cursor;
+				}
+
+				final var matchingChild = cursor.streamChildren()
+												.filter(o -> o instanceof Named named && name.equals(named.name()))
+												.findAny();
+				if (matchingChild.isPresent())
+				{
+					return matchingChild.get();
+				}
+
+				cursor = cursor.lmContainer();
+			}
+			throw new NoSuchElementException("Cannot find context-named Object : " + name);
+		}
+
+		@SuppressWarnings("unchecked")
+		private static LMObject exploreChild(final LMObject current, final String step)
+		{
+			LMObject cursor = current;
 			final var pointIndex = step.indexOf('.');
 			final var featureName = pointIndex == -1 ? step : step.substring(0, pointIndex);
 			final Integer index = pointIndex == -1 ? null : Integer.valueOf(step.substring(pointIndex + 1));
 
-			final var feature = current.lmGroup()
+			final var feature = cursor.lmGroup()
 									   .features()
 									   .stream()
 									   .filter(f -> f.name().equals(featureName))
 									   .findAny()
-									   .orElseThrow();
+									   .orElseThrow(() -> new NoSuchElementException("Cannot resolve step " + step));
 
 			if (index != null)
 			{
 				@SuppressWarnings("unchecked")
-				final var featureValue = (List<? extends LMObject>) current.get(
+				final var featureValue = (List<? extends LMObject>) cursor.get(
 						(Relation<?, List<? extends LMObject>, ?, ?>) feature);
-				current = featureValue.get(index);
+				cursor = featureValue.get(index);
 			}
 			else
 			{
-				final var featureValue = (LMObject) current.get(
+				final var featureValue = (LMObject) cursor.get(
 						(Relation<?, ? extends LMObject, ?, ?>) feature);
-				current = featureValue;
+				cursor = featureValue;
 			}
+
+			if (cursor == null)
+			{
+				throw new NoSuchElementException("Cannot resolve step " + step);
+			}
+
+			return cursor;
 		}
 
 		@SuppressWarnings("unchecked")

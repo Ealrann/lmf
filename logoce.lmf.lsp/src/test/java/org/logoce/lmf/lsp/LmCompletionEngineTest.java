@@ -6,7 +6,7 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
-import org.logoce.lmf.lsp.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;

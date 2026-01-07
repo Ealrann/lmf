@@ -4,7 +4,7 @@ import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.lsp.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
@@ -47,4 +47,3 @@ final class SemanticTokensTest
 		}
 	}
 }
-

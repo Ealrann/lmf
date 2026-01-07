@@ -224,6 +224,71 @@ public final class M1LoaderTest
 		assertSame(car, referencedCar, "Person.car should resolve to the local '@peugeot1' Car instance");
 	}
 
+	@Test
+	void loadPeugeotM1Model_canResolveNamedReferencePaths() throws IOException
+	{
+		final var metaLoader = LmLoader.withEmptyRegistry();
+		final var metaSource = Files.readString(Path.of("src/test/model/CarCompany.lm"), StandardCharsets.UTF_8);
+		final var metaDoc = metaLoader.loadModel(metaSource);
+		assertTrue(metaDoc.diagnostics()
+						  .stream()
+						  .noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+				   "CarCompany meta-model diagnostics should not contain errors");
+
+		final var carCompanyMetaModel = (MetaModel) metaDoc.model();
+		final var registryBuilder = new ModelRegistry.Builder();
+		registryBuilder.register(LMCoreModelPackage.MODEL);
+		registryBuilder.register(carCompanyMetaModel);
+		final var registry = registryBuilder.build();
+
+		final var loader = new LmLoader(registry);
+		final var source = Files.readString(Path.of("src/test/model/PeugeotWithReferencePath.lm"),
+											StandardCharsets.UTF_8);
+
+		final var objects = loader.loadObjects(source);
+		assertEquals(1, objects.size(), "PeugeotWithReferencePath.lm should produce a single root object");
+
+		final var root = (LMObject) objects.getFirst();
+		final var carCompanyGroup = findGroup(carCompanyMetaModel, "CarCompany");
+		final var ceoRelation = findRelation(carCompanyGroup, "ceo");
+		final var parcsRelation = findRelation(carCompanyGroup, "parcs");
+
+		final var ceo = (LMObject) root.get(ceoRelation);
+		assertNotNull(ceo, "CarCompany.ceo should be present");
+
+		final var personGroup = findGroup(carCompanyMetaModel, "Person");
+		final var carRelation = findRelation(personGroup, "car");
+
+		@SuppressWarnings("unchecked")
+		final var parcs = (java.util.List<LMObject>) root.get(parcsRelation);
+		assertEquals(1, parcs.size(), "CarCompany.parcs should contain one CarParc");
+
+		final var parc = parcs.getFirst();
+		final var carParcGroup = findGroup(carCompanyMetaModel, "CarParc");
+		final var carsRelation = findRelation(carParcGroup, "cars");
+		@SuppressWarnings("unchecked")
+		final var cars = (java.util.List<LMObject>) parc.get(carsRelation);
+		assertEquals(2, cars.size(), "CarParc.cars should contain two Cars");
+
+		final var expected = cars.get(1);
+		final var ceoCar = (LMObject) ceo.get(carRelation);
+		assertSame(expected,
+				   ceoCar,
+				   "Person.car should resolve using '@ref/children.1' style paths");
+
+		final var carGroup = findGroup(carCompanyMetaModel, "Car");
+		final var passengersRelation = findRelation(carGroup, "passengers");
+		@SuppressWarnings("unchecked")
+		final var passengers = (java.util.List<LMObject>) cars.getFirst().get(passengersRelation);
+		assertEquals(1, passengers.size(), "Car.passengers should contain one passenger");
+
+		final var passenger = passengers.getFirst();
+		final var passengerCar = (LMObject) passenger.get(carRelation);
+		assertSame(expected,
+				   passengerCar,
+				   "Person.car should resolve using '@ref/../brother.12' style paths");
+	}
+
 	private static Group<LMObject> findGroup(final MetaModel metaModel, final String name)
 	{
 		@SuppressWarnings("unchecked")

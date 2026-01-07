@@ -2,9 +2,9 @@ package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.Position;
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
-import org.logoce.lmf.lsp.state.SymbolTable;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SemanticSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SymbolTable;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.api.loader.linking.LmModelLinker;
 import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;

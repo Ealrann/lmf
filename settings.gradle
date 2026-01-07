@@ -15,6 +15,8 @@ project(':logoce.lmf.core.loader').projectDir = file('logoce.lmf.core.loader')
 include ':logoce.lmf.core.generator'
 project(':logoce.lmf.core.generator').projectDir = file('logoce.lmf.core.generator')
 
+include ':logoce.lmf.cli'
+
 include ':logoce.lmf.gradle'
 
 include ':logoce.lmf.lsp'

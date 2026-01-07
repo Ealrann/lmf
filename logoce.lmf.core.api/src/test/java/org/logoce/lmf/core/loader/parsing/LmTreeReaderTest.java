@@ -3,7 +3,10 @@ package org.logoce.lmf.core.loader.parsing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.logoce.lmf.core.loader.api.lexer.ELMTokenType;
+import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
+
+import java.util.ArrayList;
 
 public class LmTreeReaderTest
 {
@@ -88,5 +91,30 @@ public class LmTreeReaderTest
 		Assertions.assertEquals("-string", name.data().tokens().get(0).value());
 		Assertions.assertEquals("name", name.data().tokens().get(2).value());
 	}
-}
 
+	@Test
+	public void diagnostics_reportsMissingClosingParen()
+	{
+		final var model = "(model";
+		final var diagnostics = new ArrayList<LmDiagnostic>();
+		final var result = treeReader.read(model, diagnostics);
+
+		Assertions.assertFalse(diagnostics.isEmpty(), "Expected at least one diagnostic");
+		Assertions.assertTrue(diagnostics.stream().anyMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+							  "Expected an ERROR diagnostic");
+		Assertions.assertEquals(model, result.source());
+	}
+
+	@Test
+	public void diagnostics_reportsUnmatchedClosingParen()
+	{
+		final var model = ")";
+		final var diagnostics = new ArrayList<LmDiagnostic>();
+		final var result = treeReader.read(model, diagnostics);
+
+		Assertions.assertFalse(diagnostics.isEmpty(), "Expected at least one diagnostic");
+		Assertions.assertTrue(diagnostics.stream().anyMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+							  "Expected an ERROR diagnostic");
+		Assertions.assertEquals(model, result.source());
+	}
+}

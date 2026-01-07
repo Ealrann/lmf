@@ -2,9 +2,9 @@ package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.Position;
 import org.logoce.lmf.lsp.LmLanguageServer;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.SemanticSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.lang.Concept;
 import org.logoce.lmf.core.lang.Feature;

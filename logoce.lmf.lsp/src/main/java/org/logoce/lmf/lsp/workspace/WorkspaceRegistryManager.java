@@ -7,11 +7,13 @@ import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.api.loader.model.LmDocument;
 import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
 import org.logoce.lmf.core.loader.api.loader.parsing.ModelHeaderUtil;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
-import org.logoce.lmf.lsp.state.SymbolTable;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.lsp.state.WorkspaceIndex;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.SemanticSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SymbolTable;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.workspace.DiskMetaModelHeaderIndex;
+import org.logoce.lmf.core.loader.api.tooling.workspace.SymbolIndexer;
+import org.logoce.lmf.core.loader.api.tooling.workspace.WorkspaceIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

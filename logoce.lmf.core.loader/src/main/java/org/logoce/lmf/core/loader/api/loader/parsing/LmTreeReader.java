@@ -41,7 +41,23 @@ public final class LmTreeReader
 				modelBuilder.readToken(token);
 			}
 
-			return new ReadResult(modelBuilder.buildRoots(), source);
+			final var roots = modelBuilder.buildRoots();
+			if (modelBuilder.openDepth() > 0)
+			{
+				final int offset = source.length();
+				final int line = TextPositions.lineFor(source, offset);
+				final int col = TextPositions.columnFor(source, offset);
+				diagnostics.add(new LmDiagnostic(
+					line,
+					col,
+					1,
+					offset,
+					LmDiagnostic.Severity.ERROR,
+					"Unexpected end of input: missing ')'"
+				));
+			}
+
+			return new ReadResult(roots, source);
 		}
 		catch (LexerException e)
 		{

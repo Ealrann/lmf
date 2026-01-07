@@ -1,0 +1,6 @@
+(CarCompany domain=test.model name=PeugeotCompanyWithReferencePaths metamodels=test.model.CarCompany
+	(ceo name=Boss car=@PeugeotCompanyWithReferencePaths/parcs.0/cars.1)
+	(CarParc
+		(Car name=peugeot1 brand=Peugeot
+			(passengers name=Alice car=@peugeot1/../cars.1))
+		(Car name=peugeot2 brand=Peugeot)))

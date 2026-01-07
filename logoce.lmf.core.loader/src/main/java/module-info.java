@@ -15,6 +15,9 @@ module logoce.lmf.core.loader
 	exports org.logoce.lmf.core.loader.api.loader.model;
 	exports org.logoce.lmf.core.loader.api.loader.parsing;
 	exports org.logoce.lmf.core.loader.api.loader.util;
+	exports org.logoce.lmf.core.loader.api.tooling;
+	exports org.logoce.lmf.core.loader.api.tooling.state;
+	exports org.logoce.lmf.core.loader.api.tooling.workspace;
 	exports org.logoce.lmf.core.util.tree;
 
 	uses ILmLoader;

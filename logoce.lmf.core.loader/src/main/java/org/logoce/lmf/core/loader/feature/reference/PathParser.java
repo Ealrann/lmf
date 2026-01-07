@@ -39,36 +39,42 @@ public final class PathParser implements Iterator<PathParser.Step>
 
 		if (firstChar == '@')
 		{
-			final var text = path.substring(location + 1);
-			location = path.length();
+			final int nextStep = path.indexOf('/', location + 1);
+			final int end = nextStep == -1 ? path.length() : nextStep;
+			final var text = path.substring(location + 1, end);
+			location = nextStep == -1 ? path.length() : nextStep + 1;
 			return new Step(Type.NAME, text);
 		}
 		else if (firstChar == '^')
 		{
-			final var text = path.substring(location + 1);
-			location = path.length();
+			final int nextStep = path.indexOf('/', location + 1);
+			final int end = nextStep == -1 ? path.length() : nextStep;
+			final var text = path.substring(location + 1, end);
+			location = nextStep == -1 ? path.length() : nextStep + 1;
 			return new Step(Type.CONTEXT_NAME, text);
 		}
 		else if (firstChar == '#')
 		{
 			final int nextStep = path.indexOf('/', location + 1);
 			final int nextName = path.indexOf('@', location + 1);
-			if (nextName == -1 && nextStep == -1)
-			{
-				final var text = path.substring(location + 1);
-				location = path.length();
-				return new Step(Type.MODEL, text);
-			}
-			else if (nextStep == -1)
+
+			final boolean hasNameBeforeStep = nextName != -1 && (nextStep == -1 || nextName < nextStep);
+			if (hasNameBeforeStep)
 			{
 				final var text = path.substring(location + 1, nextName);
-				location += nextName;
+				location = nextName;
+				return new Step(Type.MODEL, text);
+			}
+			else if (nextStep != -1)
+			{
+				final var text = path.substring(location + 1, nextStep);
+				location = nextStep + 1;
 				return new Step(Type.MODEL, text);
 			}
 			else
 			{
-				final var text = path.substring(location + 1, nextStep);
-				location = location + nextStep + 1;
+				final var text = path.substring(location + 1);
+				location = path.length();
 				return new Step(Type.MODEL, text);
 			}
 		}

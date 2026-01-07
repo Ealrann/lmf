@@ -315,14 +315,15 @@ public final class ModelUtil
 	@SuppressWarnings("unchecked")
 	public static final Stream<LMObject> streamTree(final LMObject root)
 	{
-		final var childStream = root.lmGroup()
+		final var descendants = root.lmGroup()
 									.features()
 									.stream()
 									.filter(feature -> feature instanceof Relation<?, ?, ?, ?> relation &&
 													   relation.contains())
-									.flatMap(feature -> streamChildren(root, (Relation<LMObject, ?, ?, ?>) feature));
+									.flatMap(feature -> streamChildren(root, (Relation<LMObject, ?, ?, ?>) feature))
+									.flatMap(ModelUtil::streamTree);
 
-		return Stream.concat(Stream.of(root), childStream);
+		return Stream.concat(Stream.of(root), descendants);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -341,11 +342,12 @@ public final class ModelUtil
 			}
 			@SuppressWarnings("unchecked")
 			final var typedList = (List<T>) list;
-			return typedList.stream();
+			return typedList.stream().filter(Objects::nonNull);
 		}
 		else
 		{
-			return Stream.of((T) element.get(relation));
+			final var child = (T) element.get(relation);
+			return child == null ? Stream.empty() : Stream.of(child);
 		}
 	}
 

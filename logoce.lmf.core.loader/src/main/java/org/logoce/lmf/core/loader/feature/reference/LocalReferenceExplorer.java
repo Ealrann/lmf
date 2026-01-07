@@ -13,6 +13,8 @@ import org.logoce.lmf.core.loader.api.loader.linking.tree.LinkNodeInternal;
 import org.logoce.lmf.core.api.util.ModelUtil;
 
 import java.util.NoSuchElementException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public final class LocalReferenceExplorer implements ReferenceResolver
@@ -39,10 +41,35 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 			switch (step.type())
 			{
 				case ROOT -> current = current.root();
-				case NAME -> current = searchNamedNode(current.root(), step.text());
-				case CONTEXT_NAME -> current = searchContextNamedNode(current, step.text());
-				case PARENT -> current = current.parent();
-				case CHILD -> current = searchChild(step.text());
+				case NAME ->
+				{
+					if (parser.hasNext())
+					{
+						final var remaining = collectRemaining(parser);
+						current = resolveNamedPath(current.root(), step.text(), remaining);
+					}
+					else
+					{
+						current = searchNamedNode(current.root(), step.text());
+					}
+				}
+				case CONTEXT_NAME ->
+				{
+					if (parser.hasNext())
+					{
+						final var remaining = collectRemaining(parser);
+						current = resolveContextNamedPath(current, step.text(), remaining);
+					}
+					else
+					{
+						current = searchContextNamedNode(current, step.text());
+					}
+				}
+				case PARENT -> current = requireParent(current);
+				case CHILD -> current = searchChild(current, step.text());
+				case CURRENT ->
+				{
+				}
 				default -> throw new IllegalStateException("Unsupported path step: " + step.type());
 			}
 		}
@@ -57,7 +84,27 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 		}
 	}
 
-	private LinkNodeInternal<?, ?, ?> searchChild(final String text)
+	private static List<PathParser.Step> collectRemaining(final PathParser parser)
+	{
+		final var steps = new ArrayList<PathParser.Step>();
+		while (parser.hasNext())
+		{
+			steps.add(parser.next());
+		}
+		return List.copyOf(steps);
+	}
+
+	private static LinkNodeInternal<?, ?, ?> requireParent(final LinkNodeInternal<?, ?, ?> node)
+	{
+		final var parent = node.parent();
+		if (parent == null)
+		{
+			throw new NoSuchElementException("Cannot resolve parent of root node");
+		}
+		return parent;
+	}
+
+	private static LinkNodeInternal<?, ?, ?> searchChild(final LinkNodeInternal<?, ?, ?> current, final String text)
 	{
 		final var pointIndex = text.indexOf('.');
 		final var featureName = pointIndex == -1 ? text : text.substring(0, pointIndex);
@@ -89,6 +136,29 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 				   .orElseThrow(() -> new NoSuchElementException("Cannot find named Object : " + name));
 	}
 
+	private LinkNodeInternal<?, ?, ?> resolveNamedPath(final LinkNodeInternal<?, ?, ?> root,
+													  final String name,
+													  final List<PathParser.Step> remaining)
+	{
+		final var matches = root.streamTree()
+								.filter(node -> nameMatch(node, name))
+								.map(candidate -> tryResolveFrom(candidate, remaining))
+								.filter(Optional::isPresent)
+								.map(Optional::get)
+								.filter(this::groupMatch)
+								.toList();
+
+		if (matches.isEmpty())
+		{
+			throw new NoSuchElementException("Cannot resolve named path @" + name);
+		}
+		if (matches.size() > 1)
+		{
+			throw new NoSuchElementException("Ambiguous named path @" + name + " (" + matches.size() + " matches)");
+		}
+		return matches.getFirst();
+	}
+
 	private LinkNodeInternal<?, ?, ?> searchContextNamedNode(final LinkNodeInternal<?, ?, ?> startNode,
 															 final String name)
 	{
@@ -114,6 +184,77 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 		}
 
 		throw new NoSuchElementException("Cannot find context-named Object : " + name);
+	}
+
+	private LinkNodeInternal<?, ?, ?> resolveContextNamedPath(final LinkNodeInternal<?, ?, ?> startNode,
+															  final String name,
+															  final List<PathParser.Step> remaining)
+	{
+		final var anchor = searchContextNamedNodeAny(startNode, name);
+		return tryResolveFrom(anchor, remaining)
+			.filter(this::groupMatch)
+			.orElseThrow(() -> new NoSuchElementException("Cannot resolve context-named path ^" + name));
+	}
+
+	private static LinkNodeInternal<?, ?, ?> searchContextNamedNodeAny(final LinkNodeInternal<?, ?, ?> startNode,
+																	  final String name)
+	{
+		LinkNodeInternal<?, ?, ?> cursor = startNode;
+
+		while (cursor != null)
+		{
+			if (nameMatch(cursor, name))
+			{
+				return cursor;
+			}
+
+			final var matchingChild = cursor.streamChildren()
+											.filter(node -> nameMatch(node, name))
+											.findAny();
+			if (matchingChild.isPresent())
+			{
+				return matchingChild.get();
+			}
+
+			cursor = cursor.parent();
+		}
+
+		throw new NoSuchElementException("Cannot find context-named Object : " + name);
+	}
+
+	private Optional<LinkNodeInternal<?, ?, ?>> tryResolveFrom(final LinkNodeInternal<?, ?, ?> start,
+															  final List<PathParser.Step> remaining)
+	{
+		LinkNodeInternal<?, ?, ?> cursor = start;
+		try
+		{
+			for (final var step : remaining)
+			{
+				cursor = switch (step.type())
+				{
+					case ROOT -> cursor.root();
+					case NAME -> searchNamedNodeAny(cursor.root(), step.text());
+					case CONTEXT_NAME -> searchContextNamedNodeAny(cursor, step.text());
+					case PARENT -> requireParent(cursor);
+					case CURRENT -> cursor;
+					case CHILD -> searchChild(cursor, step.text());
+					default -> throw new IllegalStateException("Unsupported path step: " + step.type());
+				};
+			}
+			return Optional.of(cursor);
+		}
+		catch (final NoSuchElementException exception)
+		{
+			return Optional.empty();
+		}
+	}
+
+	private static LinkNodeInternal<?, ?, ?> searchNamedNodeAny(final LinkNodeInternal<?, ?, ?> root, final String name)
+	{
+		return root.streamTree()
+				   .filter(node -> nameMatch(node, name))
+				   .findAny()
+				   .orElseThrow(() -> new NoSuchElementException("Cannot find named Object : " + name));
 	}
 
 	private boolean groupMatch(final LinkNodeInternal<?, ?, ?> node)

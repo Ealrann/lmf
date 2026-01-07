@@ -33,9 +33,10 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
+import org.logoce.lmf.core.loader.api.tooling.state.LmSymbolKind;
 import org.logoce.lmf.lsp.features.DocumentSymbols;
 import org.logoce.lmf.lsp.features.completion.LmCompletionEngine;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,7 +256,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			final var decl = index.symbolIndex().get(id);
 			if (decl != null && uri.equals(decl.uri()))
 			{
-				final var dh = new DocumentHighlight(decl.range(), DocumentHighlightKind.Text);
+				final var dh = new DocumentHighlight(LspRanges.forSpan(decl.span()), DocumentHighlightKind.Text);
 				result.add(dh);
 			}
 
@@ -265,7 +266,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			{
 				if (uri.equals(ref.uri()))
 				{
-					final var dh = new DocumentHighlight(ref.range(), DocumentHighlightKind.Text);
+					final var dh = new DocumentHighlight(LspRanges.forSpan(ref.span()), DocumentHighlightKind.Text);
 					result.add(dh);
 				}
 			}
@@ -315,7 +316,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			{
 				return Either.forLeft(List.<Location>of());
 			}
-			final var loc = new Location(entry.uri().toString(), entry.range());
+			final var loc = new Location(entry.uri().toString(), LspRanges.forSpan(entry.span()));
 			return Either.forLeft(List.of(loc));
 		}, server.worker());
 	}
@@ -336,11 +337,11 @@ public final class LmTextDocumentService implements TextDocumentService
 			final var decl = server.workspaceIndex().symbolIndex().get(id);
 			if (decl != null && params.getContext().isIncludeDeclaration())
 			{
-				result.add(new Location(decl.uri().toString(), decl.range()));
+				result.add(new Location(decl.uri().toString(), LspRanges.forSpan(decl.span())));
 			}
 			for (final var ref : refs)
 			{
-				result.add(new Location(ref.uri().toString(), ref.range()));
+				result.add(new Location(ref.uri().toString(), LspRanges.forSpan(ref.span())));
 			}
 			return List.copyOf(result);
 		}, server.worker());
@@ -387,7 +388,7 @@ public final class LmTextDocumentService implements TextDocumentService
 			{
 				return new WorkspaceEdit();
 			}
-			if (id.kind() == org.logoce.lmf.lsp.state.LmSymbolKind.META_MODEL)
+			if (id.kind() == LmSymbolKind.META_MODEL)
 			{
 				return new WorkspaceEdit();
 			}
@@ -397,13 +398,13 @@ public final class LmTextDocumentService implements TextDocumentService
 			final var decl = server.workspaceIndex().symbolIndex().get(id);
 			if (decl != null)
 			{
-				addEdit(changes, decl.uri(), decl.range(), newName);
+				addEdit(changes, decl.uri(), decl.span(), newName);
 			}
 
 			final var refs = server.workspaceIndex().referenceIndex().getOrDefault(id, List.of());
 			for (final var ref : refs)
 			{
-				addEdit(changes, ref.uri(), ref.range(), newName);
+				addEdit(changes, ref.uri(), ref.span(), newName);
 			}
 
 			final var edit = new WorkspaceEdit();
@@ -419,12 +420,12 @@ public final class LmTextDocumentService implements TextDocumentService
 
 	private static void addEdit(final Map<String, List<TextEdit>> changes,
 								final URI uri,
-								final org.eclipse.lsp4j.Range range,
+								final TextPositions.Span span,
 								final String newText)
 	{
 		final var key = uri.toString();
 		final var edits = changes.computeIfAbsent(key, k -> new ArrayList<>());
-		edits.add(new TextEdit(range, newText));
+		edits.add(new TextEdit(LspRanges.forSpan(span), newText));
 	}
 
 	@Override

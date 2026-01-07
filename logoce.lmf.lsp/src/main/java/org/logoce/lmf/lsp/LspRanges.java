@@ -33,6 +33,23 @@ public final class LspRanges
 		return forOffsets(source, startOffset, endOffset);
 	}
 
+	public static Range forSpan(final TextPositions.Span span)
+	{
+		if (span == null)
+		{
+			final var pos = new Position(0, 0);
+			return new Range(pos, pos);
+		}
+
+		final int line = Math.max(0, span.line() - 1);
+		final int startChar = Math.max(0, span.column() - 1);
+		final int endChar = startChar + Math.max(1, span.length());
+
+		final var startPos = new Position(line, startChar);
+		final var endPos = new Position(line, endChar);
+		return new Range(startPos, endPos);
+	}
+
 	public static Range forToken(final CharSequence source,
 								 final PToken token)
 	{

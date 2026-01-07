@@ -1,8 +1,8 @@
 package org.logoce.lmf.lsp;
 
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.SemanticSnapshot;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;

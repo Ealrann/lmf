@@ -3,9 +3,10 @@ package org.logoce.lmf.lsp.features.completion;
 import org.eclipse.lsp4j.Position;
 import org.logoce.lmf.core.lang.*;
 import org.logoce.lmf.lsp.LmLanguageServer;
-import org.logoce.lmf.lsp.state.LmDocumentState;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.MetaModelResolver;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.SemanticSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.api.util.ModelUtil;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ final class CompletionContextResolver
 
 		final Model model = semantic.model();
 		final ModelRegistry registry = server.workspaceIndex().modelRegistry();
-		final MetaModel metaModel = MetaModelResolver.resolveForDocument(syntax, model, registry);
+		final MetaModel metaModel = MetaModelResolver.resolveForDocument(syntax.roots(), syntax.source(), model, registry);
 		final CompletionContextKind contextKind = SyntaxNavigation.detectCompletionContext(syntax, pos);
 
 		// Header / value context derived from the current line and the active meta-model / LMCore.

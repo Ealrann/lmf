@@ -73,6 +73,11 @@ public abstract class AbstractResolver<T extends Feature<?, ?, ?, ?>> implements
 			resolutions.forEach(r -> r.pushValue(builder));
 		}
 
+		public List<FeatureResolution<T>> resolutions()
+		{
+			return List.copyOf(resolutions);
+		}
+
 		@Override
 		public T feature()
 		{

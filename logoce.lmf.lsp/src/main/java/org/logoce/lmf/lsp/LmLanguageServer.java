@@ -16,10 +16,12 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.logoce.lmf.lsp.workspace.SymbolIndexer;
+import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
+import org.logoce.lmf.core.loader.api.tooling.state.LmDocumentState;
+import org.logoce.lmf.core.loader.api.tooling.state.SymbolId;
+import org.logoce.lmf.core.loader.api.tooling.workspace.SymbolIndexer;
+import org.logoce.lmf.core.loader.api.tooling.workspace.WorkspaceIndex;
 import org.logoce.lmf.lsp.workspace.WorkspaceRebuilder;
-import org.logoce.lmf.lsp.state.WorkspaceIndex;
-import org.logoce.lmf.lsp.state.SymbolId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +91,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		return workspaceIndex;
 	}
 
-	public void analyzeDocument(final org.logoce.lmf.lsp.state.LmDocumentState state)
+	public void analyzeDocument(final LmDocumentState state)
 	{
 		workspaceRebuilder.analyzeDocument(state);
 	}
@@ -131,7 +133,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 	{
 		for (final var ref : workspaceIndex.referencesForUri(uri))
 		{
-			if (rangeContains(ref.range(), position))
+			if (spanContains(ref.span(), position))
 			{
 				return ref.target();
 			}
@@ -139,7 +141,7 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 
 		for (final var entry : workspaceIndex.symbolsForUri(uri))
 		{
-			if (rangeContains(entry.range(), position))
+			if (spanContains(entry.span(), position))
 			{
 				return entry.id();
 			}
@@ -148,24 +150,22 @@ public final class LmLanguageServer implements LanguageServer, LanguageClientAwa
 		return null;
 	}
 
-	private static boolean rangeContains(final org.eclipse.lsp4j.Range range, final Position pos)
+	private static boolean spanContains(final TextPositions.Span span, final Position pos)
 	{
-		final Position start = range.getStart();
-		final Position end = range.getEnd();
+		if (span == null || pos == null)
+		{
+			return false;
+		}
 
-		if (pos.getLine() < start.getLine() || pos.getLine() > end.getLine())
+		final int line = Math.max(0, span.line() - 1);
+		final int startChar = Math.max(0, span.column() - 1);
+		final int endChar = startChar + Math.max(1, span.length());
+
+		if (pos.getLine() != line)
 		{
 			return false;
 		}
-		if (pos.getLine() == start.getLine() && pos.getCharacter() < start.getCharacter())
-		{
-			return false;
-		}
-		if (pos.getLine() == end.getLine() && pos.getCharacter() > end.getCharacter())
-		{
-			return false;
-		}
-		return true;
+		return pos.getCharacter() >= startChar && pos.getCharacter() <= endChar;
 	}
 
 	/**

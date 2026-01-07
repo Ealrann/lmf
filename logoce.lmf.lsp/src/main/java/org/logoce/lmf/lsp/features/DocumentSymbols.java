@@ -7,11 +7,11 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.logoce.lmf.lsp.LspRanges;
-import org.logoce.lmf.lsp.state.SemanticSnapshot;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
-import org.logoce.lmf.lsp.state.SymbolEntry;
-import org.logoce.lmf.lsp.state.SymbolId;
-import org.logoce.lmf.lsp.state.WorkspaceIndex;
+import org.logoce.lmf.core.loader.api.tooling.state.SemanticSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SymbolEntry;
+import org.logoce.lmf.core.loader.api.tooling.state.SymbolId;
+import org.logoce.lmf.core.loader.api.tooling.workspace.WorkspaceIndex;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 import org.logoce.lmf.core.loader.api.text.syntax.PToken;
 import org.logoce.lmf.core.util.tree.Tree;
@@ -60,7 +60,8 @@ public final class DocumentSymbols
 				case FEATURE -> SymbolKind.Field;
 			};
 
-			final var symbol = new DocumentSymbol(id.name(), kind, entry.range(), entry.range());
+			final var range = LspRanges.forSpan(entry.span());
+			final var symbol = new DocumentSymbol(id.name(), kind, range, range);
 			byId.put(id, symbol);
 		}
 

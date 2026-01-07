@@ -2,7 +2,7 @@ package org.logoce.lmf.lsp.features.completion;
 
 import org.eclipse.lsp4j.Position;
 import org.junit.jupiter.api.Test;
-import org.logoce.lmf.lsp.state.SyntaxSnapshot;
+import org.logoce.lmf.core.loader.api.tooling.state.SyntaxSnapshot;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.MetaModel;
 import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
