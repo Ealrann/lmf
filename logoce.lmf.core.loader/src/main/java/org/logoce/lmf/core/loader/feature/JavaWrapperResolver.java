@@ -9,18 +9,20 @@ import org.logoce.lmf.core.loader.api.loader.linking.FeatureResolution;
 
 import java.util.Optional;
 
-public final class JavaWrapperResolver extends AttributeResolver
+public final class JavaWrapperResolver<Y> extends AttributeResolver
 {
-	private final JavaWrapper<?> wrapper;
+	private final Attribute<Y, ?, ?, ?> typedFeature;
+	private final JavaWrapper<Y> wrapper;
 
+	@SuppressWarnings("unchecked")
 	public JavaWrapperResolver(final Attribute<?, ?, ?, ?> attribute)
 	{
 		super(attribute);
 		assert attribute.datatype() instanceof JavaWrapper;
-		wrapper = (JavaWrapper<?>) attribute.datatype();
+		typedFeature = (Attribute<Y, ?, ?, ?>) attribute;
+		wrapper = (JavaWrapper<Y>) attribute.datatype();
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	protected Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(final String value)
 	{
@@ -29,20 +31,27 @@ public final class JavaWrapperResolver extends AttributeResolver
 		{
 			if (isDynamicWrapper(wrapper))
 			{
-				return Optional.of(new AttributeResolution<>((Attribute<String, ?, ?, ?>) feature, value));
+				return buildDynamicResolution(value);
 			}
 			return Optional.empty();
 		}
 
 		try
 		{
-			final var parsedValue = ((IJavaWrapperConverter<Object>) converter.get()).create(value);
-			return Optional.of(new AttributeResolution<>((Attribute<Object, ?, ?, ?>) feature, parsedValue));
+			final var parsedValue = converter.get().create(value);
+			return Optional.of(new AttributeResolution<>(typedFeature, parsedValue));
 		}
 		catch (final RuntimeException e)
 		{
 			return Optional.empty();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> buildDynamicResolution(final String value)
+	{
+		final var dynamicFeature = (Attribute<String, ?, ?, ?>) typedFeature;
+		return Optional.of(new AttributeResolution<>(dynamicFeature, value));
 	}
 
 	private static boolean isDynamicWrapper(final JavaWrapper<?> wrapper)
@@ -51,13 +60,13 @@ public final class JavaWrapperResolver extends AttributeResolver
 		return metaModel.lmPackage() instanceof DynamicModelPackage;
 	}
 
-	private static Optional<IJavaWrapperConverter<?>> resolveConverter(final JavaWrapper<?> wrapper)
+	private static <T> Optional<IJavaWrapperConverter<T>> resolveConverter(final JavaWrapper<T> wrapper)
 	{
 		if (!(wrapper.lmContainer() instanceof MetaModel metaModel)) return Optional.empty();
 
 		final var pkg = metaModel.lmPackage();
 		if (pkg == null) return Optional.empty();
 
-		return (Optional) pkg.resolveJavaWrapperConverter((JavaWrapper) wrapper);
+		return pkg.resolveJavaWrapperConverter(wrapper);
 	}
 }

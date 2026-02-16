@@ -45,7 +45,7 @@ public interface ITokenResolver
 			}
 			else
 			{
-				return Optional.of(new JavaWrapperResolver(attribute));
+				return Optional.of(new JavaWrapperResolver<>(attribute));
 			}
 		}
 	}
