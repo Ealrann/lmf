@@ -2,13 +2,16 @@ package org.logoce.lmf.cli.move;
 
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
+import org.logoce.lmf.cli.edit.EditJsonReportWriter;
 import org.logoce.lmf.cli.edit.EditOptions;
 import org.logoce.lmf.cli.edit.EditValidationContext;
+import org.logoce.lmf.cli.edit.ReferenceRewrite;
 import org.logoce.lmf.cli.edit.WorkspaceEditPipeline;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.cli.workspace.WorkspaceDocumentsLoader;
 
@@ -18,55 +21,44 @@ import java.util.Objects;
 
 public final class MoveRunner
 {
+	public record Options(boolean json)
+	{
+	}
+
 	public int run(final CliContext context,
 				   final String modelSpec,
 				   final String fromReference,
 				   final String toReference)
 	{
+		return run(context, modelSpec, fromReference, toReference, new Options(false));
+	}
+
+	public int run(final CliContext context,
+				   final String modelSpec,
+				   final String fromReference,
+				   final String toReference,
+				   final Options options)
+	{
 		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(fromReference, "fromReference");
 		Objects.requireNonNull(toReference, "toReference");
+		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "move", options.json());
+		if (!resolved.ok())
 		{
-			return moveInModel(found.path(), context, fromReference, toReference);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return moveInModel(resolved.path(), context, modelSpec, fromReference, toReference, options);
 	}
 
 	private int moveInModel(final Path modelPath,
-					   final CliContext context,
-					   final String fromReference,
-					   final String toReference)
+							final CliContext context,
+							final String requestedModel,
+							final String fromReference,
+							final String toReference,
+							final Options options)
 	{
 		final var projectRoot = context.projectRoot();
 		final var displayPath = PathDisplay.display(projectRoot, modelPath);
@@ -77,7 +69,17 @@ public final class MoveRunner
 		final var prepareResult = registryService.prepareForModelAndImporters(modelPath, err, true);
 		if (prepareResult instanceof RegistryService.PrepareWorkspaceResult.Failure failure)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "move",
+										   failure.exitCode(),
+										   "Cannot prepare workspace for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return failure.exitCode();
 		}
 
@@ -93,7 +95,14 @@ public final class MoveRunner
 								   displayPath);
 		if (documents == null || documents.targetDocument() == null)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "move", ExitCodes.INVALID, "Cannot load workspace documents for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -101,15 +110,38 @@ public final class MoveRunner
 		final var planResult = planner.plan(documents, fromReference, toReference);
 		if (planResult instanceof MovePlanResult.Failure failure)
 		{
-			err.println(failure.message());
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "move", ExitCodes.INVALID, failure.message());
+			}
+			else
+			{
+				err.println(failure.message());
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		final var planned = ((MovePlanResult.Success) planResult).edit();
 		if (!planned.changed() || planned.editsByFile().isEmpty())
 		{
-			context.out().println("OK: nothing to move in " + displayPath);
+			if (options.json())
+			{
+				final var outcome = org.logoce.lmf.cli.edit.EditOutcome.noChanges();
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								fromReference,
+								toReference,
+								planned.rewrites(),
+								outcome,
+								"OK: nothing to move",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to move in " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
@@ -123,17 +155,95 @@ public final class MoveRunner
 
 		if (!outcome.changed())
 		{
-			context.out().println("OK: nothing to move in " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								fromReference,
+								toReference,
+								planned.rewrites(),
+								outcome,
+								"OK: nothing to move",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to move in " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
 		if (!outcome.validationPassed() || !outcome.wrote())
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								fromReference,
+								toReference,
+								planned.rewrites(),
+								outcome,
+								"No changes written",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
-		context.out().println("OK: moved " + fromReference + " to " + toReference + " in " + displayPath);
+		if (options.json())
+		{
+			writeJsonResult(context,
+							requestedModel,
+							displayPath,
+							fromReference,
+							toReference,
+							planned.rewrites(),
+							outcome,
+							"OK: moved " + fromReference + " to " + toReference,
+							ExitCodes.OK);
+		}
+		else
+		{
+			context.out().println("OK: moved " + fromReference + " to " + toReference + " in " + displayPath);
+		}
 		return ExitCodes.OK;
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String fromReference,
+										final String toReference,
+										final List<ReferenceRewrite> rewrites,
+										final org.logoce.lmf.cli.edit.EditOutcome outcome,
+										final String message,
+										final int exitCode)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("move")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("from").value(fromReference)
+			.name("to").value(toReference);
+
+		EditJsonReportWriter.writeOutcome(json, context, outcome);
+		EditJsonReportWriter.writeReferenceRewrites(json, context, rewrites);
+		EditJsonReportWriter.writeDiagnostics(json, outcome.validationReport());
+
+		json.name("message").value(message)
+			.name("ok").value(exitCode == ExitCodes.OK)
+			.name("exitCode").value(exitCode)
+			.endObject()
+			.flush();
+		context.out().println();
 	}
 }

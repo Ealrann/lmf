@@ -2,15 +2,19 @@ package org.logoce.lmf.cli.insert;
 
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
+import org.logoce.lmf.cli.diagnostics.DiagnosticItem;
 import org.logoce.lmf.cli.diagnostics.DiagnosticReporter;
+import org.logoce.lmf.cli.diagnostics.ValidationReport;
+import org.logoce.lmf.cli.edit.EditJsonReportWriter;
 import org.logoce.lmf.cli.edit.EditOptions;
 import org.logoce.lmf.cli.edit.EditValidationContext;
 import org.logoce.lmf.cli.edit.WorkspaceEditPipeline;
 import org.logoce.lmf.cli.format.LmFormatter;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.cli.workspace.WorkspaceDocumentsLoader;
 import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
@@ -18,77 +22,86 @@ import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public final class InsertRunner
 {
+	public record Options(boolean json)
+	{
+	}
+
 	public int run(final CliContext context,
 				   final String modelSpec,
 				   final String targetReference,
 				   final String subtree)
 	{
+		return run(context, modelSpec, targetReference, subtree, new Options(false));
+	}
+
+	public int run(final CliContext context,
+				   final String modelSpec,
+				   final String targetReference,
+				   final String subtree,
+				   final Options options)
+	{
 		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(targetReference, "targetReference");
 		Objects.requireNonNull(subtree, "subtree");
+		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "insert", options.json());
+		if (!resolved.ok())
 		{
-			return insertIntoModel(found.path(), context, targetReference, subtree);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return insertIntoModel(resolved.path(), context, modelSpec, targetReference, subtree, options);
 	}
 
 	private int insertIntoModel(final Path modelPath,
 								final CliContext context,
+								final String modelSpec,
 								final String targetReference,
-								final String subtree)
+								final String subtree,
+								final Options options)
 	{
 		final var projectRoot = context.projectRoot();
 		final var displayPath = PathDisplay.display(projectRoot, modelPath);
 		final var err = context.err();
 
-		final var formattedSubtree = formatSingleRootSubtree(subtree, err);
-		if (formattedSubtree == null)
+		final var formattedSubtreeResult = formatSingleRootSubtree(subtree, err);
+		if (formattedSubtreeResult instanceof SubtreeFormatResult.Failure failure)
 		{
-			err.println("No changes written to " + displayPath);
+			final var report = new ValidationReport(false, toSubtreeDiagnostics(failure.diagnostics()), List.of());
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "insert", ExitCodes.USAGE, failure.message(), report);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.USAGE;
 		}
+		final var formattedSubtree = ((SubtreeFormatResult.Success) formattedSubtreeResult).formatted();
 
 		final var documentLoader = new DocumentLoader();
 		final var registryService = new RegistryService(projectRoot, documentLoader);
 		final var prepareResult = registryService.prepareForModelAndImporters(modelPath, err, true);
 		if (prepareResult instanceof RegistryService.PrepareWorkspaceResult.Failure failure)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "insert",
+										   failure.exitCode(),
+										   "Cannot prepare workspace for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return failure.exitCode();
 		}
 
@@ -104,7 +117,14 @@ public final class InsertRunner
 												   displayPath);
 		if (documents == null)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "insert", ExitCodes.INVALID, "Cannot load workspace documents for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -112,8 +132,15 @@ public final class InsertRunner
 		final var planResult = planner.plan(documents, targetReference, formattedSubtree);
 		if (planResult instanceof InsertPlanResult.Failure failure)
 		{
-			err.println(failure.message());
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "insert", ExitCodes.INVALID, failure.message());
+			}
+			else
+			{
+				err.println(failure.message());
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -128,21 +155,90 @@ public final class InsertRunner
 
 		if (!outcome.changed())
 		{
-			context.out().println("OK: nothing to insert into " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								modelSpec,
+								displayPath,
+								targetReference,
+								planned,
+								outcome,
+								"OK: nothing to insert",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to insert into " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
 		if (!outcome.validationPassed() || !outcome.wrote())
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								modelSpec,
+								displayPath,
+								targetReference,
+								planned,
+								outcome,
+								"No changes written",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
-		context.out().println("OK: inserted into " + displayPath + " (updated " + outcome.sources().size() + " file(s))");
+		if (options.json())
+		{
+			writeJsonResult(context,
+							modelSpec,
+							displayPath,
+							targetReference,
+							planned,
+							outcome,
+							"OK: inserted into " + targetReference,
+							ExitCodes.OK);
+		}
+		else
+		{
+			context.out().println("OK: inserted into " + displayPath + " (updated " + outcome.sources().size() + " file(s))");
+		}
 		return ExitCodes.OK;
 	}
 
-	private static String formatSingleRootSubtree(final String subtreeSource, final java.io.PrintWriter err)
+	private sealed interface SubtreeFormatResult permits SubtreeFormatResult.Success, SubtreeFormatResult.Failure
+	{
+		record Success(String formatted) implements SubtreeFormatResult
+		{
+		}
+
+			record Failure(String message, List<LmDiagnostic> diagnostics) implements SubtreeFormatResult
+			{
+				public Failure
+				{
+					Objects.requireNonNull(message, "message");
+					diagnostics = diagnostics == null ? List.of() : List.copyOf(diagnostics);
+				}
+			}
+	}
+
+	private static List<DiagnosticItem> toSubtreeDiagnostics(final List<LmDiagnostic> diagnostics)
+	{
+		if (diagnostics == null || diagnostics.isEmpty())
+		{
+			return List.of();
+		}
+		return diagnostics.stream()
+						  .map(diagnostic -> new DiagnosticItem("<subtree>", diagnostic))
+						  .toList();
+	}
+
+	private static SubtreeFormatResult formatSingleRootSubtree(final String subtreeSource, final java.io.PrintWriter err)
 	{
 		final var diagnostics = new ArrayList<LmDiagnostic>();
 		final var reader = new LmTreeReader();
@@ -151,16 +247,52 @@ public final class InsertRunner
 		if (DiagnosticReporter.hasErrors(diagnostics))
 		{
 			DiagnosticReporter.printDiagnostics(err, "<subtree>", diagnostics);
-			err.println("Insertion subtree cannot be parsed");
-			return null;
+			final var message = "Insertion subtree cannot be parsed";
+			err.println(message);
+			err.println("Hint: If you passed a subtree inline, prefer --subtree-stdin/--subtree-file to avoid shell quoting issues.");
+			return new SubtreeFormatResult.Failure(message, List.copyOf(diagnostics));
 		}
 
 		if (readResult.roots().size() != 1)
 		{
-			err.println("Insertion subtree must contain exactly one root element; found: " + readResult.roots().size());
-			return null;
+			final var message = "Insertion subtree must contain exactly one root element; found: " + readResult.roots().size();
+			err.println(message);
+			return new SubtreeFormatResult.Failure(message, List.of());
 		}
 
-		return new LmFormatter().format(readResult.roots());
+		return new SubtreeFormatResult.Success(new LmFormatter().format(readResult.roots()));
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String targetReference,
+										final InsertPlannedEdit planned,
+										final org.logoce.lmf.cli.edit.EditOutcome outcome,
+										final String message,
+										final int exitCode)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("insert")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("target").beginObject()
+			.name("reference").value(targetReference)
+			.endObject();
+
+		EditJsonReportWriter.writeReferenceRewrites(json, context, planned.rewrites());
+		EditJsonReportWriter.writeOutcome(json, context, outcome);
+		EditJsonReportWriter.writeDiagnostics(json, outcome.validationReport());
+
+		json.name("message").value(message)
+			.name("ok").value(exitCode == ExitCodes.OK)
+			.name("exitCode").value(exitCode)
+			.endObject()
+			.flush();
+		context.out().println();
 	}
 }

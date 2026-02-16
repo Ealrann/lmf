@@ -225,6 +225,50 @@ public final class M1LoaderTest
 	}
 
 	@Test
+	void loadM1Model_withInvalidEnumLiteral_reportsHelpfulDiagnostic() throws IOException
+	{
+		final var metaLoader = LmLoader.withEmptyRegistry();
+		final var metaSource = Files.readString(Path.of("src/test/model/CarCompany.lm"), StandardCharsets.UTF_8);
+		final var metaDoc = metaLoader.loadModel(metaSource);
+
+		assertTrue(metaDoc.diagnostics()
+						  .stream()
+						  .noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR),
+				   "CarCompany meta-model diagnostics should not contain errors");
+		assertInstanceOf(MetaModel.class, metaDoc.model(), "CarCompany.lm should load as a MetaModel");
+
+		final var carCompanyMetaModel = (MetaModel) metaDoc.model();
+		final var registryBuilder = new ModelRegistry.Builder();
+		registryBuilder.register(LMCoreModelPackage.MODEL);
+		registryBuilder.register(carCompanyMetaModel);
+
+		final var loader = new LmLoader(registryBuilder.build());
+		final var source = """
+			(CarCompany domain=test.model name=BadCompany metamodels=test.model.CarCompany
+				(ceo name=Bob)
+				(CarParc
+					(Car name=car1 brand=NotALiteral)))
+			""";
+
+		final var doc = loader.loadModel(source);
+		final var enumError = doc.diagnostics()
+								 .stream()
+								 .filter(d -> d.severity() == LmDiagnostic.Severity.ERROR)
+								 .filter(d -> d.message() != null && d.message().contains("Invalid enum literal"))
+								 .findFirst()
+								 .orElseThrow(() -> new AssertionError("Expected an Invalid enum literal diagnostic but got: " + doc.diagnostics()));
+
+		assertTrue(enumError.message().contains("NotALiteral"), "message: " + enumError.message());
+		assertTrue(enumError.message().contains("brand"), "message: " + enumError.message());
+		assertTrue(enumError.message().contains("Peugeot"), "message: " + enumError.message());
+
+		final int expectedOffset = source.indexOf("NotALiteral");
+		assertTrue(expectedOffset >= 0, "Test source must contain NotALiteral");
+		assertEquals(expectedOffset, enumError.offset(), "message: " + enumError.message());
+		assertEquals("NotALiteral".length(), enumError.length(), "message: " + enumError.message());
+	}
+
+	@Test
 	void loadPeugeotM1Model_canResolveNamedReferencePaths() throws IOException
 	{
 		final var metaLoader = LmLoader.withEmptyRegistry();

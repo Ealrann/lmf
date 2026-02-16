@@ -2,6 +2,7 @@ package org.logoce.lmf.cli.move;
 
 import org.logoce.lmf.cli.edit.ReferenceEditPlanner;
 import org.logoce.lmf.cli.edit.ReferenceStringUtil;
+import org.logoce.lmf.cli.edit.ReferenceRewrite;
 import org.logoce.lmf.cli.edit.SubtreeSpanLocator;
 import org.logoce.lmf.cli.edit.TextEdits;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
@@ -136,7 +137,7 @@ public final class MovePlanner
 
 			if (sameSlot)
 			{
-				return new MovePlanResult.Success(new MovePlannedEdit(Map.of(), false));
+				return new MovePlanResult.Success(new MovePlannedEdit(Map.of(), List.of(), false));
 			}
 
 			if (sameList)
@@ -145,7 +146,7 @@ public final class MovePlanner
 				final int destIndex = destIndexOpt.getAsInt();
 				if (destIndex == sourceIndex || destIndex == sourceIndex + 1)
 				{
-					return new MovePlanResult.Success(new MovePlannedEdit(Map.of(), false));
+					return new MovePlanResult.Success(new MovePlannedEdit(Map.of(), List.of(), false));
 				}
 			}
 
@@ -169,6 +170,7 @@ public final class MovePlanner
 			final ReferenceEditPlanner.ReferenceMapper mapper = (node, raw, targetId, quoted) -> rewriteReference(raw, targetId, movedPaths, shifts);
 
 			final var editsByFile = new HashMap<Path, List<TextEdits.TextEdit>>();
+			final var rewrites = new ArrayList<ReferenceRewrite>();
 			for (final var doc : workspace.documents())
 			{
 				final var roots = RootReferenceResolver.collectLinkRoots(doc.document().linkTrees());
@@ -178,7 +180,17 @@ public final class MovePlanner
 				}
 
 				final var skip = doc.path().equals(targetDocument.path()) ? movedNodes : Set.<LinkNodeInternal<?, PNode, ?>>of();
-				final var edits = referencePlanner.planEdits(doc.document().source(), roots, skip, mapper, 0);
+				final var edits = referencePlanner.planEdits(doc.document().source(),
+															roots,
+															skip,
+															mapper,
+															0,
+															(span, oldRaw, newRaw, resolvedTarget) ->
+																rewrites.add(new ReferenceRewrite(doc.path(),
+																								 span,
+																								 oldRaw,
+																								 newRaw,
+																								 resolvedTarget)));
 				if (!edits.isEmpty())
 				{
 					editsByFile.computeIfAbsent(doc.path(), ignored -> new ArrayList<>()).addAll(edits);
@@ -202,7 +214,7 @@ public final class MovePlanner
 										: buildSingleInsertionEdit(source, destParent, formattedSubtree);
 			editsByFile.computeIfAbsent(targetDocument.path(), ignored -> new ArrayList<>()).add(insertionEdit);
 
-			return new MovePlanResult.Success(new MovePlannedEdit(copyEdits(editsByFile), true));
+			return new MovePlanResult.Success(new MovePlannedEdit(copyEdits(editsByFile), List.copyOf(rewrites), true));
 		}
 		catch (MovePlanException | ReferenceEditPlanner.ReferenceEditException failure)
 		{
@@ -444,12 +456,6 @@ public final class MovePlanner
 			return null;
 		}
 
-		final var movedPath = movedPaths.get(targetId);
-		if (movedPath != null)
-		{
-			return rewriteMovedPath(raw, movedPath);
-		}
-
 		if (shifts != null)
 		{
 			for (final var shift : shifts)
@@ -460,6 +466,12 @@ public final class MovePlanner
 					return updated;
 				}
 			}
+		}
+
+		final var movedPath = movedPaths.get(targetId);
+		if (movedPath != null)
+		{
+			return rewriteMovedPath(raw, movedPath);
 		}
 
 		return null;
@@ -602,9 +614,33 @@ public final class MovePlanner
 			return new TextEdits.TextEdit(closingParenOffset, 0, insertionText);
 		}
 
-		final int insertionOffset = newlineBeforeClosing + 1;
-		final var insertionText = childIndent + indentedSubtree + "\n";
-		return new TextEdits.TextEdit(insertionOffset, 0, insertionText);
+		if (isOnlyWhitespace(source, newlineBeforeClosing + 1, closingParenOffset))
+		{
+			final int insertionOffset = newlineBeforeClosing + 1;
+			final var insertionText = childIndent + indentedSubtree + "\n";
+			return new TextEdits.TextEdit(insertionOffset, 0, insertionText);
+		}
+
+		final var insertionText = "\n" + childIndent + indentedSubtree;
+		return new TextEdits.TextEdit(closingParenOffset, 0, insertionText);
+	}
+
+	private static boolean isOnlyWhitespace(final CharSequence source, final int startInclusive, final int endExclusive)
+	{
+		if (startInclusive < 0 || endExclusive > source.length() || startInclusive > endExclusive)
+		{
+			return false;
+		}
+
+		for (int i = startInclusive; i < endExclusive; i++)
+		{
+			final char c = source.charAt(i);
+			if (c != ' ' && c != '\t' && c != '\r')
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static int lastNewline(final CharSequence source, final int start, final int endExclusive)

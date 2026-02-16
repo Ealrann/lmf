@@ -29,6 +29,7 @@ public final class BatchCommand implements Command
 		boolean dryRun = false;
 		boolean continueOnError = false;
 		boolean force = false;
+		boolean json = false;
 		BatchOptions.ValidateMode validateMode = BatchOptions.ValidateMode.FINAL;
 		String defaultModel = null;
 
@@ -75,6 +76,11 @@ public final class BatchCommand implements Command
 			if ("--force".equals(arg))
 			{
 				force = true;
+				continue;
+			}
+			if ("--json".equals(arg))
+			{
+				json = true;
 				continue;
 			}
 			if ("--validate".equals(arg))
@@ -154,7 +160,8 @@ public final class BatchCommand implements Command
 												continueOnError,
 												force,
 												validateMode,
-												defaultModel));
+												defaultModel,
+												json));
 	}
 
 	@Override
@@ -186,7 +193,8 @@ public final class BatchCommand implements Command
 													   options.continueOnError(),
 													   options.force(),
 													   options.validateMode(),
-													   options.defaultModel());
+													   options.defaultModel(),
+													   options.json());
 				return runner.run(context, effective, reader);
 			}
 			catch (Exception e)
@@ -212,7 +220,7 @@ public final class BatchCommand implements Command
 	private static String usage()
 	{
 		return """
-			Usage: lm [--project-root <path>] batch [--file <path> | --stdin] [--dry-run] [--continue-on-error] [--force] [--validate each|final|none] [--default-model <model.lm>]
+			Usage: lm [--project-root <path>] batch [--file <path> | --stdin] [--dry-run] [--continue-on-error] [--force] [--validate each|final|none] [--default-model <model.lm>] [--json]
 
 			Batch format: JSON Lines (one JSON object per line), for example:
 			  {"cmd":"remove","args":["Application.vsand.lm","/materials/materials.1"]}

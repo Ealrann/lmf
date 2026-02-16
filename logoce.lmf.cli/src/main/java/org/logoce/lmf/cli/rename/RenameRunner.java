@@ -2,13 +2,15 @@ package org.logoce.lmf.cli.rename;
 
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
+import org.logoce.lmf.cli.edit.EditJsonReportWriter;
 import org.logoce.lmf.cli.edit.EditOptions;
 import org.logoce.lmf.cli.edit.EditValidationContext;
 import org.logoce.lmf.cli.edit.WorkspaceEditPipeline;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.cli.workspace.WorkspaceDocumentsLoader;
 
@@ -17,55 +19,44 @@ import java.util.Objects;
 
 public final class RenameRunner
 {
+	public record Options(boolean json)
+	{
+	}
+
 	public int run(final CliContext context,
 				   final String modelSpec,
 				   final String targetReference,
 				   final String newName)
 	{
+		return run(context, modelSpec, targetReference, newName, new Options(false));
+	}
+
+	public int run(final CliContext context,
+				   final String modelSpec,
+				   final String targetReference,
+				   final String newName,
+				   final Options options)
+	{
 		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(targetReference, "targetReference");
 		Objects.requireNonNull(newName, "newName");
+		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "rename", options.json());
+		if (!resolved.ok())
 		{
-			return renameInModel(found.path(), context, targetReference, newName);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return renameInModel(resolved.path(), context, modelSpec, targetReference, newName, options);
 	}
 
 	private int renameInModel(final Path modelPath,
-						final CliContext context,
-						final String targetReference,
-						final String newName)
+							  final CliContext context,
+							  final String requestedModel,
+							  final String targetReference,
+							  final String newName,
+							  final Options options)
 	{
 		final var projectRoot = context.projectRoot();
 		final var displayPath = PathDisplay.display(projectRoot, modelPath);
@@ -76,7 +67,17 @@ public final class RenameRunner
 		final var prepareResult = registryService.prepareForModelAndImporters(modelPath, err, true);
 		if (prepareResult instanceof RegistryService.PrepareWorkspaceResult.Failure failure)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "rename",
+										   failure.exitCode(),
+										   "Cannot prepare workspace for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return failure.exitCode();
 		}
 
@@ -92,7 +93,14 @@ public final class RenameRunner
 								   displayPath);
 		if (documents == null || documents.targetDocument() == null)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "rename", ExitCodes.INVALID, "Cannot load workspace documents for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -100,15 +108,37 @@ public final class RenameRunner
 		final var planResult = planner.plan(documents, targetReference, newName);
 		if (planResult instanceof RenamePlanResult.Failure failure)
 		{
-			err.println(failure.message());
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "rename", ExitCodes.INVALID, failure.message());
+			}
+			else
+			{
+				err.println(failure.message());
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		final var planned = ((RenamePlanResult.Success) planResult).edit();
 		if (!planned.changed() || planned.editsByFile().isEmpty())
 		{
-			context.out().println("OK: nothing to rename in " + displayPath);
+			if (options.json())
+			{
+				final var outcome = org.logoce.lmf.cli.edit.EditOutcome.noChanges();
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								targetReference,
+								newName,
+								outcome,
+								"OK: nothing to rename",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to rename in " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
@@ -122,11 +152,72 @@ public final class RenameRunner
 
 		if (!outcome.validationPassed() || !outcome.wrote())
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								targetReference,
+								newName,
+								outcome,
+								"No changes written",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
-		context.out().println("OK: renamed " + targetReference + " in " + displayPath);
+		if (options.json())
+		{
+			writeJsonResult(context,
+							requestedModel,
+							displayPath,
+							targetReference,
+							newName,
+							outcome,
+							"OK: renamed " + targetReference,
+							ExitCodes.OK);
+		}
+		else
+		{
+			context.out().println("OK: renamed " + targetReference + " in " + displayPath);
+		}
 		return ExitCodes.OK;
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String targetReference,
+										final String newName,
+										final org.logoce.lmf.cli.edit.EditOutcome outcome,
+										final String message,
+										final int exitCode)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("rename")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("target").beginObject()
+			.name("reference").value(targetReference)
+			.name("newName").value(newName)
+			.endObject();
+
+		EditJsonReportWriter.writeOutcome(json, context, outcome);
+		EditJsonReportWriter.writeDiagnostics(json, outcome.validationReport());
+
+		json.name("message").value(message)
+			.name("ok").value(exitCode == ExitCodes.OK)
+			.name("exitCode").value(exitCode)
+			.endObject()
+			.flush();
+		context.out().println();
 	}
 }

@@ -135,11 +135,22 @@ public final class FeatureValueSpanIndex
 			return;
 		}
 
+		if (!"type".equals(token.value()))
+		{
+			return;
+		}
+
 		final var assign = nextNonWhitespace(scanner, null);
 		if (assign == null)
 		{
 			return;
 		}
+		if (assign.type() != ELMTokenType.ASSIGN)
+		{
+			scanner.pushBack(assign);
+			return;
+		}
+
 		final var typeToken = nextNonWhitespace(scanner, null);
 		if (typeToken == null)
 		{

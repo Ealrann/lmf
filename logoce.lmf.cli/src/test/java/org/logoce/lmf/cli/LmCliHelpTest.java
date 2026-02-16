@@ -15,6 +15,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class LmCliHelpTest
 {
 	@Test
+	void globalHelpMentionsCheckAllExclude(@TempDir final Path workspace)
+	{
+		final var outBuffer = new ByteArrayOutputStream();
+		final var errBuffer = new ByteArrayOutputStream();
+		final var cli = new LmCli(new PrintStream(outBuffer), new PrintStream(errBuffer), workspace);
+
+		final var exit = cli.run(new String[] { "--help" });
+		assertEquals(ExitCodes.OK, exit);
+
+		final var out = new String(outBuffer.toByteArray(), StandardCharsets.UTF_8);
+		assertTrue(out.contains("check --all"), out);
+		assertTrue(out.contains("--exclude"), out);
+		assertTrue(out.contains("models"), out);
+		assertTrue(out.contains("--model"), out);
+	}
+
+	@Test
 	void batchHelpDoesNotReportUnknownCommand(@TempDir final Path workspace)
 	{
 		final var outBuffer = new ByteArrayOutputStream();

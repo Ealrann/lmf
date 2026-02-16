@@ -108,7 +108,9 @@ public final class LmModelLinker<I extends PNode>
 			}
 			catch (LinkException e)
 			{
-				final var span = TextPositions.spanOf(e.pNode(), source);
+				final var span = e.token() != null
+								 ? TextPositions.spanOf(e.token(), source)
+								 : TextPositions.spanOf(e.pNode(), source);
 				diagnostics.add(new LmDiagnostic(span.line(),
 												 span.column(),
 												 span.length(),

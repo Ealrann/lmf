@@ -89,15 +89,15 @@ public final class BatchResolver<T extends Feature<?, ?, ?, ?>>
 	private FeatureResolution<T> valueResolution(final PFeature token)
 	{
 		final var tokenName = token.firstToken();
-		return runner.findMandatory(r -> true,
-									token.values(),
-									tokenName,
-									() -> new NoSuchElementException("Cannot resolve value Token " +
-																	 token.firstToken()));
+		return runner.findMandatoryLenient(r -> true,
+										   token.values(),
+										   tokenName,
+										   () -> new NoSuchElementException("Cannot resolve value Token " +
+																			token.firstToken()));
 	}
 
 	private Optional<FeatureResolution<T>> resolveBoolean(final PNominalGroup token)
 	{
-		return runner.findOptional(r -> r.match(token.firstToken()), List.of("true"));
+		return runner.findOptionalLenient(r -> r.match(token.firstToken()), List.of("true"));
 	}
 }

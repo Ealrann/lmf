@@ -177,22 +177,21 @@ public final class RenamePlanner
 			return new TextEdits.TextEdit(span.offset(), span.length(), nameFeature + "=" + literal);
 		}
 
-		final var positional = resolvePositionalNameSpan(node, index, currentName);
-		if (positional != null)
-		{
-			return new TextEdits.TextEdit(positional.span().offset(), positional.span().length(), literal);
-		}
+			final var positional = resolvePositionalNameSpan(index, currentName);
+			if (positional != null)
+			{
+				return new TextEdits.TextEdit(positional.span().offset(), positional.span().length(), literal);
+			}
 
 		final int insertionOffset = endOffsetOfLastNonWhitespaceToken(tokens);
 		return new TextEdits.TextEdit(insertionOffset, 0, " " + nameFeature + "=" + literal);
 	}
 
-	private static FeatureValueSpanIndex.ValueSpan resolvePositionalNameSpan(final LinkNodeInternal<?, PNode, ?> node,
-																			final FeatureValueSpanIndex index,
-																			final String currentName)
-	{
-		if (currentName == null || currentName.isBlank())
+		private static FeatureValueSpanIndex.ValueSpan resolvePositionalNameSpan(final FeatureValueSpanIndex index,
+																				final String currentName)
 		{
+			if (currentName == null || currentName.isBlank())
+			{
 			return null;
 		}
 

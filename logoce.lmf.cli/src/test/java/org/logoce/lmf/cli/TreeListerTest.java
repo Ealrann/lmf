@@ -38,5 +38,29 @@ final class TreeListerTest
 		assertEquals("/groups.1\tGroup\tB", lines.get(1).format());
 		assertEquals("/enums\tEnum\tE", lines.get(2).format());
 	}
-}
 
+	@Test
+	void treeAlwaysIndexListsIndexEvenWithSingleElement() throws Exception
+	{
+		final var source = """
+			(MetaModel domain=test.model name=TreeTest
+				(Group A)
+				(Enum E A,B))
+			""";
+
+		final var loader = new LmLoader(ModelRegistry.empty());
+		final var doc = loader.loadModel(source);
+
+		assertTrue(doc.diagnostics()
+					  .stream()
+					  .noneMatch(d -> d.severity() == LmDiagnostic.Severity.ERROR));
+
+		final var linkRoots = RootReferenceResolver.collectLinkRoots(doc.linkTrees());
+		assertEquals(1, linkRoots.size());
+
+		final var lines = new TreeLister().list(linkRoots.getFirst(), 1, true);
+		assertEquals(2, lines.size());
+		assertEquals("/groups.0\tGroup\tA", lines.get(0).format());
+		assertEquals("/enums.0\tEnum\tE", lines.get(1).format());
+	}
+}

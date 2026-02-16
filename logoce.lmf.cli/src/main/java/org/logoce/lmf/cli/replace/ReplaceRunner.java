@@ -2,7 +2,10 @@ package org.logoce.lmf.cli.replace;
 
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
+import org.logoce.lmf.cli.diagnostics.DiagnosticItem;
 import org.logoce.lmf.cli.diagnostics.DiagnosticReporter;
+import org.logoce.lmf.cli.diagnostics.ValidationReport;
+import org.logoce.lmf.cli.edit.EditJsonReportWriter;
 import org.logoce.lmf.cli.edit.EditOptions;
 import org.logoce.lmf.cli.edit.EditValidationContext;
 import org.logoce.lmf.cli.edit.SubtreeSpanLocator;
@@ -10,10 +13,11 @@ import org.logoce.lmf.cli.edit.TextEdits;
 import org.logoce.lmf.cli.edit.WorkspaceEditPipeline;
 import org.logoce.lmf.cli.format.LmFormatter;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic;
 import org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader;
@@ -26,7 +30,7 @@ import java.util.Objects;
 
 public final class ReplaceRunner
 {
-	public record Options(boolean force)
+	public record Options(boolean force, boolean json)
 	{
 	}
 
@@ -42,43 +46,17 @@ public final class ReplaceRunner
 		Objects.requireNonNull(replacementSubtree, "replacementSubtree");
 		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "replace", options.json());
+		if (!resolved.ok())
 		{
-			return replaceInModel(found.path(), context, targetReference, replacementSubtree, options);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return replaceInModel(resolved.path(), context, modelSpec, targetReference, replacementSubtree, options);
 	}
 
 	private int replaceInModel(final Path modelPath,
 							   final CliContext context,
+							   final String requestedModel,
 							   final String targetReference,
 							   final String replacementSubtree,
 							   final Options options)
@@ -92,7 +70,17 @@ public final class ReplaceRunner
 
 		if (prepareResult instanceof RegistryService.PrepareResult.Failure failure)
 		{
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "replace",
+										   failure.exitCode(),
+										   "Cannot prepare registry for " + displayPath);
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return failure.exitCode();
 		}
 
@@ -103,7 +91,14 @@ public final class ReplaceRunner
 		final var originalSource = documentLoader.readString(modelPath, context.err());
 		if (originalSource == null)
 		{
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.INVALID, "Failed to read model file");
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -114,8 +109,15 @@ public final class ReplaceRunner
 		final var linkRoots = RootReferenceResolver.collectLinkRoots(originalDocument.linkTrees());
 		if (linkRoots.isEmpty())
 		{
-			context.err().println("No link trees available for " + displayPath);
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.INVALID, "No link trees available for " + displayPath);
+			}
+			else
+			{
+				context.err().println("No link trees available for " + displayPath);
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -125,6 +127,7 @@ public final class ReplaceRunner
 			return replaceSpan(context,
 							   modelPath,
 							   displayPath,
+							   requestedModel,
 							   prepared,
 							   originalSource,
 							   found.node(),
@@ -139,32 +142,61 @@ public final class ReplaceRunner
 			{
 				context.err().println(" - " + candidate);
 			}
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.USAGE, "Ambiguous reference: " + targetReference);
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.USAGE;
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.NotFound notFound)
 		{
 			context.err().println("Cannot resolve reference: " + targetReference);
 			context.err().println(notFound.message());
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.USAGE, "Cannot resolve reference: " + targetReference);
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.USAGE;
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.Failure failure)
 		{
 			context.err().println("Cannot resolve reference: " + targetReference);
 			context.err().println(failure.message());
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.USAGE, "Cannot resolve reference: " + targetReference);
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.USAGE;
 		}
 
 		context.err().println("Unexpected reference resolution state");
-		context.err().println("No changes written to " + displayPath);
+		if (options.json())
+		{
+			JsonErrorWriter.writeError(context, "replace", ExitCodes.USAGE, "Unexpected reference resolution state");
+		}
+		else
+		{
+			context.err().println("No changes written to " + displayPath);
+		}
 		return ExitCodes.USAGE;
 	}
 
 	private int replaceSpan(final CliContext context,
 							final Path modelPath,
 							final String displayPath,
+							final String requestedModel,
 							final RegistryService.PreparedRegistry prepared,
 							final String originalSource,
 							final org.logoce.lmf.core.loader.api.loader.linking.tree.LinkNodeInternal<?, org.logoce.lmf.core.loader.api.text.syntax.PNode, ?> targetNode,
@@ -175,22 +207,38 @@ public final class ReplaceRunner
 		final var span = SubtreeSpanLocator.locate(originalSource, targetNode);
 		if (span == null)
 		{
-			context.err().println("Cannot locate subtree span for reference: " + targetReference);
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.INVALID, "Cannot locate subtree span for reference: " + targetReference);
+			}
+			else
+			{
+				context.err().println("Cannot locate subtree span for reference: " + targetReference);
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		final var formattedReplacement = formatSingleRootSubtree(replacementSubtree, context.err());
-		if (formattedReplacement == null)
+		if (formattedReplacement instanceof SubtreeFormatResult.Failure failure)
 		{
-			context.err().println("No changes written to " + displayPath);
+			final var report = new ValidationReport(false, toSubtreeDiagnostics(failure.diagnostics()), List.of());
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "replace", ExitCodes.USAGE, failure.message(), report);
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.USAGE;
 		}
+		final var formatted = ((SubtreeFormatResult.Success) formattedReplacement).formatted();
 
 		final var baseIndent = trailingIndentBefore(originalSource, span.startOffset());
 		final var indentedReplacement = baseIndent.isEmpty()
-										? formattedReplacement
-										: formattedReplacement.replace("\n", "\n" + baseIndent);
+										? formatted
+										: formatted.replace("\n", "\n" + baseIndent);
 
 		final var documentLoader = new DocumentLoader();
 		final var editsByFile = Map.of(modelPath,
@@ -210,21 +258,125 @@ public final class ReplaceRunner
 
 		if (!outcome.wrote())
 		{
-			context.err().println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								targetReference,
+								options.force(),
+								outcome,
+								"No changes written",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				context.err().println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		if (!outcome.validationPassed())
 		{
-			context.err().println("FORCED: wrote changes to " + displayPath + " despite errors");
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								targetReference,
+								options.force(),
+								outcome,
+								"FORCED: wrote changes despite errors",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				context.err().println("FORCED: wrote changes to " + displayPath + " despite errors");
+			}
 			return ExitCodes.INVALID;
 		}
 
-		context.out().println("OK: replaced " + targetReference + " in " + displayPath);
+		if (options.json())
+		{
+			writeJsonResult(context,
+							requestedModel,
+							displayPath,
+							targetReference,
+							options.force(),
+							outcome,
+							"OK: replaced " + targetReference,
+							ExitCodes.OK);
+		}
+		else
+		{
+			context.out().println("OK: replaced " + targetReference + " in " + displayPath);
+		}
 		return ExitCodes.OK;
 	}
 
-	private static String formatSingleRootSubtree(final String subtreeSource, final java.io.PrintWriter err)
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String targetReference,
+										final boolean force,
+										final org.logoce.lmf.cli.edit.EditOutcome outcome,
+										final String message,
+										final int exitCode)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("replace")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("target").beginObject()
+			.name("reference").value(targetReference)
+			.endObject()
+			.name("options").beginObject()
+			.name("force").value(force)
+			.endObject();
+
+		EditJsonReportWriter.writeOutcome(json, context, outcome);
+		EditJsonReportWriter.writeDiagnostics(json, outcome.validationReport());
+
+		json.name("message").value(message)
+			.name("ok").value(exitCode == ExitCodes.OK)
+			.name("exitCode").value(exitCode)
+			.endObject()
+			.flush();
+		context.out().println();
+	}
+
+	private sealed interface SubtreeFormatResult permits SubtreeFormatResult.Success, SubtreeFormatResult.Failure
+	{
+		record Success(String formatted) implements SubtreeFormatResult
+		{
+		}
+
+		record Failure(String message, List<LmDiagnostic> diagnostics) implements SubtreeFormatResult
+		{
+			public Failure
+			{
+				Objects.requireNonNull(message, "message");
+				diagnostics = diagnostics == null ? List.of() : List.copyOf(diagnostics);
+			}
+		}
+	}
+
+	private static List<DiagnosticItem> toSubtreeDiagnostics(final List<LmDiagnostic> diagnostics)
+	{
+		if (diagnostics == null || diagnostics.isEmpty())
+		{
+			return List.of();
+		}
+		return diagnostics.stream()
+						  .map(diagnostic -> new DiagnosticItem("<subtree>", diagnostic))
+						  .toList();
+	}
+
+	private static SubtreeFormatResult formatSingleRootSubtree(final String subtreeSource, final java.io.PrintWriter err)
 	{
 		final var diagnostics = new ArrayList<LmDiagnostic>();
 		final var reader = new LmTreeReader();
@@ -232,18 +384,21 @@ public final class ReplaceRunner
 		if (DiagnosticReporter.hasErrors(diagnostics))
 		{
 			DiagnosticReporter.printDiagnostics(err, "<subtree>", diagnostics);
-			err.println("Replacement subtree cannot be parsed");
-			return null;
+			final var message = "Replacement subtree cannot be parsed";
+			err.println(message);
+			err.println("Hint: If you passed a subtree inline, prefer --subtree-stdin/--subtree-file to avoid shell quoting issues.");
+			return new SubtreeFormatResult.Failure(message, List.copyOf(diagnostics));
 		}
 
 		if (readResult.roots().size() != 1)
 		{
-			err.println("Replacement subtree must contain exactly one root element; found: " + readResult.roots().size());
-			return null;
+			final var message = "Replacement subtree must contain exactly one root element; found: " + readResult.roots().size();
+			err.println(message);
+			return new SubtreeFormatResult.Failure(message, List.of());
 		}
 
 		final var formatter = new LmFormatter();
-		return formatter.format(readResult.roots());
+		return new SubtreeFormatResult.Success(formatter.format(readResult.roots()));
 	}
 
 	private static String trailingIndentBefore(final CharSequence source, final int offset)

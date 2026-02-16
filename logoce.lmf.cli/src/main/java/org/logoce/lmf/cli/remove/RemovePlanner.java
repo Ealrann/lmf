@@ -2,6 +2,7 @@ package org.logoce.lmf.cli.remove;
 
 import org.logoce.lmf.cli.edit.SubtreeSpanLocator;
 import org.logoce.lmf.cli.edit.TextEdits;
+import org.logoce.lmf.cli.edit.ReferenceRewrite;
 import org.logoce.lmf.core.loader.api.loader.linking.tree.LinkNodeInternal;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 
@@ -34,6 +35,7 @@ public final class RemovePlanner
 
 			final var editsByFile = new HashMap<Path, List<TextEdits.TextEdit>>();
 			final var unsets = new ArrayList<RemoveUnsetReference>();
+			final var rewrites = new ArrayList<ReferenceRewrite>();
 
 			final var documentPlanner = new RemoveDocumentPlanner();
 			for (final var doc : workspace.documents())
@@ -46,7 +48,8 @@ public final class RemovePlanner
 												  shiftContext,
 												  skipNodes,
 												  editsByFile,
-												  unsets);
+												  unsets,
+												  rewrites);
 			}
 
 			final var targetSource = targetDocument.document().source();
@@ -59,7 +62,10 @@ public final class RemovePlanner
 			editsByFile.computeIfAbsent(targetDocument.path(), ignored -> new ArrayList<>())
 					   .add(new TextEdits.TextEdit(subtreeSpan.startOffset(), subtreeSpan.length(), ""));
 
-			final var planned = new RemovePlannedEdit(copyEdits(editsByFile), List.copyOf(unsets), removedId);
+			final var planned = new RemovePlannedEdit(copyEdits(editsByFile),
+													  List.copyOf(unsets),
+													  List.copyOf(rewrites),
+													  removedId);
 			return new RemovePlanResult.Success(planned);
 		}
 		catch (RemovePlanException failure)

@@ -12,6 +12,7 @@ import java.util.List;
 public final class PNodeBuilder
 {
 	private final Deque<PTreeBuilder> stack = new ArrayDeque<>();
+	private final Deque<Integer> openOffsets = new ArrayDeque<>();
 	private final List<PTreeBuilder> roots = new ArrayList<>();
 
 	public PNodeBuilder()
@@ -28,21 +29,27 @@ public final class PNodeBuilder
 		return stack.size();
 	}
 
+	public Integer lastUnclosedOpenOffset()
+	{
+		return openOffsets.peekLast();
+	}
+
 	public void readToken(final PToken token) throws LexerException
 	{
 		switch (token.type())
 		{
-			case OPEN_NODE -> stack();
+			case OPEN_NODE -> stack(token.offset());
 			case CLOSE_NODE -> pop();
-			case BAD_CHARACTER -> throw new LexerException("Invalid model");
+			case BAD_CHARACTER -> throw new LexerException("Unexpected character: " + describeBadCharacter(token.value()));
 			default -> addToken(token);
 		}
 	}
 
-	private void stack()
+	private void stack(final int openOffset)
 	{
 		final var newNode = stack.isEmpty() ? newRoot() : stack.getLast().newChild();
 		stack.add(newNode);
+		openOffsets.add(openOffset);
 	}
 
 	private PTreeBuilder newRoot()
@@ -60,6 +67,31 @@ public final class PNodeBuilder
 			throw new LexerException("Unmatched ')'");
 		}
 		stack.removeLast();
+		if (!openOffsets.isEmpty())
+		{
+			openOffsets.removeLast();
+		}
+	}
+
+	private static String describeBadCharacter(final String tokenText)
+	{
+		if (tokenText == null || tokenText.isEmpty())
+		{
+			return "<empty>";
+		}
+
+		final int codePoint = tokenText.codePointAt(0);
+		return switch (codePoint)
+		{
+			case '\n' -> "'\\n' (U+000A)";
+			case '\r' -> "'\\r' (U+000D)";
+			case '\t' -> "'\\t' (U+0009)";
+			default ->
+			{
+				final var text = "'" + tokenText + "'";
+				yield text + " (U+" + String.format("%04X", codePoint) + ")";
+			}
+		};
 	}
 
 	private void addToken(final PToken token)

@@ -32,5 +32,24 @@ final class CheckAllCommandTest
 
 		assertEquals(ExitCodes.INVALID, exit);
 	}
-}
 
+	@Test
+	void checkAllExcludeSkipsFiles(@TempDir final Path workspace) throws Exception
+	{
+		Files.writeString(workspace.resolve("Good.lm"), """
+			(MetaModel domain=test.model name=Good
+				(Unit name=u))
+			""");
+		Files.createDirectories(workspace.resolve("snippets"));
+		Files.writeString(workspace.resolve("snippets/Bad.lm"), "(MetaModel domain=test.model name=Bad");
+
+		final var outBuffer = new StringWriter();
+		final var errBuffer = new StringWriter();
+		final var context = new CliContext(workspace, new PrintWriter(outBuffer), new PrintWriter(errBuffer));
+
+		final var command = CheckCommand.parse(List.of("--all", "--exclude", "snippets"), context.err());
+		final int exit = command.execute(context);
+
+		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
+	}
+}

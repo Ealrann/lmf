@@ -4,10 +4,11 @@ import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
 import org.logoce.lmf.cli.diagnostics.DiagnosticReporter;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
+import org.logoce.lmf.cli.json.JsonSerializers;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.core.api.model.ModelRegistry;
 import org.logoce.lmf.core.lang.LMObject;
@@ -30,7 +31,7 @@ import java.util.Objects;
 
 public final class RefRunner
 {
-	public record Options(boolean includeDescendants)
+	public record Options(boolean includeDescendants, boolean json)
 	{
 	}
 
@@ -44,39 +45,12 @@ public final class RefRunner
 		Objects.requireNonNull(targetReference, "targetReference");
 		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "ref", options.json());
+		if (!resolved.ok())
 		{
-			return findReferences(found.path(), context, targetReference, options);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return findReferences(resolved.path(), context, targetReference, options);
 	}
 
 	private int findReferences(final Path targetModelPath,
@@ -104,11 +78,15 @@ public final class RefRunner
 		final var targetId = resolveTargetId(registry, targetHeader, targetModelPath, targetReference, context, displayTargetPath);
 		if (targetId == null)
 		{
+			if (options.json())
+			{
+				writeJsonError(context, ExitCodes.INVALID, "Cannot resolve target reference: " + targetReference, List.of());
+			}
 			return ExitCodes.INVALID;
 		}
 
-		final var exact = new StringBuilder();
-		final var descendants = new StringBuilder();
+		final var exact = new ArrayList<RefMatch>();
+		final var descendants = new ArrayList<RefMatch>();
 
 		for (final var entry : scanModelPaths.entrySet())
 		{
@@ -131,7 +109,6 @@ public final class RefRunner
 			{
 				root.streamTree().forEach(node -> scanNode(exact,
 														   descendants,
-														   projectRoot,
 														   path,
 														   doc.source(),
 														   node,
@@ -140,15 +117,50 @@ public final class RefRunner
 			}
 		}
 
-		final var output = exact.isEmpty() ? descendants : exact.append(options.includeDescendants() ? descendants : "");
-		context.out().print(output.toString());
-		context.out().flush();
+			final var output = outputMatches(exact, descendants, options);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								displayTargetPath,
+								targetReference,
+								targetId,
+								options,
+							exact,
+							descendants,
+							output);
+		}
+		else
+		{
+			for (final var match : output)
+			{
+				context.out().println(formatMatch(projectRoot, match));
+			}
+			context.out().flush();
+		}
+
 		return ExitCodes.OK;
 	}
 
-	private static void scanNode(final StringBuilder exactOut,
-								 final StringBuilder descendantOut,
-								 final Path projectRoot,
+	private static List<RefMatch> outputMatches(final List<RefMatch> exact,
+												final List<RefMatch> descendants,
+												final Options options)
+	{
+		if (exact.isEmpty())
+		{
+			return descendants;
+		}
+		if (!options.includeDescendants())
+		{
+			return exact;
+		}
+		final var out = new ArrayList<RefMatch>(exact.size() + descendants.size());
+		out.addAll(exact);
+		out.addAll(descendants);
+		return List.copyOf(out);
+	}
+
+	private static void scanNode(final List<RefMatch> exactOut,
+								 final List<RefMatch> descendantOut,
 								 final Path documentPath,
 								 final CharSequence source,
 								 final LinkNodeInternal<?, PNode, ?> node,
@@ -173,32 +185,16 @@ public final class RefRunner
 				}
 
 				final var span = resolveValueSpan(resolved.raw(), node, source);
-				final var location = formatLocation(projectRoot, documentPath, span);
-				final var resolvedText = resolvedId.modelQualifiedName() + resolvedId.path();
 
 				if (exact)
 				{
-					exactOut.append(location)
-							.append('\t')
-							.append(resolved.raw() == null ? "" : resolved.raw())
-							.append('\t')
-							.append(resolvedText)
-							.append('\t')
-							.append("exact")
-							.append('\n');
+					exactOut.add(new RefMatch(documentPath, span, resolved.raw(), resolvedId, MatchKind.EXACT));
 					continue;
 				}
 
 				if (options.includeDescendants() || exactOut.isEmpty())
 				{
-					descendantOut.append(location)
-								 .append('\t')
-								 .append(resolved.raw() == null ? "" : resolved.raw())
-								 .append('\t')
-								 .append(resolvedText)
-								 .append('\t')
-								 .append("descendant")
-								 .append('\n');
+					descendantOut.add(new RefMatch(documentPath, span, resolved.raw(), resolvedId, MatchKind.DESCENDANT));
 				}
 			}
 		}
@@ -424,5 +420,116 @@ public final class RefRunner
 		}
 
 		return true;
+	}
+
+	private static String formatMatch(final Path projectRoot, final RefMatch match)
+	{
+		final var location = formatLocation(projectRoot, match.documentPath(), match.span());
+		final var resolved = match.resolvedId().modelQualifiedName() + match.resolvedId().path();
+		return location + "\t" + (match.rawReference() == null ? "" : match.rawReference()) + "\t" + resolved + "\t" + match.kind().label;
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String displayTargetPath,
+										final String targetReference,
+										final ObjectId targetId,
+										final Options options,
+										final List<RefMatch> exactMatches,
+										final List<RefMatch> descendantMatches,
+										final List<RefMatch> outputMatches)
+	{
+		final boolean fallbackToDescendants = exactMatches.isEmpty() && !descendantMatches.isEmpty();
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("ref")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("path").value(displayTargetPath)
+			.endObject()
+			.name("target").beginObject()
+			.name("reference").value(targetReference)
+			.name("resolved").beginObject()
+			.name("modelQualifiedName").value(targetId.modelQualifiedName())
+			.name("path").value(targetId.path())
+			.endObject()
+			.endObject()
+			.name("options").beginObject()
+			.name("includeDescendants").value(options.includeDescendants())
+			.endObject()
+			.name("exactCount").value(exactMatches.size())
+			.name("descendantCount").value(descendantMatches.size())
+			.name("fallbackToDescendants").value(fallbackToDescendants)
+			.name("matchCount").value(outputMatches.size())
+			.name("matches").beginArray();
+
+		for (final var match : outputMatches)
+		{
+			json.beginObject()
+				.name("file").value(PathDisplay.display(context.projectRoot(), match.documentPath()))
+				.name("rawReference").value(match.rawReference())
+				.name("kind").value(match.kind().label)
+				.name("resolved").beginObject()
+				.name("modelQualifiedName").value(match.resolvedId().modelQualifiedName())
+				.name("path").value(match.resolvedId().path())
+				.endObject();
+			if (match.span() != null)
+			{
+				json.name("span");
+				JsonSerializers.writeSpan(json, match.span());
+			}
+			json.endObject();
+		}
+
+		json.endArray()
+			.name("ok").value(true)
+			.name("exitCode").value(ExitCodes.OK)
+			.endObject()
+			.flush();
+		context.out().println();
+	}
+
+	private static void writeJsonError(final CliContext context,
+									   final int exitCode,
+									   final String message,
+									   final List<String> details)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("ref")
+			.name("ok").value(false)
+			.name("exitCode").value(exitCode)
+			.name("error").beginObject()
+			.name("message").value(message)
+			.name("details").beginArray();
+		for (final var detail : details)
+		{
+			json.value(detail);
+		}
+		json.endArray()
+			.endObject()
+			.endObject()
+			.flush();
+		context.out().println();
+	}
+
+	private record RefMatch(Path documentPath,
+							TextPositions.Span span,
+							String rawReference,
+							ObjectId resolvedId,
+							MatchKind kind)
+	{
+	}
+
+	private enum MatchKind
+	{
+		EXACT("exact"),
+		DESCENDANT("descendant");
+
+		private final String label;
+
+		MatchKind(final String label)
+		{
+			this.label = label;
+		}
 	}
 }

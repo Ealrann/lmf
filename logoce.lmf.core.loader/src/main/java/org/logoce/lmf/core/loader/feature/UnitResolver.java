@@ -3,6 +3,7 @@ package org.logoce.lmf.core.loader.feature;
 import org.logoce.lmf.core.lang.Attribute;
 import org.logoce.lmf.core.lang.LMCoreModelDefinition;
 import org.logoce.lmf.core.lang.Unit;
+import org.logoce.lmf.core.loader.api.loader.linking.InvalidUnitLiteralException;
 import org.logoce.lmf.core.loader.api.loader.linking.FeatureResolution;
 
 import java.util.Optional;
@@ -45,6 +46,10 @@ public final class UnitResolver<T> extends AttributeResolver
 	protected Optional<FeatureResolution<Attribute<?, ?, ?, ?>>> internalResolve(final String value)
 	{
 		final var pmatcher = matcherPattern == null ? null : matcherPattern.matcher(value);
+		if (pmatcher != null && !pmatcher.matches())
+		{
+			throw new InvalidUnitLiteralException(feature.name(), value, unit);
+		}
 		if (pmatcher == null || pmatcher.matches())
 		{
 			final var extractedValue = extractValue(unit, value);

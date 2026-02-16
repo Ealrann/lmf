@@ -2,6 +2,8 @@ package org.logoce.lmf.core.loader.linking;
 
 import org.logoce.lmf.core.lang.Feature;
 import org.logoce.lmf.core.loader.api.loader.linking.FeatureResolution;
+import org.logoce.lmf.core.loader.api.loader.linking.InvalidEnumLiteralException;
+import org.logoce.lmf.core.loader.api.loader.linking.InvalidUnitLiteralException;
 import org.logoce.lmf.core.loader.feature.AbstractResolver;
 import org.logoce.lmf.core.loader.feature.ITokenResolver;
 
@@ -71,6 +73,62 @@ public final class TokenResolver<T extends Feature<?, ?, ?, ?>, R extends Abstra
 					it.remove();
 					return resolution;
 				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	public FeatureResolution<T> findMandatoryLenient(final Predicate<ITokenResolver> filter,
+													 final List<String> values,
+													 final String tokenName,
+													 final Supplier<NoSuchElementException> message)
+	{
+		final var optional = findOptionalLenient(filter, values);
+		if (optional.isPresent())
+		{
+			return optional.get();
+		}
+
+		final var e = message.get();
+
+		final boolean existed = allResolvers.stream().anyMatch(filter::test);
+		final boolean stillAvailable = availableResolvers.stream().anyMatch(filter::test);
+		if (existed && !stillAvailable)
+		{
+			final var effectiveName = tokenName == null || tokenName.isBlank() ? "unknown" : tokenName;
+			throw new NoSuchElementException("Feature \"" + effectiveName + "\" is already defined");
+		}
+
+		throw e;
+	}
+
+	public Optional<FeatureResolution<T>> findOptionalLenient(final Predicate<ITokenResolver> filter,
+															  final List<String> values)
+	{
+		final var it = availableResolvers.iterator();
+
+		while (it.hasNext())
+		{
+			final var currentResolver = it.next();
+			if (!filter.test(currentResolver))
+			{
+				continue;
+			}
+
+			final Optional<FeatureResolution<T>> resolution;
+			try
+			{
+				resolution = resolverUsage.apply(currentResolver, values);
+			}
+			catch (InvalidEnumLiteralException | InvalidUnitLiteralException e)
+			{
+				continue;
+			}
+
+			if (resolution.isPresent())
+			{
+				it.remove();
+				return resolution;
 			}
 		}
 		return Optional.empty();

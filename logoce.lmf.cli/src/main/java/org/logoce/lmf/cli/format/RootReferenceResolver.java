@@ -58,7 +58,7 @@ public final class RootReferenceResolver
 					case NAME -> selectNamed(candidates, step.text());
 					case CONTEXT_NAME -> selectContextNamed(candidates, step.text());
 					case MODEL -> {
-						return new Resolution.Failure("Model-qualified references are not supported for --root");
+						return new Resolution.Failure("Model-qualified references are not supported for local references (remove the '#Model' prefix)");
 					}
 				}
 

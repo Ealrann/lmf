@@ -8,7 +8,8 @@ public record BatchOptions(Path file,
 						   boolean continueOnError,
 						   boolean force,
 						   ValidateMode validateMode,
-						   String defaultModel)
+						   String defaultModel,
+						   boolean json)
 {
 	public enum ValidateMode
 	{
@@ -17,4 +18,3 @@ public record BatchOptions(Path file,
 		NONE
 	}
 }
-

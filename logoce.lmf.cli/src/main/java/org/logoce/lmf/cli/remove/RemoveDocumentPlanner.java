@@ -1,6 +1,7 @@
 package org.logoce.lmf.cli.remove;
 
 import org.logoce.lmf.cli.edit.FeatureValueSpanIndex;
+import org.logoce.lmf.cli.edit.ReferenceRewrite;
 import org.logoce.lmf.cli.edit.TextEdits;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
 import org.logoce.lmf.cli.ref.ObjectId;
@@ -28,7 +29,8 @@ final class RemoveDocumentPlanner
 						   final RemoveShiftContext shiftContext,
 						   final Set<LinkNodeInternal<?, PNode, ?>> skipNodes,
 						   final Map<Path, List<TextEdits.TextEdit>> editsByFile,
-						   final List<RemoveUnsetReference> unsets)
+						   final List<RemoveUnsetReference> unsets,
+						   final List<ReferenceRewrite> rewrites)
 	{
 		final var document = doc.document();
 		final var source = document.source();
@@ -47,7 +49,8 @@ final class RemoveDocumentPlanner
 							  removedIds,
 							  shiftContext,
 							  editsByFile,
-							  unsets);
+							  unsets,
+							  rewrites);
 			});
 		}
 	}
@@ -58,7 +61,8 @@ final class RemoveDocumentPlanner
 							   final Set<ObjectId> removedIds,
 							   final RemoveShiftContext shiftContext,
 							   final Map<Path, List<TextEdits.TextEdit>> editsByFile,
-							   final List<RemoveUnsetReference> unsets)
+							   final List<RemoveUnsetReference> unsets,
+							   final List<ReferenceRewrite> rewrites)
 	{
 		final var attempts = node.relationResolutions();
 		if (attempts == null || attempts.isEmpty())
@@ -69,6 +73,7 @@ final class RemoveDocumentPlanner
 		final var index = FeatureValueSpanIndex.build(node.pNode().tokens(), source);
 		final var mutationsByFeature = new HashMap<FeatureValueSpanIndex.FeatureSpan, List<RemoveValueMutation>>();
 		final var queuesByFeature = new HashMap<FeatureValueSpanIndex.FeatureSpan, Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>>>();
+		PositionalQueues positionalQueues = null;
 
 		for (final ResolutionAttempt<Relation<?, ?, ?, ?>> attempt : attempts)
 		{
@@ -78,13 +83,20 @@ final class RemoveDocumentPlanner
 				continue;
 			}
 
-			final var featureSpan = resolveFeatureSpan(index, relation.name());
-			if (featureSpan == null)
+			final var explicitFeatureSpan = resolveFeatureSpan(index, relation.name());
+			final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> valueQueues;
+			if (explicitFeatureSpan != null)
 			{
-				throw new RemovePlanException("Cannot locate feature span for '" + relation.name() + "'");
+				valueQueues = queuesByFeature.computeIfAbsent(explicitFeatureSpan, RemoveDocumentPlanner::buildQueues);
 			}
-
-			final var valueQueues = queuesByFeature.computeIfAbsent(featureSpan, RemoveDocumentPlanner::buildQueues);
+			else
+			{
+				if (positionalQueues == null)
+				{
+					positionalQueues = buildPositionalQueues(index);
+				}
+				valueQueues = positionalQueues.queues();
+			}
 			for (final var resolved : RelationReferences.resolved(attempt))
 			{
 				final var raw = resolved.raw();
@@ -93,10 +105,25 @@ final class RemoveDocumentPlanner
 					continue;
 				}
 
-				final var valueSpan = pollValueSpan(valueQueues, featureSpan, raw);
+				final FeatureValueSpanIndex.ValueSpan valueSpan;
+				final FeatureValueSpanIndex.FeatureSpan featureSpan;
+				if (explicitFeatureSpan != null)
+				{
+					featureSpan = explicitFeatureSpan;
+					valueSpan = pollValueSpan(valueQueues, featureSpan, raw);
+				}
+				else
+				{
+					valueSpan = pollValueSpan(valueQueues, raw);
+					featureSpan = valueSpan == null ? null : positionalQueues.featureSpanFor(valueSpan);
+				}
 				if (valueSpan == null)
 				{
 					throw new RemovePlanException("Cannot locate value span for '" + raw + "'");
+				}
+				if (featureSpan == null)
+				{
+					throw new RemovePlanException("Cannot locate feature span for '" + relation.name() + "'");
 				}
 
 				final var targetId = ObjectId.from(resolved.target());
@@ -125,6 +152,7 @@ final class RemoveDocumentPlanner
 											  .add(new RemoveValueMutation(RemoveMutationKind.SHIFT,
 																		   valueSpan,
 																		   updated));
+							rewrites.add(new ReferenceRewrite(path, valueSpan.span(), raw, updated, targetId));
 						}
 					}
 				}
@@ -202,5 +230,46 @@ final class RemoveDocumentPlanner
 			}
 		}
 		return null;
+	}
+
+	private static FeatureValueSpanIndex.ValueSpan pollValueSpan(final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> queues,
+																final String raw)
+	{
+		final var queue = queues.get(raw);
+		if (queue != null && !queue.isEmpty())
+		{
+			return queue.removeFirst();
+		}
+		return null;
+	}
+
+	private static PositionalQueues buildPositionalQueues(final FeatureValueSpanIndex index)
+	{
+		final var queues = new HashMap<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>>();
+		final var owners = new HashMap<FeatureValueSpanIndex.ValueSpan, FeatureValueSpanIndex.FeatureSpan>();
+
+		for (final var feature : index.features())
+		{
+			if (feature.name() != null)
+			{
+				continue;
+			}
+			for (final var value : feature.values())
+			{
+				queues.computeIfAbsent(value.raw(), ignored -> new ArrayDeque<>()).add(value);
+				owners.put(value, feature);
+			}
+		}
+
+		return new PositionalQueues(Map.copyOf(queues), Map.copyOf(owners));
+	}
+
+	private record PositionalQueues(Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> queues,
+								   Map<FeatureValueSpanIndex.ValueSpan, FeatureValueSpanIndex.FeatureSpan> owners)
+	{
+		FeatureValueSpanIndex.FeatureSpan featureSpanFor(final FeatureValueSpanIndex.ValueSpan valueSpan)
+		{
+			return owners.get(valueSpan);
+		}
 	}
 }

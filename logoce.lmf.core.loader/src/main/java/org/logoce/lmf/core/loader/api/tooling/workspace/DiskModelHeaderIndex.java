@@ -10,6 +10,8 @@ import org.logoce.lmf.core.util.tree.Tree;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,13 +34,44 @@ public final class DiskModelHeaderIndex
 
 	public void refresh(final Path root) throws IOException
 	{
+		final var normalizedRoot = root.toAbsolutePath().normalize();
 		final var present = new HashSet<Path>();
-		try (final var paths = Files.walk(root))
+		Files.walkFileTree(normalizedRoot, new SimpleFileVisitor<>()
 		{
-			paths.filter(Files::isRegularFile)
-				 .filter(p -> p.getFileName().toString().endsWith(".lm"))
-				 .forEach(present::add);
-		}
+			@Override
+			public java.nio.file.FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+			{
+				if (!dir.equals(normalizedRoot))
+				{
+					final var name = dir.getFileName();
+					if (name != null && WorkspaceScanDefaults.isIgnoredDirectoryName(name.toString()))
+					{
+						return java.nio.file.FileVisitResult.SKIP_SUBTREE;
+					}
+				}
+				return java.nio.file.FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public java.nio.file.FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
+			{
+				if (attrs != null && !attrs.isRegularFile())
+				{
+					return java.nio.file.FileVisitResult.CONTINUE;
+				}
+				if (file.getFileName().toString().endsWith(".lm"))
+				{
+					present.add(file.toAbsolutePath().normalize());
+				}
+				return java.nio.file.FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public java.nio.file.FileVisitResult visitFileFailed(final Path file, final IOException exc)
+			{
+				return java.nio.file.FileVisitResult.CONTINUE;
+			}
+		});
 
 		final var removed = new ArrayList<Path>();
 		for (final var path : modelFilesByMtime.keySet())
@@ -206,4 +239,3 @@ public final class DiskModelHeaderIndex
 	{
 	}
 }
-

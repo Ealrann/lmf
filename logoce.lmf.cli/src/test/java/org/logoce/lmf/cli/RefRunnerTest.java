@@ -27,7 +27,7 @@ final class RefRunnerTest
 		final var exit = new RefRunner().run(context,
 											 "ModelA.lm",
 											 "@Lava",
-											 new RefRunner.Options(false));
+											 new RefRunner.Options(false, false));
 
 		assertEquals(ExitCodes.OK, exit);
 		final var output = outBuffer.toString();
@@ -50,7 +50,7 @@ final class RefRunnerTest
 		final var exit = new RefRunner().run(context,
 											 "ModelA.lm",
 											 "/materials",
-											 new RefRunner.Options(true));
+											 new RefRunner.Options(true, false));
 
 		assertEquals(ExitCodes.OK, exit);
 		final var output = outBuffer.toString();
@@ -72,7 +72,7 @@ final class RefRunnerTest
 		final var exit = new RefRunner().run(context,
 											 "ModelA.lm",
 											 "/materials",
-											 new RefRunner.Options(false));
+											 new RefRunner.Options(false, false));
 
 		assertEquals(ExitCodes.OK, exit);
 		final var output = outBuffer.toString();

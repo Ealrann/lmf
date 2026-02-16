@@ -22,13 +22,20 @@ public final class TreeLister
 
 	public List<Line> list(final LinkNodeInternal<?, PNode, ?> root, final int maxDepth)
 	{
+		return list(root, maxDepth, false);
+	}
+
+	public List<Line> list(final LinkNodeInternal<?, PNode, ?> root,
+						   final int maxDepth,
+						   final boolean alwaysIndex)
+	{
 		if (root == null || maxDepth <= 0)
 		{
 			return List.of();
 		}
 
 		final var lines = new ArrayList<Line>();
-		collectChildren(root, "", 1, maxDepth, lines);
+		collectChildren(root, "", 1, maxDepth, alwaysIndex, lines);
 		return List.copyOf(lines);
 	}
 
@@ -36,6 +43,7 @@ public final class TreeLister
 								 final String parentPath,
 								 final int depth,
 								 final int maxDepth,
+								 final boolean alwaysIndex,
 								 final List<Line> out)
 	{
 		if (depth > maxDepth)
@@ -65,15 +73,17 @@ public final class TreeLister
 			final int index = indices.getOrDefault(relationName, 0);
 			indices.put(relationName, index + 1);
 
-			final boolean many = counts.getOrDefault(relationName, 0) > 1;
-			final var segment = many ? relationName + "." + index : relationName;
+			final boolean multiple = counts.getOrDefault(relationName, 0) > 1;
+			final boolean list = child.containingRelation().many();
+			final boolean indexed = multiple || (alwaysIndex && list);
+			final var segment = indexed ? relationName + "." + index : relationName;
 			final var path = parentPath.isEmpty() ? "/" + segment : parentPath + "/" + segment;
 
 			final var groupName = child.group() != null ? child.group().name() : "Unknown";
 			final var name = NodeNameResolver.resolve(child);
 			out.add(new Line(path, groupName, name));
 
-			collectChildren(child, path, depth + 1, maxDepth, out);
+			collectChildren(child, path, depth + 1, maxDepth, alwaysIndex, out);
 		}
 	}
 }

@@ -2,6 +2,7 @@ package org.logoce.lmf.cli.insert;
 
 import org.logoce.lmf.cli.edit.SubtreeSpanLocator;
 import org.logoce.lmf.cli.edit.TextEdits;
+import org.logoce.lmf.cli.edit.ReferenceRewrite;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
 import org.logoce.lmf.cli.ref.ObjectId;
 import org.logoce.lmf.cli.workspace.WorkspaceDocuments;
@@ -56,6 +57,7 @@ public final class InsertPlanner
 			}
 
 			final var editsByFile = new HashMap<Path, List<TextEdits.TextEdit>>();
+			final var rewrites = new ArrayList<ReferenceRewrite>();
 
 			if (relation.many())
 			{
@@ -75,7 +77,7 @@ public final class InsertPlanner
 				{
 					for (final var doc : workspace.documents())
 					{
-						shiftPlanner.planDocumentEdits(doc, insertion.shiftContext(), editsByFile);
+						shiftPlanner.planDocumentEdits(doc, insertion.shiftContext(), editsByFile, rewrites);
 					}
 				}
 			}
@@ -93,7 +95,7 @@ public final class InsertPlanner
 								 editsByFile);
 			}
 
-			return new InsertPlanResult.Success(new InsertPlannedEdit(copyEdits(editsByFile)));
+			return new InsertPlanResult.Success(new InsertPlannedEdit(copyEdits(editsByFile), List.copyOf(rewrites)));
 		}
 		catch (InsertPlanException e)
 		{
@@ -200,9 +202,33 @@ public final class InsertPlanner
 			return new TextEdits.TextEdit(closingParenOffset, 0, insertionText);
 		}
 
-		final int insertionOffset = newlineBeforeClosing + 1;
-		final var insertionText = childIndent + indentedSubtree + "\n";
-		return new TextEdits.TextEdit(insertionOffset, 0, insertionText);
+		if (isOnlyWhitespace(source, newlineBeforeClosing + 1, closingParenOffset))
+		{
+			final int insertionOffset = newlineBeforeClosing + 1;
+			final var insertionText = childIndent + indentedSubtree + "\n";
+			return new TextEdits.TextEdit(insertionOffset, 0, insertionText);
+		}
+
+		final var insertionText = "\n" + childIndent + indentedSubtree;
+		return new TextEdits.TextEdit(closingParenOffset, 0, insertionText);
+	}
+
+	private static boolean isOnlyWhitespace(final CharSequence source, final int startInclusive, final int endExclusive)
+	{
+		if (startInclusive < 0 || endExclusive > source.length() || startInclusive > endExclusive)
+		{
+			return false;
+		}
+
+		for (int i = startInclusive; i < endExclusive; i++)
+		{
+			final char c = source.charAt(i);
+			if (c != ' ' && c != '\t' && c != '\r')
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static int lastNewline(final CharSequence source, final int start, final int endExclusive)

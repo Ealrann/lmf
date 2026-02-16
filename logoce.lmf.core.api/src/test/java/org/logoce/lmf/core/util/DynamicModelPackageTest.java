@@ -35,8 +35,8 @@ public final class DynamicModelPackageTest
 										   "src",
 										   "test",
 										   "model",
-										   "CarCompany.lm");
-		assertTrue(Files.exists(carCompanyPath), "CarCompany.lm for generator tests should exist");
+										   "CarCompanyGenerator.lm");
+		assertTrue(Files.exists(carCompanyPath), "CarCompanyGenerator.lm for generator tests should exist");
 
 		final String source = Files.readString(carCompanyPath, StandardCharsets.UTF_8);
 

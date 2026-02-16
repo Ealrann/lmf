@@ -7,6 +7,8 @@ import org.logoce.lmf.core.lang.Model;
 import org.logoce.lmf.core.lang.Named;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.api.loader.linking.FeatureResolution;
+import org.logoce.lmf.core.loader.api.loader.linking.AmbiguousReferenceException;
+import org.logoce.lmf.core.loader.api.loader.linking.InvalidReferenceException;
 import org.logoce.lmf.core.api.util.ModelUtil;
 
 import java.util.ArrayList;
@@ -39,18 +41,19 @@ public final class ModelReferenceResolver implements ReferenceResolver
 	@Override
 	public Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolve(final PathParser pathParser)
 	{
+		final var rawReference = pathParser.rawPath();
 		final var firstStep = pathParser.next();
 		if (!pathParser.hasNext())
 		{
 			if (firstStep.type() == PathParser.Type.NAME)
 			{
-				return resolveName(firstStep.text(), relation);
+				return resolveName(rawReference, firstStep.text(), relation);
 			}
 			if (firstStep.type() == PathParser.Type.CHILD)
 			{
 				final var explorer = new ModelExplorer(model);
 				explorer.apply(firstStep);
-				return explorer.build(relation);
+				return Optional.of(explorer.buildOrThrow(relation, rawReference));
 			}
 			throw new NoSuchElementException("Unsupported first step in model reference: " + firstStep.type());
 		}
@@ -59,7 +62,7 @@ public final class ModelReferenceResolver implements ReferenceResolver
 
 		if (firstStep.type() == PathParser.Type.NAME)
 		{
-			return resolveNamedPath(firstStep.text(), remaining, relation);
+			return resolveNamedPath(rawReference, firstStep.text(), remaining, relation);
 		}
 		else
 		{
@@ -69,7 +72,7 @@ public final class ModelReferenceResolver implements ReferenceResolver
 			{
 				explorer.apply(step);
 			}
-			return explorer.build(relation);
+			return Optional.of(explorer.buildOrThrow(relation, rawReference));
 		}
 	}
 
@@ -84,55 +87,78 @@ public final class ModelReferenceResolver implements ReferenceResolver
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolveName(final String name,
+	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolveName(final String rawReference,
+																							 final String name,
 																							 final Relation<T, ?, ?, ?> relation)
 	{
-		final var group = (Group<?>) relation.concept();
-		return ModelUtil.streamTree(model)
-						.filter(o -> ModelUtil.isSubGroup(group, o.lmGroup()))
-						.map(o -> (T) o)
-						.filter(o -> {
-							if (o instanceof Named named)
-							{
-								final var v = named.name();
-								return v != null && v.equals(name);
-							}
-							return false;
-						})
-						.findAny()
-						.map(o -> new ModelExplorer.StaticReferenceResolution<>(relation, o));
-	}
+		final var concept = relation.concept();
+		final var expectedGroup = concept instanceof Group<?> group ? group : null;
+		final var expectedName = concept == null ? null : concept.name();
 
-	@SuppressWarnings("unchecked")
-	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolveNamedPath(final String name,
-																									final List<PathParser.Step> remaining,
-																									final Relation<T, ?, ?, ?> relation)
-	{
 		final var candidates = ModelUtil.streamTree(model)
 										.filter(o -> o instanceof Named named && name.equals(named.name()))
 										.toList();
-
-		final var results = candidates.stream()
-									  .map(anchor -> tryResolveFrom(anchor, remaining))
-									  .filter(Optional::isPresent)
-									  .map(Optional::get)
-									  .filter(o -> {
-										  final var concept = relation.concept();
-										  return concept instanceof Group<?> group && ModelUtil.isSubGroup(group, o.lmGroup());
-									  })
-									  .toList();
-
-		if (results.isEmpty())
+		final var matches = expectedGroup == null
+							? candidates
+							: candidates.stream().filter(o -> ModelUtil.isSubGroup(expectedGroup, o.lmGroup())).toList();
+		if (!matches.isEmpty())
 		{
-			throw new NoSuchElementException("Cannot resolve named path @" + name);
-		}
-		if (results.size() > 1)
-		{
-			throw new NoSuchElementException("Ambiguous named path @" + name + " (" + results.size() + " matches)");
+			final var object = (T) matches.getFirst();
+			return Optional.of(new ModelExplorer.StaticReferenceResolution<>(relation, object));
 		}
 
-		final var object = (T) results.getFirst();
-		return Optional.of(new ModelExplorer.StaticReferenceResolution<>(relation, object));
+		if (candidates.size() == 1)
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedName,
+												candidates.getFirst().lmGroup().name());
+		}
+		throw new InvalidReferenceException(relation.name(), rawReference, expectedName);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends LMObject> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolveNamedPath(final String rawReference,
+																									final String name,
+																									final List<PathParser.Step> remaining,
+																									final Relation<T, ?, ?, ?> relation)
+	{
+		final var concept = relation.concept();
+		final var expectedGroup = concept instanceof Group<?> group ? group : null;
+		final var expectedName = concept == null ? null : concept.name();
+
+		final var candidates = ModelUtil.streamTree(model)
+										.filter(o -> o instanceof Named named && name.equals(named.name()))
+										.toList();
+		final var resolved = candidates.stream()
+									   .map(anchor -> tryResolveFrom(anchor, remaining))
+									   .filter(Optional::isPresent)
+									   .map(Optional::get)
+									   .toList();
+		final var matches = expectedGroup == null
+							? resolved
+							: resolved.stream().filter(o -> ModelUtil.isSubGroup(expectedGroup, o.lmGroup())).toList();
+
+		if (matches.size() == 1)
+		{
+			final var object = (T) matches.getFirst();
+			return Optional.of(new ModelExplorer.StaticReferenceResolution<>(relation, object));
+		}
+		if (matches.size() > 1)
+		{
+			throw new AmbiguousReferenceException(relation.name(),
+												  rawReference,
+												  expectedName,
+												  matches.size());
+		}
+		if (resolved.size() == 1)
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedName,
+												resolved.getFirst().lmGroup().name());
+		}
+		throw new InvalidReferenceException(relation.name(), rawReference, expectedName);
 	}
 
 	private static Optional<LMObject> tryResolveFrom(final LMObject anchor, final List<PathParser.Step> remaining)
@@ -259,17 +285,20 @@ public final class ModelReferenceResolver implements ReferenceResolver
 		}
 
 		@SuppressWarnings("unchecked")
-		public <T extends Relation<?, ?, ?, ?>> Optional<FeatureResolution<Relation<?, ?, ?, ?>>> build(final T relation)
+		public <T extends Relation<?, ?, ?, ?>> FeatureResolution<Relation<?, ?, ?, ?>> buildOrThrow(final T relation,
+																									 final String rawReference)
 		{
 			final var concept = relation.concept();
 			if (concept instanceof Group<?> group && ModelUtil.isSubGroup(group, current.lmGroup()))
 			{
-				return Optional.of(buildInternal(relation, current));
+				return buildInternal(relation, current);
 			}
-			else
-			{
-				return Optional.empty();
-			}
+
+			final var expected = concept == null ? null : concept.name();
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expected,
+												current.lmGroup().name());
 		}
 
 		private static <Y extends LMObject> StaticReferenceResolution<Y, Relation<Y, ?, ?, ?>> buildInternal(final Relation<?, ?, ?, ?> relation,

@@ -89,7 +89,9 @@ public final class DocumentAnalyzer
 
 			if (e.pNode() != null)
 			{
-				final var span = TextPositions.spanOf(e.pNode(), parsed.source());
+				final var span = e.token() != null
+								 ? TextPositions.spanOf(e.token(), parsed.source())
+								 : TextPositions.spanOf(e.pNode(), parsed.source());
 				diagnostics.add(new LmDiagnostic(
 					span.line(),
 					span.column(),

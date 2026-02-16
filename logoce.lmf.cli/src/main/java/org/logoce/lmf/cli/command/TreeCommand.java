@@ -14,12 +14,23 @@ public final class TreeCommand implements Command
 	private final String modelSpec;
 	private final int maxDepth;
 	private final String rootReference;
+	private final boolean alwaysIndex;
+	private final boolean syntaxOnly;
+	private final boolean json;
 
-	public TreeCommand(final String modelSpec, final int maxDepth, final String rootReference)
+	public TreeCommand(final String modelSpec,
+					   final int maxDepth,
+					   final String rootReference,
+					   final boolean alwaysIndex,
+					   final boolean syntaxOnly,
+					   final boolean json)
 	{
 		this.modelSpec = Objects.requireNonNull(modelSpec, "modelSpec");
 		this.maxDepth = maxDepth;
 		this.rootReference = rootReference;
+		this.alwaysIndex = alwaysIndex;
+		this.syntaxOnly = syntaxOnly;
+		this.json = json;
 	}
 
 	@Override
@@ -33,6 +44,9 @@ public final class TreeCommand implements Command
 		String modelSpec = null;
 		Integer depth = null;
 		String rootReference = null;
+		boolean alwaysIndex = false;
+		boolean syntaxOnly = false;
+		boolean json = false;
 
 		for (int i = 0; i < args.size(); i++)
 		{
@@ -41,7 +55,7 @@ public final class TreeCommand implements Command
 			{
 				if (i + 1 >= args.size())
 				{
-					err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>]");
+					err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>] [--always-index] [--syntax-only]");
 					return null;
 				}
 				final var rawDepth = args.get(i + 1);
@@ -52,7 +66,7 @@ public final class TreeCommand implements Command
 				catch (NumberFormatException e)
 				{
 					err.println("Invalid depth: " + rawDepth);
-					err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>]");
+					err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>] [--always-index] [--syntax-only]");
 					return null;
 				}
 				if (depth < 0)
@@ -67,17 +81,32 @@ public final class TreeCommand implements Command
 			{
 				if (i + 1 >= args.size())
 				{
-					err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>]");
+					err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>] [--always-index] [--syntax-only]");
 					return null;
 				}
 				rootReference = args.get(i + 1);
 				i++;
 				continue;
 			}
+			if ("--always-index".equals(arg))
+			{
+				alwaysIndex = true;
+				continue;
+			}
+			if ("--syntax-only".equals(arg))
+			{
+				syntaxOnly = true;
+				continue;
+			}
+			if ("--json".equals(arg))
+			{
+				json = true;
+				continue;
+			}
 			if (arg != null && arg.startsWith("--"))
 			{
 				err.println("Unknown option for tree: " + arg);
-				err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>]");
+				err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>] [--always-index] [--syntax-only] [--json]");
 				return null;
 			}
 			if (modelSpec == null)
@@ -85,24 +114,24 @@ public final class TreeCommand implements Command
 				modelSpec = arg;
 				continue;
 			}
-			err.println("Usage: lm [--project-root <path>] tree <model.lm> [--max-depth <n>]");
+			err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>] [--always-index] [--syntax-only] [--json]");
 			return null;
 		}
 
 		if (modelSpec == null)
 		{
-			err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>]");
+			err.println("Usage: lm [--project-root <path>] tree <model.lm> [--root <ref>] [--max-depth <n>] [--always-index] [--syntax-only] [--json]");
 			return null;
 		}
 
 		final int maxDepth = depth == null ? DEFAULT_DEPTH : depth;
-		return new TreeCommand(modelSpec, maxDepth, rootReference);
+		return new TreeCommand(modelSpec, maxDepth, rootReference, alwaysIndex, syntaxOnly, json);
 	}
 
 	@Override
 	public int execute(final CliContext context)
 	{
 		final var runner = new TreeRunner();
-		return runner.run(context, modelSpec, new TreeRunner.Options(maxDepth, rootReference));
+		return runner.run(context, modelSpec, new TreeRunner.Options(maxDepth, rootReference, alwaysIndex, syntaxOnly, json));
 	}
 }

@@ -2,15 +2,17 @@ package org.logoce.lmf.cli.assign;
 
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
+import org.logoce.lmf.cli.edit.EditJsonReportWriter;
 import org.logoce.lmf.cli.edit.TextEdits;
 import org.logoce.lmf.cli.edit.EditOptions;
 import org.logoce.lmf.cli.edit.EditValidationContext;
 import org.logoce.lmf.cli.edit.WorkspaceEditPipeline;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.cli.workspace.WorkspaceDocumentsLoader;
 
@@ -20,55 +22,44 @@ import java.util.Objects;
 
 public final class UnsetRunner
 {
+	public record Options(boolean json)
+	{
+	}
+
 	public int run(final CliContext context,
 				   final String modelSpec,
 				   final String objectReference,
 				   final String featureName)
 	{
+		return run(context, modelSpec, objectReference, featureName, new Options(false));
+	}
+
+	public int run(final CliContext context,
+				   final String modelSpec,
+				   final String objectReference,
+				   final String featureName,
+				   final Options options)
+	{
 		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(objectReference, "objectReference");
 		Objects.requireNonNull(featureName, "featureName");
+		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "unset", options.json());
+		if (!resolved.ok())
 		{
-			return unsetInModel(found.path(), context, objectReference, featureName);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return unsetInModel(resolved.path(), context, modelSpec, objectReference, featureName, options);
 	}
 
 	private int unsetInModel(final Path modelPath,
 							 final CliContext context,
+							 final String requestedModel,
 							 final String objectReference,
-							 final String featureName)
+							 final String featureName,
+							 final Options options)
 	{
 		final var projectRoot = context.projectRoot();
 		final var displayPath = PathDisplay.display(projectRoot, modelPath);
@@ -79,7 +70,17 @@ public final class UnsetRunner
 		final var prepareResult = registryService.prepareForModelAndImporters(modelPath, err, true);
 		if (prepareResult instanceof RegistryService.PrepareWorkspaceResult.Failure failure)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "unset",
+										   failure.exitCode(),
+										   "Cannot prepare workspace for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return failure.exitCode();
 		}
 
@@ -95,7 +96,14 @@ public final class UnsetRunner
 												   displayPath);
 		if (documents == null)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "unset", ExitCodes.INVALID, "Cannot load workspace documents for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -105,14 +113,26 @@ public final class UnsetRunner
 		{
 			err.println("No link trees available for " + displayPath);
 			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "unset", ExitCodes.INVALID, "No link trees available for " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		final var resolved = new RootReferenceResolver().resolve(linkRoots, objectReference);
 		if (!(resolved instanceof RootReferenceResolver.Resolution.Found found))
 		{
-			err.println(ReferenceResolutionMessage.forResolution(objectReference, resolved));
-			err.println("No changes written to " + displayPath);
+			final var message = ReferenceResolutionMessage.forResolution(objectReference, resolved);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "unset", ExitCodes.USAGE, message);
+			}
+			else
+			{
+				err.println(message);
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.USAGE;
 		}
 
@@ -124,14 +144,37 @@ public final class UnsetRunner
 		}
 		catch (RuntimeException e)
 		{
-			err.println(e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
-			err.println("No changes written to " + displayPath);
+			final var message = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "unset", ExitCodes.INVALID, message);
+			}
+			else
+			{
+				err.println(message);
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		if (edit == null)
 		{
-			context.out().println("OK: nothing to unset for " + featureName + " on " + objectReference + " in " + displayPath);
+			if (options.json())
+			{
+				final var outcome = org.logoce.lmf.cli.edit.EditOutcome.noChanges();
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								objectReference,
+								featureName,
+								outcome,
+								"OK: nothing to unset",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to unset for " + featureName + " on " + objectReference + " in " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
@@ -145,17 +188,90 @@ public final class UnsetRunner
 
 		if (!outcome.changed())
 		{
-			context.out().println("OK: nothing to unset for " + featureName + " on " + objectReference + " in " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								objectReference,
+								featureName,
+								outcome,
+								"OK: nothing to unset",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to unset for " + featureName + " on " + objectReference + " in " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
 		if (!outcome.validationPassed() || !outcome.wrote())
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								requestedModel,
+								displayPath,
+								objectReference,
+								featureName,
+								outcome,
+								"No changes written",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
-		context.out().println("OK: unset " + featureName + " on " + objectReference + " in " + displayPath);
+		if (options.json())
+		{
+			writeJsonResult(context,
+							requestedModel,
+							displayPath,
+							objectReference,
+							featureName,
+							outcome,
+							"OK: unset " + featureName,
+							ExitCodes.OK);
+		}
+		else
+		{
+			context.out().println("OK: unset " + featureName + " on " + objectReference + " in " + displayPath);
+		}
 		return ExitCodes.OK;
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String objectReference,
+										final String featureName,
+										final org.logoce.lmf.cli.edit.EditOutcome outcome,
+										final String message,
+										final int exitCode)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("unset")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("object").value(objectReference)
+			.name("feature").value(featureName);
+
+		EditJsonReportWriter.writeOutcome(json, context, outcome);
+		EditJsonReportWriter.writeDiagnostics(json, outcome.validationReport());
+
+		json.name("message").value(message)
+			.name("ok").value(exitCode == ExitCodes.OK)
+			.name("exitCode").value(exitCode)
+			.endObject()
+			.flush();
+		context.out().println();
 	}
 }

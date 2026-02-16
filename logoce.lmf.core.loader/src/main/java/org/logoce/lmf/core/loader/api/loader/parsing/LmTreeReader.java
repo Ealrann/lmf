@@ -47,13 +47,27 @@ public final class LmTreeReader
 				final int offset = source.length();
 				final int line = TextPositions.lineFor(source, offset);
 				final int col = TextPositions.columnFor(source, offset);
+				final int missing = modelBuilder.openDepth();
+				final var openOffset = modelBuilder.lastUnclosedOpenOffset();
+				final String openHint;
+				if (openOffset != null)
+				{
+					final int openLine = TextPositions.lineFor(source, openOffset);
+					final int openCol = TextPositions.columnFor(source, openOffset);
+					openHint = " (innermost '(' opened at " + openLine + ":" + openCol + ")";
+				}
+				else
+				{
+					openHint = "";
+				}
+				final String suffix = missing == 1 ? "missing ')'" : "missing " + missing + " ')'";
 				diagnostics.add(new LmDiagnostic(
 					line,
 					col,
 					1,
 					offset,
 					LmDiagnostic.Severity.ERROR,
-					"Unexpected end of input: missing ')'"
+					"Unexpected end of input: " + suffix + openHint
 				));
 			}
 

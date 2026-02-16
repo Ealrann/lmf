@@ -4,9 +4,10 @@ import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
 import org.logoce.lmf.cli.diagnostics.DiagnosticReporter;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.core.loader.api.loader.linking.tree.LinkNodeInternal;
@@ -19,7 +20,7 @@ import java.util.Objects;
 
 public final class TreeRunner
 {
-	public record Options(int maxDepth, String rootReference)
+	public record Options(int maxDepth, String rootReference, boolean alwaysIndex, boolean syntaxOnly, boolean json)
 	{
 		public Options
 		{
@@ -40,48 +41,30 @@ public final class TreeRunner
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "tree", options.json());
+		if (!resolved.ok())
 		{
-			return listTree(found.path(), context, options);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return listTree(modelSpec, resolved.path(), context, options);
 	}
 
-	private int listTree(final Path path, final CliContext context, final Options options)
+	private int listTree(final String requestedModel, final Path path, final CliContext context, final Options options)
 	{
+		if (options.syntaxOnly())
+		{
+			return listSyntaxTree(requestedModel, path, context, options);
+		}
+
 		final var displayPath = PathDisplay.display(context.projectRoot(), path);
 		final var documentLoader = new DocumentLoader();
 		final var source = documentLoader.readString(path, context.err());
 		if (source == null)
 		{
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "Failed to read model file: " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -89,6 +72,10 @@ public final class TreeRunner
 		if (DiagnosticReporter.hasErrors(parseDiagnostics))
 		{
 			DiagnosticReporter.printDiagnostics(context.err(), displayPath, parseDiagnostics);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "Model has syntax errors: " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -96,6 +83,10 @@ public final class TreeRunner
 		final var prepareResult = registryService.prepareForModel(path, context.err());
 		if (prepareResult instanceof RegistryService.PrepareResult.Failure)
 		{
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "Cannot prepare model registry for " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -109,6 +100,10 @@ public final class TreeRunner
 		if (DiagnosticReporter.hasErrors(diagnostics))
 		{
 			DiagnosticReporter.printDiagnostics(context.err(), displayPath, diagnostics);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "Model has linking errors: " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -116,31 +111,35 @@ public final class TreeRunner
 		if (linkRoots.isEmpty())
 		{
 			context.err().println("No link trees available for " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "No link trees available for " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		final var lister = new TreeLister();
-		final var builder = new StringBuilder();
+		final var lines = new ArrayList<TreeLister.Line>();
 
 		if (options.rootReference() == null)
 		{
 			for (final var linkRoot : linkRoots)
 			{
-				appendTree(lister, builder, linkRoot, options.maxDepth());
+				lines.addAll(lister.list(linkRoot, options.maxDepth(), options.alwaysIndex()));
 			}
-			context.out().print(builder.toString());
-			context.out().flush();
-			return ExitCodes.OK;
+			return emitResult(context, requestedModel, displayPath, options, lines);
 		}
 
 		final var resolution = new RootReferenceResolver().resolve(linkRoots, options.rootReference());
 		if (resolution instanceof RootReferenceResolver.Resolution.Found found)
 		{
 			final var basePath = absolutePath(found.node());
-			appendTree(lister, builder, found.node(), options.maxDepth(), basePath);
-			context.out().print(builder.toString());
-			context.out().flush();
-			return ExitCodes.OK;
+			final var relative = lister.list(found.node(), options.maxDepth(), options.alwaysIndex());
+			for (final var line : relative)
+			{
+				lines.add(new TreeLister.Line(fullPath(basePath, line.path()), line.groupName(), line.name()));
+			}
+			return emitResult(context, requestedModel, displayPath, options, lines);
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.Ambiguous ambiguous)
 		{
@@ -149,51 +148,111 @@ public final class TreeRunner
 			{
 				context.err().println(" - " + candidate);
 			}
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "tree",
+										   ExitCodes.USAGE,
+										   "Ambiguous --root reference: " + options.rootReference(),
+										   ambiguous.candidates());
+			}
 			return ExitCodes.USAGE;
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.NotFound notFound)
 		{
 			context.err().println("Cannot resolve --root reference: " + options.rootReference());
 			context.err().println(notFound.message());
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "tree",
+										   ExitCodes.USAGE,
+										   "Cannot resolve --root reference: " + options.rootReference(),
+										   List.of(notFound.message()));
+			}
 			return ExitCodes.USAGE;
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.Failure failure)
 		{
 			context.err().println("Cannot resolve --root reference: " + options.rootReference());
 			context.err().println(failure.message());
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "tree",
+										   ExitCodes.USAGE,
+										   "Cannot resolve --root reference: " + options.rootReference(),
+										   List.of(failure.message()));
+			}
 			return ExitCodes.USAGE;
 		}
 
 		context.err().println("Unexpected root resolution state");
+		if (options.json())
+		{
+			JsonErrorWriter.writeError(context, "tree", ExitCodes.USAGE, "Unexpected root resolution state");
+		}
 		return ExitCodes.USAGE;
 	}
 
-	private static void appendTree(final TreeLister lister,
-								   final StringBuilder builder,
-								   final LinkNodeInternal<?, PNode, ?> root,
-								   final int maxDepth)
+	private int emitResult(final CliContext context,
+						   final String requestedModel,
+						   final String displayPath,
+						   final Options options,
+						   final List<TreeLister.Line> lines)
 	{
-		final var lines = lister.list(root, maxDepth);
+		if (options.json())
+		{
+			writeJsonResult(context, requestedModel, displayPath, options, lines);
+			return ExitCodes.OK;
+		}
+
+		final var builder = new StringBuilder();
 		for (final var line : lines)
 		{
 			builder.append(line.format()).append('\n');
 		}
+		context.out().print(builder.toString());
+		context.out().flush();
+		return ExitCodes.OK;
 	}
 
-	private static void appendTree(final TreeLister lister,
-								   final StringBuilder builder,
-								   final LinkNodeInternal<?, PNode, ?> root,
-								   final int maxDepth,
-								   final String basePath)
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final Options options,
+										final List<TreeLister.Line> lines)
 	{
-		final var lines = lister.list(root, maxDepth);
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("tree")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("options").beginObject()
+			.name("root").value(options.rootReference())
+			.name("maxDepth").value(options.maxDepth())
+			.name("alwaysIndex").value(options.alwaysIndex())
+			.name("syntaxOnly").value(options.syntaxOnly())
+			.endObject()
+			.name("count").value(lines.size())
+			.name("items").beginArray();
 		for (final var line : lines)
 		{
-			final var path = fullPath(basePath, line.path());
-			final var safeGroup = line.groupName() == null ? "" : line.groupName();
-			final var safeName = line.name() == null ? "" : line.name();
-			builder.append(path).append('\t').append(safeGroup).append('\t').append(safeName).append('\n');
+			json.beginObject()
+				.name("path").value(line.path())
+				.name("group").value(line.groupName())
+				.name("name").value(line.name())
+				.endObject();
 		}
+		json.endArray()
+			.name("ok").value(true)
+			.name("exitCode").value(ExitCodes.OK)
+			.endObject()
+			.flush();
+		context.out().println();
 	}
 
 	private static String fullPath(final String basePath, final String relativePath)
@@ -263,5 +322,47 @@ public final class TreeRunner
 		final var diagnostics = new ArrayList<org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic>();
 		new org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader().read(source, diagnostics);
 		return List.copyOf(diagnostics);
+	}
+
+	private int listSyntaxTree(final String requestedModel, final Path path, final CliContext context, final Options options)
+	{
+		if (options.rootReference() != null)
+		{
+			context.err().println("Cannot use --root with --syntax-only (requires semantic linking)");
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.USAGE, "Cannot use --root with --syntax-only (requires semantic linking)");
+			}
+			return ExitCodes.USAGE;
+		}
+
+		final var displayPath = PathDisplay.display(context.projectRoot(), path);
+		final var documentLoader = new DocumentLoader();
+		final var source = documentLoader.readString(path, context.err());
+		if (source == null)
+		{
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "Failed to read model file: " + displayPath);
+			}
+			return ExitCodes.INVALID;
+		}
+
+		final var diagnostics = new ArrayList<org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic>();
+		final var reader = new org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader();
+		final var readResult = reader.read(source, diagnostics);
+		if (DiagnosticReporter.hasErrors(diagnostics))
+		{
+			DiagnosticReporter.printDiagnostics(context.err(), displayPath, diagnostics);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "tree", ExitCodes.INVALID, "Model has syntax errors: " + displayPath);
+			}
+			return ExitCodes.INVALID;
+		}
+
+		final var lister = new SyntaxTreeLister();
+		final var lines = lister.list(readResult.roots(), options.maxDepth());
+		return emitResult(context, requestedModel, displayPath, options, lines);
 	}
 }

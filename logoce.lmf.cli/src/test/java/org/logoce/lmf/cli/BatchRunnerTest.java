@@ -41,7 +41,8 @@ final class BatchRunnerTest
 											false,
 											false,
 											BatchOptions.ValidateMode.FINAL,
-											"ModelA.lm");
+											"ModelA.lm",
+											false);
 
 		final var exit = new BatchRunner().run(context, options, new StringReader(script));
 		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
@@ -77,7 +78,8 @@ final class BatchRunnerTest
 											false,
 											false,
 											BatchOptions.ValidateMode.FINAL,
-											null);
+											null,
+											false);
 
 		final var exit = new BatchRunner().run(context, options, new StringReader(script));
 		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
@@ -110,7 +112,8 @@ final class BatchRunnerTest
 											false,
 											false,
 											BatchOptions.ValidateMode.EACH,
-											"ModelA.lm");
+											"ModelA.lm",
+											false);
 
 		final var exit = new BatchRunner().run(context, options, new StringReader(script));
 		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
@@ -143,13 +146,49 @@ final class BatchRunnerTest
 											false,
 											false,
 											BatchOptions.ValidateMode.FINAL,
-											"ModelA.lm");
+											"ModelA.lm",
+											false);
 
 		final var exit = new BatchRunner().run(context, options, new StringReader(script));
 		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
 
 		final var afterA = Files.readString(fileA);
 		assertEquals(afterA, formatter.formatOrOriginal(afterA));
+	}
+
+	@Test
+	void batchValidateFinalFailsImmediatelyWhenStageIsNotParseable(@TempDir final Path workspace) throws Exception
+	{
+		writeModels(workspace);
+		final var fileA = workspace.resolve("ModelA.lm");
+		final var originalA = Files.readString(fileA);
+
+		final var script = """
+			{"cmd":"set","args":["/","mainMaterial",")"]}
+			{"cmd":"rename","args":["/materials/materials.0","Lava Boiling"]}
+			""";
+
+		final var outBuffer = new StringWriter();
+		final var errBuffer = new StringWriter();
+		final var context = new CliContext(workspace, new PrintWriter(outBuffer), new PrintWriter(errBuffer));
+
+		final var options = new BatchOptions(null,
+											true,
+											false,
+											false,
+											false,
+											BatchOptions.ValidateMode.FINAL,
+											"ModelA.lm",
+											true);
+
+		final var exit = new BatchRunner().run(context, options, new StringReader(script));
+		assertEquals(ExitCodes.INVALID, exit, "err:\n" + errBuffer + "\nout:\n" + outBuffer);
+		assertEquals(originalA, Files.readString(fileA), "file should not be modified on parse failure");
+
+		final var stdout = outBuffer.toString().trim();
+		JsonTestUtil.assertValidJson(stdout);
+		assertTrue(stdout.contains("\"index\":1"), stdout);
+		assertFalse(stdout.contains("\"index\":2"), stdout);
 	}
 
 	private static void writeModels(final Path workspace) throws Exception

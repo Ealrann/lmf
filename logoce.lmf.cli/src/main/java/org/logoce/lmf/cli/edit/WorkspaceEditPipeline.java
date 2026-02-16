@@ -1,5 +1,6 @@
 package org.logoce.lmf.cli.edit;
 
+import org.logoce.lmf.cli.diagnostics.ValidationReport;
 import org.logoce.lmf.cli.format.LmSourceFormatter;
 
 import java.io.PrintWriter;
@@ -48,12 +49,16 @@ public final class WorkspaceEditPipeline
 											? formatter.formatAll(updatedSources)
 											: Map.copyOf(updatedSources);
 
-		final boolean validationPassed = !options.validate() || validationContext.validate(formattedSources, err);
+		final ValidationReport validation = options.validate()
+										  ? validationContext.validate(formattedSources, err)
+										  : ValidationReport.success();
+
+		final boolean validationPassed = validation.ok();
 		final boolean canCommit = options.commit() && (validationPassed || options.force());
 		final boolean wrote = canCommit && commit(formattedSources, err);
 		final boolean forcedWrite = wrote && !validationPassed && options.force();
 
-		return new EditOutcome(formattedSources, validationPassed, wrote, forcedWrite);
+		return new EditOutcome(formattedSources, validationPassed, wrote, forcedWrite, validation);
 	}
 
 	private static boolean commit(final Map<Path, String> sourcesByPath, final PrintWriter err)
@@ -72,4 +77,3 @@ public final class WorkspaceEditPipeline
 		return transaction.commit(err);
 	}
 }
-

@@ -1,5 +1,7 @@
 package org.logoce.lmf.cli.edit;
 
+import org.logoce.lmf.cli.diagnostics.ValidationReport;
+
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.Map;
@@ -16,8 +18,8 @@ final class CustomValidationContext implements EditValidationContext
 	}
 
 	@Override
-	public boolean validate(final Map<Path, String> sourcesByPath, final PrintWriter err)
+	public ValidationReport validate(final Map<Path, String> sourcesByPath, final PrintWriter err)
 	{
-		return validator.apply(sourcesByPath, err);
+		return validator.apply(sourcesByPath, err) ? ValidationReport.success() : new ValidationReport(false, java.util.List.of(), java.util.List.of());
 	}
 }

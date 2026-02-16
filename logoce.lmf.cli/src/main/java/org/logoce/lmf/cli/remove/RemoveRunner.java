@@ -2,13 +2,15 @@ package org.logoce.lmf.cli.remove;
 
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
+import org.logoce.lmf.cli.edit.EditJsonReportWriter;
 import org.logoce.lmf.cli.edit.EditOptions;
 import org.logoce.lmf.cli.edit.EditValidationContext;
 import org.logoce.lmf.cli.edit.WorkspaceEditPipeline;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.cli.workspace.WorkspaceDocumentsLoader;
 import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
@@ -19,52 +21,40 @@ import java.util.Objects;
 
 public final class RemoveRunner
 {
+	public record Options(boolean json)
+	{
+	}
+
 	public int run(final CliContext context,
 				   final String modelSpec,
 				   final String targetReference)
 	{
+		return run(context, modelSpec, targetReference, new Options(false));
+	}
+
+	public int run(final CliContext context,
+				   final String modelSpec,
+				   final String targetReference,
+				   final Options options)
+	{
 		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(targetReference, "targetReference");
+		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "remove", options.json());
+		if (!resolved.ok())
 		{
-			return removeFromModel(found.path(), context, targetReference);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return removeFromModel(resolved.path(), context, modelSpec, targetReference, options);
 	}
 
 	private int removeFromModel(final Path modelPath,
 								final CliContext context,
-								final String targetReference)
+								final String modelSpec,
+								final String targetReference,
+								final Options options)
 	{
 		final var projectRoot = context.projectRoot();
 		final var displayPath = PathDisplay.display(projectRoot, modelPath);
@@ -75,7 +65,17 @@ public final class RemoveRunner
 		final var prepareResult = registryService.prepareForModelAndImporters(modelPath, err, true);
 		if (prepareResult instanceof RegistryService.PrepareWorkspaceResult.Failure failure)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "remove",
+										   failure.exitCode(),
+										   "Cannot prepare workspace for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return failure.exitCode();
 		}
 
@@ -90,14 +90,28 @@ public final class RemoveRunner
 												   displayPath);
 		if (documents == null || documents.targetDocument() == null)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "remove", ExitCodes.INVALID, "Cannot load workspace documents for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		final var removeWorkspace = toRemoveWorkspace(documents);
 		if (removeWorkspace == null)
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "remove", ExitCodes.INVALID, "Cannot build remove workspace for " + displayPath);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -105,8 +119,15 @@ public final class RemoveRunner
 		final var planResult = planner.plan(removeWorkspace, targetReference);
 		if (planResult instanceof RemovePlanResult.Failure failure)
 		{
-			err.println(failure.message());
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "remove", ExitCodes.INVALID, failure.message());
+			}
+			else
+			{
+				err.println(failure.message());
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -121,18 +142,60 @@ public final class RemoveRunner
 
 		if (!outcome.changed())
 		{
-			context.out().println("OK: nothing to remove in " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								modelSpec,
+								displayPath,
+								targetReference,
+								planned,
+								outcome,
+								"OK: nothing to remove",
+								ExitCodes.OK);
+			}
+			else
+			{
+				context.out().println("OK: nothing to remove in " + displayPath);
+			}
 			return ExitCodes.OK;
 		}
 
 		if (!outcome.validationPassed() || !outcome.wrote())
 		{
-			err.println("No changes written to " + displayPath);
+			if (options.json())
+			{
+				writeJsonResult(context,
+								modelSpec,
+								displayPath,
+								targetReference,
+								planned,
+								outcome,
+								"No changes written",
+								ExitCodes.INVALID);
+			}
+			else
+			{
+				err.println("No changes written to " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
-		printUnsets(context, planned.unsets());
-		context.out().println("OK: removed " + targetReference + " from " + displayPath);
+		if (options.json())
+		{
+			writeJsonResult(context,
+							modelSpec,
+							displayPath,
+							targetReference,
+							planned,
+							outcome,
+							"OK: removed " + targetReference,
+							ExitCodes.OK);
+		}
+		else
+		{
+			printUnsets(context, planned.unsets());
+			context.out().println("OK: removed " + targetReference + " from " + displayPath);
+		}
 		return ExitCodes.OK;
 	}
 
@@ -182,5 +245,43 @@ public final class RemoveRunner
 			return rel;
 		}
 		return rel + ":" + span.line() + ":" + span.column();
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String targetReference,
+										final RemovePlannedEdit planned,
+										final org.logoce.lmf.cli.edit.EditOutcome outcome,
+										final String message,
+										final int exitCode)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("remove")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("target").beginObject()
+			.name("reference").value(targetReference)
+			.name("removed").beginObject()
+			.name("modelQualifiedName").value(planned.removedId().modelQualifiedName())
+			.name("path").value(planned.removedId().path())
+			.endObject()
+			.endObject();
+
+		EditJsonReportWriter.writeUnsets(json, context, planned.unsets());
+		EditJsonReportWriter.writeReferenceRewrites(json, context, planned.rewrites());
+		EditJsonReportWriter.writeOutcome(json, context, outcome);
+		EditJsonReportWriter.writeDiagnostics(json, outcome.validationReport());
+
+		json.name("message").value(message)
+			.name("ok").value(exitCode == ExitCodes.OK)
+			.name("exitCode").value(exitCode)
+			.endObject()
+			.flush();
+		context.out().println();
 	}
 }

@@ -25,6 +25,11 @@ public final class PathParser implements Iterator<PathParser.Step>
 		this.path = path;
 	}
 
+	public String rawPath()
+	{
+		return path;
+	}
+
 	public void rewind()
 	{
 		location = lastLocation;

@@ -1,11 +1,13 @@
 package org.logoce.lmf.core.loader.feature.reference;
 
 import org.logoce.lmf.core.loader.api.loader.linking.LinkNode;
+import org.logoce.lmf.core.loader.api.loader.linking.AmbiguousReferenceException;
 import org.logoce.lmf.core.lang.Group;
 import org.logoce.lmf.core.lang.LMObject;
 import org.logoce.lmf.core.lang.Named;
 import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.api.loader.linking.FeatureResolution;
+import org.logoce.lmf.core.loader.api.loader.linking.InvalidReferenceException;
 import org.logoce.lmf.core.loader.api.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.core.loader.feature.AttributeResolver;
 import org.logoce.lmf.core.loader.feature.RelationResolver;
@@ -33,6 +35,7 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 	@Override
 	public Optional<FeatureResolution<Relation<?, ?, ?, ?>>> resolve(final PathParser parser)
 	{
+		final var rawReference = parser.rawPath();
 		current = start;
 		while (parser.hasNext())
 		{
@@ -46,11 +49,11 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 					if (parser.hasNext())
 					{
 						final var remaining = collectRemaining(parser);
-						current = resolveNamedPath(current.root(), step.text(), remaining);
+						current = resolveNamedPath(current.root(), step.text(), remaining, rawReference);
 					}
 					else
 					{
-						current = searchNamedNode(current.root(), step.text());
+						current = searchNamedNode(current.root(), step.text(), rawReference);
 					}
 				}
 				case CONTEXT_NAME ->
@@ -58,11 +61,11 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 					if (parser.hasNext())
 					{
 						final var remaining = collectRemaining(parser);
-						current = resolveContextNamedPath(current, step.text(), remaining);
+						current = resolveContextNamedPath(current, step.text(), remaining, rawReference);
 					}
 					else
 					{
-						current = searchContextNamedNode(current, step.text());
+						current = searchContextNamedNode(current, step.text(), rawReference);
 					}
 				}
 				case PARENT -> current = requireParent(current);
@@ -80,7 +83,10 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 		}
 		else
 		{
-			return Optional.empty();
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedConceptName(),
+												current.group().name());
 		}
 	}
 
@@ -127,40 +133,69 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 																 (LinkNode<T, ?>) current);
 	}
 
-	private LinkNodeInternal<?, ?, ?> searchNamedNode(final LinkNodeInternal<?, ?, ?> root, final String name)
+	private LinkNodeInternal<?, ?, ?> searchNamedNode(final LinkNodeInternal<?, ?, ?> root,
+													 final String name,
+													 final String rawReference)
 	{
-		return root.streamTree()
-				   .filter(this::groupMatch)
-				   .filter(node -> nameMatch(node, name))
-				   .findAny()
-				   .orElseThrow(() -> new NoSuchElementException("Cannot find named Object : " + name));
+		final var candidates = root.streamTree()
+								  .filter(node -> nameMatch(node, name))
+								  .toList();
+		final var matches = candidates.stream().filter(this::groupMatch).toList();
+		if (!matches.isEmpty())
+		{
+			return matches.getFirst();
+		}
+
+		if (candidates.size() == 1)
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedConceptName(),
+												candidates.getFirst().group().name());
+		}
+		throw new InvalidReferenceException(relation.name(),
+											rawReference,
+											expectedConceptName());
 	}
 
 	private LinkNodeInternal<?, ?, ?> resolveNamedPath(final LinkNodeInternal<?, ?, ?> root,
 													  final String name,
-													  final List<PathParser.Step> remaining)
+													  final List<PathParser.Step> remaining,
+													  final String rawReference)
 	{
-		final var matches = root.streamTree()
-								.filter(node -> nameMatch(node, name))
-								.map(candidate -> tryResolveFrom(candidate, remaining))
-								.filter(Optional::isPresent)
-								.map(Optional::get)
-								.filter(this::groupMatch)
-								.toList();
-
-		if (matches.isEmpty())
+		final var resolved = root.streamTree()
+								 .filter(node -> nameMatch(node, name))
+								 .map(candidate -> tryResolveFrom(candidate, remaining))
+								 .filter(Optional::isPresent)
+								 .map(Optional::get)
+								 .toList();
+		final var matches = resolved.stream().filter(this::groupMatch).toList();
+		if (matches.size() == 1)
 		{
-			throw new NoSuchElementException("Cannot resolve named path @" + name);
+			return matches.getFirst();
 		}
 		if (matches.size() > 1)
 		{
-			throw new NoSuchElementException("Ambiguous named path @" + name + " (" + matches.size() + " matches)");
+			throw new AmbiguousReferenceException(relation.name(),
+												  rawReference,
+												  expectedConceptName(),
+												  matches.size());
 		}
-		return matches.getFirst();
+		if (resolved.size() == 1)
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedConceptName(),
+												resolved.getFirst().group().name());
+		}
+		throw new InvalidReferenceException(relation.name(),
+											rawReference,
+											expectedConceptName());
 	}
 
 	private LinkNodeInternal<?, ?, ?> searchContextNamedNode(final LinkNodeInternal<?, ?, ?> startNode,
-															 final String name)
+															 final String name,
+															 final String rawReference)
 	{
 		LinkNodeInternal<?, ?, ?> cursor = startNode;
 
@@ -183,17 +218,45 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 			cursor = cursor.parent();
 		}
 
-		throw new NoSuchElementException("Cannot find context-named Object : " + name);
+		final LinkNodeInternal<?, ?, ?> any;
+		try
+		{
+			any = searchContextNamedNodeAny(startNode, name);
+		}
+		catch (NoSuchElementException ignored)
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedConceptName());
+		}
+		throw new InvalidReferenceException(relation.name(),
+											rawReference,
+											expectedConceptName(),
+											any.group().name());
 	}
 
 	private LinkNodeInternal<?, ?, ?> resolveContextNamedPath(final LinkNodeInternal<?, ?, ?> startNode,
 															  final String name,
-															  final List<PathParser.Step> remaining)
+															  final List<PathParser.Step> remaining,
+															  final String rawReference)
 	{
 		final var anchor = searchContextNamedNodeAny(startNode, name);
-		return tryResolveFrom(anchor, remaining)
-			.filter(this::groupMatch)
-			.orElseThrow(() -> new NoSuchElementException("Cannot resolve context-named path ^" + name));
+		final var resolved = tryResolveFrom(anchor, remaining);
+		if (resolved.isEmpty())
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedConceptName());
+		}
+		final var node = resolved.get();
+		if (!groupMatch(node))
+		{
+			throw new InvalidReferenceException(relation.name(),
+												rawReference,
+												expectedConceptName(),
+												node.group().name());
+		}
+		return node;
 	}
 
 	private static LinkNodeInternal<?, ?, ?> searchContextNamedNodeAny(final LinkNodeInternal<?, ?, ?> startNode,
@@ -279,5 +342,11 @@ public final class LocalReferenceExplorer implements ReferenceResolver
 				   .map(AttributeResolver.AttributeResolution.class::cast)
 				   .filter(r -> r.feature().id() == Named.FeatureIDs.NAME)
 				   .anyMatch(r -> name.equals(r.value()));
+	}
+
+	private String expectedConceptName()
+	{
+		final var concept = relation.concept();
+		return concept == null ? null : concept.name();
 	}
 }

@@ -30,7 +30,7 @@ final class ReplaceRunnerTest
 												 "ModelA.lm",
 												 "/materials/materials.1",
 												 "(Material name=Stone)",
-												 new ReplaceRunner.Options(false));
+												 new ReplaceRunner.Options(false, false));
 
 		assertEquals(ExitCodes.OK, exit);
 		final var updated = Files.readString(file);
@@ -53,12 +53,37 @@ final class ReplaceRunnerTest
 												 "ModelA.lm",
 												 "/materials/materials.1",
 												 "(Material name=Stone) (Material name=Other)",
-												 new ReplaceRunner.Options(false));
+												 new ReplaceRunner.Options(false, false));
 
 		assertEquals(ExitCodes.USAGE, exit);
 		final var updated = Files.readString(file);
 		assertEquals(original, updated);
 		assertTrue(errBuffer.toString().contains("exactly one root element"));
+	}
+
+	@Test
+	void replaceParseFailurePrintsHint(@TempDir final Path workspace) throws Exception
+	{
+		writeModels(workspace);
+		final var file = workspace.resolve("ModelA.lm");
+		final var original = Files.readString(file);
+
+		final var outBuffer = new StringWriter();
+		final var errBuffer = new StringWriter();
+		final var context = new CliContext(workspace, new PrintWriter(outBuffer), new PrintWriter(errBuffer));
+
+		final var exit = new ReplaceRunner().run(context,
+												 "ModelA.lm",
+												 "/materials/materials.1",
+												 "(Material name=Stone",
+												 new ReplaceRunner.Options(false, false));
+
+		assertEquals(ExitCodes.USAGE, exit, "err:\n" + errBuffer);
+		assertTrue(errBuffer.toString().contains("Replacement subtree cannot be parsed"), "err:\n" + errBuffer);
+		assertTrue(errBuffer.toString().contains("Hint: If you passed a subtree inline"), "err:\n" + errBuffer);
+
+		final var updated = Files.readString(file);
+		assertEquals(original, updated);
 	}
 
 	@Test
@@ -76,7 +101,7 @@ final class ReplaceRunnerTest
 												 "ModelA.lm",
 												 "/materials/materials.0",
 												 "(Material name=Stone)",
-												 new ReplaceRunner.Options(false));
+												 new ReplaceRunner.Options(false, false));
 
 		assertEquals(ExitCodes.INVALID, exit);
 		final var updated = Files.readString(file);
@@ -99,7 +124,7 @@ final class ReplaceRunnerTest
 												 "ModelA.lm",
 												 "/materials/materials.0",
 												 "(Material name=Stone)",
-												 new ReplaceRunner.Options(true));
+												 new ReplaceRunner.Options(true, false));
 
 		assertEquals(ExitCodes.INVALID, exit);
 		final var updated = Files.readString(file);

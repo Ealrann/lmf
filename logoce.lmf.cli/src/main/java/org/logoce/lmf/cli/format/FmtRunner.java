@@ -3,13 +3,16 @@ package org.logoce.lmf.cli.format;
 import org.logoce.lmf.cli.CliContext;
 import org.logoce.lmf.cli.ExitCodes;
 import org.logoce.lmf.cli.diagnostics.DiagnosticReporter;
+import org.logoce.lmf.cli.json.JsonErrorWriter;
+import org.logoce.lmf.cli.json.JsonWriter;
 import org.logoce.lmf.cli.util.PathDisplay;
-import org.logoce.lmf.cli.workspace.ModelLocator;
-import org.logoce.lmf.cli.workspace.ModelResolution;
+import org.logoce.lmf.cli.workspace.ModelSpecResolver;
 import org.logoce.lmf.cli.workspace.DocumentLoader;
 import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +20,7 @@ import java.util.Objects;
 
 public final class FmtRunner
 {
-	public record Options(String rootReference, boolean refPathToName)
+	public record Options(String rootReference, boolean refPathToName, boolean syntaxOnly, boolean inPlace, boolean json)
 	{
 		public Options
 		{
@@ -34,62 +37,77 @@ public final class FmtRunner
 		Objects.requireNonNull(modelSpec, "modelSpec");
 		Objects.requireNonNull(options, "options");
 
-		final var locator = new ModelLocator(context.projectRoot());
-		final var resolution = locator.resolve(modelSpec);
-
-		if (resolution instanceof ModelResolution.Found found)
+		final var resolved = ModelSpecResolver.resolve(context, modelSpec, "fmt", options.json());
+		if (!resolved.ok())
 		{
-			return formatModel(found.path(), context, options);
+			return resolved.exitCode();
 		}
-		if (resolution instanceof ModelResolution.Ambiguous ambiguous)
-		{
-			final var err = context.err();
-			err.println("Ambiguous model reference: " + modelSpec);
-			for (final var path : ambiguous.matches())
-			{
-				err.println(" - " + PathDisplay.display(context.projectRoot(), path));
-			}
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.NotFound notFound)
-		{
-			final var err = context.err();
-			err.println("Model not found: " + notFound.requested());
-			err.println("Searched under: " + context.projectRoot());
-			return ExitCodes.USAGE;
-		}
-		if (resolution instanceof ModelResolution.Failed failed)
-		{
-			final var err = context.err();
-			err.println("Failed to search for model: " + failed.message());
-			return ExitCodes.USAGE;
-		}
-
-		context.err().println("Unexpected model resolution state");
-		return ExitCodes.USAGE;
+		return formatModel(modelSpec, resolved.path(), context, options);
 	}
 
-	private int formatModel(final Path path, final CliContext context, final Options options)
+	private int formatModel(final String requestedModel, final Path path, final CliContext context, final Options options)
 	{
 		final var displayPath = PathDisplay.display(context.projectRoot(), path);
 		final var documentLoader = new DocumentLoader();
 		final var source = documentLoader.readString(path, context.err());
 		if (source == null)
 		{
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "Failed to read model file: " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
-		final var parseDiagnostics = parseDiagnostics(source);
+		final var parseDiagnostics = new ArrayList<org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic>();
+		final var reader = new org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader();
+		final var readResult = reader.read(source, parseDiagnostics);
 		if (DiagnosticReporter.hasErrors(parseDiagnostics))
 		{
 			DiagnosticReporter.printDiagnostics(context.err(), displayPath, parseDiagnostics);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "Model has syntax errors: " + displayPath);
+			}
 			return ExitCodes.INVALID;
+		}
+
+		if (options.syntaxOnly())
+		{
+			if (options.rootReference() != null)
+			{
+				context.err().println("Cannot use --root with --syntax-only (requires semantic linking)");
+				return ExitCodes.USAGE;
+			}
+			if (options.refPathToName())
+			{
+				context.err().println("Cannot use --ref-path-to-name with --syntax-only (requires semantic linking)");
+				return ExitCodes.USAGE;
+			}
+
+			if (readResult.roots().isEmpty())
+			{
+				context.err().println("No syntax roots found in " + displayPath);
+				if (options.json())
+				{
+					JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "No syntax roots found in " + displayPath);
+				}
+				return ExitCodes.INVALID;
+			}
+
+			final var formatter = new LmFormatter();
+			final var formatted = ensureTrailingNewline(formatter.format(readResult.roots()));
+			return emitFormatted(context, requestedModel, path, displayPath, source, formatted, options);
 		}
 
 		final var registryService = new RegistryService(context.projectRoot(), documentLoader);
 		final var prepareResult = registryService.prepareForModel(path, context.err());
 		if (prepareResult instanceof RegistryService.PrepareResult.Failure)
 		{
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "Cannot prepare model registry for " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -103,6 +121,10 @@ public final class FmtRunner
 		if (DiagnosticReporter.hasErrors(diagnostics))
 		{
 			DiagnosticReporter.printDiagnostics(context.err(), displayPath, diagnostics);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "Model has linking errors: " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
@@ -110,28 +132,37 @@ public final class FmtRunner
 		if (roots.isEmpty())
 		{
 			context.err().println("No syntax roots found in " + displayPath);
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "No syntax roots found in " + displayPath);
+			}
 			return ExitCodes.INVALID;
 		}
 
 		if (options.rootReference() == null)
 		{
-			return emitFormattedRoots(context, document, roots, options);
+			final var formatted = formatRoots(document, roots, options);
+			return emitFormatted(context, requestedModel, path, displayPath, source, formatted, options);
 		}
 
-		return emitFormattedRootReference(context, document, displayPath, options);
+		final var formatted = formatRootReference(document, displayPath, options, context);
+		if (formatted == null)
+		{
+			return ExitCodes.USAGE;
+		}
+		return emitFormatted(context, requestedModel, path, displayPath, source, formatted, options);
 	}
 
-	private int emitFormattedRoots(final CliContext context,
-								   final org.logoce.lmf.core.loader.api.loader.model.LmDocument document,
-								   final List<org.logoce.lmf.core.util.tree.Tree<PNode>> roots,
-								   final Options options)
+	private static String formatRoots(final org.logoce.lmf.core.loader.api.loader.model.LmDocument document,
+									  final List<org.logoce.lmf.core.util.tree.Tree<PNode>> roots,
+									  final Options options)
 	{
 		final var formatter = new LmFormatter();
-		final String formatted;
+		final String formattedBody;
 
 		if (!options.refPathToName())
 		{
-			formatted = formatter.format(roots);
+			formattedBody = formatter.format(roots);
 		}
 		else
 		{
@@ -149,33 +180,31 @@ public final class FmtRunner
 						builder.append('\n').append('\n');
 					}
 				}
-				formatted = builder.toString();
+				formattedBody = builder.toString();
 			}
 			else
 			{
-				formatted = formatter.format(roots);
+				formattedBody = formatter.format(roots);
 			}
 		}
 
-		context.out().print(formatted);
-		if (!formatted.endsWith("\n"))
-		{
-			context.out().print("\n");
-		}
-		context.out().flush();
-		return ExitCodes.OK;
+		return ensureTrailingNewline(formattedBody);
 	}
 
-	private int emitFormattedRootReference(final CliContext context,
-										   final org.logoce.lmf.core.loader.api.loader.model.LmDocument document,
-										   final String displayPath,
-										   final Options options)
+	private static String formatRootReference(final org.logoce.lmf.core.loader.api.loader.model.LmDocument document,
+											  final String displayPath,
+											  final Options options,
+											  final CliContext context)
 	{
 		final var linkRoots = RootReferenceResolver.collectLinkRoots(document.linkTrees());
 		if (linkRoots.isEmpty())
 		{
 			context.err().println("Unable to resolve --root because no link trees are available for " + displayPath);
-			return ExitCodes.INVALID;
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "Unable to resolve --root because no link trees are available for " + displayPath);
+			}
+			return null;
 		}
 
 		final var resolution = new RootReferenceResolver().resolve(linkRoots, options.rootReference());
@@ -183,14 +212,7 @@ public final class FmtRunner
 		{
 			final var formatter = new LmFormatter();
 			final var index = options.refPathToName() ? ReferencePathToNameIndex.build(found.node().root()) : null;
-			final var formatted = formatter.format(found.node(), index);
-			context.out().print(formatted);
-			if (!formatted.endsWith("\n"))
-			{
-				context.out().print("\n");
-			}
-			context.out().flush();
-			return ExitCodes.OK;
+			return ensureTrailingNewline(formatter.format(found.node(), index));
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.Ambiguous ambiguous)
 		{
@@ -199,29 +221,175 @@ public final class FmtRunner
 			{
 				context.err().println(" - " + candidate);
 			}
-			return ExitCodes.USAGE;
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "fmt",
+										   ExitCodes.USAGE,
+										   "Ambiguous --root reference: " + options.rootReference(),
+										   ambiguous.candidates());
+			}
+			return null;
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.NotFound notFound)
 		{
 			context.err().println("Cannot resolve --root reference: " + options.rootReference());
 			context.err().println(notFound.message());
-			return ExitCodes.USAGE;
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "fmt",
+										   ExitCodes.USAGE,
+										   "Cannot resolve --root reference: " + options.rootReference(),
+										   List.of(notFound.message()));
+			}
+			return null;
 		}
 		if (resolution instanceof RootReferenceResolver.Resolution.Failure failure)
 		{
 			context.err().println("Cannot resolve --root reference: " + options.rootReference());
 			context.err().println(failure.message());
-			return ExitCodes.USAGE;
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context,
+										   "fmt",
+										   ExitCodes.USAGE,
+										   "Cannot resolve --root reference: " + options.rootReference(),
+										   List.of(failure.message()));
+			}
+			return null;
 		}
 
 		context.err().println("Unexpected root resolution state");
-		return ExitCodes.USAGE;
+		if (options.json())
+		{
+			JsonErrorWriter.writeError(context, "fmt", ExitCodes.USAGE, "Unexpected root resolution state");
+		}
+		return null;
 	}
 
-	private static List<org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic> parseDiagnostics(final CharSequence source)
+	private int emitFormatted(final CliContext context,
+							  final String requestedModel,
+							  final Path modelPath,
+							  final String displayPath,
+							  final String originalSource,
+							  final String formatted,
+							  final Options options)
 	{
-		final var diagnostics = new ArrayList<org.logoce.lmf.core.loader.api.loader.diagnostic.LmDiagnostic>();
-		new org.logoce.lmf.core.loader.api.loader.parsing.LmTreeReader().read(source, diagnostics);
-		return List.copyOf(diagnostics);
+		if (options.inPlace())
+		{
+			return writeInPlace(context, requestedModel, modelPath, displayPath, originalSource, formatted, options);
+		}
+
+		if (options.json())
+		{
+			writeJsonResult(context, requestedModel, displayPath, formatted, false, false, options);
+			return ExitCodes.OK;
+		}
+
+		context.out().print(formatted);
+		context.out().flush();
+		return ExitCodes.OK;
+	}
+
+	private int writeInPlace(final CliContext context,
+							 final String requestedModel,
+							 final Path modelPath,
+							 final String displayPath,
+							 final String originalSource,
+							 final String formatted,
+							 final Options options)
+	{
+		final var normalizedOriginal = ensureTrailingNewline(originalSource);
+		final boolean changed = !Objects.equals(normalizedOriginal, formatted);
+		if (!changed)
+		{
+			if (options.json())
+			{
+				writeJsonResult(context, requestedModel, displayPath, null, false, false, options);
+			}
+			else
+			{
+				context.out().println("OK: already formatted " + displayPath);
+			}
+			return ExitCodes.OK;
+		}
+
+		try
+		{
+			Files.writeString(modelPath.toAbsolutePath().normalize(), formatted, StandardCharsets.UTF_8);
+		}
+		catch (Exception e)
+		{
+			final var message = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
+			if (options.json())
+			{
+				JsonErrorWriter.writeError(context, "fmt", ExitCodes.INVALID, "Failed to write file: " + displayPath + " (" + message + ")");
+			}
+			else
+			{
+				context.err().println("Failed to write file: " + displayPath + " (" + message + ")");
+			}
+			return ExitCodes.INVALID;
+		}
+
+		if (options.json())
+		{
+			writeJsonResult(context, requestedModel, displayPath, null, true, true, options);
+		}
+		else
+		{
+			context.out().println("OK: formatted " + displayPath);
+		}
+		return ExitCodes.OK;
+	}
+
+	private static void writeJsonResult(final CliContext context,
+										final String requestedModel,
+										final String displayPath,
+										final String formatted,
+										final boolean changed,
+										final boolean wrote,
+										final Options options)
+	{
+		final var json = new JsonWriter(context.out());
+		json.beginObject()
+			.name("command").value("fmt")
+			.name("projectRoot").value(context.projectRoot().toString())
+			.name("model").beginObject()
+			.name("requested").value(requestedModel)
+			.name("path").value(displayPath)
+			.endObject()
+			.name("options").beginObject()
+			.name("root").value(options.rootReference())
+			.name("refPathToName").value(options.refPathToName())
+			.name("syntaxOnly").value(options.syntaxOnly())
+			.name("inPlace").value(options.inPlace())
+			.endObject();
+
+		if (!options.inPlace())
+		{
+			json.name("formatted").value(formatted);
+		}
+		else
+		{
+			json.name("changed").value(changed)
+				.name("wrote").value(wrote);
+		}
+
+		json.name("ok").value(true)
+			.name("exitCode").value(ExitCodes.OK)
+			.endObject()
+			.flush();
+		context.out().println();
+	}
+
+	private static String ensureTrailingNewline(final String formatted)
+	{
+		if (formatted == null || formatted.isEmpty())
+		{
+			return "\n";
+		}
+		return formatted.endsWith("\n") ? formatted : formatted + "\n";
 	}
 }

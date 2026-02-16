@@ -10,16 +10,17 @@ import org.logoce.lmf.cli.workspace.RegistryService;
 import org.logoce.lmf.cli.workspace.WorkspaceValidator;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 public final class BatchFinalizer
 {
-	public int finalizeBatch(final BatchExecutionContext context,
-							final boolean anyHardFailure,
-							boolean anyValidationFailure,
-							final int maxExitCode)
+	public BatchFinalizationResult finalizeBatch(final BatchExecutionContext context,
+												final boolean anyHardFailure,
+												boolean anyValidationFailure,
+												final int maxExitCode)
 	{
 		Objects.requireNonNull(context, "context");
 
@@ -31,7 +32,13 @@ public final class BatchFinalizer
 		if (anyHardFailure)
 		{
 			err.println("Batch failed; no changes written");
-			return maxExitCode;
+			return new BatchFinalizationResult(maxExitCode,
+											   false,
+											   options.dryRun(),
+											   false,
+											   anyValidationFailure,
+											   context.overlaySources().size(),
+											   List.copyOf(context.overlaySources().keySet()));
 		}
 
 		if (!overlaySources.isEmpty())
@@ -58,19 +65,38 @@ public final class BatchFinalizer
 			{
 				out.println(line);
 			}
-			return anyValidationFailure ? ExitCodes.INVALID : ExitCodes.OK;
+			final int exitCode = anyValidationFailure ? ExitCodes.INVALID : ExitCodes.OK;
+			return new BatchFinalizationResult(exitCode,
+											   false,
+											   true,
+											   false,
+											   anyValidationFailure,
+											   overlaySources.size(),
+											   List.copyOf(overlaySources.keySet()));
 		}
 
 		if (overlaySources.isEmpty())
 		{
 			out.println("OK: no changes to write");
-			return ExitCodes.OK;
+			return new BatchFinalizationResult(ExitCodes.OK,
+											   false,
+											   false,
+											   false,
+											   anyValidationFailure,
+											   0,
+											   List.of());
 		}
 
 		if (anyValidationFailure && options.validateMode() != BatchOptions.ValidateMode.NONE && !options.force())
 		{
 			err.println("Batch produced validation errors; no changes written");
-			return ExitCodes.INVALID;
+			return new BatchFinalizationResult(ExitCodes.INVALID,
+											   false,
+											   false,
+											   false,
+											   true,
+											   overlaySources.size(),
+											   List.copyOf(overlaySources.keySet()));
 		}
 
 		final var transaction = new WorkspaceWriteTransaction();
@@ -82,7 +108,13 @@ public final class BatchFinalizer
 		if (!transaction.commit(err))
 		{
 			err.println("Batch failed; no changes written");
-			return ExitCodes.INVALID;
+			return new BatchFinalizationResult(ExitCodes.INVALID,
+											   false,
+											   false,
+											   false,
+											   anyValidationFailure,
+											   overlaySources.size(),
+											   List.copyOf(overlaySources.keySet()));
 		}
 
 		for (final var line : context.deferredOut())
@@ -93,11 +125,23 @@ public final class BatchFinalizer
 		if (anyValidationFailure)
 		{
 			err.println("FORCED: wrote changes despite validation errors");
-			return ExitCodes.INVALID;
+			return new BatchFinalizationResult(ExitCodes.INVALID,
+											   true,
+											   false,
+											   true,
+											   true,
+											   overlaySources.size(),
+											   List.copyOf(overlaySources.keySet()));
 		}
 
 		out.println("OK: updated " + overlaySources.size() + " file(s)");
-		return ExitCodes.OK;
+		return new BatchFinalizationResult(ExitCodes.OK,
+										   true,
+										   false,
+										   false,
+										   false,
+										   overlaySources.size(),
+										   List.copyOf(overlaySources.keySet()));
 	}
 
 	private static boolean validateFinal(final BatchExecutionContext context,

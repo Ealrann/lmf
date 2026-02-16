@@ -5,6 +5,7 @@ import org.logoce.lmf.core.lang.Relation;
 import org.logoce.lmf.core.loader.api.loader.linking.RelationReferences;
 import org.logoce.lmf.core.loader.api.loader.linking.ResolutionAttempt;
 import org.logoce.lmf.core.loader.api.loader.linking.tree.LinkNodeInternal;
+import org.logoce.lmf.core.loader.api.loader.util.TextPositions;
 import org.logoce.lmf.core.loader.api.text.syntax.PNode;
 
 import java.util.ArrayDeque;
@@ -23,11 +24,27 @@ public final class ReferenceEditPlanner
 		String map(LinkNodeInternal<?, PNode, ?> node, String raw, ObjectId targetId, boolean quoted);
 	}
 
+	@FunctionalInterface
+	public interface RewriteListener
+	{
+		void onRewrite(TextPositions.Span span, String oldRaw, String newRaw, ObjectId resolvedTarget);
+	}
+
 	public List<TextEdits.TextEdit> planEdits(final CharSequence source,
 									   final List<LinkNodeInternal<?, PNode, ?>> roots,
 									   final Set<LinkNodeInternal<?, PNode, ?>> skipNodes,
 									   final ReferenceMapper mapper,
 									   final int offsetAdjustment)
+	{
+		return planEdits(source, roots, skipNodes, mapper, offsetAdjustment, null);
+	}
+
+	public List<TextEdits.TextEdit> planEdits(final CharSequence source,
+											 final List<LinkNodeInternal<?, PNode, ?>> roots,
+											 final Set<LinkNodeInternal<?, PNode, ?>> skipNodes,
+											 final ReferenceMapper mapper,
+											 final int offsetAdjustment,
+											 final RewriteListener rewriteListener)
 	{
 		Objects.requireNonNull(source, "source");
 		Objects.requireNonNull(roots, "roots");
@@ -44,7 +61,7 @@ public final class ReferenceEditPlanner
 					{
 						return;
 					}
-					planNodeEdits(node, source, mapper, offsetAdjustment, edits);
+					planNodeEdits(node, source, mapper, offsetAdjustment, rewriteListener, edits);
 				});
 		}
 
@@ -55,6 +72,7 @@ public final class ReferenceEditPlanner
 								 final CharSequence source,
 								 final ReferenceMapper mapper,
 								 final int offsetAdjustment,
+								 final RewriteListener rewriteListener,
 								 final List<TextEdits.TextEdit> edits)
 	{
 		final var attempts = node.relationResolutions();
@@ -63,8 +81,15 @@ public final class ReferenceEditPlanner
 			return;
 		}
 
-		final var index = FeatureValueSpanIndex.build(node.pNode().tokens(), source);
+		final var pNode = node.pNode();
+		if (pNode == null)
+		{
+			return;
+		}
+
+		final var index = FeatureValueSpanIndex.build(pNode.tokens(), source);
 		final var queuesByFeature = new HashMap<FeatureValueSpanIndex.FeatureSpan, Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>>>();
+		Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> positionalQueues = null;
 
 		for (final ResolutionAttempt<Relation<?, ?, ?, ?>> attempt : attempts)
 		{
@@ -75,12 +100,19 @@ public final class ReferenceEditPlanner
 			}
 
 			final var featureSpan = resolveFeatureSpan(index, relation.name());
-			if (featureSpan == null)
+			final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> valueQueues;
+			if (featureSpan != null)
 			{
-				throw new ReferenceEditException("Cannot locate feature span for '" + relation.name() + "'");
+				valueQueues = queuesByFeature.computeIfAbsent(featureSpan, ReferenceEditPlanner::buildQueues);
 			}
-
-			final var valueQueues = queuesByFeature.computeIfAbsent(featureSpan, ReferenceEditPlanner::buildQueues);
+			else
+			{
+				if (positionalQueues == null)
+				{
+					positionalQueues = buildPositionalQueues(index);
+				}
+				valueQueues = positionalQueues;
+			}
 			for (final var resolved : RelationReferences.resolved(attempt))
 			{
 				final var raw = resolved.raw();
@@ -89,7 +121,15 @@ public final class ReferenceEditPlanner
 					continue;
 				}
 
-				final var valueSpan = pollValueSpan(valueQueues, featureSpan, raw);
+				final FeatureValueSpanIndex.ValueSpan valueSpan;
+				if (featureSpan != null)
+				{
+					valueSpan = pollValueSpan(valueQueues, featureSpan, raw);
+				}
+				else
+				{
+					valueSpan = pollValueSpan(valueQueues, raw);
+				}
 				if (valueSpan == null)
 				{
 					throw new ReferenceEditException("Cannot locate value span for '" + raw + "'");
@@ -112,9 +152,31 @@ public final class ReferenceEditPlanner
 				{
 					throw new ReferenceEditException("Reference edit offset is negative after adjustment");
 				}
+				if (rewriteListener != null)
+				{
+					rewriteListener.onRewrite(valueSpan.span(), raw, updated, targetId);
+				}
 				edits.add(new TextEdits.TextEdit(adjustedOffset, valueSpan.span().length(), updated));
 			}
 		}
+	}
+
+	private static Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> buildPositionalQueues(final FeatureValueSpanIndex index)
+	{
+		final var queues = new HashMap<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>>();
+		for (final var feature : index.features())
+		{
+			if (feature.name() != null)
+			{
+				continue;
+			}
+
+			for (final var value : feature.values())
+			{
+				queues.computeIfAbsent(value.raw(), ignored -> new ArrayDeque<>()).add(value);
+			}
+		}
+		return queues;
 	}
 
 	private static FeatureValueSpanIndex.FeatureSpan resolveFeatureSpan(final FeatureValueSpanIndex index,
@@ -152,6 +214,17 @@ public final class ReferenceEditPlanner
 			queues.computeIfAbsent(value.raw(), ignored -> new ArrayDeque<>()).add(value);
 		}
 		return queues;
+	}
+
+	private static FeatureValueSpanIndex.ValueSpan pollValueSpan(final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> queues,
+																 final String raw)
+	{
+		final var queue = queues.get(raw);
+		if (queue == null || queue.isEmpty())
+		{
+			return null;
+		}
+		return queue.removeFirst();
 	}
 
 	private static FeatureValueSpanIndex.ValueSpan pollValueSpan(final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> queues,

@@ -13,16 +13,19 @@ public final class SetCommand implements Command
 	private final String objectReference;
 	private final String featureName;
 	private final String value;
+	private final boolean json;
 
 	public SetCommand(final String modelSpec,
 					  final String objectReference,
 					  final String featureName,
-					  final String value)
+					  final String value,
+					  final boolean json)
 	{
 		this.modelSpec = Objects.requireNonNull(modelSpec, "modelSpec");
 		this.objectReference = Objects.requireNonNull(objectReference, "objectReference");
 		this.featureName = Objects.requireNonNull(featureName, "featureName");
 		this.value = Objects.requireNonNull(value, "value");
+		this.json = json;
 	}
 
 	@Override
@@ -35,17 +38,23 @@ public final class SetCommand implements Command
 	{
 		if (args.isEmpty())
 		{
-			err.println("Usage: lm [--project-root <path>] set <model.lm> <objectRef> <featureName> <value>");
+			err.println("Usage: lm [--project-root <path>] set <model.lm> <objectRef> <featureName> <value> [--json]");
 			return null;
 		}
 
+		boolean json = false;
 		final var cleaned = new java.util.ArrayList<String>(args.size());
 		for (final var arg : args)
 		{
+			if ("--json".equals(arg))
+			{
+				json = true;
+				continue;
+			}
 			if (arg != null && arg.startsWith("--"))
 			{
 				err.println("Unknown option for set: " + arg);
-				err.println("Usage: lm [--project-root <path>] set <model.lm> <objectRef> <featureName> <value>");
+				err.println("Usage: lm [--project-root <path>] set <model.lm> <objectRef> <featureName> <value> [--json]");
 				return null;
 			}
 			cleaned.add(arg);
@@ -53,7 +62,7 @@ public final class SetCommand implements Command
 
 		if (cleaned.size() < 4)
 		{
-			err.println("Usage: lm [--project-root <path>] set <model.lm> <objectRef> <featureName> <value>");
+			err.println("Usage: lm [--project-root <path>] set <model.lm> <objectRef> <featureName> <value> [--json]");
 			return null;
 		}
 
@@ -61,13 +70,12 @@ public final class SetCommand implements Command
 		final var objectRef = cleaned.get(1);
 		final var featureName = cleaned.get(2);
 		final var value = String.join(" ", cleaned.subList(3, cleaned.size()));
-		return new SetCommand(modelSpec, objectRef, featureName, value);
+		return new SetCommand(modelSpec, objectRef, featureName, value, json);
 	}
 
 	@Override
 	public int execute(final CliContext context)
 	{
-		return new SetRunner().run(context, modelSpec, objectReference, featureName, value);
+		return new SetRunner().run(context, modelSpec, objectReference, featureName, value, new SetRunner.Options(json));
 	}
 }
-

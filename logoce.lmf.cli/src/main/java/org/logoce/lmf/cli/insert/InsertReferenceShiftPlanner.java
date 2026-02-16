@@ -1,6 +1,7 @@
 package org.logoce.lmf.cli.insert;
 
 import org.logoce.lmf.cli.edit.FeatureValueSpanIndex;
+import org.logoce.lmf.cli.edit.ReferenceRewrite;
 import org.logoce.lmf.cli.edit.TextEdits;
 import org.logoce.lmf.cli.format.RootReferenceResolver;
 import org.logoce.lmf.cli.ref.ObjectId;
@@ -24,28 +25,31 @@ final class InsertReferenceShiftPlanner
 						   final CharSequence source,
 						   final List<LinkNodeInternal<?, PNode, ?>> linkRoots,
 						   final InsertShiftContext shiftContext,
-						   final Map<Path, List<TextEdits.TextEdit>> editsByFile)
+						   final Map<Path, List<TextEdits.TextEdit>> editsByFile,
+						   final List<ReferenceRewrite> rewrites)
 	{
 		for (final var root : linkRoots)
 		{
-			root.streamTree().forEach(node -> planNodeEdits(path, node, source, shiftContext, editsByFile));
+			root.streamTree().forEach(node -> planNodeEdits(path, node, source, shiftContext, editsByFile, rewrites));
 		}
 	}
 
 	void planDocumentEdits(final org.logoce.lmf.cli.workspace.WorkspaceModelDocument doc,
 						   final InsertShiftContext shiftContext,
-						   final Map<Path, List<TextEdits.TextEdit>> editsByFile)
+						   final Map<Path, List<TextEdits.TextEdit>> editsByFile,
+						   final List<ReferenceRewrite> rewrites)
 	{
 		final var document = doc.document();
 		final var linkRoots = RootReferenceResolver.collectLinkRoots(document.linkTrees());
-		planDocumentEdits(doc.path(), document.source(), linkRoots, shiftContext, editsByFile);
+		planDocumentEdits(doc.path(), document.source(), linkRoots, shiftContext, editsByFile, rewrites);
 	}
 
 	private void planNodeEdits(final Path path,
 							   final LinkNodeInternal<?, PNode, ?> node,
 							   final CharSequence source,
 							   final InsertShiftContext shiftContext,
-							   final Map<Path, List<TextEdits.TextEdit>> editsByFile)
+							   final Map<Path, List<TextEdits.TextEdit>> editsByFile,
+							   final List<ReferenceRewrite> rewrites)
 	{
 		final var attempts = node.relationResolutions();
 		if (attempts == null || attempts.isEmpty())
@@ -55,6 +59,7 @@ final class InsertReferenceShiftPlanner
 
 		final var index = FeatureValueSpanIndex.build(node.pNode().tokens(), source);
 		final var queuesByFeature = new HashMap<FeatureValueSpanIndex.FeatureSpan, Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>>>();
+		Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> positionalQueues = null;
 
 		for (final ResolutionAttempt<Relation<?, ?, ?, ?>> attempt : attempts)
 		{
@@ -65,12 +70,19 @@ final class InsertReferenceShiftPlanner
 			}
 
 			final var featureSpan = resolveFeatureSpan(index, relation.name());
-			if (featureSpan == null)
+			final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> valueQueues;
+			if (featureSpan != null)
 			{
-				throw new InsertPlanException("Cannot locate feature span for '" + relation.name() + "'");
+				valueQueues = queuesByFeature.computeIfAbsent(featureSpan, InsertReferenceShiftPlanner::buildQueues);
 			}
-
-			final var valueQueues = queuesByFeature.computeIfAbsent(featureSpan, InsertReferenceShiftPlanner::buildQueues);
+			else
+			{
+				if (positionalQueues == null)
+				{
+					positionalQueues = buildPositionalQueues(index);
+				}
+				valueQueues = positionalQueues;
+			}
 			for (final var resolved : RelationReferences.resolved(attempt))
 			{
 				final var raw = resolved.raw();
@@ -79,7 +91,15 @@ final class InsertReferenceShiftPlanner
 					continue;
 				}
 
-				final var valueSpan = pollValueSpan(valueQueues, featureSpan, raw);
+				final FeatureValueSpanIndex.ValueSpan valueSpan;
+				if (featureSpan != null)
+				{
+					valueSpan = pollValueSpan(valueQueues, featureSpan, raw);
+				}
+				else
+				{
+					valueSpan = pollValueSpan(valueQueues, raw);
+				}
 				if (valueSpan == null)
 				{
 					throw new InsertPlanException("Cannot locate value span for '" + raw + "'");
@@ -110,6 +130,7 @@ final class InsertReferenceShiftPlanner
 
 				final var edits = editsByFile.computeIfAbsent(path, ignored -> new ArrayList<>());
 				edits.add(new TextEdits.TextEdit(valueSpan.span().offset(), valueSpan.span().length(), updated));
+				rewrites.add(new ReferenceRewrite(path, valueSpan.span(), raw, updated, targetId));
 			}
 		}
 	}
@@ -169,5 +190,32 @@ final class InsertReferenceShiftPlanner
 		}
 		return null;
 	}
-}
 
+	private static FeatureValueSpanIndex.ValueSpan pollValueSpan(final Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> queues,
+																final String raw)
+	{
+		final var queue = queues.get(raw);
+		if (queue == null || queue.isEmpty())
+		{
+			return null;
+		}
+		return queue.removeFirst();
+	}
+
+	private static Map<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>> buildPositionalQueues(final FeatureValueSpanIndex index)
+	{
+		final var queues = new HashMap<String, ArrayDeque<FeatureValueSpanIndex.ValueSpan>>();
+		for (final var feature : index.features())
+		{
+			if (feature.name() != null)
+			{
+				continue;
+			}
+			for (final var value : feature.values())
+			{
+				queues.computeIfAbsent(value.raw(), ignored -> new ArrayDeque<>()).add(value);
+			}
+		}
+		return queues;
+	}
+}

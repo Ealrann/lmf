@@ -12,10 +12,12 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public final class DocumentLoader
 {
@@ -29,6 +31,11 @@ public final class DocumentLoader
 	public DocumentLoader(final Map<Path, String> overlaySources)
 	{
 		this.overlaySources = Objects.requireNonNull(overlaySources, "overlaySources");
+	}
+
+	public Set<Path> overlayPaths()
+	{
+		return Collections.unmodifiableSet(overlaySources.keySet());
 	}
 
 	public String readString(final Path path, final PrintWriter err)

@@ -59,7 +59,7 @@ final class DefinitionNavigationTest
 	@Test
 	void goToDefinitionFromLocalAtReferenceInM1Model() throws Exception
 	{
-		Path path = Path.of("../logoce.lmf.core.generator/src/test/model/CarCompany.lm");
+		Path path = Path.of("../logoce.lmf.core.generator/src/test/model/CarCompanyGenerator.lm");
 		final String text = Files.readString(path, StandardCharsets.UTF_8);
 		final URI uri = path.toAbsolutePath().toUri();
 

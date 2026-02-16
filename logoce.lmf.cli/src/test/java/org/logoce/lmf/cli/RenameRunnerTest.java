@@ -8,8 +8,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class RenameRunnerTest
@@ -52,6 +54,35 @@ final class RenameRunnerTest
 		assertTrue(updatedA.contains("(Item aa)"), "updatedA:\n" + updatedA);
 		assertTrue(updatedA.contains("selected=@aa/../items.1"), "updatedA:\n" + updatedA);
 		assertTrue(updatedB.contains("selected=#ModelA@aa/../items.1"), "updatedB:\n" + updatedB);
+	}
+
+	@Test
+	void renameMetaModelUpdatesPositionalConceptReferences(@TempDir final Path workspace) throws Exception
+	{
+		final var meta = """
+			(MetaModel domain=test.model name=RenameMeta
+				(Group Named (includes group=#LMCore@Named))
+				(Definition Material (includes group=@Named))
+				(Definition MaterialsEnv (includes group=#LMCore@LMObject)
+					(+contains materials [0..*] @Material))
+				(Definition Root (includes group=#LMCore@Model)
+					(+contains materials [1..1] @MaterialsEnv)
+					(+refers mainMaterial [0..1] @Material)))
+			""";
+
+		Files.writeString(workspace.resolve("RenameMeta.lm"), meta);
+
+		final var outBuffer = new StringWriter();
+		final var errBuffer = new StringWriter();
+		final var context = new CliContext(workspace, new PrintWriter(outBuffer), new PrintWriter(errBuffer));
+
+		final var exit = new RenameRunner().run(context, "RenameMeta.lm", "@Material", "MaterialRenamed");
+		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
+
+		final var updated = Files.readString(workspace.resolve("RenameMeta.lm"));
+		assertTrue(updated.contains("(Definition MaterialRenamed"), "updated:\n" + updated);
+		assertTrue(updated.contains("@MaterialRenamed"), "updated:\n" + updated);
+		assertFalse(Pattern.compile("@Material\\b").matcher(updated).find(), "updated:\n" + updated);
 	}
 
 	private static void writeModels(final Path workspace) throws Exception

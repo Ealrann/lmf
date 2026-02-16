@@ -47,6 +47,35 @@ final class MoveRunnerTest
 		assertTrue(dirt < lava && lava < stone, "updatedA order:\n" + updatedA);
 	}
 
+	@Test
+	void moveToEndSlotActuallyMovesInNestedLists(@TempDir final Path workspace) throws Exception
+	{
+		final var repoRoot = findRepoRoot();
+		Files.writeString(workspace.resolve("CarCompany.lm"),
+						  Files.readString(repoRoot.resolve("logoce.lmf.core.api/src/test/model/CarCompany.lm")));
+		Files.writeString(workspace.resolve("PeugeotWithReferencePath.lm"),
+						  Files.readString(repoRoot.resolve("logoce.lmf.core.api/src/test/model/PeugeotWithReferencePath.lm")));
+
+		final var outBuffer = new StringWriter();
+		final var errBuffer = new StringWriter();
+		final var context = new CliContext(workspace, new PrintWriter(outBuffer), new PrintWriter(errBuffer));
+
+		final var exit = new MoveRunner().run(context,
+											  "PeugeotWithReferencePath.lm",
+											  "/parcs.0/cars.0",
+											  "/parcs.0/cars.2");
+		assertEquals(ExitCodes.OK, exit, "err:\n" + errBuffer);
+
+		final var updated = Files.readString(workspace.resolve("PeugeotWithReferencePath.lm"));
+		final int peugeot2 = updated.indexOf("(Car name=peugeot2");
+		final int peugeot1 = updated.indexOf("(Car name=peugeot1");
+		assertTrue(peugeot2 >= 0 && peugeot1 >= 0, "updated:\n" + updated);
+		assertTrue(peugeot2 < peugeot1, "cars not reordered as expected:\n" + updated);
+
+		assertTrue(updated.contains("car=@PeugeotCompanyWithReferencePaths/parcs.0/cars.0"), "updated:\n" + updated);
+		assertTrue(updated.contains("car=@peugeot1/../cars.0"), "updated:\n" + updated);
+	}
+
 	private static void writeModels(final Path workspace) throws Exception
 	{
 		final var meta = """
@@ -80,5 +109,19 @@ final class MoveRunnerTest
 		Files.writeString(workspace.resolve("MoveMeta.lm"), meta);
 		Files.writeString(workspace.resolve("ModelA.lm"), modelA);
 		Files.writeString(workspace.resolve("ModelB.lm"), modelB);
+	}
+
+	private static Path findRepoRoot() throws Exception
+	{
+		Path cursor = Path.of("").toAbsolutePath().normalize();
+		while (cursor != null)
+		{
+			if (Files.exists(cursor.resolve("settings.gradle")))
+			{
+				return cursor;
+			}
+			cursor = cursor.getParent();
+		}
+		throw new IllegalStateException("Cannot locate repo root (settings.gradle not found)");
 	}
 }
