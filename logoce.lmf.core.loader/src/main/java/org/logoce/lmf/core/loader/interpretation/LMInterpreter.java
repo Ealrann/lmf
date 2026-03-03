@@ -14,7 +14,11 @@ import java.util.stream.Stream;
 
 public final class LMInterpreter<I extends PNode>
 {
-	private static final LMIterableLexer LEXER = new LMIterableLexer();
+	/**
+	 * Lexer state is mutable; keep one instance per interpreter to avoid cross-thread
+	 * interference when multiple Gradle tasks generate models concurrently.
+	 */
+	private final LMIterableLexer lexer = new LMIterableLexer();
 
 	private final Map<String, Alias> aliases;
 
@@ -48,8 +52,8 @@ public final class LMInterpreter<I extends PNode>
 			final var value = aliases.get(word.value()).value();
 			final var isType = word.type() == ELMTokenType.TYPE;
 			final var initialState = isType ? LMLexer.WAITING_TYPE : 0;
-			LEXER.reset(value, initialState);
-			return LEXER.stream();
+			lexer.reset(value, initialState);
+			return lexer.stream();
 		}
 		else
 		{
